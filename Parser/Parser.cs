@@ -1,13 +1,42 @@
 ﻿using System.Text;
+using System.Timers;
 
 using Newtonsoft.Json.Linq;
 
+using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
-namespace ScheduleBot {
-    static public class Parser {
+using Timer = System.Timers.Timer;
 
-        static public List<Discipline>? GetDisciplines(string group = "220611") {
+namespace ScheduleBot {
+    public class Parser {
+        private readonly ScheduleDbContext dbContext;
+        private readonly Timer UpdatingTimer;
+
+        public Parser(ScheduleDbContext dbContext) {
+            this.dbContext = dbContext;
+
+            UpdatingTimer = new() {
+                Interval = 60 * 60 * 1000 //Minutes Seconds Milliseconds
+            };
+            UpdatingTimer.Elapsed += Updating;
+
+            Updating();
+        }
+
+        private void Updating(object? sender = null, ElapsedEventArgs? e = null) {
+            var disciplines = GetDisciplines();
+            var _list = dbContext.Disciplines.ToList();
+
+            if(disciplines != null) {
+                
+                dbContext.SaveChanges();
+            }
+
+            UpdatingTimer.Start();
+        }
+
+        public List<Discipline>? GetDisciplines(string group = "220611") {
             using(var client = new HttpClient()) {
                 #region RequestHeaders
                 client.DefaultRequestHeaders.Add("Accept", "application/json, text/javascript, */*; q=0.01");

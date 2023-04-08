@@ -3,27 +3,49 @@
 namespace ScheduleBot.DB.Entity {
 
 #pragma warning disable CS8618
-    public class Discipline {
+    public class Discipline : IEquatable<Discipline?> {
         public int Id { get; set; }
 
         public string Name { get; set; }
-        public string? Lecturer { get; set; }
+        public string? Lecturer { get; set; } = null;
         public string LectureHall { get; set; }
         public string? Subgroup { get; set; } = null;
         public DateOnly Date { get; set; }
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
 
+        public Discipline() { }
+
         public Discipline(JToken json) {
             LectureHall = json.Value<string>("AUD") ?? throw new NullReferenceException("AUD");
             Date = DateOnly.Parse(json.Value<string>("DATE_Z") ?? throw new NullReferenceException("DATE_Z"));
             Name = json.Value<string>("DISCIP") ?? throw new NullReferenceException("DISCIP");
-            Subgroup = json.Value<JToken>("GROUPS")?[0]?.Value<string>("PRIM") ?? null;
+            Subgroup = json.Value<JToken>("GROUPS")?[0]?.Value<string>("PRIM");
             Lecturer = json.Value<string>("PREP");
 
             var times = (json.Value<string>("TIME_Z") ?? throw new NullReferenceException("TIME_Z")).Split('-');
             StartTime = TimeOnly.Parse(times[0]);
             EndTime = TimeOnly.Parse(times[1]);
+        }
+
+        public override bool Equals(object? obj) => Equals(obj as Discipline);
+        public bool Equals(Discipline? discipline) => discipline is not null && Name == discipline.Name && Lecturer == discipline.Lecturer && LectureHall == discipline.LectureHall && Subgroup == discipline.Subgroup && Date.Equals(discipline.Date) && StartTime.Equals(discipline.StartTime) && EndTime.Equals(discipline.EndTime);
+
+        public static bool operator ==(Discipline? left, Discipline? right) => left?.Equals(right) ?? false;
+        public static bool operator !=(Discipline? left, Discipline? right) => !(left == right);
+
+        public override int GetHashCode() {
+            int hash = 17;
+
+            hash += Name?.GetHashCode() ?? 0;
+            hash += Lecturer?.GetHashCode() ?? 0;
+            hash += LectureHall.GetHashCode();
+            hash += Subgroup?.GetHashCode() ?? 0;
+            hash += Date.GetHashCode();
+            hash += StartTime.GetHashCode();
+            hash += EndTime.GetHashCode();
+
+            return hash.GetHashCode();
         }
     }
 }

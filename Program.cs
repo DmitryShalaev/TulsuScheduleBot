@@ -1,7 +1,19 @@
-﻿namespace ScheduleBot {
-    internal class Program {
+﻿using System.Linq;
+
+using ScheduleBot.DB;
+
+using static System.Net.Mime.MediaTypeNames;
+
+namespace ScheduleBot {
+    public class Program {
         static void Main(string[] args) {
-            var disciplines = Parser.GetDisciplines();
+            ScheduleDbContext dbContext = new();
+            //dbContext.CleanDB();
+            //dbContext.SaveChanges();
+
+            Parser parser = new(dbContext);
+
+
         }
     }
 }
