@@ -5,7 +5,7 @@ using ScheduleBot.DB.Entity;
 namespace ScheduleBot.DB {
     public class ScheduleDbContext : DbContext {
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseSqlite($"Data Source={Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "MyListDB.db")}");
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseSqlite($"Data Source={Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "ScheduleDB.db")}");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
 
@@ -18,7 +18,7 @@ namespace ScheduleBot.DB {
         }
 
 #pragma warning disable CS8618
-        public DbSet<Disciplines> Disciplines { get; set; }
+        public DbSet<Discipline> Disciplines { get; set; }
 
     }
 }
