@@ -5,7 +5,7 @@ using ScheduleBot.DB.Entity;
 namespace ScheduleBot.DB {
     public class ScheduleDbContext : DbContext {
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseSqlite($"Data Source={Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "ScheduleDB.db")}");
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseSqlite($"Data Source={Environment.CurrentDirectory}/ScheduleDB.db");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             foreach(Entity.Type type in Enum.GetValues(typeof(Entity.Type)).Cast<Entity.Type>())

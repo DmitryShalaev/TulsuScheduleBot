@@ -1,9 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
-using System.Xml.Linq;
-using Telegram.Bot.Types;
-
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ScheduleBot.DB.Entity {
 #pragma warning disable CS8618
@@ -29,6 +24,6 @@ namespace ScheduleBot.DB.Entity {
 
             return hash.GetHashCode();
         }
-        
+
     }
 }
