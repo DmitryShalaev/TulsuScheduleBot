@@ -17,8 +17,10 @@ namespace ScheduleBot.DB {
             SaveChanges();
         }
 
+        public IQueryable<Discipline> GetDisciplinesBetweenDates((DateOnly min, DateOnly max) dates) => Disciplines.Where(i => i.Date >= dates.min && i.Date <= dates.max);
+
+
 #pragma warning disable CS8618
         public DbSet<Discipline> Disciplines { get; set; }
-
     }
 }
