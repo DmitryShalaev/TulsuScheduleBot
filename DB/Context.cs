@@ -8,7 +8,8 @@ namespace ScheduleBot.DB {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseSqlite($"Data Source={Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "ScheduleDB.db")}");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
-
+            foreach(Entity.Type type in Enum.GetValues(typeof(Entity.Type)).Cast<Entity.Type>())
+                modelBuilder.Entity<TypeDTO>().HasData(new TypeDTO() { Id = type, Name = type.ToString() });
         }
 
         public void CleanDB() {
@@ -22,5 +23,8 @@ namespace ScheduleBot.DB {
 
 #pragma warning disable CS8618
         public DbSet<Discipline> Disciplines { get; set; }
+        public DbSet<CompletedDiscipline> CompletedDisciplines { get; set; }
+        public DbSet<TypeDTO> Types { get; set; }
+        public DbSet<TelegramUser> TelegramUsers { get; set; }
     }
 }

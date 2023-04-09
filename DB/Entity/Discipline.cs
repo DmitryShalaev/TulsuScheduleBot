@@ -13,6 +13,10 @@ namespace ScheduleBot.DB.Entity {
         public DateOnly Date { get; set; }
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
+        public Type Class { get; set; }
+        public string Type { get; set; }
+
+        public bool IsCompleted { get; set; } = false;
 
         public Discipline() { }
 
@@ -20,8 +24,10 @@ namespace ScheduleBot.DB.Entity {
             LectureHall = json.Value<string>("AUD") ?? throw new NullReferenceException("AUD");
             Date = DateOnly.Parse(json.Value<string>("DATE_Z") ?? throw new NullReferenceException("DATE_Z"));
             Name = json.Value<string>("DISCIP") ?? throw new NullReferenceException("DISCIP");
+            Type = json.Value<string>("KOW") ?? throw new NullReferenceException("KOW");
             Subgroup = json.Value<JToken>("GROUPS")?[0]?.Value<string>("PRIM");
             Lecturer = json.Value<string>("PREP");
+            Class = (Type)Enum.Parse(typeof(Type), json.Value<string>("CLASS") ?? "other");
 
             var times = (json.Value<string>("TIME_Z") ?? throw new NullReferenceException("TIME_Z")).Split('-');
             StartTime = TimeOnly.Parse(times[0]);
@@ -29,7 +35,7 @@ namespace ScheduleBot.DB.Entity {
         }
 
         public override bool Equals(object? obj) => Equals(obj as Discipline);
-        public bool Equals(Discipline? discipline) => discipline is not null && Name == discipline.Name && Lecturer == discipline.Lecturer && LectureHall == discipline.LectureHall && Subgroup == discipline.Subgroup && Date.Equals(discipline.Date) && StartTime.Equals(discipline.StartTime) && EndTime.Equals(discipline.EndTime);
+        public bool Equals(Discipline? discipline) => discipline is not null && Name == discipline.Name && Lecturer == discipline.Lecturer && LectureHall == discipline.LectureHall && Subgroup == discipline.Subgroup && Date.Equals(discipline.Date) && StartTime.Equals(discipline.StartTime) && EndTime.Equals(discipline.EndTime) && Class == discipline.Class;
 
         public static bool operator ==(Discipline? left, Discipline? right) => left?.Equals(right) ?? false;
         public static bool operator !=(Discipline? left, Discipline? right) => !(left == right);
@@ -44,6 +50,7 @@ namespace ScheduleBot.DB.Entity {
             hash += Date.GetHashCode();
             hash += StartTime.GetHashCode();
             hash += EndTime.GetHashCode();
+            hash += Class.GetHashCode();
 
             return hash.GetHashCode();
         }

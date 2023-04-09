@@ -12,12 +12,15 @@ using Timer = System.Timers.Timer;
 namespace ScheduleBot {
     public class Parser {
         private readonly ScheduleDbContext dbContext;
+        private readonly string group;
+        private readonly string subgroup;
         private readonly HttpClientHandler clientHandler;
         private readonly Timer UpdatingTimer;
 
-        public Parser(ScheduleDbContext dbContext) {
+        public Parser(ScheduleDbContext dbContext, string group = "220611", string subgroup = "2 пг") {
             this.dbContext = dbContext;
-
+            this.group = group;
+            this.subgroup = subgroup;
             clientHandler = new() {
                 AllowAutoRedirect = false,
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip | DecompressionMethods.None,
@@ -36,14 +39,13 @@ namespace ScheduleBot {
         private void Updating(object? sender = null, ElapsedEventArgs? e = null) {
             var disciplines = GetDisciplines();
 
-
             if(disciplines != null) {
                 var dates = GetDates();
                 var _list = dbContext.GetDisciplinesBetweenDates(dates).ToList();
 
                 var except = disciplines.Except(_list);
                 if(except.Any()) {
-                    dbContext.Disciplines.AddRange(except);
+                    AddToSchedule(except);
                     dbContext.SaveChanges();
                     _list = dbContext.GetDisciplinesBetweenDates(dates).ToList();
                 }
@@ -58,7 +60,16 @@ namespace ScheduleBot {
             UpdatingTimer.Start();
         }
 
-        public List<Discipline>? GetDisciplines(string group = "220611") {
+        private void AddToSchedule(IEnumerable<Discipline> list) {
+            var completedDiscipline = dbContext.CompletedDisciplines.ToList();
+
+            foreach(var discipline in list)
+                discipline.IsCompleted =(discipline.Class == DB.Entity.Type.lab && discipline.Subgroup != subgroup) | completedDiscipline.Contains(new() { Name = discipline.Name, Class = discipline.Class });
+            
+            dbContext.Disciplines.AddRange(list);
+        }
+
+        public List<Discipline>? GetDisciplines() {
             using(var client = new HttpClient(clientHandler, false)) {
                 #region RequestHeaders
                 client.DefaultRequestHeaders.Add("Accept", "application/json, text/javascript, */*; q=0.01");
@@ -90,7 +101,7 @@ namespace ScheduleBot {
             return null;
         }
 
-        public (DateOnly min, DateOnly max) GetDates(string group = "220611") {
+        public (DateOnly min, DateOnly max) GetDates() {
             using(var client = new HttpClient(clientHandler, false)) {
                 #region RequestHeaders
                 client.DefaultRequestHeaders.Add("Accept", "application/json, text/javascript, */*; q=0.01");
