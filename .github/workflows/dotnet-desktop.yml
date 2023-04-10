@@ -22,13 +22,13 @@ jobs:
       run: dotnet restore
     
     - name: DotNet Build
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore --os linux-x64
       
     - name: DotNet Run Tests
       run: dotnet test --no-build --verbosity normal
       
     - name: DotNet Publish
-      run: dotnet publish -c Release
+      run: dotnet publish --os linux-x64 -c Release 
       
     - name: Stop schedule Service
       uses: garygrossgarten/github-action-ssh@v0.6.3
