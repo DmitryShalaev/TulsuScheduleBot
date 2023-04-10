@@ -34,7 +34,8 @@ namespace ScheduleBot {
                     Bot.TelegramBot telegramBot = new(dbContext);
 
                     Thread.Sleep(-1);
-                } catch(Exception) {
+                } catch(Exception e) {
+                    Console.WriteLine(e);
                 }
 
             }

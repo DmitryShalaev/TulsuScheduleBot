@@ -16,14 +16,14 @@ namespace ScheduleBot {
         private readonly HttpClientHandler clientHandler;
         private readonly Timer UpdatingTimer;
 
-        public static string subgroup = "";
+        public static string notSub = "";
         public static DateTime lastUpdate;
 
-        public Parser(ScheduleDbContext dbContext, string group = "220611", string sub = "2 пг") {
+        public Parser(ScheduleDbContext dbContext, string group = "220611", string notSub = "1 пг") {
             this.dbContext = dbContext;
             this.group = group;
 
-            subgroup = sub;
+            Parser.notSub = notSub;
 
             clientHandler = new() {
                 AllowAutoRedirect = false,
@@ -69,12 +69,14 @@ namespace ScheduleBot {
         }
 
         private void AddToSchedule(IEnumerable<Discipline> list) {
-            var completedDiscipline = dbContext.CompletedDisciplines.ToList();
-
-            foreach(var discipline in list)
-                discipline.IsCompleted = (discipline.Class == DB.Entity.Type.lab && discipline.Subgroup != subgroup) || completedDiscipline.Contains(new() { Name = discipline.Name, Class = discipline.Class });
+            SetDisciplineIsCompleted(dbContext.CompletedDisciplines.ToList(), list);
 
             dbContext.Disciplines.AddRange(list);
+        }
+
+        public static void SetDisciplineIsCompleted(List<CompletedDiscipline> completedDiscipline, IEnumerable<Discipline> list) {
+            foreach(var discipline in list)
+                discipline.IsCompleted = (discipline.Class == DB.Entity.Type.lab && discipline.Subgroup == notSub) || completedDiscipline.Contains(new() { Name = discipline.Name, Class = discipline.Class });
         }
 
         public List<Discipline>? GetDisciplines() {

@@ -158,10 +158,7 @@ namespace ScheduleBot.Bot {
                             if(user is not null && user.IsAdmin && addFlag) {
                                 addFlag = false;
 
-                                var completedDiscipline = dbContext.CompletedDisciplines.ToList();
-                                foreach(var discipline in dbContext.Disciplines)
-                                    discipline.IsCompleted = (discipline.Class == DB.Entity.Type.lab && discipline.Subgroup != Parser.subgroup) || completedDiscipline.Contains(new() { Name = discipline.Name, Class = discipline.Class });
-
+                                Parser.SetDisciplineIsCompleted(dbContext.CompletedDisciplines.ToList(), dbContext.Disciplines);
                                 dbContext.SaveChanges();
                             }
                             await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Основное меню", replyMarkup: MainKeyboardMarkup, cancellationToken: cancellationToken);
