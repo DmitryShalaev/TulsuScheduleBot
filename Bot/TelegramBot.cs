@@ -43,7 +43,6 @@ namespace ScheduleBot.Bot {
         public TelegramBot(ScheduleDbContext dbContext) {
             this.dbContext = dbContext;
 
-            Console.WriteLine("TelegramBotToken" + Environment.GetEnvironmentVariable("TelegramBotToken"));
             telegramBot = new TelegramBotClient(Environment.GetEnvironmentVariable("TelegramBotToken") ?? "5942426712:AAEZZHTqmbzIUEXfPCakJ76VN57YXGmImA8");
 
             Console.WriteLine("Запущен бот " + telegramBot.GetMeAsync().Result.FirstName);
