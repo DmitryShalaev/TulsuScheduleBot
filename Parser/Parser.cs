@@ -33,7 +33,7 @@ namespace ScheduleBot {
             };
 
             UpdatingTimer = new() {
-                Interval = 60 * 60 * 1000 //Minutes Seconds Milliseconds
+                Interval = 30 * 60 * 1000 //Minutes Seconds Milliseconds
             };
             UpdatingTimer.Elapsed += Updating;
 

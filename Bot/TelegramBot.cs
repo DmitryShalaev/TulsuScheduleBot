@@ -43,11 +43,7 @@ namespace ScheduleBot.Bot {
         public TelegramBot(ScheduleDbContext dbContext) {
             this.dbContext = dbContext;
 
-#if DEBUG
-            telegramBot = new TelegramBotClient("5942426712:AAEZZHTqmbzIUEXfPCakJ76VN57YXGmImA8");
-#else
-        telegramBot = new TelegramBotClient(Environment.GetEnvironmentVariable("TelegramBotToken")?? "");
-#endif
+            telegramBot = new TelegramBotClient(Environment.GetEnvironmentVariable("TelegramBotToken")?? "5942426712:AAEZZHTqmbzIUEXfPCakJ76VN57YXGmImA8");
 
             Console.WriteLine("Запущен бот " + telegramBot.GetMeAsync().Result.FirstName);
 
@@ -70,10 +66,8 @@ namespace ScheduleBot.Bot {
             if(message != null) {
                 if(update.Type == Telegram.Bot.Types.Enums.UpdateType.Message || update.Type == Telegram.Bot.Types.Enums.UpdateType.EditedMessage) {
                     if(update.Message?.From != null) {
-                        user = new() { ChatId = message.Chat.Id, FirstName = update.Message.From.FirstName, Username = update.Message.From.Username, LastName = update.Message.From.LastName };
-
-                        if(!dbContext.TelegramUsers.ToList().Contains(user)) {
-                            dbContext.TelegramUsers.Add(user);
+                        if(dbContext.TelegramUsers.FirstOrDefault(u => u.ChatId == message.Chat.Id) is null) {
+                            dbContext.TelegramUsers.Add(new() { ChatId = message.Chat.Id, FirstName = update.Message.From.FirstName, Username = update.Message.From.Username, LastName = update.Message.From.LastName });
                             dbContext.SaveChanges();
 
                             await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Registered", cancellationToken: cancellationToken);
