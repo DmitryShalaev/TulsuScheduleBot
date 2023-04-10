@@ -13,14 +13,18 @@ namespace ScheduleBot {
     public class Parser {
         private readonly ScheduleDbContext dbContext;
         private readonly string group;
-        private readonly string subgroup;
         private readonly HttpClientHandler clientHandler;
         private readonly Timer UpdatingTimer;
 
-        public Parser(ScheduleDbContext dbContext, string group = "220611", string subgroup = "2 пг") {
+        public static string subgroup = "";
+        public static DateTime lastUpdate;
+
+        public Parser(ScheduleDbContext dbContext, string group = "220611", string sub = "2 пг") {
             this.dbContext = dbContext;
             this.group = group;
-            this.subgroup = subgroup;
+
+            subgroup = sub;
+
             clientHandler = new() {
                 AllowAutoRedirect = false,
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip | DecompressionMethods.None,
@@ -56,6 +60,8 @@ namespace ScheduleBot {
                         dbContext.Disciplines.RemoveRange(except);
                         dbContext.SaveChanges();
                     }
+
+                    lastUpdate = DateTime.Now;
                 }
             }
 
@@ -66,7 +72,7 @@ namespace ScheduleBot {
             var completedDiscipline = dbContext.CompletedDisciplines.ToList();
 
             foreach(var discipline in list)
-                discipline.IsCompleted = (discipline.Class == DB.Entity.Type.lab && discipline.Subgroup != subgroup) | completedDiscipline.Contains(new() { Name = discipline.Name, Class = discipline.Class });
+                discipline.IsCompleted = (discipline.Class == DB.Entity.Type.lab && discipline.Subgroup != subgroup) || completedDiscipline.Contains(new() { Name = discipline.Name, Class = discipline.Class });
 
             dbContext.Disciplines.AddRange(list);
         }

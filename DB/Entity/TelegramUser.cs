@@ -9,6 +9,7 @@ namespace ScheduleBot.DB.Entity {
         public string FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Username { get; set; }
+        public bool IsAdmin { get; set; } = false;
 
         public override bool Equals(object? obj) => Equals(obj as TelegramUser);
         public bool Equals(TelegramUser? user) => user is not null && ChatId == user.ChatId && FirstName == user.FirstName && Username == user.Username && LastName == user.LastName;

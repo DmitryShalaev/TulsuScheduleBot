@@ -11,7 +11,7 @@ namespace ScheduleBot {
 
                     CultureInfo.CurrentCulture = CultureInfo.CreateSpecificCulture("ru-RU");
                     ScheduleDbContext dbContext = new();
-
+                   
                     try {
                         if(!dbContext.CompletedDisciplines.Any()) {
                             dbContext.CompletedDisciplines.AddRange(new List<CompletedDiscipline>(){
@@ -34,9 +34,7 @@ namespace ScheduleBot {
                     Bot.TelegramBot telegramBot = new(dbContext);
 
                     Thread.Sleep(-1);
-                } catch(Exception e) {
-                    Console.WriteLine(e);
-
+                } catch(Exception) {
                 }
 
             }
