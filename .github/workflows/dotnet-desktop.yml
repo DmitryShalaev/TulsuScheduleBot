@@ -28,9 +28,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
       
     - name: DotNet Publish
-      env:
-        TelegramBotToken: ${{ secrets.TELEGRAMBOTTOKEN }}
-      run: dotnet publish --os linux -c Release
+      run: dotnet publish --os linux -c Release -e ${{ secrets.TELEGRAMBOTTOKEN }}
       
     - name: Stop schedule Service
       uses: garygrossgarten/github-action-ssh@v0.6.3
