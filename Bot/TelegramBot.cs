@@ -72,14 +72,12 @@ namespace ScheduleBot.Bot {
                             dbContext.TelegramUsers.Add(user);
                             dbContext.SaveChanges();
 
-                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Registered", replyMarkup: MainKeyboardMarkup, cancellationToken: cancellationToken);
-                            return;
+                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Registered", cancellationToken: cancellationToken);
                         }
                     }
 
                     switch(message.Text?.ToLower()) {
                         case "/start":
-
                             await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"👋 {telegramBot.GetMeAsync(cancellationToken: cancellationToken).Result.Username} 👋", replyMarkup: MainKeyboardMarkup, cancellationToken: cancellationToken);
                             break;
 
