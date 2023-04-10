@@ -42,7 +42,7 @@ jobs:
     - name: Copy to Server via SCP
       uses: garygrossgarten/github-action-scp@release
       with:
-        local: /home/runner/work/ScheduleBot/ScheduleBot/ScheduleBot/bin/Release/net7.0/publish/
+        local: /home/runner/work/ScheduleBot/ScheduleBot/bin/Release/net7.0/publish/
         concurrency: 10
         remote: ${{ secrets.REMOTE_TARGET }}
         host: ${{ secrets.REMOTE_HOST }}
