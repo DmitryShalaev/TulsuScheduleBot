@@ -76,7 +76,7 @@ namespace ScheduleBot {
 
         public static void SetDisciplineIsCompleted(List<CompletedDiscipline> completedDiscipline, IEnumerable<Discipline> list) {
             foreach(var discipline in list)
-                discipline.IsCompleted = (discipline.Class == DB.Entity.Type.lab && discipline.Subgroup == notSub) || completedDiscipline.Contains(new() { Name = discipline.Name, Class = discipline.Class });
+                discipline.IsCompleted = discipline.Class == DB.Entity.Type.lab && discipline.Subgroup == notSub || completedDiscipline.Contains(new() { Name = discipline.Name, Class = discipline.Class, Lecturer = discipline.Lecturer });
         }
 
         public List<Discipline>? GetDisciplines() {

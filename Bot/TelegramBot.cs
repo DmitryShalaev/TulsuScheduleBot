@@ -65,16 +65,20 @@ namespace ScheduleBot.Bot {
 
             if(message != null) {
                 if(update.Type == Telegram.Bot.Types.Enums.UpdateType.Message || update.Type == Telegram.Bot.Types.Enums.UpdateType.EditedMessage) {
+                    if(update.Message?.From != null) {
+                        user = new() { ChatId = message.Chat.Id, FirstName = update.Message.From.FirstName, Username = update.Message.From.Username, LastName = update.Message.From.LastName };
+
+                        if(!dbContext.TelegramUsers.ToList().Contains(user)) {
+                            dbContext.TelegramUsers.Add(user);
+                            dbContext.SaveChanges();
+
+                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Registered", replyMarkup: MainKeyboardMarkup, cancellationToken: cancellationToken);
+                            return;
+                        }
+                    }
+
                     switch(message.Text?.ToLower()) {
                         case "/start":
-                            if(update.Message?.From != null) {
-                                user = new() { ChatId = message.Chat.Id, FirstName = update.Message.From.FirstName, Username = update.Message.From.Username, LastName = update.Message.From.LastName };
-
-                                if(!dbContext.TelegramUsers.ToList().Contains(user)) {
-                                    dbContext.TelegramUsers.Add(user);
-                                    dbContext.SaveChanges();
-                                }
-                            }
 
                             await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"👋 {telegramBot.GetMeAsync(cancellationToken: cancellationToken).Result.Username} 👋", replyMarkup: MainKeyboardMarkup, cancellationToken: cancellationToken);
                             break;

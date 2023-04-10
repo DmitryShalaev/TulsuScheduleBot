@@ -20,6 +20,7 @@ namespace ScheduleBot {
                             new() { Name = "Компьютерные сети и телекоммуникации", Class = DB.Entity.Type.all },
                             new() { Name = "Специальные разделы высшей математики", Class = DB.Entity.Type.all },
                             new() { Name = "Объектно-ориентированное программирование", Class = DB.Entity.Type.lab },
+                            new() { Name = "Базы данных", Lecturer = "Набродова Ирина Николаевна", Class = DB.Entity.Type.lab},
                         });
 
                             dbContext.SaveChanges();
