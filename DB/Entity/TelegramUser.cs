@@ -4,7 +4,6 @@ namespace ScheduleBot.DB.Entity {
 #pragma warning disable CS8618
     public class TelegramUser : IEquatable<TelegramUser?> {
         [Key]
-        public int Id { get; set; }
         public long ChatId { get; set; }
         public string FirstName { get; set; }
         public string? LastName { get; set; }

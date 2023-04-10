@@ -40,10 +40,14 @@ namespace ScheduleBot.Bot {
         { ResizeKeyboard = true };
 
 
-        public TelegramBot(ScheduleDbContext dbContext, string token = "5588441792:AAFsoUQdu5_hd9Ccz34ZVNPhK9d5Z7Nx9VM") {
+        public TelegramBot(ScheduleDbContext dbContext) {
             this.dbContext = dbContext;
 
-            telegramBot = new TelegramBotClient(token);
+#if DEBUG
+            telegramBot = new TelegramBotClient("5942426712:AAEZZHTqmbzIUEXfPCakJ76VN57YXGmImA8");
+#else
+        telegramBot = new TelegramBotClient(Environment.GetEnvironmentVariable("TelegramBotToken")?? "");
+#endif
 
             Console.WriteLine("Запущен бот " + telegramBot.GetMeAsync().Result.FirstName);
 
