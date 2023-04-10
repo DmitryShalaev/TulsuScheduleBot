@@ -22,13 +22,17 @@ jobs:
       run: dotnet restore
     
     - name: DotNet Build
+      env:
+        TelegramBotToken: ${{ secrets.TELEGRAMBOTTOKEN }}
       run: dotnet build --no-restore
       
     - name: DotNet Run Tests
       run: dotnet test --no-build --verbosity normal
       
     - name: DotNet Publish
-      run: dotnet publish --os linux -c Release --environment ${{ secrets.TELEGRAMBOTTOKEN }}
+      env:
+        TelegramBotToken: ${{ secrets.TELEGRAMBOTTOKEN }}
+      run: dotnet publish --os linux -c Release
       
     - name: Stop schedule Service
       uses: garygrossgarten/github-action-ssh@v0.6.3
