@@ -2,9 +2,6 @@
 
 using ScheduleBot.DB;
 
-using Telegram.Bot.Types;
-using Telegram.Bot;
-
 namespace ScheduleBot.Scheduler {
     public class Scheduler {
         public static Dictionary<DB.Entity.Type, string> TypeToString = new(){ { DB.Entity.Type.all, "Все"}, { DB.Entity.Type.lab, "Лаб. занятия" }, { DB.Entity.Type.practice, "Практические занятия" } };
@@ -34,8 +31,8 @@ namespace ScheduleBot.Scheduler {
 
             foreach(var item in list) {
                 str += $"⏰ {item.StartTime.ToString("HH:mm")}-{item.EndTime.ToString("HH:mm")} | {item.LectureHall}\n" +
-                       $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrEmpty(item.Subgroup) ? $"({item.Subgroup})" : "")}\n" +
-                       $"✒ {item.Lecturer}\n\n";
+                       $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrEmpty(item.Subgroup) ? item.Subgroup : "")}\n" +
+                       $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n";
             }
 
             return str;

@@ -1,8 +1,6 @@
 ﻿using System.Globalization;
 
 using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-using ScheduleBot.Scheduler;
 
 namespace ScheduleBot {
     public class Program {

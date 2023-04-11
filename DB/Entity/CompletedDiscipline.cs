@@ -17,7 +17,7 @@
 
         public override bool Equals(object? obj) => Equals(obj as CompletedDiscipline);
         public bool Equals(CompletedDiscipline? discipline) => discipline is not null && Name == discipline.Name && ((Class == discipline.Class && (string.IsNullOrWhiteSpace(Lecturer) || Lecturer == discipline.Lecturer)) || Class == Type.all) && discipline.Class != Type.other;
-        
+
         public static bool operator ==(CompletedDiscipline? left, CompletedDiscipline? right) => left?.Equals(right) ?? false;
         public static bool operator !=(CompletedDiscipline? left, CompletedDiscipline? right) => !(left == right);
 
