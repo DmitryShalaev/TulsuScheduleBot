@@ -18,6 +18,7 @@ namespace ScheduleBot {
 
                     Thread.Sleep(-1);
                 } catch(Exception e) {
+
                     Console.WriteLine(e);
                 }
 
