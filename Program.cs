@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
 
+using Microsoft.EntityFrameworkCore;
+
 using ScheduleBot.DB;
 
 namespace ScheduleBot {
@@ -10,6 +12,8 @@ namespace ScheduleBot {
                     CultureInfo.CurrentCulture = CultureInfo.CreateSpecificCulture("ru-RU");
 
                     ScheduleDbContext dbContext = new();
+                    dbContext.Database.Migrate();
+
                     Parser parser = new(dbContext);
                     Scheduler.Scheduler scheduler = new(dbContext);
                     Bot.TelegramBot telegramBot = new(scheduler, dbContext);

@@ -67,10 +67,12 @@ namespace ScheduleBot.Bot {
 
                     user = dbContext.TelegramUsers.FirstOrDefault(u => u.ChatId == message.Chat.Id);
                     if(user is null) {
-                        user = new() { ChatId = message.Chat.Id, FirstName = update.Message.From.FirstName, Username = update.Message.From.Username, LastName = update.Message.From.LastName };
+                        user = new() { ChatId = message.Chat.Id, FirstName = update.Message.From.FirstName, Username = update.Message.From.Username, LastName = update.Message.From.LastName, LastAppeal = DateTime.UtcNow };
                         dbContext.TelegramUsers.Add(user);
                         dbContext.SaveChanges();
                     }
+                    user.LastAppeal = DateTime.UtcNow;
+                    dbContext.SaveChanges();
 
                     var text = message.Text?.ToLower();
                     switch(text) {

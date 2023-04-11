@@ -9,8 +9,9 @@ namespace ScheduleBot.DB.Entity {
         public string? LastName { get; set; }
         public string? Username { get; set; }
         public bool IsAdmin { get; set; } = false;
+        public DateTime LastAppeal { get; set; }
 
-        public override bool Equals(object? obj) => Equals(obj as TelegramUser);
+    public override bool Equals(object? obj) => Equals(obj as TelegramUser);
         public bool Equals(TelegramUser? user) => user is not null && ChatId == user.ChatId && FirstName == user.FirstName && Username == user.Username && LastName == user.LastName;
         public static bool operator ==(TelegramUser? left, TelegramUser? right) => left?.Equals(right) ?? false;
         public static bool operator !=(TelegramUser? left, TelegramUser? right) => !(left == right);
