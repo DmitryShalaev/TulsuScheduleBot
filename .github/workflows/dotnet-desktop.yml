@@ -53,6 +53,17 @@ jobs:
     - name: Start schedule Service
       uses: garygrossgarten/github-action-ssh@v0.6.3
       with:
+        command: |
+          cd ${{ secrets.REMOTE_TARGET }}
+          dotnet ef database update
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        passphrase: ${{ secrets.PASSPHRASE }}
+        privateKey: ${{ secrets.REMOTE_SSH_KEY }}
+
+    - name: Start schedule Service
+      uses: garygrossgarten/github-action-ssh@v0.6.3
+      with:
         command: service schedule start
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}

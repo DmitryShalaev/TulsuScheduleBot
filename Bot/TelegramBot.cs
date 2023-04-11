@@ -14,8 +14,6 @@ namespace ScheduleBot.Bot {
         private readonly Scheduler.Scheduler scheduler;
         private readonly ScheduleDbContext dbContext;
 
-        private bool addFlag = false;
-
         private readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { "Сегодня", "Завтра" },
                             new KeyboardButton[] { "По дням", "На неделю" }
