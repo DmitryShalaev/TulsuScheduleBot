@@ -42,7 +42,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("CompletedDisciplines");
+                    b.ToTable("CompletedDisciplines", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.Discipline", b =>
@@ -88,7 +88,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Disciplines");
+                    b.ToTable("Disciplines", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.TelegramUser", b =>
@@ -117,7 +117,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasKey("ChatId");
 
-                    b.ToTable("TelegramUsers");
+                    b.ToTable("TelegramUsers", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.TypeDTO", b =>
@@ -131,7 +131,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Types");
+                    b.ToTable("Types", (string)null);
 
                     b.HasData(
                         new
