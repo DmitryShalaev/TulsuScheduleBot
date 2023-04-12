@@ -35,8 +35,17 @@ namespace ScheduleBot.Bot {
                         })
         { ResizeKeyboard = true };
 
-        private readonly InlineKeyboardMarkup inlineKeyboardMarkup = new(new[]{
+        private readonly InlineKeyboardMarkup inlineAdminKeyboardMarkup = new(new[]{
+            new [] { InlineKeyboardButton.WithCallbackData(text: "Посмотреть все", callbackData: "All") },
             new [] { InlineKeyboardButton.WithCallbackData(text: "Edit", callbackData: "Edit") }
+        }){};
+
+        private readonly InlineKeyboardMarkup inlineKeyboardMarkup = new(new[]{
+            new [] { InlineKeyboardButton.WithCallbackData(text: "Посмотреть все", callbackData: "All") }
+        }){};
+
+        private readonly InlineKeyboardMarkup inlineBackKeyboardMarkup = new(new[]{
+            new [] { InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "Back") }
         }){};
 
         public TelegramBot(Scheduler.Scheduler scheduler, ScheduleDbContext dbContext) {
@@ -59,141 +68,160 @@ namespace ScheduleBot.Bot {
 
         private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken) {
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
-            Message? message = update.Message ?? update.EditedMessage;
+            Message? message = update.Message ?? update.EditedMessage ?? update.CallbackQuery?.Message;
             TelegramUser? user;
 
-            if(message != null) {
-                if(update.Message?.From is not null && (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message || update.Type == Telegram.Bot.Types.Enums.UpdateType.EditedMessage)) {
+            if(message is not null) {
+                user = dbContext.TelegramUsers.FirstOrDefault(u => u.ChatId == message.Chat.Id);
 
-                    user = dbContext.TelegramUsers.FirstOrDefault(u => u.ChatId == message.Chat.Id);
-                    if(user is null) {
-                        user = new() { ChatId = message.Chat.Id, FirstName = update.Message.From.FirstName, Username = update.Message.From.Username, LastName = update.Message.From.LastName, LastAppeal = DateTime.UtcNow };
-                        dbContext.TelegramUsers.Add(user);
+                if((update.Type == Telegram.Bot.Types.Enums.UpdateType.Message || update.Type == Telegram.Bot.Types.Enums.UpdateType.EditedMessage)) {
+
+                    if(update.Message?.From is not null) {
+                        if(user is null) {
+                            user = new() { ChatId = message.Chat.Id, FirstName = update.Message.From.FirstName, Username = update.Message.From.Username, LastName = update.Message.From.LastName, LastAppeal = DateTime.UtcNow };
+                            dbContext.TelegramUsers.Add(user);
+                            dbContext.SaveChanges();
+                        }
+                        user.LastAppeal = DateTime.UtcNow;
                         dbContext.SaveChanges();
+
+
+                        var text = message.Text?.ToLower();
+                        switch(text) {
+                            case "/start":
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"👋 {telegramBot.GetMeAsync(cancellationToken: cancellationToken).Result.Username} 👋", replyMarkup: MainKeyboardMarkup);
+                                break;
+
+                            case "назад":
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Основное меню", replyMarkup: MainKeyboardMarkup);
+                                break;
+
+                            case "сегодня":
+                            case "завтра":
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Расписание актуально на {Parser.lastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: MainKeyboardMarkup);
+                                switch(text) {
+                                    case "сегодня":
+                                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now)), replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+                                        break;
+
+                                    case "завтра":
+                                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now.AddDays(1))), replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+                                        break;
+                                }
+                                break;
+
+                            case "по дням":
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: "По дням", replyMarkup: DaysKeyboardMarkup);
+                                break;
+
+                            case "понедельник":
+                            case "вторник":
+                            case "среда":
+                            case "четверг":
+                            case "пятница":
+                            case "суббота":
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Расписание актуально на {Parser.lastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: DaysKeyboardMarkup);
+                                switch(text) {
+                                    case "понедельник":
+                                        foreach(var day in scheduler.GetScheduleByDay(DayOfWeek.Monday))
+                                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: day, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+
+                                        break;
+                                    case "вторник":
+                                        foreach(var day in scheduler.GetScheduleByDay(DayOfWeek.Tuesday))
+                                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: day, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+
+                                        break;
+                                    case "среда":
+                                        foreach(var day in scheduler.GetScheduleByDay(DayOfWeek.Wednesday))
+                                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: day, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+
+                                        break;
+                                    case "четверг":
+                                        foreach(var day in scheduler.GetScheduleByDay(DayOfWeek.Thursday))
+                                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: day, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+
+                                        break;
+                                    case "пятница":
+                                        foreach(var day in scheduler.GetScheduleByDay(DayOfWeek.Friday))
+                                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: day, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+
+                                        break;
+                                    case "суббота":
+                                        foreach(var day in scheduler.GetScheduleByDay(DayOfWeek.Saturday))
+                                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: day, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+
+                                        break;
+                                }
+                                break;
+
+                            case "на неделю":
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: "На неделю", replyMarkup: WeekKeyboardMarkup);
+                                break;
+
+                            case "эта неделя":
+                            case "следующая неделя":
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Расписание актуально на {Parser.lastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: WeekKeyboardMarkup);
+                                switch(text) {
+                                    case "эта неделя":
+                                        foreach(var item in scheduler.GetScheduleByWeak(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday) - 1))
+                                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: item, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+
+                                        break;
+                                    case "следующая неделя":
+                                        foreach(var item in scheduler.GetScheduleByWeak(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday)))
+                                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: item, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+
+                                        break;
+                                }
+                                break;
+                        }
+                        return;
+
                     }
-                    user.LastAppeal = DateTime.UtcNow;
-                    dbContext.SaveChanges();
 
-                    var text = message.Text?.ToLower();
-                    switch(text) {
-                        case "/start":
-                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"👋 {telegramBot.GetMeAsync(cancellationToken: cancellationToken).Result.Username} 👋", replyMarkup: MainKeyboardMarkup);
-                            break;
+                } else if(update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery && user is not null) {
 
-                        case "назад":
-                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Основное меню", replyMarkup: MainKeyboardMarkup);
-                            break;
-
-                        case "сегодня":
-                        case "завтра":
-                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Расписание актуально на {Parser.lastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: MainKeyboardMarkup);
-                            switch(text) {
-                                case "сегодня":
-                                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now)), replyMarkup: user.IsAdmin ? inlineKeyboardMarkup : MainKeyboardMarkup);
-                                    break;
-
-                                case "завтра":
-                                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now.AddDays(1))), replyMarkup: user.IsAdmin ? inlineKeyboardMarkup : MainKeyboardMarkup);
-                                    break;
-                            }
-                            break;
-
-                        case "по дням":
-                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: "По дням", replyMarkup: DaysKeyboardMarkup);
-                            break;
-
-                        case "понедельник":
-                        case "вторник":
-                        case "среда":
-                        case "четверг":
-                        case "пятница":
-                        case "суббота":
-                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Расписание актуально на {Parser.lastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: DaysKeyboardMarkup);
-                            switch(text) {
-                                case "понедельник":
-                                    foreach(var day in scheduler.GetScheduleByDay(DayOfWeek.Monday))
-                                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: day, replyMarkup: user.IsAdmin ? inlineKeyboardMarkup : DaysKeyboardMarkup);
-
-                                    break;
-                                case "вторник":
-                                    foreach(var day in scheduler.GetScheduleByDay(DayOfWeek.Tuesday))
-                                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: day, replyMarkup: user.IsAdmin ? inlineKeyboardMarkup : DaysKeyboardMarkup);
-
-                                    break;
-                                case "среда":
-                                    foreach(var day in scheduler.GetScheduleByDay(DayOfWeek.Wednesday))
-                                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: day, replyMarkup: user.IsAdmin ? inlineKeyboardMarkup : DaysKeyboardMarkup);
-
-                                    break;
-                                case "четверг":
-                                    foreach(var day in scheduler.GetScheduleByDay(DayOfWeek.Thursday))
-                                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: day, replyMarkup: user.IsAdmin ? inlineKeyboardMarkup : DaysKeyboardMarkup);
-
-                                    break;
-                                case "пятница":
-                                    foreach(var day in scheduler.GetScheduleByDay(DayOfWeek.Friday))
-                                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: day, replyMarkup: user.IsAdmin ? inlineKeyboardMarkup : DaysKeyboardMarkup);
-
-                                    break;
-                                case "суббота":
-                                    foreach(var day in scheduler.GetScheduleByDay(DayOfWeek.Saturday))
-                                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: day, replyMarkup: user.IsAdmin ? inlineKeyboardMarkup : DaysKeyboardMarkup);
-
-                                    break;
-                            }
-                            break;
-
-                        case "на неделю":
-                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: "На неделю", replyMarkup: WeekKeyboardMarkup);
-                            break;
-
-                        case "эта неделя":
-                        case "следующая неделя":
-                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Расписание актуально на {Parser.lastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: WeekKeyboardMarkup);
-                            switch(text) {
-                                case "эта неделя":
-                                    foreach(var item in scheduler.GetScheduleByWeak(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday) - 1))
-                                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: item, replyMarkup: user.IsAdmin ? inlineKeyboardMarkup : WeekKeyboardMarkup);
-
-                                    break;
-                                case "следующая неделя":
-                                    foreach(var item in scheduler.GetScheduleByWeak(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday)))
-                                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: item, replyMarkup: user.IsAdmin ? inlineKeyboardMarkup : WeekKeyboardMarkup);
-
-                                    break;
-                            }
-                            break;
-                    }
-                    return;
-                }
-            }
-
-            if(update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery) {
-                message = update.CallbackQuery?.Message;
-                if(message != null && update.CallbackQuery != null) {
                     if(DateOnly.TryParse(message.Text?.Split('-')[0].Trim()[2..] ?? "", out DateOnly date)) {
 
-                        if(update.CallbackQuery.Data == "Edit") {
-                            List<InlineKeyboardButton[]> buttons = new();
+                        switch(update.CallbackQuery?.Data) {
+                            case "Edit":
+                                List<InlineKeyboardButton[]> editButtons = new();
 
-                            foreach(var item in dbContext.Disciplines.Where(i => i.Date == date && i.Subgroup != Parser.notSub))
-                                buttons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()}-{item.EndTime.ToString()} {item.Lecturer?.Split(' ')[0]} {item.Subgroup} {item.IsCompleted}", callbackData: item.StartTime.ToString()) });
+                                foreach(var item in dbContext.Disciplines.Where(i => i.Date == date && i.Subgroup != Parser.notSub))
+                                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()}-{item.EndTime.ToString()} {item.Lecturer?.Split(' ')[0]} {item.Subgroup} {item.IsCompleted}", callbackData: item.StartTime.ToString()) });
 
-                            await botClient.EditMessageReplyMarkupAsync(chatId: message.Chat, messageId: message.MessageId, replyMarkup: (new(buttons.ToArray()) { }));
+                                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "Back") });
 
-                        } else if(TimeOnly.TryParse(update.CallbackQuery.Data ?? "", out TimeOnly time)) {
+                                await botClient.EditMessageReplyMarkupAsync(chatId: message.Chat, messageId: message.MessageId, replyMarkup: (new(editButtons.ToArray()) { }));
+                                break;
 
-                            var discipline = dbContext.Disciplines.First(i => i.Date == date && i.StartTime == time && i.Subgroup != Parser.notSub);
-                            discipline.IsCompleted = !discipline.IsCompleted;
+                            case "All":
 
-                            dbContext.SaveChanges();
-                            await botClient.EditMessageReplyMarkupAsync(chatId: message.Chat, messageId: message.MessageId);
+                                await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, true), replyMarkup: inlineBackKeyboardMarkup);
+                                break;
+
+                            case "Back":
+
+                                await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date), replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+                                break;
+
+                            default:
+                                if(TimeOnly.TryParse(update.CallbackQuery?.Data ?? "", out TimeOnly time)) {
+
+                                    var discipline = dbContext.Disciplines.First(i => i.Date == date && i.StartTime == time && i.Subgroup != Parser.notSub);
+                                    discipline.IsCompleted = !discipline.IsCompleted;
+
+                                    dbContext.SaveChanges();
+                                    await botClient.EditMessageReplyMarkupAsync(chatId: message.Chat, messageId: message.MessageId);
+                                }
+                                break;
                         }
 
                     }
                 }
-
             }
+
         }
 
         private Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken) {

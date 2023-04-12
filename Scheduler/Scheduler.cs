@@ -20,8 +20,8 @@ namespace ScheduleBot.Scheduler {
             return schedules;
         }
 
-        public string GetScheduleByDate(DateOnly date) {
-            var list = dbContext.Disciplines.Where(i => i.Date == date && !i.IsCompleted).OrderBy(i => i.StartTime);
+        public string GetScheduleByDate(DateOnly date, bool all = false) {
+            var list = dbContext.Disciplines.Where(i => i.Date == date && (!i.IsCompleted || all)).OrderBy(i => i.StartTime);
 
             int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
             string str = $"📌{date.ToString("dd.MM.yy")} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd").Substring(1)} ({(weekNumber % 2 == 0 ? "чётная неделя":"нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
