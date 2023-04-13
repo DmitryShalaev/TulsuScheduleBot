@@ -260,7 +260,6 @@ namespace ScheduleBot.Bot {
 
             editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "Back") });
 
-            var dd = editButtons.ToArray();
             return editButtons.ToArray();
         }
 
