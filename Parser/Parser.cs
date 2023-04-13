@@ -52,12 +52,14 @@ namespace ScheduleBot {
 
                     var except = disciplines.Except(_list);
                     if(except.Any()) {
-                        AddToSchedule(except);
+                        SetDisciplineIsCompleted(dbContext.CompletedDisciplines.ToList(), except);
+                        dbContext.Disciplines.AddRange(except);
+
                         dbContext.SaveChanges();
                         _list = dbContext.GetDisciplinesBetweenDates(dates.Value).ToList();
                     }
 
-                    except = _list.Except(disciplines);
+                    except = _list.Except(disciplines).Where(i => !i.IsCastom);
                     if(except.Any()) {
                         dbContext.Disciplines.RemoveRange(except);
                         dbContext.SaveChanges();
@@ -66,12 +68,6 @@ namespace ScheduleBot {
             }
 
             UpdatingTimer.Start();
-        }
-
-        private void AddToSchedule(IEnumerable<Discipline> list) {
-            SetDisciplineIsCompleted(dbContext.CompletedDisciplines.ToList(), list);
-
-            dbContext.Disciplines.AddRange(list);
         }
 
         public static void SetDisciplineIsCompleted(List<CompletedDiscipline> completedDiscipline, IEnumerable<Discipline> list) {

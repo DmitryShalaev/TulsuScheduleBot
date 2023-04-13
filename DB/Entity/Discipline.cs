@@ -17,6 +17,7 @@ namespace ScheduleBot.DB.Entity {
         public string Type { get; set; }
 
         public bool IsCompleted { get; set; } = false;
+        public bool IsCastom { get; set; } = false;
 
         public Discipline() { }
 
