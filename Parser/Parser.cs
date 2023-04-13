@@ -46,6 +46,8 @@ namespace ScheduleBot {
             if(disciplines != null) {
                 var dates = GetDates();
                 if(dates != null) {
+                    lastUpdate = DateTime.Now;
+
                     var _list = dbContext.GetDisciplinesBetweenDates(dates.Value).ToList();
 
                     var except = disciplines.Except(_list);
@@ -60,8 +62,6 @@ namespace ScheduleBot {
                         dbContext.Disciplines.RemoveRange(except);
                         dbContext.SaveChanges();
                     }
-
-                    lastUpdate = DateTime.Now;
                 }
             }
 

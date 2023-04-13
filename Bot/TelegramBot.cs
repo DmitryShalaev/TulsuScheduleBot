@@ -206,7 +206,7 @@ namespace ScheduleBot.Bot {
 
                                 if(TimeOnly.TryParse(str[1], out TimeOnly time)) {
 
-                                    var discipline = dbContext.Disciplines.ToList().First(i => i.Date == date && i.StartTime == time && i.Subgroup != Parser.notSub && i.Lecturer?.Split()[0] == str[2]);
+                                    var discipline = dbContext.Disciplines.ToList().First(i => i.Date == date && i.StartTime == time && i.Subgroup != Parser.notSub && (i.Lecturer?.Split()[0] ?? "") == str[2]);
 
                                     switch(str[0] ?? "") {
                                         case "Day":
