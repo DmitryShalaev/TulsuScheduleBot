@@ -17,14 +17,12 @@ namespace ScheduleBot {
         private readonly HttpClientHandler clientHandler;
         private readonly Timer UpdatingTimer;
 
-        public static string notSub = "";
         public static DateTime lastUpdate;
 
-        public Parser(ScheduleDbContext dbContext, string group = "220611", string studentID = "201305", string notSub = "1 пг") {
+        public Parser(ScheduleDbContext dbContext, string group = "220611", string studentID = "201305") {
             this.dbContext = dbContext;
             this.group = group;
             this.studentID = studentID;
-            Parser.notSub = notSub;
 
             clientHandler = new() {
                 AllowAutoRedirect = false,
@@ -92,7 +90,7 @@ namespace ScheduleBot {
 
         public static void SetDisciplineIsCompleted(List<CompletedDiscipline> completedDiscipline, IEnumerable<Discipline> list) {
             foreach(var discipline in list)
-                discipline.IsCompleted = discipline.Class == DB.Entity.Type.lab && discipline.Subgroup == notSub || completedDiscipline.Contains(new() { Name = discipline.Name, Class = discipline.Class, Lecturer = discipline.Lecturer });
+                discipline.IsCompleted = completedDiscipline.Contains(discipline);
         }
 
         public List<Discipline>? GetDisciplines() {

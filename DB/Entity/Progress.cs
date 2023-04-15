@@ -1,6 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Security.Claims;
 
 namespace ScheduleBot.DB.Entity {
 

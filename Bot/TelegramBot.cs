@@ -81,13 +81,10 @@ namespace ScheduleBot.Bot {
 
                     if(update.Message?.From is not null) {
                         if(user is null) {
-                            user = new() { ChatId = message.Chat.Id, FirstName = update.Message.From.FirstName, Username = update.Message.From.Username, LastName = update.Message.From.LastName, LastAppeal = DateTime.UtcNow };
+                            user = new() { ChatId = message.Chat.Id, FirstName = update.Message.From.FirstName, Username = update.Message.From.Username, LastName = update.Message.From.LastName };
                             dbContext.TelegramUsers.Add(user);
                             dbContext.SaveChanges();
                         }
-                        user.LastAppeal = DateTime.UtcNow;
-                        dbContext.SaveChanges();
-
 
                         var text = message.Text?.ToLower();
                         switch(text) {
@@ -150,7 +147,7 @@ namespace ScheduleBot.Bot {
 
                         switch(update.CallbackQuery?.Data) {
                             case "Edit":
-                                await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, true), replyMarkup: new(GetEditAdminInlineKeyboardButton(date)) { });
+                                await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, true), replyMarkup: GetEditAdminInlineKeyboardButton(date));
                                 break;
 
                             case "All":
@@ -165,36 +162,35 @@ namespace ScheduleBot.Bot {
 
                             default:
                                 List<string> str = update.CallbackQuery?.Data?.Split(' ').ToList() ?? new();
-                                if(str.Count < 3) return;
+                                if(str.Count < 2) return;
 
-                                if(TimeOnly.TryParse(str[1], out TimeOnly time)) {
+                                var discipline = dbContext.Disciplines.FirstOrDefault(i => i.Id == int.Parse(str[1]));
 
-                                    var discipline = dbContext.Disciplines.ToList().First(i => i.Date == date && i.StartTime == time && i.Subgroup != Parser.notSub && (i.Lecturer?.Split()[0] ?? "") == str[2]);
-
+                                if(discipline is not null) {
                                     switch(str[0] ?? "") {
                                         case "Day":
 
                                             discipline.IsCompleted = !discipline.IsCompleted;
 
                                             dbContext.SaveChanges();
-                                            await botClient.EditMessageReplyMarkupAsync(chatId: message.Chat, messageId: message.MessageId, replyMarkup: (new(GetEditAdminInlineKeyboardButton(date)) { }));
+                                            await botClient.EditMessageReplyMarkupAsync(chatId: message.Chat, messageId: message.MessageId, replyMarkup: GetEditAdminInlineKeyboardButton(date));
 
                                             break;
 
                                         case "Always":
 
-                                            var completedDisciplines = dbContext.CompletedDisciplines.FirstOrDefault(i=> i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class);
+                                            var completedDisciplines = dbContext.CompletedDisciplines.FirstOrDefault(i=> i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup);
 
                                             if(completedDisciplines is not null)
                                                 dbContext.CompletedDisciplines.Remove(completedDisciplines);
                                             else
-                                                dbContext.CompletedDisciplines.Add(new() { Name = discipline.Name, Lecturer = discipline.Lecturer, Class = discipline.Class });
+                                                dbContext.CompletedDisciplines.Add(discipline);
 
                                             dbContext.SaveChanges();
-                                            Parser.SetDisciplineIsCompleted(dbContext.CompletedDisciplines.ToList(), dbContext.Disciplines.Where(i => i.Subgroup != Parser.notSub));
+                                            Parser.SetDisciplineIsCompleted(dbContext.CompletedDisciplines.ToList(), dbContext.Disciplines);
                                             dbContext.SaveChanges();
 
-                                            await botClient.EditMessageReplyMarkupAsync(chatId: message.Chat, messageId: message.MessageId, replyMarkup: (new(GetEditAdminInlineKeyboardButton(date)) { }));
+                                            await botClient.EditMessageReplyMarkupAsync(chatId: message.Chat, messageId: message.MessageId, replyMarkup: GetEditAdminInlineKeyboardButton(date));
 
                                             break;
                                     }
@@ -285,18 +281,17 @@ namespace ScheduleBot.Bot {
             }
         }
 
-        private InlineKeyboardButton[][] GetEditAdminInlineKeyboardButton(DateOnly date) {
+        private InlineKeyboardMarkup GetEditAdminInlineKeyboardButton(DateOnly date) {
             List<InlineKeyboardButton[]> editButtons = new();
 
             editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "В этот день", callbackData: "!"), InlineKeyboardButton.WithCallbackData(text: "Всегда", callbackData: "!") });
 
-            foreach(var item in dbContext.Disciplines.ToList().Where(i => i.Date == date && i.Subgroup != Parser.notSub).OrderBy(i => i.StartTime)) {
-                CompletedDiscipline? completedDisciplines = dbContext.CompletedDisciplines.FirstOrDefault(i => i.Name == item.Name && i.Lecturer == item.Lecturer && i.Class == item.Class );
+            var completedDisciplinesList = dbContext.CompletedDisciplines.ToList();
+            foreach(var item in dbContext.Disciplines.Where(i => i.Date == date).OrderBy(i => i.StartTime).ToList()) {
+                var completedDisciplines = completedDisciplinesList.FirstOrDefault(i => i.Equals(item));
 
-                string callbackData = $"{item.StartTime.ToString()} {item.Lecturer?.Split()[0]}";
-
-                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(item.IsCompleted ? "✅" : "❌")}", callbackData: $"Day {callbackData}"),
-                                        InlineKeyboardButton.WithCallbackData(text: completedDisciplines is not null ? "✅" : "❌", callbackData: $"Always {callbackData}")});
+                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(item.IsCompleted ? "✅" : "❌")}", callbackData: $"Day {item.Id}"),
+                                        InlineKeyboardButton.WithCallbackData(text: completedDisciplines is not null ? "✅" : "❌", callbackData: $"Always {item.Id}")});
             }
 
             editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "Back") });

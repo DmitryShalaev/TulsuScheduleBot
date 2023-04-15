@@ -24,7 +24,7 @@ namespace ScheduleBot.Scheduler {
             var list = dbContext.Disciplines.Where(i => i.Date == date && (!i.IsCompleted || all)).OrderBy(i => i.StartTime);
 
             int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-            string str = $"📌{date.ToString("dd.MM.yy")} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd").Substring(1)} ({(weekNumber % 2 == 0 ? "чётная неделя":"нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
+            string str = $"📌{date.ToString("dd.MM.yy")} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd").Substring(1)} ({(weekNumber % 2 == 0 ? "чётная неделя":"нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
 
             if(!list.Any())
                 return str += "Ничего нет";
@@ -42,14 +42,14 @@ namespace ScheduleBot.Scheduler {
         public string GetProgressByTerm(int term) {
             var list = dbContext.Progresses.Where(i => i.Term == term && i.Mark != null);
 
-            string str = $"📌 Семестр {term}\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
+            string str = $"📌 Семестр {term}\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
 
             if(!list.Any())
                 return str += "В этом семестре нет проставленных баллов";
 
             foreach(var item in list)
                 str += $"🔹 {item.Discipline} | {item.Mark} | {item.MarkTitle}\n";
-            
+
             return str;
         }
 
@@ -58,9 +58,9 @@ namespace ScheduleBot.Scheduler {
             var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
             var list = new List<string>();
 
-            for(int i = -1; i < 2; i++) {
+            for(int i = -1; i < 2; i++)
                 list.Add(GetScheduleByDate(dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek)));
-            }
+
             return list;
         }
     }

@@ -59,5 +59,7 @@ namespace ScheduleBot.DB.Entity {
 
             return hash.GetHashCode();
         }
+
+        public static implicit operator CompletedDiscipline(Discipline discipline) => new() { Name = discipline.Name, Class = discipline.Class, Lecturer = discipline.Lecturer, Subgroup = discipline.Subgroup };
     }
 }
