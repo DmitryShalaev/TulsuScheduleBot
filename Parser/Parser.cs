@@ -13,16 +13,17 @@ namespace ScheduleBot {
     public class Parser {
         private readonly ScheduleDbContext dbContext;
         private readonly string group;
+        private readonly string studentID;
         private readonly HttpClientHandler clientHandler;
         private readonly Timer UpdatingTimer;
 
         public static string notSub = "";
         public static DateTime lastUpdate;
 
-        public Parser(ScheduleDbContext dbContext, string group = "220611", string notSub = "1 пг") {
+        public Parser(ScheduleDbContext dbContext, string group = "220611", string studentID = "201305", string notSub = "1 пг") {
             this.dbContext = dbContext;
             this.group = group;
-
+            this.studentID = studentID;
             Parser.notSub = notSub;
 
             clientHandler = new() {
@@ -64,6 +65,25 @@ namespace ScheduleBot {
                         dbContext.Disciplines.RemoveRange(except);
                         dbContext.SaveChanges();
                     }
+                }
+            }
+
+            var progress = GetProgress();
+            if(progress != null) {
+                var _list = dbContext.Progresses.ToList();
+
+                var except = progress.Except(_list);
+                if(except.Any()) {
+                    dbContext.Progresses.AddRange(except);
+
+                    dbContext.SaveChanges();
+                    _list = dbContext.Progresses.ToList();
+                }
+
+                except = _list.Except(progress);
+                if(except.Any()) {
+                    dbContext.Progresses.RemoveRange(except);
+                    dbContext.SaveChanges();
                 }
             }
 
@@ -148,5 +168,42 @@ namespace ScheduleBot {
             }
             return null;
         }
+
+        public List<Progress>? GetProgress() {
+            try {
+                using(var client = new HttpClient(clientHandler, false)) {
+                    #region RequestHeaders
+                    client.DefaultRequestHeaders.Add("Accept", "application/json, text/javascript, */*; q=0.01");
+                    client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
+                    client.DefaultRequestHeaders.Add("Accept-Language", "ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7");
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.34");
+                    client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
+                    client.DefaultRequestHeaders.Add("Referer", "https://tulsu.ru/progress/?search=201305");
+                    client.DefaultRequestHeaders.Add("Origin", "https://tulsu.ru");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua", "\"Chromium\";v=\"112\", \"Microsoft Edge\";v=\"112\", \"Not:A-Brand\";v=\"99\"");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua-mobile", "?0");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua-platform", "\"Windows\"");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-Dest", "empty");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-Mode", "cors");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-Site", "same-origin");
+                    client.DefaultRequestHeaders.Add("Connection", "keep-alive");
+                    client.DefaultRequestHeaders.Add("Host", "tulsu.ru");
+                    #endregion
+
+                    using(var content = new StringContent($"SEARCH={studentID}", Encoding.UTF8, "application/x-www-form-urlencoded"))
+                    using(HttpResponseMessage response = client.PostAsync("https://tulsu.ru/progress/queries/GetMarks.php", content).Result)
+                        if(response.IsSuccessStatusCode) {
+                            JArray jObject = JObject.Parse(response.Content.ReadAsStringAsync().Result).Value<JArray>("data") ?? throw new Exception();
+
+                            return jObject.Select(j => new Progress(j)).ToList();
+                        }
+                }
+            } catch(Exception) {
+                return null;
+            }
+
+            return null;
+        }
+
     }
 }

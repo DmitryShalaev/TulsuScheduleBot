@@ -26,8 +26,12 @@ namespace ScheduleBot.DB.Entity {
             Date = DateOnly.Parse(json.Value<string>("DATE_Z") ?? throw new NullReferenceException("DATE_Z"));
             Name = json.Value<string>("DISCIP") ?? throw new NullReferenceException("DISCIP");
             Type = json.Value<string>("KOW") ?? throw new NullReferenceException("KOW");
-            Subgroup = json.Value<JToken>("GROUPS")?[0]?.Value<string>("PRIM");
-            Lecturer = json.Value<string>("PREP");
+
+            var _subgroup = json.Value<JToken>("GROUPS")?[0]?.Value<string>("PRIM");
+            Subgroup = string.IsNullOrEmpty(_subgroup) ? null : _subgroup;
+
+            Lecturer = json.Value<string?>("PREP");
+
             Class = (Type)Enum.Parse(typeof(Type), json.Value<string>("CLASS") ?? "other");
 
             var times = (json.Value<string>("TIME_Z") ?? throw new NullReferenceException("TIME_Z")).Split('-');

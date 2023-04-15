@@ -16,22 +16,22 @@ namespace ScheduleBot.Bot {
 
         private readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { "Сегодня", "Завтра" },
-                            new KeyboardButton[] { "По дням", "На неделю" }
+                            new KeyboardButton[] { "По дням", "На неделю" },
+                            new KeyboardButton[] { "Успеваемость" }
                         })
         { ResizeKeyboard = true };
-
 
         private readonly ReplyKeyboardMarkup DaysKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { "Понедельник", "Вторник" },
                             new KeyboardButton[] { "Среда", "Четверг" },
                             new KeyboardButton[] { "Пятница", "Суббота" },
-                            new KeyboardButton[] { "Назад", }
+                            new KeyboardButton[] { "Назад" }
                         })
         { ResizeKeyboard = true };
 
         private readonly ReplyKeyboardMarkup WeekKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { "Эта неделя", "Следующая неделя" },
-                            new KeyboardButton[] { "Назад", }
+                            new KeyboardButton[] { "Назад" }
                         })
         { ResizeKeyboard = true };
 
@@ -68,7 +68,9 @@ namespace ScheduleBot.Bot {
         }
 
         private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken) {
+#if DEBUG
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
+#endif
             Message? message = update.Message ?? update.EditedMessage ?? update.CallbackQuery?.Message;
             TelegramUser? user;
 
@@ -123,6 +125,22 @@ namespace ScheduleBot.Bot {
                             case "следующая неделя":
                                 await Weeks(botClient, message.Chat, text, user);
                                 break;
+
+                            case "успеваемость":
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Семестр", replyMarkup: GetTermsKeyboardMarkup());
+                                break;
+
+                            default:
+                                var split = text?.Split();
+                                if(split == null || split.Count() < 2) return;
+
+                                switch(split[1]) {
+                                    case "семестр":
+                                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetProgressByTerm(int.Parse(split[0])), replyMarkup: GetTermsKeyboardMarkup());
+                                        break;
+                                }
+
+                                break;
                         }
                     }
 
@@ -132,8 +150,7 @@ namespace ScheduleBot.Bot {
 
                         switch(update.CallbackQuery?.Data) {
                             case "Edit":
-                                InlineKeyboardMarkup ff = new(GetEditAdminInlineKeyboardButton(date)) { };
-                                await botClient.EditMessageReplyMarkupAsync(chatId: message.Chat, messageId: message.MessageId, replyMarkup: ff);
+                                await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, true), replyMarkup: new(GetEditAdminInlineKeyboardButton(date)) { });
                                 break;
 
                             case "All":
@@ -188,6 +205,18 @@ namespace ScheduleBot.Bot {
                 }
             }
 
+        }
+
+        private ReplyKeyboardMarkup GetTermsKeyboardMarkup() {
+            List<KeyboardButton[]> TermsKeyboardMarkup = new();
+
+            var terms = dbContext.Progresses.Where(i => i.Mark != null).Select(i => i.Term).Distinct().OrderBy(i => i).ToArray();
+            for(int i = 0; i < terms.Length; i++)
+                TermsKeyboardMarkup.Add(new KeyboardButton[] { $"{terms[i]} семестр", i + 1 < terms.Length ? $"{terms[++i]} семестр" : "" });
+
+            TermsKeyboardMarkup.Add(new KeyboardButton[] { "Назад" });
+
+            return new(TermsKeyboardMarkup) { ResizeKeyboard = true };
         }
 
         private async Task TodayAndTomorrow(ITelegramBotClient botClient, ChatId chatId, string text, TelegramUser user) {

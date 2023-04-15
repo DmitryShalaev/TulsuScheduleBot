@@ -38,6 +38,21 @@ namespace ScheduleBot.Scheduler {
             return str;
         }
 
+
+        public string GetProgressByTerm(int term) {
+            var list = dbContext.Progresses.Where(i => i.Term == term && i.Mark != null);
+
+            string str = $"📌 Семестр {term}\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
+
+            if(!list.Any())
+                return str += "В этом семестре нет проставленных баллов";
+
+            foreach(var item in list)
+                str += $"🔹 {item.Discipline} | {item.Mark} | {item.MarkTitle}\n";
+            
+            return str;
+        }
+
         public List<string> GetScheduleByDay(DayOfWeek dayOfWeek) {
             int weeks = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
             var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));

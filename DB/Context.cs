@@ -22,6 +22,7 @@ namespace ScheduleBot.DB {
 
 #pragma warning disable CS8618
         public DbSet<Discipline> Disciplines { get; set; }
+        public DbSet<Progress> Progresses { get; set; }
         public DbSet<CompletedDiscipline> CompletedDisciplines { get; set; }
         public DbSet<TypeDTO> Types { get; set; }
         public DbSet<TelegramUser> TelegramUsers { get; set; }

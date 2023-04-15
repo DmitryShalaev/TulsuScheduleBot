@@ -1,13 +1,5 @@
 ﻿namespace ScheduleBot.DB.Entity {
 
-    public enum Type : byte {
-        all,
-        lab,
-        practice,
-        lecture,
-        other
-    }
-
 #pragma warning disable CS8618
     public class CompletedDiscipline : IEquatable<CompletedDiscipline?> {
         public int ID { get; set; }
@@ -30,6 +22,14 @@
 
             return hash.GetHashCode();
         }
+    }
+
+    public enum Type : byte {
+        all,
+        lab,
+        practice,
+        lecture,
+        other
     }
 
     public class TypeDTO {
