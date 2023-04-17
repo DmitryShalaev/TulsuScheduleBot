@@ -2,7 +2,7 @@
 
 #pragma warning disable CS8618
     public class CompletedDiscipline : IEquatable<CompletedDiscipline?> {
-        public int ID { get; set; }
+        public long ID { get; set; }
         public string Name { get; set; }
         public string? Lecturer { get; set; }
         public Type Class { get; set; }

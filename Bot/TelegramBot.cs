@@ -15,37 +15,37 @@ namespace ScheduleBot.Bot {
         private readonly ScheduleDbContext dbContext;
 
         private readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { "Сегодня", "Завтра" },
-                            new KeyboardButton[] { "По дням", "На неделю" },
-                            new KeyboardButton[] { "Успеваемость" }
+                            new KeyboardButton[] { Constants.RK_Today, Constants.RK_Tomorrow },
+                            new KeyboardButton[] { Constants.RK_ByDays, Constants.RK_ForAWeek },
+                            new KeyboardButton[] { Constants.RK_AcademicPerformance }
                         })
         { ResizeKeyboard = true };
 
         private readonly ReplyKeyboardMarkup DaysKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { "Понедельник", "Вторник" },
-                            new KeyboardButton[] { "Среда", "Четверг" },
-                            new KeyboardButton[] { "Пятница", "Суббота" },
-                            new KeyboardButton[] { "Назад" }
+                            new KeyboardButton[] { Constants.RK_Monday, Constants.RK_Tuesday },
+                            new KeyboardButton[] { Constants.RK_Wednesday, Constants.RK_Thursday },
+                            new KeyboardButton[] { Constants.RK_Friday, Constants.RK_Saturday },
+                            new KeyboardButton[] { Constants.RK_Back }
                         })
         { ResizeKeyboard = true };
 
         private readonly ReplyKeyboardMarkup WeekKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { "Эта неделя", "Следующая неделя" },
-                            new KeyboardButton[] { "Назад" }
+                            new KeyboardButton[] { Constants.RK_ThisWeek, Constants.RK_NextWeek },
+                            new KeyboardButton[] { Constants.RK_Back }
                         })
         { ResizeKeyboard = true };
 
         private readonly InlineKeyboardMarkup inlineAdminKeyboardMarkup = new(new[]{
-            new [] { InlineKeyboardButton.WithCallbackData(text: "Посмотреть все", callbackData: "All") },
-            new [] { InlineKeyboardButton.WithCallbackData(text: "Редактировать", callbackData: "Edit") }
+            new [] { InlineKeyboardButton.WithCallbackData(Constants.IK_ViewAll.text, Constants.IK_ViewAll.callback) },
+            new [] { InlineKeyboardButton.WithCallbackData(Constants.IK_Edit.text, Constants.IK_Edit.callback) }
         }){};
 
         private readonly InlineKeyboardMarkup inlineKeyboardMarkup = new(new[]{
-            new [] { InlineKeyboardButton.WithCallbackData(text: "Посмотреть все", callbackData: "All") }
+            new [] { InlineKeyboardButton.WithCallbackData(text: Constants.IK_ViewAll.text, Constants.IK_ViewAll.callback) }
         }){};
 
         private readonly InlineKeyboardMarkup inlineBackKeyboardMarkup = new(new[]{
-            new [] { InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "Back") }
+            new [] { InlineKeyboardButton.WithCallbackData(Constants.IK_Back.text, Constants.IK_Back.callback) }
         }){};
 
         public TelegramBot(Scheduler.Scheduler scheduler, ScheduleDbContext dbContext) {
@@ -86,49 +86,48 @@ namespace ScheduleBot.Bot {
                             dbContext.SaveChanges();
                         }
 
-                        var text = message.Text?.ToLower();
-                        switch(text) {
+                        switch(message.Text) {
                             case "/start":
                                 await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"👋 {telegramBot.GetMeAsync(cancellationToken: cancellationToken).Result.Username} 👋", replyMarkup: MainKeyboardMarkup);
                                 break;
 
-                            case "назад":
+                            case Constants.RK_Back:
                                 await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Основное меню", replyMarkup: MainKeyboardMarkup);
                                 break;
 
-                            case "сегодня":
-                            case "завтра":
-                                await TodayAndTomorrow(botClient, message.Chat, text, user);
+                            case Constants.RK_Today:
+                            case Constants.RK_Tomorrow:
+                                await TodayAndTomorrow(botClient, message.Chat, message.Text, user);
                                 break;
 
-                            case "по дням":
-                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: "По дням", replyMarkup: DaysKeyboardMarkup);
+                            case Constants.RK_ByDays:
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: Constants.RK_ByDays, replyMarkup: DaysKeyboardMarkup);
                                 break;
 
-                            case "понедельник":
-                            case "вторник":
-                            case "среда":
-                            case "четверг":
-                            case "пятница":
-                            case "суббота":
-                                await DayOfWeek(botClient, message.Chat, text, user);
+                            case Constants.RK_Monday:
+                            case Constants.RK_Tuesday:
+                            case Constants.RK_Wednesday:
+                            case Constants.RK_Thursday:
+                            case Constants.RK_Friday:
+                            case Constants.RK_Saturday:
+                                await DayOfWeek(botClient, message.Chat, message.Text, user);
                                 break;
 
-                            case "на неделю":
-                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: "На неделю", replyMarkup: WeekKeyboardMarkup);
+                            case Constants.RK_ForAWeek:
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: Constants.RK_ForAWeek, replyMarkup: WeekKeyboardMarkup);
                                 break;
 
-                            case "эта неделя":
-                            case "следующая неделя":
-                                await Weeks(botClient, message.Chat, text, user);
+                            case Constants.RK_ThisWeek:
+                            case Constants.RK_NextWeek:
+                                await Weeks(botClient, message.Chat, message.Text, user);
                                 break;
 
-                            case "успеваемость":
-                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Семестр", replyMarkup: GetTermsKeyboardMarkup());
+                            case Constants.RK_AcademicPerformance:
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Успеваемость актуальна на {Parser.lastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: GetTermsKeyboardMarkup());
                                 break;
 
                             default:
-                                var split = text?.Split();
+                                var split = message.Text?.Split();
                                 if(split == null || split.Count() < 2) return;
 
                                 switch(split[1]) {
@@ -146,16 +145,16 @@ namespace ScheduleBot.Bot {
                     if(DateOnly.TryParse(message.Text?.Split('-')[0].Trim()[2..] ?? "", out DateOnly date)) {
 
                         switch(update.CallbackQuery?.Data) {
-                            case "Edit":
+                            case Constants.IK_Edit.callback:
                                 await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, true), replyMarkup: GetEditAdminInlineKeyboardButton(date));
                                 break;
 
-                            case "All":
+                            case Constants.IK_ViewAll.callback:
 
                                 await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, true), replyMarkup: inlineBackKeyboardMarkup);
                                 break;
 
-                            case "Back":
+                            case Constants.IK_Back.callback:
 
                                 await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date), replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
                                 break;
@@ -210,7 +209,7 @@ namespace ScheduleBot.Bot {
             for(int i = 0; i < terms.Length; i++)
                 TermsKeyboardMarkup.Add(new KeyboardButton[] { $"{terms[i]} семестр", i + 1 < terms.Length ? $"{terms[++i]} семестр" : "" });
 
-            TermsKeyboardMarkup.Add(new KeyboardButton[] { "Назад" });
+            TermsKeyboardMarkup.Add(new KeyboardButton[] { Constants.RK_Back });
 
             return new(TermsKeyboardMarkup) { ResizeKeyboard = true };
         }
@@ -219,11 +218,11 @@ namespace ScheduleBot.Bot {
             await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {Parser.lastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: MainKeyboardMarkup);
 
             switch(text) {
-                case "сегодня":
+                case Constants.RK_Today:
                     await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now)), replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
                     break;
 
-                case "завтра":
+                case Constants.RK_Tomorrow:
                     await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now.AddDays(1))), replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
                     break;
             }
@@ -232,32 +231,32 @@ namespace ScheduleBot.Bot {
         private async Task DayOfWeek(ITelegramBotClient botClient, ChatId chatId, string text, TelegramUser user) {
             await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {Parser.lastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: DaysKeyboardMarkup);
             switch(text) {
-                case "понедельник":
+                case Constants.RK_Monday:
                     foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Monday))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: day, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
                     break;
-                case "вторник":
+                case Constants.RK_Tuesday:
                     foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Tuesday))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: day, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
                     break;
-                case "среда":
+                case Constants.RK_Wednesday:
                     foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Wednesday))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: day, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
                     break;
-                case "четверг":
+                case Constants.RK_Thursday:
                     foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Thursday))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: day, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
                     break;
-                case "пятница":
+                case Constants.RK_Friday:
                     foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Friday))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: day, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
                     break;
-                case "суббота":
+                case Constants.RK_Saturday:
                     foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Saturday))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: day, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
@@ -268,12 +267,12 @@ namespace ScheduleBot.Bot {
         private async Task Weeks(ITelegramBotClient botClient, ChatId chatId, string text, TelegramUser user) {
             await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {Parser.lastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: WeekKeyboardMarkup);
             switch(text) {
-                case "эта неделя":
+                case Constants.RK_ThisWeek:
                     foreach(var item in scheduler.GetScheduleByWeak(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, System.DayOfWeek.Monday) - 1))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: item, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
                     break;
-                case "следующая неделя":
+                case Constants.RK_NextWeek:
                     foreach(var item in scheduler.GetScheduleByWeak(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, System.DayOfWeek.Monday)))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: item, replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
@@ -294,7 +293,7 @@ namespace ScheduleBot.Bot {
                                         InlineKeyboardButton.WithCallbackData(text: completedDisciplines is not null ? "✅" : "❌", callbackData: $"Always {item.Id}")});
             }
 
-            editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "Back") });
+            editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(Constants.IK_Back.text, Constants.IK_Back.callback) });
 
             return editButtons.ToArray();
         }

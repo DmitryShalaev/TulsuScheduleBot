@@ -4,7 +4,7 @@ namespace ScheduleBot.DB.Entity {
 
 #pragma warning disable CS8618
     public class Discipline : IEquatable<Discipline?> {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         public string Name { get; set; }
         public string? Lecturer { get; set; } = null;

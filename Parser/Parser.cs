@@ -193,7 +193,7 @@ namespace ScheduleBot {
                         if(response.IsSuccessStatusCode) {
                             JArray jObject = JObject.Parse(response.Content.ReadAsStringAsync().Result).Value<JArray>("data") ?? throw new Exception();
 
-                            return jObject.Select(j => new Progress(j)).ToList();
+                            return jObject.Select(j => new Progress(j)).Where(i => i.Mark != null).ToList();
                         }
                 }
             } catch(Exception) {

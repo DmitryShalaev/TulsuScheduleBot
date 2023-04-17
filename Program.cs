@@ -34,6 +34,7 @@ namespace ScheduleBot {
                     Parser parser = new(dbContext);
                     Scheduler.Scheduler scheduler = new(dbContext);
                     Bot.TelegramBot telegramBot = new(scheduler, dbContext);
+
                 } catch(Exception e) {
                     Console.WriteLine(e.Message);
 
