@@ -17,7 +17,8 @@ namespace ScheduleBot {
         private readonly HttpClientHandler clientHandler;
         private readonly Timer UpdatingTimer;
 
-        public static DateTime lastUpdate;
+        public static DateTime scheduleLastUpdate;
+        public static DateTime progressLastUpdate;
 
         public Parser(ScheduleDbContext dbContext, string group = "220611", string studentID = "201305") {
             this.dbContext = dbContext;
@@ -45,7 +46,7 @@ namespace ScheduleBot {
             if(disciplines != null) {
                 var dates = GetDates();
                 if(dates != null) {
-                    lastUpdate = DateTime.Now;
+                    scheduleLastUpdate = DateTime.Now;
 
                     var _list = dbContext.GetDisciplinesBetweenDates(dates.Value).ToList();
 
@@ -68,6 +69,8 @@ namespace ScheduleBot {
 
             var progress = GetProgress();
             if(progress != null) {
+                progressLastUpdate = DateTime.Now;
+
                 var _list = dbContext.Progresses.ToList();
 
                 var except = progress.Except(_list);

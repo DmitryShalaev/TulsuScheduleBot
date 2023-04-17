@@ -97,6 +97,7 @@ namespace ScheduleBot.Bot {
 
                             case Constants.RK_Today:
                             case Constants.RK_Tomorrow:
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Расписание актуально на {Parser.scheduleLastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: MainKeyboardMarkup);
                                 await TodayAndTomorrow(botClient, message.Chat, message.Text, user);
                                 break;
 
@@ -110,6 +111,7 @@ namespace ScheduleBot.Bot {
                             case Constants.RK_Thursday:
                             case Constants.RK_Friday:
                             case Constants.RK_Saturday:
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Расписание актуально на {Parser.scheduleLastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: DaysKeyboardMarkup);
                                 await DayOfWeek(botClient, message.Chat, message.Text, user);
                                 break;
 
@@ -119,11 +121,12 @@ namespace ScheduleBot.Bot {
 
                             case Constants.RK_ThisWeek:
                             case Constants.RK_NextWeek:
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Расписание актуально на {Parser.scheduleLastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: WeekKeyboardMarkup);
                                 await Weeks(botClient, message.Chat, message.Text, user);
                                 break;
 
                             case Constants.RK_AcademicPerformance:
-                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Успеваемость актуальна на {Parser.lastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: GetTermsKeyboardMarkup());
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Успеваемость актуальна на {Parser.progressLastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: GetTermsKeyboardMarkup());
                                 break;
 
                             default:
@@ -135,7 +138,6 @@ namespace ScheduleBot.Bot {
                                         await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetProgressByTerm(int.Parse(split[0])), replyMarkup: GetTermsKeyboardMarkup());
                                         break;
                                 }
-
                                 break;
                         }
                     }
@@ -150,12 +152,10 @@ namespace ScheduleBot.Bot {
                                 break;
 
                             case Constants.IK_ViewAll.callback:
-
                                 await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, true), replyMarkup: inlineBackKeyboardMarkup);
                                 break;
 
                             case Constants.IK_Back.callback:
-
                                 await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date), replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
                                 break;
 
@@ -168,7 +168,6 @@ namespace ScheduleBot.Bot {
                                 if(discipline is not null) {
                                     switch(str[0] ?? "") {
                                         case "Day":
-
                                             discipline.IsCompleted = !discipline.IsCompleted;
 
                                             dbContext.SaveChanges();
@@ -177,7 +176,6 @@ namespace ScheduleBot.Bot {
                                             break;
 
                                         case "Always":
-
                                             var completedDisciplines = dbContext.CompletedDisciplines.FirstOrDefault(i=> i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup);
 
                                             if(completedDisciplines is not null)
@@ -215,8 +213,6 @@ namespace ScheduleBot.Bot {
         }
 
         private async Task TodayAndTomorrow(ITelegramBotClient botClient, ChatId chatId, string text, TelegramUser user) {
-            await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {Parser.lastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: MainKeyboardMarkup);
-
             switch(text) {
                 case Constants.RK_Today:
                     await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now)), replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
@@ -229,7 +225,6 @@ namespace ScheduleBot.Bot {
         }
 
         private async Task DayOfWeek(ITelegramBotClient botClient, ChatId chatId, string text, TelegramUser user) {
-            await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {Parser.lastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: DaysKeyboardMarkup);
             switch(text) {
                 case Constants.RK_Monday:
                     foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Monday))
@@ -265,7 +260,6 @@ namespace ScheduleBot.Bot {
         }
 
         private async Task Weeks(ITelegramBotClient botClient, ChatId chatId, string text, TelegramUser user) {
-            await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {Parser.lastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: WeekKeyboardMarkup);
             switch(text) {
                 case Constants.RK_ThisWeek:
                     foreach(var item in scheduler.GetScheduleByWeak(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, System.DayOfWeek.Monday) - 1))
