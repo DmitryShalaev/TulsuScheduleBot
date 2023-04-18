@@ -1,10 +1,12 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+using Newtonsoft.Json.Linq;
 
 namespace ScheduleBot.DB.Entity {
 
 #pragma warning disable CS8618
     public class Discipline : IEquatable<Discipline?> {
-        public long Id { get; set; }
+        public long ID { get; set; }
 
         public string Name { get; set; }
         public string? Lecturer { get; set; } = null;
@@ -13,8 +15,12 @@ namespace ScheduleBot.DB.Entity {
         public DateOnly Date { get; set; }
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
-        public Type Class { get; set; }
+
         public string Type { get; set; }
+
+        [ForeignKey("TypeDTO")]
+        public Type Class { get; set; }
+        public TypeDTO TypeDTO { get; set; }
 
         public bool IsCompleted { get; set; } = false;
         public bool IsCastom { get; set; } = false;

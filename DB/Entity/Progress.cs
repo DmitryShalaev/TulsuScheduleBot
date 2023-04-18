@@ -5,6 +5,7 @@ namespace ScheduleBot.DB.Entity {
 #pragma warning disable CS8618
     public class Progress : IEquatable<Progress?> {
         public long ID { get; set; }
+
         public string Discipline { get; set; }
         public string? MarkTitle { get; set; }
         public int? Mark { get; set; }

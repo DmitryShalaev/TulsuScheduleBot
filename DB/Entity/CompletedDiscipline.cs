@@ -1,12 +1,18 @@
-﻿namespace ScheduleBot.DB.Entity {
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ScheduleBot.DB.Entity {
 
 #pragma warning disable CS8618
     public class CompletedDiscipline : IEquatable<CompletedDiscipline?> {
         public long ID { get; set; }
+
         public string Name { get; set; }
         public string? Lecturer { get; set; }
-        public Type Class { get; set; }
         public string? Subgroup { get; set; }
+
+        [ForeignKey("TypeDTO")]
+        public Type Class { get; set; }
+        public TypeDTO TypeDTO { get; set; }
 
         public override bool Equals(object? obj) => Equals(obj as CompletedDiscipline);
         public bool Equals(CompletedDiscipline? discipline) => discipline is not null && Name == discipline.Name && Class == discipline.Class && discipline.Class != Type.other && Lecturer == discipline.Lecturer && Subgroup == discipline.Subgroup;
@@ -35,7 +41,7 @@
     }
 
     public class TypeDTO {
-        public Type Id { get; set; }
+        public Type ID { get; set; }
         public string Name { get; set; }
     }
 }

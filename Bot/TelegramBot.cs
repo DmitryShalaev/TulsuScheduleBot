@@ -35,6 +35,11 @@ namespace ScheduleBot.Bot {
                         })
         { ResizeKeyboard = true };
 
+        private readonly ReplyKeyboardMarkup CancelKeyboardMarkup = new(new[] {
+                            new KeyboardButton[] { Constants.RK_Cancel }
+                        })
+        { ResizeKeyboard = true };
+
         private readonly InlineKeyboardMarkup inlineAdminKeyboardMarkup = new(new[]{
             new [] { InlineKeyboardButton.WithCallbackData(Constants.IK_ViewAll.text, Constants.IK_ViewAll.callback) },
             new [] { InlineKeyboardButton.WithCallbackData(Constants.IK_Edit.text, Constants.IK_Edit.callback) }
@@ -75,129 +80,224 @@ namespace ScheduleBot.Bot {
             TelegramUser? user;
 
             if(message is not null) {
-                user = dbContext.TelegramUsers.FirstOrDefault(u => u.ChatId == message.Chat.Id);
+                if(message.From is null) return;
 
-                if((update.Type == Telegram.Bot.Types.Enums.UpdateType.Message || update.Type == Telegram.Bot.Types.Enums.UpdateType.EditedMessage)) {
+                user = dbContext.TelegramUsers.FirstOrDefault(u => u.ChatID == message.Chat.Id);
 
-                    if(update.Message?.From is not null) {
-                        if(user is null) {
-                            user = new() { ChatId = message.Chat.Id, FirstName = update.Message.From.FirstName, Username = update.Message.From.Username, LastName = update.Message.From.LastName };
-                            dbContext.TelegramUsers.Add(user);
-                            dbContext.SaveChanges();
-                        }
+                if(user is null) {
+                    user = new() { ChatID = message.Chat.Id, FirstName = message.From.FirstName, Username = message.From.Username, LastName = message.From.LastName };
+                    dbContext.TelegramUsers.Add(user);
+                    dbContext.SaveChanges();
+                }
 
-                        switch(message.Text) {
-                            case "/start":
-                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"👋 {telegramBot.GetMeAsync(cancellationToken: cancellationToken).Result.Username} 👋", replyMarkup: MainKeyboardMarkup);
+                switch(user.Mode) {
+                    case Mode.Default:
+                        switch(update.Type) {
+                            case Telegram.Bot.Types.Enums.UpdateType.Message:
+                            case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
+                                await MessageModeAsync(message, botClient, user, cancellationToken);
                                 break;
 
-                            case Constants.RK_Back:
+                            case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
+                                if(update.CallbackQuery?.Data is null) return;
+
+                                await CallbackModeAsync(message, botClient, user, cancellationToken, update.CallbackQuery.Data);
+                                break;
+                        }
+                        break;
+
+                    case Mode.AddingDiscipline:
+                        switch(message.Text) {
+                            case Constants.RK_Cancel:
+                                user.Mode = Mode.Default;
+                                dbContext.TemporaryAddition.Remove(dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First());
+                                dbContext.SaveChanges();
                                 await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Основное меню", replyMarkup: MainKeyboardMarkup);
                                 break;
 
-                            case Constants.RK_Today:
-                            case Constants.RK_Tomorrow:
-                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Расписание актуально на {Parser.scheduleLastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: MainKeyboardMarkup);
-                                await TodayAndTomorrow(botClient, message.Chat, message.Text, user);
-                                break;
-
-                            case Constants.RK_ByDays:
-                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: Constants.RK_ByDays, replyMarkup: DaysKeyboardMarkup);
-                                break;
-
-                            case Constants.RK_Monday:
-                            case Constants.RK_Tuesday:
-                            case Constants.RK_Wednesday:
-                            case Constants.RK_Thursday:
-                            case Constants.RK_Friday:
-                            case Constants.RK_Saturday:
-                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Расписание актуально на {Parser.scheduleLastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: DaysKeyboardMarkup);
-                                await DayOfWeek(botClient, message.Chat, message.Text, user);
-                                break;
-
-                            case Constants.RK_ForAWeek:
-                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: Constants.RK_ForAWeek, replyMarkup: WeekKeyboardMarkup);
-                                break;
-
-                            case Constants.RK_ThisWeek:
-                            case Constants.RK_NextWeek:
-                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Расписание актуально на {Parser.scheduleLastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: WeekKeyboardMarkup);
-                                await Weeks(botClient, message.Chat, message.Text, user);
-                                break;
-
-                            case Constants.RK_AcademicPerformance:
-                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Успеваемость актуальна на {Parser.progressLastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: GetTermsKeyboardMarkup());
-                                break;
-
                             default:
-                                var split = message.Text?.Split();
-                                if(split == null || split.Count() < 2) return;
-
-                                switch(split[1]) {
-                                    case "семестр":
-                                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetProgressByTerm(int.Parse(split[0])), replyMarkup: GetTermsKeyboardMarkup());
-                                        break;
-                                }
+                                await SetStagesAddingDisciplineAsync(user, message, botClient);
                                 break;
                         }
+                        break;
+                }
+            }
+        }
+
+        private async Task MessageModeAsync(Message message, ITelegramBotClient botClient, TelegramUser user, CancellationToken cancellationToken) {
+            switch(message.Text) {
+                case "/start":
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"👋 {telegramBot.GetMeAsync(cancellationToken).Result.Username} 👋", replyMarkup: MainKeyboardMarkup);
+                    break;
+
+                case Constants.RK_Back:
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Основное меню", replyMarkup: MainKeyboardMarkup);
+                    break;
+
+                case Constants.RK_Today:
+                case Constants.RK_Tomorrow:
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Расписание актуально на {Parser.scheduleLastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: MainKeyboardMarkup);
+                    await TodayAndTomorrow(botClient, message.Chat, message.Text, user);
+                    break;
+
+                case Constants.RK_ByDays:
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: Constants.RK_ByDays, replyMarkup: DaysKeyboardMarkup);
+                    break;
+
+                case Constants.RK_Monday:
+                case Constants.RK_Tuesday:
+                case Constants.RK_Wednesday:
+                case Constants.RK_Thursday:
+                case Constants.RK_Friday:
+                case Constants.RK_Saturday:
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Расписание актуально на {Parser.scheduleLastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: DaysKeyboardMarkup);
+                    await DayOfWeek(botClient, message.Chat, message.Text, user);
+                    break;
+
+                case Constants.RK_ForAWeek:
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: Constants.RK_ForAWeek, replyMarkup: WeekKeyboardMarkup);
+                    break;
+
+                case Constants.RK_ThisWeek:
+                case Constants.RK_NextWeek:
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Расписание актуально на {Parser.scheduleLastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: WeekKeyboardMarkup);
+                    await Weeks(botClient, message.Chat, message.Text, user);
+                    break;
+
+                case Constants.RK_AcademicPerformance:
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Успеваемость актуальна на {Parser.progressLastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: GetTermsKeyboardMarkup());
+                    break;
+
+                default:
+                    var split = message.Text?.Split();
+                    if(split == null || split.Count() < 2) return;
+
+                    switch(split[1]) {
+                        case "семестр":
+                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetProgressByTerm(int.Parse(split[0])), replyMarkup: GetTermsKeyboardMarkup());
+                            break;
                     }
+                    break;
+            }
+        }
 
-                } else if(update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery && user is not null) {
+        private async Task CallbackModeAsync(Message message, ITelegramBotClient botClient, TelegramUser user, CancellationToken cancellationToken, string data) {
+            if(DateOnly.TryParse(message.Text?.Split('-')[0].Trim()[2..] ?? "", out DateOnly date)) {
 
-                    if(DateOnly.TryParse(message.Text?.Split('-')[0].Trim()[2..] ?? "", out DateOnly date)) {
+                switch(data) {
+                    case Constants.IK_Edit.callback:
+                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, true), replyMarkup: GetEditAdminInlineKeyboardButton(date));
+                        break;
 
-                        switch(update.CallbackQuery?.Data) {
-                            case Constants.IK_Edit.callback:
-                                await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, true), replyMarkup: GetEditAdminInlineKeyboardButton(date));
-                                break;
+                    case Constants.IK_ViewAll.callback:
+                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, true), replyMarkup: inlineBackKeyboardMarkup);
+                        break;
 
-                            case Constants.IK_ViewAll.callback:
-                                await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, true), replyMarkup: inlineBackKeyboardMarkup);
-                                break;
+                    case Constants.IK_Back.callback:
+                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date), replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+                        break;
 
-                            case Constants.IK_Back.callback:
-                                await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date), replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
-                                break;
+                    case Constants.IK_Add.callback:
+                        user.Mode = Mode.AddingDiscipline;
+                        dbContext.TemporaryAddition.Add(new(user, date));
+                        dbContext.SaveChanges();
+                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date));
+                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: GetStagesAddingDiscipline(user), replyMarkup: CancelKeyboardMarkup);
+                        break;
 
-                            default:
-                                List<string> str = update.CallbackQuery?.Data?.Split(' ').ToList() ?? new();
-                                if(str.Count < 2) return;
+                    default:
+                        List<string> str = data.Split(' ').ToList() ?? new();
+                        if(str.Count < 2) return;
 
-                                var discipline = dbContext.Disciplines.FirstOrDefault(i => i.Id == int.Parse(str[1]));
+                        var discipline = dbContext.Disciplines.FirstOrDefault(i => i.ID == int.Parse(str[1]));
 
-                                if(discipline is not null) {
-                                    switch(str[0] ?? "") {
-                                        case "Day":
-                                            discipline.IsCompleted = !discipline.IsCompleted;
+                        if(discipline is not null) {
+                            switch(str[0] ?? "") {
+                                case "Day":
+                                    discipline.IsCompleted = !discipline.IsCompleted;
+                                    dbContext.SaveChanges();
 
-                                            dbContext.SaveChanges();
-                                            await botClient.EditMessageReplyMarkupAsync(chatId: message.Chat, messageId: message.MessageId, replyMarkup: GetEditAdminInlineKeyboardButton(date));
+                                    break;
 
-                                            break;
+                                case "Always":
+                                    var completedDisciplines = dbContext.CompletedDisciplines.FirstOrDefault(i=> i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup);
 
-                                        case "Always":
-                                            var completedDisciplines = dbContext.CompletedDisciplines.FirstOrDefault(i=> i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup);
+                                    if(completedDisciplines is not null)
+                                        dbContext.CompletedDisciplines.Remove(completedDisciplines);
+                                    else
+                                        dbContext.CompletedDisciplines.Add(discipline);
 
-                                            if(completedDisciplines is not null)
-                                                dbContext.CompletedDisciplines.Remove(completedDisciplines);
-                                            else
-                                                dbContext.CompletedDisciplines.Add(discipline);
+                                    dbContext.SaveChanges();
+                                    Parser.SetDisciplineIsCompleted(dbContext.CompletedDisciplines.ToList(), dbContext.Disciplines);
+                                    dbContext.SaveChanges();
+                                    break;
 
-                                            dbContext.SaveChanges();
-                                            Parser.SetDisciplineIsCompleted(dbContext.CompletedDisciplines.ToList(), dbContext.Disciplines);
-                                            dbContext.SaveChanges();
+                                case "Delete":
+                                    dbContext.Disciplines.Remove(discipline);
+                                    dbContext.SaveChanges();
 
-                                            await botClient.EditMessageReplyMarkupAsync(chatId: message.Chat, messageId: message.MessageId, replyMarkup: GetEditAdminInlineKeyboardButton(date));
-
-                                            break;
-                                    }
-                                }
-                                break;
+                                    break;
+                            }
+                            await botClient.EditMessageReplyMarkupAsync(chatId: message.Chat, messageId: message.MessageId, replyMarkup: GetEditAdminInlineKeyboardButton(date));
                         }
-                    }
+                        break;
                 }
             }
 
+        }
+
+        private string GetStagesAddingDiscipline(TelegramUser user, int? counter = null) {
+            if(counter != null)
+                return Constants.StagesOfAdding[(int)counter];
+
+            return Constants.StagesOfAdding[dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First().Counter];
+        }
+
+        private async Task SetStagesAddingDisciplineAsync(TelegramUser user, Message message, ITelegramBotClient botClient) {
+            var temporaryAddition = dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First();
+            try {
+                if(message.Text == null) throw new Exception();
+
+                switch(temporaryAddition.Counter) {
+                    case 0:
+                        temporaryAddition.Name = message.Text;
+                        break;
+                    case 1:
+                        temporaryAddition.Type = message.Text;
+                        break;
+                    case 2:
+                        temporaryAddition.Lecturer = message.Text;
+                        break;
+                    case 3:
+                        temporaryAddition.LectureHall = message.Text;
+                        break;
+                    case 4:
+                        temporaryAddition.StartTime = TimeOnly.Parse(message.Text);
+                        break;
+                    case 5:
+                        temporaryAddition.EndTime = TimeOnly.Parse(message.Text);
+                        break;
+                }
+            } catch(Exception) {
+                await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Ошибка! " + GetStagesAddingDiscipline(user, temporaryAddition.Counter), replyMarkup: CancelKeyboardMarkup);
+                return;
+            }
+
+            temporaryAddition.Counter++;
+
+            if(temporaryAddition.Counter <= 5) {
+                dbContext.SaveChanges();
+                await botClient.SendTextMessageAsync(chatId: message.Chat, text: GetStagesAddingDiscipline(user, temporaryAddition.Counter), replyMarkup: CancelKeyboardMarkup);
+            } else {
+                dbContext.Disciplines.Add(temporaryAddition);
+                dbContext.TemporaryAddition.Remove(temporaryAddition);
+                user.Mode = Mode.Default;
+
+                dbContext.SaveChanges();
+
+                await botClient.SendTextMessageAsync(chatId: message.Chat, text: GetStagesAddingDiscipline(user, temporaryAddition.Counter), replyMarkup: MainKeyboardMarkup);
+                await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetScheduleByDate(temporaryAddition.Date), replyMarkup: inlineAdminKeyboardMarkup);
+            }
         }
 
         private ReplyKeyboardMarkup GetTermsKeyboardMarkup() {
@@ -277,23 +377,38 @@ namespace ScheduleBot.Bot {
         private InlineKeyboardMarkup GetEditAdminInlineKeyboardButton(DateOnly date) {
             List<InlineKeyboardButton[]> editButtons = new();
 
-            editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "В этот день", callbackData: "!"), InlineKeyboardButton.WithCallbackData(text: "Всегда", callbackData: "!") });
-
             var completedDisciplinesList = dbContext.CompletedDisciplines.ToList();
-            foreach(var item in dbContext.Disciplines.Where(i => i.Date == date).OrderBy(i => i.StartTime).ToList()) {
-                var completedDisciplines = completedDisciplinesList.FirstOrDefault(i => i.Equals(item));
 
-                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(item.IsCompleted ? "✅" : "❌")}", callbackData: $"Day {item.Id}"),
-                                        InlineKeyboardButton.WithCallbackData(text: completedDisciplines is not null ? "✅" : "❌", callbackData: $"Always {item.Id}")});
+            var disciplines = dbContext.Disciplines.Where(i => i.Date == date && !i.IsCastom).OrderBy(i => i.StartTime).ToList();
+            if(disciplines.Any()) {
+                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "В этот день", callbackData: "!"), InlineKeyboardButton.WithCallbackData(text: "Всегда", callbackData: "!") });
+
+                foreach(var item in disciplines) {
+                    var completedDisciplines = completedDisciplinesList.FirstOrDefault(i => i.Equals(item));
+
+                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(item.IsCompleted ? "✅" : "❌")}", callbackData: $"Day {item.ID}"),
+                                        InlineKeyboardButton.WithCallbackData(text: completedDisciplines is not null ? "✅" : "❌", callbackData: $"Always {item.ID}")});
+                }
             }
 
+            var castom = dbContext.Disciplines.Where(i => i.Date == date && i.IsCastom).OrderBy(i => i.StartTime).ToList();
+            if(castom.Any()) {
+                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "Отображение", callbackData: "!"), InlineKeyboardButton.WithCallbackData(text: "Удалить", callbackData: "!") });
+
+                foreach(var item in castom) {
+                    var completedDisciplines = completedDisciplinesList.FirstOrDefault(i => i.Equals(item));
+
+                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(item.IsCompleted ? "✅" : "❌")}", callbackData: $"Day {item.ID}"),
+                                        InlineKeyboardButton.WithCallbackData(text: "🗑", callbackData: $"Delete {item.ID}")});
+                }
+            }
+
+            editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(Constants.IK_Add.text, Constants.IK_Add.callback) });
             editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(Constants.IK_Back.text, Constants.IK_Back.callback) });
 
             return editButtons.ToArray();
         }
 
-        private Task HandleError(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken) {
-            return Task.CompletedTask;
-        }
+        private Task HandleError(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken) => Task.CompletedTask;
     }
 }

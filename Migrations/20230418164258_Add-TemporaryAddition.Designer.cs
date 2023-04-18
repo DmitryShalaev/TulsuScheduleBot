@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScheduleBot.DB;
@@ -11,9 +12,11 @@ using ScheduleBot.DB;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230418164258_Add-TemporaryAddition")]
+    partial class AddTemporaryAddition
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -198,7 +201,7 @@ namespace ScheduleBot.Migrations
                     b.Property<int>("Counter")
                         .HasColumnType("integer");
 
-                    b.Property<DateOnly>("Date")
+                    b.Property<DateOnly?>("Date")
                         .HasColumnType("date");
 
                     b.Property<TimeOnly?>("EndTime")
@@ -215,9 +218,6 @@ namespace ScheduleBot.Migrations
 
                     b.Property<TimeOnly?>("StartTime")
                         .HasColumnType("time without time zone");
-
-                    b.Property<string>("Type")
-                        .HasColumnType("text");
 
                     b.Property<long>("User")
                         .HasColumnType("bigint");

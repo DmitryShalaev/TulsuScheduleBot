@@ -19,7 +19,7 @@
         public const string RK_NextWeek = "Следующая неделя";
 
         public const string RK_Back = "Назад";
-
+        public const string RK_Cancel = "Отмена";
 
         public struct IK_ViewAll {
             public const string text = "Посмотреть все";
@@ -35,5 +35,12 @@
             public const string text = "Назад";
             public const string callback = "Back";
         }
+
+        public struct IK_Add {
+            public const string text = "Добавить";
+            public const string callback = "Add";
+        }
+
+        public static readonly string[] StagesOfAdding = {"Введите название", "Введите тип", "Введите лектора", "Введите аудиторию", "Введите время начала", "Введите время конца", "Дисциплина добавлена", "Ошибка"};
     }
 }
