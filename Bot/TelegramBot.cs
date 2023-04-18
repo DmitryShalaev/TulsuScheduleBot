@@ -377,11 +377,11 @@ namespace ScheduleBot.Bot {
         }
 
         private InlineKeyboardMarkup GetEditAdminInlineKeyboardButton(DateOnly date) {
-            List<InlineKeyboardButton[]> editButtons = new();
+            var editButtons = new List<InlineKeyboardButton[]>();
 
             var completedDisciplinesList = dbContext.CompletedDisciplines.ToList();
 
-            var disciplines = dbContext.Disciplines.Where(i => i.Date == date && !i.IsCastom).OrderBy(i => i.StartTime).ToList();
+            var disciplines = dbContext.Disciplines.Where(i => i.Date == date && !i.IsCastom).OrderBy(i => i.StartTime);
             if(disciplines.Any()) {
                 editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "В этот день", callbackData: "!"), InlineKeyboardButton.WithCallbackData(text: "Всегда", callbackData: "!") });
 
@@ -389,11 +389,11 @@ namespace ScheduleBot.Bot {
                     var completedDisciplines = completedDisciplinesList.FirstOrDefault(i => i.Equals(item));
 
                     editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(item.IsCompleted ? "❌" : "✅")}", callbackData: $"Day {item.ID}"),
-                                        InlineKeyboardButton.WithCallbackData(text: completedDisciplines is not null ? "❌" : "✅", callbackData: $"Always {item.ID}")});
+                                            InlineKeyboardButton.WithCallbackData(text: completedDisciplines is not null ? "❌" : "✅", callbackData: $"Always {item.ID}")});
                 }
             }
 
-            var castom = dbContext.Disciplines.Where(i => i.Date == date && i.IsCastom).OrderBy(i => i.StartTime).ToList();
+            var castom = dbContext.Disciplines.Where(i => i.Date == date && i.IsCastom).OrderBy(i => i.StartTime);
             if(castom.Any()) {
                 editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "Отображение", callbackData: "!"), InlineKeyboardButton.WithCallbackData(text: "Удалить", callbackData: "!") });
 
@@ -401,15 +401,16 @@ namespace ScheduleBot.Bot {
                     var completedDisciplines = completedDisciplinesList.FirstOrDefault(i => i.Equals(item));
 
                     editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(item.IsCompleted ? "❌" : "✅")}", callbackData: $"Day {item.ID}"),
-                                        InlineKeyboardButton.WithCallbackData(text: "🗑", callbackData: $"Delete {item.ID}")});
+                                            InlineKeyboardButton.WithCallbackData(text: "🗑", callbackData: $"Delete {item.ID}")});
                 }
             }
 
-            editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(Constants.IK_Add.text, Constants.IK_Add.callback) });
-            editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(Constants.IK_Back.text, Constants.IK_Back.callback) });
+            editButtons.AddRange(new[] { new[] { InlineKeyboardButton.WithCallbackData(Constants.IK_Add.text, Constants.IK_Add.callback) },
+                                         new[] { InlineKeyboardButton.WithCallbackData(Constants.IK_Back.text, Constants.IK_Back.callback) }});
 
-            return editButtons.ToArray();
+            return new InlineKeyboardMarkup(editButtons);
         }
+
 
         private Task HandleError(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken) => Task.CompletedTask;
     }

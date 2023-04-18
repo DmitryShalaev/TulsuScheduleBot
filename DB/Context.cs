@@ -1,11 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 using ScheduleBot.DB.Entity;
 
 namespace ScheduleBot.DB {
     public class ScheduleDbContext : DbContext {
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql("Host=localhost;Database=ScheduleDB;Username=postgres;Password=1901");
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
+            optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("TelegramBotConnectionString"));
+#if DEBUG
+            optionsBuilder.LogTo(Console.WriteLine, new[] { RelationalEventId.CommandExecuted });
+#endif
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             foreach(Entity.Type type in Enum.GetValues(typeof(Entity.Type)).Cast<Entity.Type>())
