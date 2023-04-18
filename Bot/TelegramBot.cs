@@ -14,6 +14,7 @@ namespace ScheduleBot.Bot {
         private readonly Scheduler.Scheduler scheduler;
         private readonly ScheduleDbContext dbContext;
 
+        #region KeyboardMarkup
         private readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { Constants.RK_Today, Constants.RK_Tomorrow },
                             new KeyboardButton[] { Constants.RK_ByDays, Constants.RK_ForAWeek },
@@ -52,6 +53,7 @@ namespace ScheduleBot.Bot {
         private readonly InlineKeyboardMarkup inlineBackKeyboardMarkup = new(new[]{
             new [] { InlineKeyboardButton.WithCallbackData(Constants.IK_Back.text, Constants.IK_Back.callback) }
         }){};
+        #endregion
 
         public TelegramBot(Scheduler.Scheduler scheduler, ScheduleDbContext dbContext) {
             this.scheduler = scheduler;
@@ -386,8 +388,8 @@ namespace ScheduleBot.Bot {
                 foreach(var item in disciplines) {
                     var completedDisciplines = completedDisciplinesList.FirstOrDefault(i => i.Equals(item));
 
-                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(item.IsCompleted ? "✅" : "❌")}", callbackData: $"Day {item.ID}"),
-                                        InlineKeyboardButton.WithCallbackData(text: completedDisciplines is not null ? "✅" : "❌", callbackData: $"Always {item.ID}")});
+                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(item.IsCompleted ? "❌" : "✅")}", callbackData: $"Day {item.ID}"),
+                                        InlineKeyboardButton.WithCallbackData(text: completedDisciplines is not null ? "❌" : "✅", callbackData: $"Always {item.ID}")});
                 }
             }
 
@@ -398,7 +400,7 @@ namespace ScheduleBot.Bot {
                 foreach(var item in castom) {
                     var completedDisciplines = completedDisciplinesList.FirstOrDefault(i => i.Equals(item));
 
-                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(item.IsCompleted ? "✅" : "❌")}", callbackData: $"Day {item.ID}"),
+                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(item.IsCompleted ? "❌" : "✅")}", callbackData: $"Day {item.ID}"),
                                         InlineKeyboardButton.WithCallbackData(text: "🗑", callbackData: $"Delete {item.ID}")});
                 }
             }

@@ -38,7 +38,6 @@ namespace ScheduleBot.Scheduler {
             return str;
         }
 
-
         public string GetProgressByTerm(int term) {
             var list = dbContext.Progresses.Where(i => i.Term == term && i.Mark != null);
 
