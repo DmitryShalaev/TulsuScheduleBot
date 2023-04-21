@@ -29,7 +29,7 @@ jobs:
       run: dotnet publish --os linux -c Release
       
     - name: Stop schedule Service
-      uses: garygrossgarten/github-action-ssh@v0.6.3
+      uses: garygrossgarten/github-action-ssh@release
       with:
         command: service schedule stop
         host: ${{ secrets.REMOTE_HOST }}
@@ -51,7 +51,7 @@ jobs:
         ASPNETCORE_ENVIRONMENT: Production
 
     - name: Start schedule Service
-      uses: garygrossgarten/github-action-ssh@v0.6.3
+      uses: garygrossgarten/github-action-ssh@release
       with:
         command: service schedule start
         host: ${{ secrets.REMOTE_HOST }}
