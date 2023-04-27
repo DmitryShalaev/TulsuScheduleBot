@@ -195,7 +195,10 @@ namespace ScheduleBot.Bot {
                         temporaryAddition.StartTime = TimeOnly.Parse(message.Text);
                         break;
                     case 5:
-                        temporaryAddition.EndTime = TimeOnly.Parse(message.Text);
+                        if(message.Text == ".")
+                            temporaryAddition.EndTime = temporaryAddition.StartTime.AddMinutes(95);
+                        else
+                            temporaryAddition.EndTime = TimeOnly.Parse(message.Text);
                         break;
                 }
             } catch(Exception) {
