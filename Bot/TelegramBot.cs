@@ -65,16 +65,26 @@ namespace ScheduleBot.Bot {
                         break;
 
                     case Mode.AddingDiscipline:
-                        switch(message.Text) {
-                            case Constants.RK_Cancel:
-                                user.Mode = Mode.Default;
-                                dbContext.TemporaryAddition.Remove(dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First());
-                                dbContext.SaveChanges();
-                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Основное меню", replyMarkup: MainKeyboardMarkup);
+                        switch(update.Type) {
+                            case Telegram.Bot.Types.Enums.UpdateType.Message:
+                            case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
+
+                                switch(message.Text) {
+                                    case Constants.RK_Cancel:
+                                        user.Mode = Mode.Default;
+                                        dbContext.TemporaryAddition.Remove(dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First());
+                                        dbContext.SaveChanges();
+                                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Основное меню", replyMarkup: MainKeyboardMarkup);
+                                        break;
+
+                                    default:
+                                        await SetStagesAddingDisciplineAsync(user, message, botClient);
+                                        break;
+                                }
+
                                 break;
 
-                            default:
-                                await SetStagesAddingDisciplineAsync(user, message, botClient);
+                            case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
                                 break;
                         }
                         break;
