@@ -35,7 +35,7 @@ namespace ScheduleBot.Bot {
         { ResizeKeyboard = true };
         #endregion
 
-        private async Task MessageModeAsync(Message message, ITelegramBotClient botClient, TelegramUser user, CancellationToken cancellationToken) {
+        private async Task DefaultMessageModeAsync(Message message, ITelegramBotClient botClient, TelegramUser user, CancellationToken cancellationToken) {
             switch(message.Text) {
                 case "/start":
                     await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"👋 {telegramBot.GetMeAsync(cancellationToken).Result.Username} 👋", replyMarkup: MainKeyboardMarkup);
@@ -173,54 +173,5 @@ namespace ScheduleBot.Bot {
             return Constants.StagesOfAdding[dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First().Counter];
         }
 
-        private async Task SetStagesAddingDisciplineAsync(TelegramUser user, Message message, ITelegramBotClient botClient) {
-            var temporaryAddition = dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First();
-            try {
-                if(message.Text == null) throw new Exception();
-
-                switch(temporaryAddition.Counter) {
-                    case 0:
-                        temporaryAddition.Name = message.Text;
-                        break;
-                    case 1:
-                        temporaryAddition.Type = message.Text;
-                        break;
-                    case 2:
-                        temporaryAddition.Lecturer = message.Text;
-                        break;
-                    case 3:
-                        temporaryAddition.LectureHall = message.Text;
-                        break;
-                    case 4:
-                        temporaryAddition.StartTime = TimeOnly.Parse(message.Text);
-                        break;
-                    case 5:
-                        if(message.Text == ".")
-                            temporaryAddition.EndTime = temporaryAddition.StartTime.AddMinutes(95);
-                        else
-                            temporaryAddition.EndTime = TimeOnly.Parse(message.Text);
-                        break;
-                }
-            } catch(Exception) {
-                await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Ошибка! " + GetStagesAddingDiscipline(user, temporaryAddition.Counter), replyMarkup: CancelKeyboardMarkup);
-                return;
-            }
-
-            temporaryAddition.Counter++;
-
-            if(temporaryAddition.Counter <= 5) {
-                dbContext.SaveChanges();
-                await botClient.SendTextMessageAsync(chatId: message.Chat, text: GetStagesAddingDiscipline(user, temporaryAddition.Counter), replyMarkup: CancelKeyboardMarkup);
-            } else {
-                dbContext.Disciplines.Add(temporaryAddition);
-                dbContext.TemporaryAddition.Remove(temporaryAddition);
-                user.Mode = Mode.Default;
-
-                dbContext.SaveChanges();
-
-                await botClient.SendTextMessageAsync(chatId: message.Chat, text: GetStagesAddingDiscipline(user, temporaryAddition.Counter), replyMarkup: MainKeyboardMarkup);
-                await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetScheduleByDate(temporaryAddition.Date), replyMarkup: inlineAdminKeyboardMarkup);
-            }
-        }
     }
 }

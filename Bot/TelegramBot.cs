@@ -53,13 +53,13 @@ namespace ScheduleBot.Bot {
                         switch(update.Type) {
                             case Telegram.Bot.Types.Enums.UpdateType.Message:
                             case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
-                                await MessageModeAsync(message, botClient, user, cancellationToken);
+                                await DefaultMessageModeAsync(message, botClient, user, cancellationToken);
                                 break;
 
                             case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
                                 if(update.CallbackQuery?.Data is null) return;
 
-                                await CallbackModeAsync(message, botClient, user, cancellationToken, update.CallbackQuery.Data);
+                                await DefaultCallbackModeAsync(message, botClient, user, cancellationToken, update.CallbackQuery.Data);
                                 break;
                         }
                         break;
@@ -69,19 +69,7 @@ namespace ScheduleBot.Bot {
                             case Telegram.Bot.Types.Enums.UpdateType.Message:
                             case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
 
-                                switch(message.Text) {
-                                    case Constants.RK_Cancel:
-                                        user.Mode = Mode.Default;
-                                        dbContext.TemporaryAddition.Remove(dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First());
-                                        dbContext.SaveChanges();
-                                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Основное меню", replyMarkup: MainKeyboardMarkup);
-                                        break;
-
-                                    default:
-                                        await SetStagesAddingDisciplineAsync(user, message, botClient);
-                                        break;
-                                }
-
+                                await AddingDisciplineMessageModeAsync(botClient, message, user);
                                 break;
 
                             case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
