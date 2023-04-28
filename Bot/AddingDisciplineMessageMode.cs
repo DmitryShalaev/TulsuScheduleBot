@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-using ScheduleBot.DB.Entity;
+﻿using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -24,8 +22,7 @@ namespace ScheduleBot.Bot {
             }
         }
 
-        private async Task SetStagesAddingDisciplineAsync(TelegramUser user, Message message, ITelegramBotClient botClient) {
-            var temporaryAddition = dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First();
+        private async Task UpdateAddingDisciplineAsync(TelegramUser user, Message message, ITelegramBotClient botClient, TemporaryAddition temporaryAddition) {
             try {
                 if(message.Text == null) throw new Exception();
 
@@ -46,10 +43,7 @@ namespace ScheduleBot.Bot {
                         temporaryAddition.StartTime = TimeOnly.Parse(message.Text);
                         break;
                     case 5:
-                        if(message.Text == ".")
-                            temporaryAddition.EndTime = temporaryAddition.StartTime.AddMinutes(95);
-                        else
-                            temporaryAddition.EndTime = TimeOnly.Parse(message.Text);
+                        temporaryAddition.EndTime = TimeOnly.Parse(message.Text);
                         break;
                 }
             } catch(Exception) {
@@ -57,21 +51,51 @@ namespace ScheduleBot.Bot {
                 return;
             }
 
-            temporaryAddition.Counter++;
+            dbContext.SaveChanges();
+        }
 
-            if(temporaryAddition.Counter <= 5) {
-                dbContext.SaveChanges();
-                await botClient.SendTextMessageAsync(chatId: message.Chat, text: GetStagesAddingDiscipline(user, temporaryAddition.Counter), replyMarkup: CancelKeyboardMarkup);
-            } else {
-                dbContext.Disciplines.Add(temporaryAddition);
-                dbContext.TemporaryAddition.Remove(temporaryAddition);
-                user.Mode = Mode.Default;
 
-                dbContext.SaveChanges();
+        private async Task SetStagesAddingDisciplineAsync(TelegramUser user, Message message, ITelegramBotClient botClient) {
+            var temporaryAddition = dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First();
 
-                await botClient.SendTextMessageAsync(chatId: message.Chat, text: GetStagesAddingDiscipline(user, temporaryAddition.Counter), replyMarkup: MainKeyboardMarkup);
-                await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetScheduleByDate(temporaryAddition.Date), replyMarkup: inlineAdminKeyboardMarkup);
+            await UpdateAddingDisciplineAsync(user, message, botClient, temporaryAddition);
+
+            switch(++temporaryAddition.Counter) {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: GetStagesAddingDiscipline(user, temporaryAddition.Counter), replyMarkup: CancelKeyboardMarkup);
+                    break;
+
+                case 5:
+                    var endTime = temporaryAddition.StartTime.AddMinutes(95);
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: GetStagesAddingDiscipline(user, temporaryAddition.Counter),
+                            replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: endTime.ToString(), callbackData: $"{Constants.IK_SetEndTime.callback} {endTime}")) { });
+                    break;
+
+                case 6:
+                    await SaveAddingDisciplineAsync(user, message, botClient, temporaryAddition);
+                    break;
             }
+        }
+
+        private async Task SaveAddingDisciplineAsync(TelegramUser user, Message message, ITelegramBotClient botClient, TemporaryAddition temporaryAddition) {
+            dbContext.Disciplines.Add(temporaryAddition);
+            dbContext.TemporaryAddition.Remove(temporaryAddition);
+            user.Mode = Mode.Default;
+            dbContext.SaveChanges();
+
+            await botClient.SendTextMessageAsync(chatId: message.Chat, text: GetStagesAddingDiscipline(user, temporaryAddition.Counter), replyMarkup: MainKeyboardMarkup);
+            await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetScheduleByDate(temporaryAddition.Date), replyMarkup: inlineAdminKeyboardMarkup);
+        }
+
+        private string GetStagesAddingDiscipline(TelegramUser user, int? counter = null) {
+            if(counter != null)
+                return Constants.StagesOfAdding[(int)counter];
+
+            return Constants.StagesOfAdding[dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First().Counter];
         }
 
     }

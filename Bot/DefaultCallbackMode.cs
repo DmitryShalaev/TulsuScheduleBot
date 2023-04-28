@@ -8,17 +8,13 @@ namespace ScheduleBot.Bot {
     public partial class TelegramBot {
         #region InlineKeyboardMarkup
         private readonly InlineKeyboardMarkup inlineAdminKeyboardMarkup = new(new[]{
-            new [] { InlineKeyboardButton.WithCallbackData(Constants.IK_ViewAll.text, Constants.IK_ViewAll.callback) },
-            new [] { InlineKeyboardButton.WithCallbackData(Constants.IK_Edit.text, Constants.IK_Edit.callback) }
+             InlineKeyboardButton.WithCallbackData(Constants.IK_ViewAll.text, Constants.IK_ViewAll.callback),
+             InlineKeyboardButton.WithCallbackData(Constants.IK_Edit.text, Constants.IK_Edit.callback)
         }){};
 
-        private readonly InlineKeyboardMarkup inlineKeyboardMarkup = new(new[]{
-            new [] { InlineKeyboardButton.WithCallbackData(text: Constants.IK_ViewAll.text, Constants.IK_ViewAll.callback) }
-        }){};
+        private readonly InlineKeyboardMarkup inlineKeyboardMarkup = new(InlineKeyboardButton.WithCallbackData(text: Constants.IK_ViewAll.text, Constants.IK_ViewAll.callback)){};
 
-        private readonly InlineKeyboardMarkup inlineBackKeyboardMarkup = new(new[]{
-            new [] { InlineKeyboardButton.WithCallbackData(Constants.IK_Back.text, Constants.IK_Back.callback) }
-        }){};
+        private readonly InlineKeyboardMarkup inlineBackKeyboardMarkup = new(InlineKeyboardButton.WithCallbackData(Constants.IK_Back.text, Constants.IK_Back.callback)){};
         #endregion
 
         private async Task DefaultCallbackModeAsync(Message message, ITelegramBotClient botClient, TelegramUser user, CancellationToken cancellationToken, string data) {

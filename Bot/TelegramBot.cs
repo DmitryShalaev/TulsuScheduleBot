@@ -73,6 +73,9 @@ namespace ScheduleBot.Bot {
                                 break;
 
                             case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
+                                if(update.CallbackQuery?.Data is null) return;
+
+                                await AddingDisciplineCallbackModeAsync(message, botClient, user, cancellationToken, update.CallbackQuery.Data);
                                 break;
                         }
                         break;

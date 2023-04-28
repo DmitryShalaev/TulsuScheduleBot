@@ -41,6 +41,11 @@
             public const string callback = "Add";
         }
 
-        public static readonly string[] StagesOfAdding = {"Введите название", "Введите тип", "Введите лектора", "Введите аудиторию", "Введите время начала", "Введите время конца (или '.' для добавления 95 минут)", "Дисциплина добавлена", "Ошибка"};
+        public struct IK_SetEndTime {
+            public const string text = "";
+            public const string callback = "SetEndTime";
+        }
+
+        public static readonly string[] StagesOfAdding = {"Введите название", "Введите тип", "Введите лектора", "Введите аудиторию", "Введите время начала", "Введите время конца", "Дисциплина добавлена", "Ошибка"};
     }
 }

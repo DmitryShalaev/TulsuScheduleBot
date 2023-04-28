@@ -23,9 +23,8 @@ namespace ScheduleBot.Bot {
                             new KeyboardButton[] { Constants.RK_Back }
                         })
         { ResizeKeyboard = true };
-        private readonly ReplyKeyboardMarkup CancelKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { Constants.RK_Cancel }
-                        })
+
+        private readonly ReplyKeyboardMarkup CancelKeyboardMarkup = new(Constants.RK_Cancel)
         { ResizeKeyboard = true };
 
         private readonly ReplyKeyboardMarkup WeekKeyboardMarkup = new(new[] {
@@ -164,13 +163,6 @@ namespace ScheduleBot.Bot {
 
                     break;
             }
-        }
-
-        private string GetStagesAddingDiscipline(TelegramUser user, int? counter = null) {
-            if(counter != null)
-                return Constants.StagesOfAdding[(int)counter];
-
-            return Constants.StagesOfAdding[dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First().Counter];
         }
 
     }
