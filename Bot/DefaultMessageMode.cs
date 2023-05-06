@@ -85,20 +85,26 @@ namespace ScheduleBot.Bot {
                 default:
                     if(message.Text?.Contains(Constants.RK_Semester) ?? false) {
                         await AcademicPerformancePerSemester(botClient, message.Chat, message.Text);
-                        break;
+                        return;
                     }
 
-                    if(message.Text != null) {
-                        if(DateRegex().IsMatch(message.Text)) {
-                            try {
-                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Parse(message.Text))), replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
-                                break;
-                            } catch(Exception) {
-                            }
-                        }
-                    }
-
+                    if(message.Text != null) 
+                        await GetScheduleByDate(botClient, message.Chat, message.Text, user);
+                    
                     break;
+            }
+        }
+
+        private async Task GetScheduleByDate(ITelegramBotClient botClient, ChatId chatId, string text, TelegramUser user) {
+            if(DateRegex().IsMatch(text)) {
+                try {
+                    var date = DateOnly.FromDateTime(DateTime.Parse(text));
+
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {Parser.scheduleLastUpdate.ToString("dd.MM.yyyy HH:mm")}", replyMarkup: MainKeyboardMarkup);
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(date), replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+                } catch(Exception) {
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: $"Сообщение распознано как дата, но не соответствует формату.", replyMarkup: MainKeyboardMarkup);
+                }
             }
         }
 
