@@ -21,6 +21,8 @@
         public const string RK_Back = "Назад";
         public const string RK_Cancel = "Отмена";
 
+        public const string RK_Semester = "семестр";
+
         public struct IK_ViewAll {
             public const string text = "Посмотреть все";
             public const string callback = "All";

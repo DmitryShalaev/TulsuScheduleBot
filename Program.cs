@@ -13,7 +13,6 @@ namespace ScheduleBot {
     public class Program {
         static void Main(string[] args) {
             if(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TelegramBotToken")) || string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TelegramBotConnectionString"))
-
 #if !DEBUG
                 || string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TelegramBot_FromEmail")) ||
                 string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TelegramBot_ToEmail")) ||
@@ -49,7 +48,6 @@ namespace ScheduleBot {
                     smtp.Credentials = new NetworkCredential(Environment.GetEnvironmentVariable("TelegramBot_FromEmail"), Environment.GetEnvironmentVariable("TelegramBot_PassEmail"));
                     smtp.EnableSsl = true;
                     smtp.SendMailAsync(message).Wait();
-
 #endif
                 }
 

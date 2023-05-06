@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.RegularExpressions;
 
 using ScheduleBot.DB.Entity;
 
@@ -8,6 +9,9 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleBot.Bot {
     public partial class TelegramBot {
+        [GeneratedRegex("^\\d{1,2}[ ,./-](\\d{1,2}|\\w{3,8})([ ,./-](\\d{2}|\\d{4}))?$")]
+        private static partial Regex DateRegex();
+
         #region ReplyKeyboardMarkup
         private readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { Constants.RK_Today, Constants.RK_Tomorrow },
@@ -79,16 +83,31 @@ namespace ScheduleBot.Bot {
                     break;
 
                 default:
-                    var split = message.Text?.Split();
-                    if(split == null || split.Count() < 2) return;
-
-                    switch(split[1]) {
-                        case "семестр":
-                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetProgressByTerm(int.Parse(split[0])), replyMarkup: GetTermsKeyboardMarkup());
-                            break;
+                    if(message.Text?.Contains(Constants.RK_Semester) ?? false) {
+                        await AcademicPerformancePerSemester(botClient, message.Chat, message.Text);
+                        break;
                     }
+
+                    if(message.Text != null) {
+                        if(DateRegex().IsMatch(message.Text)) {
+                            try {
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Parse(message.Text))), replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+                                break;
+                            } catch(Exception) {
+                            }
+                        }
+                    }
+
                     break;
             }
+        }
+
+        private async Task AcademicPerformancePerSemester(ITelegramBotClient botClient, ChatId chatId, string text) {
+            var split = text.Split();
+            if(split == null || split.Count() < 2) return;
+
+            await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetProgressByTerm(int.Parse(split[0])), replyMarkup: GetTermsKeyboardMarkup());
+            return;
         }
 
         private async Task Weeks(ITelegramBotClient botClient, ChatId chatId, string text, TelegramUser user) {
@@ -111,7 +130,7 @@ namespace ScheduleBot.Bot {
 
             var terms = dbContext.Progresses.Where(i => i.Mark != null).Select(i => i.Term).Distinct().OrderBy(i => i).ToArray();
             for(int i = 0; i < terms.Length; i++)
-                TermsKeyboardMarkup.Add(new KeyboardButton[] { $"{terms[i]} семестр", i + 1 < terms.Length ? $"{terms[++i]} семестр" : "" });
+                TermsKeyboardMarkup.Add(new KeyboardButton[] { $"{terms[i]} {Constants.RK_Semester}", i + 1 < terms.Length ? $"{terms[++i]} {Constants.RK_Semester}" : "" });
 
             TermsKeyboardMarkup.Add(new KeyboardButton[] { Constants.RK_Back });
 
