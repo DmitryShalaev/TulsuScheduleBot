@@ -22,7 +22,9 @@ namespace ScheduleBot.Bot {
             }
         }
 
-        private async Task UpdateAddingDisciplineAsync(TelegramUser user, Message message, ITelegramBotClient botClient, TemporaryAddition temporaryAddition) {
+        private async Task SetStagesAddingDisciplineAsync(TelegramUser user, Message message, ITelegramBotClient botClient) {
+            var temporaryAddition = dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First();
+
             try {
                 if(message.Text == null) throw new Exception();
 
@@ -52,13 +54,6 @@ namespace ScheduleBot.Bot {
             }
 
             dbContext.SaveChanges();
-        }
-
-
-        private async Task SetStagesAddingDisciplineAsync(TelegramUser user, Message message, ITelegramBotClient botClient) {
-            var temporaryAddition = dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First();
-
-            await UpdateAddingDisciplineAsync(user, message, botClient, temporaryAddition);
 
             switch(++temporaryAddition.Counter) {
                 case 0:
