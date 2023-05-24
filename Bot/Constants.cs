@@ -1,4 +1,8 @@
-﻿namespace ScheduleBot.Bot {
+﻿using Telegram.Bot;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
+
+namespace ScheduleBot.Bot {
     static class Constants {
         public const string RK_Today = "Сегодня";
         public const string RK_Tomorrow = "Завтра";
@@ -7,6 +11,7 @@
         public const string RK_ForAWeek = "На неделю";
 
         public const string RK_AcademicPerformance = "Успеваемость";
+        public const string RK_Profile = "Профиль";
 
         public const string RK_Monday = "Понедельник";
         public const string RK_Tuesday = "Вторник";
@@ -49,5 +54,12 @@
         }
 
         public static readonly string[] StagesOfAdding = {"Введите название", "Введите тип", "Введите лектора", "Введите аудиторию", "Введите время начала", "Введите время конца", "Дисциплина добавлена", "Ошибка"};
+    }
+
+    public partial class TelegramBot {
+        private async Task GroupError(ITelegramBotClient botClient, ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Для того, чтобы узнать расписание, необходимо указать номер группы в настройках профиля.", replyMarkup: MainKeyboardMarkup);
+        private async Task StudentIdError(Message message, ITelegramBotClient botClient) => await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Для того, чтобы узнать успеваемость, необходимо указать номер зачетной книжки в настройках профиля.", replyMarkup: MainKeyboardMarkup);
+        private async Task ScheduleRelevance(ChatId chatId, ITelegramBotClient botClient, IReplyMarkup? replyMarkup) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {Parser.scheduleLastUpdate.ToString("dd.MM HH:mm")}", replyMarkup: replyMarkup);
+        private async Task ProgressRelevance(ChatId chatId, ITelegramBotClient botClient, IReplyMarkup? replyMarkup) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Успеваемость актуально на {Parser.scheduleLastUpdate.ToString("dd.MM HH:mm")}", replyMarkup: replyMarkup);
     }
 }

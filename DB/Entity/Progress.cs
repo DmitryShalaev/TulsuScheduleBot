@@ -11,20 +11,21 @@ namespace ScheduleBot.DB.Entity {
         public int? Mark { get; set; }
         public int Term { get; set; }
 
+        public string StudentID { get; set; }
+
         public Progress() { }
 
-        public Progress(JToken json) {
+        public Progress(JToken json, string studentID) {
             Discipline = json.Value<string>("DISCIPLINE") ?? throw new NullReferenceException("DISCIPLINE");
-
             Mark = json.Value<int?>("MARK");
-
             Term = json.Value<int>("TERM");
-
             MarkTitle = json.Value<string>("MARK_TITLE");
+
+            StudentID = studentID;
         }
 
         public override bool Equals(object? obj) => Equals(obj as Progress);
-        public bool Equals(Progress? progress) => progress is not null && Discipline == progress.Discipline && MarkTitle == progress.MarkTitle && Mark == progress.Mark && Term == progress.Term;
+        public bool Equals(Progress? progress) => progress is not null && Discipline == progress.Discipline && MarkTitle == progress.MarkTitle && Mark == progress.Mark && Term == progress.Term && StudentID == progress.StudentID;
 
         public static bool operator ==(Progress? left, Progress? right) => left?.Equals(right) ?? false;
         public static bool operator !=(Progress? left, Progress? right) => !(left == right);
@@ -36,6 +37,7 @@ namespace ScheduleBot.DB.Entity {
             hash += MarkTitle?.GetHashCode() ?? 0;
             hash += Mark?.GetHashCode() ?? 0;
             hash += Term.GetHashCode();
+            hash += StudentID.GetHashCode();
 
             return hash.GetHashCode();
         }

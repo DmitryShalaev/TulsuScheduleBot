@@ -18,97 +18,118 @@ namespace ScheduleBot.Bot {
         #endregion
 
         private async Task DefaultCallbackModeAsync(Message message, ITelegramBotClient botClient, TelegramUser user, CancellationToken cancellationToken, string data) {
+            bool IsAdmin = user.ScheduleProfile.OwnerID == user.ChatID;
+            string? group = user.ScheduleProfile.Group;
+
+            if(string.IsNullOrWhiteSpace(group)) return;
+
             if(DateOnly.TryParse(message.Text?.Split('-')[0].Trim()[2..] ?? "", out DateOnly date)) {
 
                 switch(data) {
                     case Constants.IK_Edit.callback:
-                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, true), replyMarkup: GetEditAdminInlineKeyboardButton(date));
+                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, group, user.ScheduleProfileGuid, true), replyMarkup: GetEditAdminInlineKeyboardButton(date, group, user.ScheduleProfileGuid));
                         break;
 
                     case Constants.IK_ViewAll.callback:
-                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, true), replyMarkup: inlineBackKeyboardMarkup);
+                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, group, user.ScheduleProfileGuid, true), replyMarkup: inlineBackKeyboardMarkup);
                         break;
 
                     case Constants.IK_Back.callback:
-                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date), replyMarkup: user.IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, group, user.ScheduleProfileGuid), replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
                         break;
 
                     case Constants.IK_Add.callback:
-                        user.Mode = Mode.AddingDiscipline;
-                        dbContext.TemporaryAddition.Add(new(user, date));
-                        dbContext.SaveChanges();
-                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date));
-                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: GetStagesAddingDiscipline(user), replyMarkup: CancelKeyboardMarkup);
+                        try {
+                            user.Mode = Mode.AddingDiscipline;
+                            dbContext.TemporaryAddition.Add(new(user, date));
+                            dbContext.SaveChanges();
+                            await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, group, user.ScheduleProfileGuid));
+                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: GetStagesAddingDiscipline(user), replyMarkup: CancelKeyboardMarkup);
+                        } catch(Exception e) {
+
+                            await Console.Out.WriteLineAsync(e.Message);
+                        }
+
                         break;
 
                     default:
                         List<string> str = data.Split(' ').ToList() ?? new();
                         if(str.Count < 2) return;
 
-                        var discipline = dbContext.Disciplines.FirstOrDefault(i => i.ID == int.Parse(str[1]));
+                        if(str[0].Contains("Discipline")) {
+                            var discipline = dbContext.Disciplines.FirstOrDefault(i => i.ID == uint.Parse(str[1]));
 
-                        if(discipline is not null) {
-                            switch(str[0] ?? "") {
-                                case "Day":
-                                    discipline.IsCompleted = !discipline.IsCompleted;
-                                    dbContext.SaveChanges();
+                            if(discipline is not null) {
+                                switch(str[0] ?? "") {
+                                    case "DisciplineDay":
+                                        var dayCompletedDisciplines = dbContext.CompletedDisciplines.FirstOrDefault(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid && i.Date == discipline.Date && i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup);
 
-                                    break;
+                                        if(dayCompletedDisciplines is not null)
+                                            dbContext.CompletedDisciplines.Remove(dayCompletedDisciplines);
+                                        else {
+                                            dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid && i.Date == null && i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup));
+                                            dbContext.CompletedDisciplines.Add(new(discipline, user.ScheduleProfileGuid));
+                                        }
 
-                                case "Always":
-                                    var completedDisciplines = dbContext.CompletedDisciplines.FirstOrDefault(i=> i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup);
+                                        dbContext.SaveChanges();
 
-                                    if(completedDisciplines is not null)
-                                        dbContext.CompletedDisciplines.Remove(completedDisciplines);
-                                    else
-                                        dbContext.CompletedDisciplines.Add(discipline);
+                                        break;
 
-                                    dbContext.SaveChanges();
-                                    Parser.SetDisciplineIsCompleted(dbContext.CompletedDisciplines.ToList(), dbContext.Disciplines);
-                                    dbContext.SaveChanges();
-                                    break;
+                                    case "DisciplineAlways":
+                                        var completedDisciplines = dbContext.CompletedDisciplines.FirstOrDefault(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid && i.Date == null && i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup);
 
-                                case "Delete":
-                                    dbContext.Disciplines.Remove(discipline);
-                                    dbContext.SaveChanges();
+                                        if(completedDisciplines is not null)
+                                            dbContext.CompletedDisciplines.Remove(completedDisciplines);
+                                        else {
+                                            dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid && i.Date != null && i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup));
+                                            dbContext.CompletedDisciplines.Add(new(discipline, user.ScheduleProfileGuid) { Date = null });
+                                        }
 
-                                    break;
+                                        dbContext.SaveChanges();
+                                        break;
+
+                                }
                             }
-                            await botClient.EditMessageReplyMarkupAsync(chatId: message.Chat, messageId: message.MessageId, replyMarkup: GetEditAdminInlineKeyboardButton(date));
+                        } else if(str[0] == "Delete") {
+                            var customDiscipline = dbContext.CustomDiscipline.FirstOrDefault(i => i.ID == uint.Parse(str[1]));
+
+                            if(customDiscipline is not null) {
+                                dbContext.CustomDiscipline.Remove(customDiscipline);
+                                dbContext.SaveChanges();
+                            }
                         }
+
+                        await botClient.EditMessageReplyMarkupAsync(chatId: message.Chat, messageId: message.MessageId, replyMarkup: GetEditAdminInlineKeyboardButton(date, group, user.ScheduleProfileGuid));
+
                         break;
                 }
             }
 
         }
 
-        private InlineKeyboardMarkup GetEditAdminInlineKeyboardButton(DateOnly date) {
+        private InlineKeyboardMarkup GetEditAdminInlineKeyboardButton(DateOnly date, string group, Guid scheduleProfileGuid) {
             var editButtons = new List<InlineKeyboardButton[]>();
 
-            var completedDisciplinesList = dbContext.CompletedDisciplines.ToList();
+            var completedDiscipline = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == scheduleProfileGuid).ToList();
 
-            var disciplines = dbContext.Disciplines.Where(i => i.Date == date && !i.IsCastom).OrderBy(i => i.StartTime);
+            var disciplines = dbContext.Disciplines.Where(i => i.Group == group && i.Date == date).OrderBy(i => i.StartTime);
             if(disciplines.Any()) {
                 editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "В этот день", callbackData: "!"), InlineKeyboardButton.WithCallbackData(text: "Всегда", callbackData: "!") });
 
                 foreach(var item in disciplines) {
-                    var completedDisciplines = completedDisciplinesList.FirstOrDefault(i => i.Equals(item));
+                    var always = completedDiscipline.FirstOrDefault(i => i.Equals(new(item, scheduleProfileGuid) { Date = null })) is not null;
 
-                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(item.IsCompleted ? "❌" : "✅")}", callbackData: $"Day {item.ID}"),
-                                            InlineKeyboardButton.WithCallbackData(text: completedDisciplines is not null ? "❌" : "✅", callbackData: $"Always {item.ID}")});
+                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(always ? "🚫": (completedDiscipline.Contains(item) ? "❌" : "✅"))}", callbackData: $"{(always ? "!" : $"DisciplineDay {item.ID}")}"),
+                                            InlineKeyboardButton.WithCallbackData(text: always ? "❌" : "✅", callbackData: $"DisciplineAlways {item.ID}")});
                 }
             }
 
-            var castom = dbContext.Disciplines.Where(i => i.Date == date && i.IsCastom).OrderBy(i => i.StartTime);
+            var castom = dbContext.CustomDiscipline.Where(i => i.ScheduleProfileGuid == scheduleProfileGuid && i.Date == date).OrderBy(i => i.StartTime);
             if(castom.Any()) {
-                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "Отображение", callbackData: "!"), InlineKeyboardButton.WithCallbackData(text: "Удалить", callbackData: "!") });
+                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "Пользовательские", callbackData: "!") });
 
-                foreach(var item in castom) {
-                    var completedDisciplines = completedDisciplinesList.FirstOrDefault(i => i.Equals(item));
-
-                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(item.IsCompleted ? "❌" : "✅")}", callbackData: $"Day {item.ID}"),
-                                            InlineKeyboardButton.WithCallbackData(text: "🗑", callbackData: $"Delete {item.ID}")});
-                }
+                foreach(var item in castom)
+                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} 🗑", callbackData: $"Delete {item.ID}") });
             }
 
             editButtons.AddRange(new[] { new[] { InlineKeyboardButton.WithCallbackData(Constants.IK_Add.text, Constants.IK_Add.callback) },

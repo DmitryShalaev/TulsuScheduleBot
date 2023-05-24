@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 
 using ScheduleBot.DB;
+using ScheduleBot.DB.Entity;
 
 namespace ScheduleBot.Scheduler {
     public class Scheduler {
@@ -9,19 +10,26 @@ namespace ScheduleBot.Scheduler {
 
         public Scheduler(ScheduleDbContext dbContext) => this.dbContext = dbContext;
 
-        public List<string> GetScheduleByWeak(int weeks) {
+        public List<string> GetScheduleByWeak(int weeks, string group, Guid scheduleProfileGuid) {
             var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
 
             var schedules = new List<string>();
 
             for(int i = 1; i < 7; i++)
-                schedules.Add(GetScheduleByDate(dateOnly.AddDays(7 * weeks + i)));
+                schedules.Add(GetScheduleByDate(dateOnly.AddDays(7 * weeks + i), group, scheduleProfileGuid));
 
             return schedules;
         }
 
-        public string GetScheduleByDate(DateOnly date, bool all = false) {
-            var list = dbContext.Disciplines.Where(i => i.Date == date && (!i.IsCompleted || all)).OrderBy(i => i.StartTime);
+        public string GetScheduleByDate(DateOnly date, string group, Guid scheduleProfileGuid, bool all = false) {
+
+            var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == scheduleProfileGuid).ToList();
+
+            var list = dbContext.Disciplines.ToList().Where(i => i.Group == group && i.Date == date && (all || !completedDisciplines.Contains(i))).ToList();
+
+            list.AddRange(dbContext.CustomDiscipline.Where(i => i.ScheduleProfileGuid == scheduleProfileGuid && i.Date == date).Select(i => new Discipline(i)));
+
+            list = list.OrderBy(i => i.StartTime).ToList();
 
             int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
             string str = $"📌{date.ToString("dd.MM.yy")} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd").Substring(1)} ({(weekNumber % 2 == 0 ? "чётная неделя":"нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
@@ -38,8 +46,8 @@ namespace ScheduleBot.Scheduler {
             return str;
         }
 
-        public string GetProgressByTerm(int term) {
-            var list = dbContext.Progresses.Where(i => i.Term == term && i.Mark != null);
+        public string GetProgressByTerm(int term, string StudentID) {
+            var list = dbContext.Progresses.Where(i => i.StudentID == StudentID && i.Term == term && i.Mark != null);
 
             string str = $"📌 Семестр {term}\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
 
@@ -52,13 +60,13 @@ namespace ScheduleBot.Scheduler {
             return str;
         }
 
-        public List<string> GetScheduleByDay(DayOfWeek dayOfWeek) {
+        public List<string> GetScheduleByDay(DayOfWeek dayOfWeek, string group, Guid scheduleProfileGuid) {
             int weeks = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
             var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
             var list = new List<string>();
 
             for(int i = -1; i < 2; i++)
-                list.Add(GetScheduleByDate(dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek)));
+                list.Add(GetScheduleByDate(dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek), group, scheduleProfileGuid));
 
             return list;
         }

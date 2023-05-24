@@ -33,12 +33,18 @@ namespace ScheduleBot.Migrations
                     b.Property<byte>("Class")
                         .HasColumnType("smallint");
 
+                    b.Property<DateOnly?>("Date")
+                        .HasColumnType("date");
+
                     b.Property<string>("Lecturer")
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<Guid>("ScheduleProfileGuid")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Subgroup")
                         .HasColumnType("text");
@@ -47,7 +53,56 @@ namespace ScheduleBot.Migrations
 
                     b.HasIndex("Class");
 
+                    b.HasIndex("ScheduleProfileGuid");
+
                     b.ToTable("CompletedDisciplines");
+                });
+
+            modelBuilder.Entity("ScheduleBot.DB.Entity.CustomDiscipline", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
+
+                    b.Property<byte>("Class")
+                        .HasColumnType("smallint");
+
+                    b.Property<DateOnly?>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<string>("LectureHall")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Lecturer")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ScheduleProfileGuid")
+                        .HasColumnType("uuid");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("Class");
+
+                    b.HasIndex("ScheduleProfileGuid");
+
+                    b.ToTable("CustomDiscipline");
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.Discipline", b =>
@@ -61,17 +116,15 @@ namespace ScheduleBot.Migrations
                     b.Property<byte>("Class")
                         .HasColumnType("smallint");
 
-                    b.Property<DateOnly>("Date")
+                    b.Property<DateOnly?>("Date")
                         .HasColumnType("date");
 
                     b.Property<TimeOnly>("EndTime")
                         .HasColumnType("time without time zone");
 
-                    b.Property<bool>("IsCastom")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("boolean");
+                    b.Property<string>("Group")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("LectureHall")
                         .IsRequired()
@@ -124,6 +177,16 @@ namespace ScheduleBot.Migrations
                         {
                             ID = (byte)1,
                             Name = "AddingDiscipline"
+                        },
+                        new
+                        {
+                            ID = (byte)2,
+                            Name = "GroupСhange"
+                        },
+                        new
+                        {
+                            ID = (byte)3,
+                            Name = "StudentIDСhange"
                         });
                 });
 
@@ -145,12 +208,36 @@ namespace ScheduleBot.Migrations
                     b.Property<string>("MarkTitle")
                         .HasColumnType("text");
 
+                    b.Property<string>("StudentID")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("Term")
                         .HasColumnType("integer");
 
                     b.HasKey("ID");
 
                     b.ToTable("Progresses");
+                });
+
+            modelBuilder.Entity("ScheduleBot.DB.Entity.ScheduleProfile", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Group")
+                        .HasColumnType("text");
+
+                    b.Property<long>("OwnerID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("StudentID")
+                        .HasColumnType("text");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("ScheduleProfile");
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.TelegramUser", b =>
@@ -165,14 +252,14 @@ namespace ScheduleBot.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("IsAdmin")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("LastName")
                         .HasColumnType("text");
 
                     b.Property<byte>("Mode")
                         .HasColumnType("smallint");
+
+                    b.Property<Guid>("ScheduleProfileGuid")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Username")
                         .HasColumnType("text");
@@ -180,6 +267,8 @@ namespace ScheduleBot.Migrations
                     b.HasKey("ChatID");
 
                     b.HasIndex("Mode");
+
+                    b.HasIndex("ScheduleProfileGuid");
 
                     b.ToTable("TelegramUsers");
                 });
@@ -278,6 +367,33 @@ namespace ScheduleBot.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ScheduleBot.DB.Entity.ScheduleProfile", "ScheduleProfile")
+                        .WithMany()
+                        .HasForeignKey("ScheduleProfileGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ScheduleProfile");
+
+                    b.Navigation("TypeDTO");
+                });
+
+            modelBuilder.Entity("ScheduleBot.DB.Entity.CustomDiscipline", b =>
+                {
+                    b.HasOne("ScheduleBot.DB.Entity.TypeDTO", "TypeDTO")
+                        .WithMany()
+                        .HasForeignKey("Class")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ScheduleBot.DB.Entity.ScheduleProfile", "ScheduleProfile")
+                        .WithMany()
+                        .HasForeignKey("ScheduleProfileGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ScheduleProfile");
+
                     b.Navigation("TypeDTO");
                 });
 
@@ -300,7 +416,15 @@ namespace ScheduleBot.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ScheduleBot.DB.Entity.ScheduleProfile", "ScheduleProfile")
+                        .WithMany()
+                        .HasForeignKey("ScheduleProfileGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("ModeDTO");
+
+                    b.Navigation("ScheduleProfile");
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.TemporaryAddition", b =>

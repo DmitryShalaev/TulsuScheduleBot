@@ -27,15 +27,15 @@ namespace ScheduleBot.DB {
             SaveChanges();
         }
 
-        public IQueryable<Discipline> GetDisciplinesBetweenDates((DateOnly min, DateOnly max) dates) => Disciplines.Where(i => i.Date >= dates.min && i.Date <= dates.max);
-
 #pragma warning disable CS8618
         public DbSet<Discipline> Disciplines { get; set; }
         public DbSet<Progress> Progresses { get; set; }
         public DbSet<CompletedDiscipline> CompletedDisciplines { get; set; }
+        public DbSet<CustomDiscipline> CustomDiscipline { get; set; }
         public DbSet<TypeDTO> Types { get; set; }
         public DbSet<ModeDTO> Modes { get; set; }
         public DbSet<TelegramUser> TelegramUsers { get; set; }
         public DbSet<TemporaryAddition> TemporaryAddition { get; set; }
+        public DbSet<ScheduleProfile> ScheduleProfile { get; set; }
     }
 }

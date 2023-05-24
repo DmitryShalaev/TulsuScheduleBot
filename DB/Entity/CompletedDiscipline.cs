@@ -10,12 +10,18 @@ namespace ScheduleBot.DB.Entity {
         public string? Lecturer { get; set; }
         public string? Subgroup { get; set; }
 
+        public DateOnly? Date { get; set; } = null;
+
+        [ForeignKey("ScheduleProfile")]
+        public Guid ScheduleProfileGuid { get; set; }
+        public ScheduleProfile ScheduleProfile { get; set; }
+
         [ForeignKey("TypeDTO")]
         public Type Class { get; set; }
         public TypeDTO TypeDTO { get; set; }
 
         public override bool Equals(object? obj) => Equals(obj as CompletedDiscipline);
-        public bool Equals(CompletedDiscipline? discipline) => discipline is not null && Name == discipline.Name && Class == discipline.Class && discipline.Class != Type.other && Lecturer == discipline.Lecturer && Subgroup == discipline.Subgroup;
+        public bool Equals(CompletedDiscipline? discipline) => discipline is not null && Name == discipline.Name && Class == discipline.Class && discipline.Class != Type.other && Lecturer == discipline.Lecturer && Subgroup == discipline.Subgroup && (Date == null || Date.Equals(discipline.Date));
 
         public static bool operator ==(CompletedDiscipline? left, CompletedDiscipline? right) => left?.Equals(right) ?? false;
         public static bool operator !=(CompletedDiscipline? left, CompletedDiscipline? right) => !(left == right);
@@ -27,8 +33,29 @@ namespace ScheduleBot.DB.Entity {
             hash += Class.GetHashCode();
             hash += Lecturer?.GetHashCode() ?? 0;
             hash += Subgroup?.GetHashCode() ?? 0;
+            hash += ScheduleProfileGuid.GetHashCode();
+            hash += Date.GetHashCode();
 
             return hash.GetHashCode();
+        }
+
+        public CompletedDiscipline() { }
+
+        public CompletedDiscipline(Discipline discipline, Guid scheduleProfileGuid) {
+            Name = discipline.Name;
+            Lecturer = discipline.Lecturer;
+            Class = discipline.Class;
+            Subgroup = discipline.Subgroup;
+            Date = discipline.Date;
+            ScheduleProfileGuid = scheduleProfileGuid;
+        }
+
+        public CompletedDiscipline(CustomDiscipline discipline, Guid scheduleProfileGuid) {
+            Name = discipline.Name;
+            Lecturer = discipline.Lecturer;
+            Class = discipline.Class;
+            Date = discipline.Date;
+            ScheduleProfileGuid = scheduleProfileGuid;
         }
     }
 

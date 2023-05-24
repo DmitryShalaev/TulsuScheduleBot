@@ -12,9 +12,10 @@ namespace ScheduleBot.DB.Entity {
         public string? Lecturer { get; set; } = null;
         public string LectureHall { get; set; }
         public string? Subgroup { get; set; } = null;
-        public DateOnly Date { get; set; }
+        public DateOnly? Date { get; set; }
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
+        public string Group { get; set; }
 
         public string Type { get; set; }
 
@@ -22,12 +23,9 @@ namespace ScheduleBot.DB.Entity {
         public Type Class { get; set; }
         public TypeDTO TypeDTO { get; set; }
 
-        public bool IsCompleted { get; set; } = false;
-        public bool IsCastom { get; set; } = false;
-
         public Discipline() { }
 
-        public Discipline(JToken json) {
+        public Discipline(JToken json, string group) {
             LectureHall = json.Value<string>("AUD") ?? throw new NullReferenceException("AUD");
             Date = DateOnly.Parse(json.Value<string>("DATE_Z") ?? throw new NullReferenceException("DATE_Z"));
             Name = json.Value<string>("DISCIP") ?? throw new NullReferenceException("DISCIP");
@@ -43,10 +41,23 @@ namespace ScheduleBot.DB.Entity {
             var times = (json.Value<string>("TIME_Z") ?? throw new NullReferenceException("TIME_Z")).Split('-');
             StartTime = TimeOnly.Parse(times[0]);
             EndTime = TimeOnly.Parse(times[1]);
+
+            Group = group;
+        }
+
+        public Discipline(CustomDiscipline discipline) {
+            Name = discipline.Name;
+            Class = Entity.Type.other;
+            Lecturer = discipline.Lecturer;
+            LectureHall = discipline.LectureHall;
+            StartTime = discipline.StartTime;
+            EndTime = discipline.EndTime;
+            Date = discipline.Date;
+            Type = discipline.Type;
         }
 
         public override bool Equals(object? obj) => Equals(obj as Discipline);
-        public bool Equals(Discipline? discipline) => discipline is not null && Name == discipline.Name && Lecturer == discipline.Lecturer && LectureHall == discipline.LectureHall && Subgroup == discipline.Subgroup && Date.Equals(discipline.Date) && StartTime.Equals(discipline.StartTime) && EndTime.Equals(discipline.EndTime) && Class == discipline.Class;
+        public bool Equals(Discipline? discipline) => discipline is not null && Name == discipline.Name && Lecturer == discipline.Lecturer && Subgroup == discipline.Subgroup && Date.Equals(discipline.Date) && StartTime.Equals(discipline.StartTime) && EndTime.Equals(discipline.EndTime) && Class == discipline.Class && Group == discipline.Group;
 
         public static bool operator ==(Discipline? left, Discipline? right) => left?.Equals(right) ?? false;
         public static bool operator !=(Discipline? left, Discipline? right) => !(left == right);
@@ -62,10 +73,11 @@ namespace ScheduleBot.DB.Entity {
             hash += StartTime.GetHashCode();
             hash += EndTime.GetHashCode();
             hash += Class.GetHashCode();
+            hash += Group.GetHashCode();
 
             return hash.GetHashCode();
         }
 
-        public static implicit operator CompletedDiscipline(Discipline discipline) => new() { Name = discipline.Name, Class = discipline.Class, Lecturer = discipline.Lecturer, Subgroup = discipline.Subgroup };
+        public static implicit operator CompletedDiscipline(Discipline discipline) => new() { Name = discipline.Name, Class = discipline.Class, Lecturer = discipline.Lecturer, Subgroup = discipline.Subgroup, Date = discipline.Date };
     }
 }

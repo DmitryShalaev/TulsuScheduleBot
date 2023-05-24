@@ -12,18 +12,14 @@ using Timer = System.Timers.Timer;
 namespace ScheduleBot {
     public class Parser {
         private readonly ScheduleDbContext dbContext;
-        private readonly string group;
-        private readonly string studentID;
         private readonly HttpClientHandler clientHandler;
         private readonly Timer UpdatingTimer;
 
         public static DateTime scheduleLastUpdate;
         public static DateTime progressLastUpdate;
 
-        public Parser(ScheduleDbContext dbContext, string group = "220611", string studentID = "201305") {
+        public Parser(ScheduleDbContext dbContext, bool updating = true) {
             this.dbContext = dbContext;
-            this.group = group;
-            this.studentID = studentID;
 
             clientHandler = new() {
                 AllowAutoRedirect = false,
@@ -35,68 +31,95 @@ namespace ScheduleBot {
             UpdatingTimer = new() {
                 Interval = 30 * 60 * 1000 //Minutes Seconds Milliseconds
             };
-            UpdatingTimer.Elapsed += Updating;
 
-            Updating();
+            if(updating) {
+                UpdatingTimer.Elapsed += Updating;
+                Updating();
+            }
         }
 
         private void Updating(object? sender = null, ElapsedEventArgs? e = null) {
-            var disciplines = GetDisciplines();
-
-            if(disciplines != null) {
-                var dates = GetDates();
-                if(dates != null) {
-                    scheduleLastUpdate = DateTime.Now;
-
-                    var _list = dbContext.GetDisciplinesBetweenDates(dates.Value).ToList();
-
-                    var except = disciplines.Except(_list);
-                    if(except.Any()) {
-                        SetDisciplineIsCompleted(dbContext.CompletedDisciplines.ToList(), except);
-                        dbContext.Disciplines.AddRange(except);
-
-                        dbContext.SaveChanges();
-                        _list = dbContext.GetDisciplinesBetweenDates(dates.Value).ToList();
-                    }
-
-                    except = _list.Except(disciplines).Where(i => !i.IsCastom);
-                    if(except.Any()) {
-                        dbContext.Disciplines.RemoveRange(except);
-                        dbContext.SaveChanges();
-                    }
-                }
-            }
-
-            var progress = GetProgress();
-            if(progress != null) {
-                progressLastUpdate = DateTime.Now;
-
-                var _list = dbContext.Progresses.ToList();
-
-                var except = progress.Except(_list);
-                if(except.Any()) {
-                    dbContext.Progresses.AddRange(except);
-
-                    dbContext.SaveChanges();
-                    _list = dbContext.Progresses.ToList();
-                }
-
-                except = _list.Except(progress);
-                if(except.Any()) {
-                    dbContext.Progresses.RemoveRange(except);
-                    dbContext.SaveChanges();
-                }
-            }
+            UpdatingDisciplines();
+            UpdatingProgress();
 
             UpdatingTimer.Start();
         }
 
-        public static void SetDisciplineIsCompleted(List<CompletedDiscipline> completedDiscipline, IEnumerable<Discipline> list) {
-            foreach(var discipline in list)
-                discipline.IsCompleted = completedDiscipline.Contains(discipline);
+        public void UpdatingProgress(string? studentID = null) {
+            void Get(string iStudentID) {
+                var progress = GetProgress(iStudentID);
+                if(progress != null) {
+                    progressLastUpdate = DateTime.Now;
+
+                    var _list = dbContext.Progresses.Where(i => i.StudentID == iStudentID).ToList();
+
+                    var except = progress.Except(_list);
+                    if(except.Any()) {
+                        dbContext.Progresses.AddRange(except);
+
+                        dbContext.SaveChanges();
+                        _list = dbContext.Progresses.Where(i => i.StudentID == iStudentID).ToList();
+                    }
+
+                    except = _list.Except(progress);
+                    if(except.Any()) {
+                        dbContext.Progresses.RemoveRange(except);
+                        dbContext.SaveChanges();
+                    }
+                }
+            }
+
+            if(string.IsNullOrWhiteSpace(studentID)) {
+                foreach(var iStudentID in dbContext.ScheduleProfile.Select(i => i.StudentID).Distinct().ToList()) {
+                    if(string.IsNullOrWhiteSpace(iStudentID)) continue;
+
+                    Get(iStudentID);
+                }
+            } else {
+                Get(studentID);
+            }
         }
 
-        public List<Discipline>? GetDisciplines() {
+        public void UpdatingDisciplines(string? group = null) {
+            void Get(string iGroup) {
+                var disciplines = GetDisciplines(iGroup);
+
+                if(disciplines != null) {
+                    var dates = GetDates(iGroup);
+                    if(dates != null) {
+                        scheduleLastUpdate = DateTime.Now;
+
+                        var _list = dbContext.Disciplines.Where(i => i.Group == iGroup && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
+
+                        var except = disciplines.Except(_list);
+                        if(except.Any()) {
+                            dbContext.Disciplines.AddRange(except);
+
+                            dbContext.SaveChanges();
+                            _list = dbContext.Disciplines.Where(i => i.Group == iGroup && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
+                        }
+
+                        except = _list.Except(disciplines);
+                        if(except.Any()) {
+                            dbContext.Disciplines.RemoveRange(except);
+                            dbContext.SaveChanges();
+                        }
+                    }
+                }
+            }
+
+            if(string.IsNullOrWhiteSpace(group)) {
+                foreach(var iGroup in dbContext.ScheduleProfile.Select(i => i.Group).Distinct().ToList()) {
+                    if(string.IsNullOrWhiteSpace(iGroup)) continue;
+
+                    Get(iGroup);
+                }
+            } else {
+                Get(group);
+            }
+        }
+
+        public List<Discipline>? GetDisciplines(string group) {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
                     #region RequestHeaders
@@ -105,7 +128,7 @@ namespace ScheduleBot {
                     client.DefaultRequestHeaders.Add("Accept-Language", "ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7");
                     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.34");
                     client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
-                    client.DefaultRequestHeaders.Add("Referer", "https://tulsu.ru/schedule/?search=220611");
+                    client.DefaultRequestHeaders.Add("Referer", $"https://tulsu.ru/schedule/?search={group}");
                     client.DefaultRequestHeaders.Add("Origin", "https://tulsu.ru");
                     client.DefaultRequestHeaders.Add("sec-ch-ua", "\"Chromium\";v=\"112\", \"Microsoft Edge\";v=\"112\", \"Not:A-Brand\";v=\"99\"");
                     client.DefaultRequestHeaders.Add("sec-ch-ua-mobile", "?0");
@@ -123,7 +146,7 @@ namespace ScheduleBot {
                         if(response.IsSuccessStatusCode) {
                             JArray jObject = JArray.Parse(response.Content.ReadAsStringAsync().Result);
 
-                            return jObject.Select(j => new Discipline(j)).ToList();
+                            return jObject.Select(j => new Discipline(j, group)).ToList();
                         }
                 }
             } catch(Exception) {
@@ -133,7 +156,7 @@ namespace ScheduleBot {
             return null;
         }
 
-        public (DateOnly min, DateOnly max)? GetDates() {
+        public (DateOnly min, DateOnly max)? GetDates(string group) {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
                     #region RequestHeaders
@@ -142,7 +165,7 @@ namespace ScheduleBot {
                     client.DefaultRequestHeaders.Add("Accept-Language", "ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7");
                     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.34");
                     client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
-                    client.DefaultRequestHeaders.Add("Referer", "https://tulsu.ru/schedule/?search=220611");
+                    client.DefaultRequestHeaders.Add("Referer", $"https://tulsu.ru/schedule/?search={group}");
                     client.DefaultRequestHeaders.Add("Origin", "https://tulsu.ru");
                     client.DefaultRequestHeaders.Add("sec-ch-ua", "\"Chromium\";v=\"112\", \"Microsoft Edge\";v=\"112\", \"Not:A-Brand\";v=\"99\"");
                     client.DefaultRequestHeaders.Add("sec-ch-ua-mobile", "?0");
@@ -170,7 +193,7 @@ namespace ScheduleBot {
             return null;
         }
 
-        public List<Progress>? GetProgress() {
+        public List<Progress>? GetProgress(string studentID) {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
                     #region RequestHeaders
@@ -179,7 +202,7 @@ namespace ScheduleBot {
                     client.DefaultRequestHeaders.Add("Accept-Language", "ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7");
                     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.34");
                     client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
-                    client.DefaultRequestHeaders.Add("Referer", "https://tulsu.ru/progress/?search=201305");
+                    client.DefaultRequestHeaders.Add("Referer", $"https://tulsu.ru/progress/?search={studentID}");
                     client.DefaultRequestHeaders.Add("Origin", "https://tulsu.ru");
                     client.DefaultRequestHeaders.Add("sec-ch-ua", "\"Chromium\";v=\"112\", \"Microsoft Edge\";v=\"112\", \"Not:A-Brand\";v=\"99\"");
                     client.DefaultRequestHeaders.Add("sec-ch-ua-mobile", "?0");
@@ -195,8 +218,9 @@ namespace ScheduleBot {
                     using(HttpResponseMessage response = client.PostAsync("https://tulsu.ru/progress/queries/GetMarks.php", content).Result)
                         if(response.IsSuccessStatusCode) {
                             JArray jObject = JObject.Parse(response.Content.ReadAsStringAsync().Result).Value<JArray>("data") ?? throw new Exception();
+                            if(jObject.Count == 0) throw new Exception();
 
-                            return jObject.Select(j => new Progress(j)).Where(i => i.Mark != null).ToList();
+                            return jObject.Select(j => new Progress(j, studentID)).Where(i => i.Mark != null).ToList();
                         }
                 }
             } catch(Exception) {

@@ -10,7 +10,10 @@ namespace ScheduleBot.DB.Entity {
         public string FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Username { get; set; }
-        public bool IsAdmin { get; set; } = false;
+
+        [ForeignKey("ScheduleProfile")]
+        public Guid ScheduleProfileGuid { get; set; }
+        public ScheduleProfile ScheduleProfile { get; set; }
 
         [ForeignKey("ModeDTO")]
         public Mode Mode { get; set; } = Mode.Default;
@@ -25,7 +28,9 @@ namespace ScheduleBot.DB.Entity {
 
     public enum Mode : byte {
         Default,
-        AddingDiscipline
+        AddingDiscipline,
+        GroupСhange,
+        StudentIDСhange
     }
 
     public class ModeDTO {
