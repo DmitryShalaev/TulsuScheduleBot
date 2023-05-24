@@ -145,6 +145,7 @@ namespace ScheduleBot {
                     using(HttpResponseMessage response = client.PostAsync("https://tulsu.ru/schedule/queries/GetSchedule.php", content).Result)
                         if(response.IsSuccessStatusCode) {
                             JArray jObject = JArray.Parse(response.Content.ReadAsStringAsync().Result);
+                            if(jObject.Count == 0) throw new Exception();
 
                             return jObject.Select(j => new Discipline(j, group)).ToList();
                         }
