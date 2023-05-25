@@ -116,19 +116,7 @@ namespace ScheduleBot.Bot {
                     break;
 
                 case Telegram.Bot.Types.Enums.UpdateType.InlineQuery:
-                    InlineQuery? inlineQuery = update.InlineQuery;
-
-                    if(inlineQuery is not null) {
-                        user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).FirstOrDefault(u => u.ChatID == inlineQuery.From.Id);
-
-                        if(user is not null) {
-
-                            await botClient.AnswerInlineQueryAsync(inlineQuery.Id, new[] {
-                                new InlineQueryResultArticle(Constants.RK_Today, Constants.RK_Today, new InputTextMessageContent(scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now), user.ScheduleProfile))),
-                                new InlineQueryResultArticle(Constants.RK_Tomorrow, Constants.RK_Tomorrow, new InputTextMessageContent(scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now.AddDays(1)), user.ScheduleProfile)))
-                            }, cacheTime: 60 * 10, isPersonal: true);
-                        }
-                    }
+                    await InlineQuery(botClient, update);
                     break;
             }
 
