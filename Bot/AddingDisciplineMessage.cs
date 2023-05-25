@@ -84,9 +84,7 @@ namespace ScheduleBot.Bot {
 
             await botClient.SendTextMessageAsync(chatId: message.Chat, text: GetStagesAddingDiscipline(user, temporaryAddition.Counter), replyMarkup: MainKeyboardMarkup);
 
-            string? group = user.ScheduleProfile.Group;
-            if(!string.IsNullOrWhiteSpace(group))
-                await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetScheduleByDate(temporaryAddition.Date, group, user.ScheduleProfileGuid), replyMarkup: inlineAdminKeyboardMarkup);
+            await botClient.SendTextMessageAsync(chatId: message.Chat, text: scheduler.GetScheduleByDate(temporaryAddition.Date, user.ScheduleProfile), replyMarkup: inlineAdminKeyboardMarkup);
         }
 
         private string GetStagesAddingDiscipline(TelegramUser user, int? counter = null) {

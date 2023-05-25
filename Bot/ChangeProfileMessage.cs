@@ -17,9 +17,9 @@ namespace ScheduleBot.Bot {
                 default:
                     await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Нужно подождать...", replyMarkup: CancelKeyboardMarkup);
                     Parser parser = new(dbContext, false);
-                    if(parser.GetDates(message.Text ?? "") is not null) {
-                        bool flag = dbContext.ScheduleProfile.Select(i=>i.Group).Contains(message.Text);
+                    bool flag = dbContext.ScheduleProfile.Select(i=>i.Group).Contains(message.Text);
 
+                    if(flag || parser.GetDates(message.Text ?? "") is not null) {
                         user.Mode = Mode.Default;
                         user.ScheduleProfile.Group = message.Text;
                         dbContext.SaveChanges();
@@ -51,9 +51,9 @@ namespace ScheduleBot.Bot {
 
                     if(int.TryParse(message.Text ?? "", out int studentID)) {
                         Parser parser = new(dbContext, false);
-                        if(parser.GetProgress(message.Text ?? "") is not null) {
-                            bool flag = dbContext.ScheduleProfile.Select(i=>i.StudentID).Contains(message.Text);
+                        bool flag = dbContext.ScheduleProfile.Select(i => i.StudentID).Contains(message.Text);
 
+                        if(flag || parser.GetProgress(message.Text ?? "") is not null) {
                             user.Mode = Mode.Default;
                             user.ScheduleProfile.StudentID = studentID.ToString();
                             dbContext.SaveChanges();
