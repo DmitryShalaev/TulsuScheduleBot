@@ -124,8 +124,8 @@ namespace ScheduleBot.Bot {
                         if(user is not null) {
 
                             await botClient.AnswerInlineQueryAsync(inlineQuery.Id, new[] {
-                                new InlineQueryResultArticle("0", Constants.RK_Today, new InputTextMessageContent(Constants.RK_Today)),
-                                new InlineQueryResultArticle("1", Constants.RK_Tomorrow, new InputTextMessageContent(Constants.RK_Tomorrow))
+                                new InlineQueryResultArticle(Constants.RK_Today, Constants.RK_Today, new InputTextMessageContent(scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now), user.ScheduleProfile))),
+                                new InlineQueryResultArticle(Constants.RK_Tomorrow, Constants.RK_Tomorrow, new InputTextMessageContent(scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now.AddDays(1)), user.ScheduleProfile)))
                             });
                         }
                     }
