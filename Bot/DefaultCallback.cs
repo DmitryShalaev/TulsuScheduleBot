@@ -27,15 +27,15 @@ namespace ScheduleBot.Bot {
 
                 switch(data) {
                     case Constants.IK_Edit.callback:
-                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, group, user.ScheduleProfileGuid, true), replyMarkup: GetEditAdminInlineKeyboardButton(date, group, user.ScheduleProfileGuid));
+                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile, true), replyMarkup: GetEditAdminInlineKeyboardButton(date, group, user.ScheduleProfileGuid));
                         break;
 
                     case Constants.IK_ViewAll.callback:
-                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, group, user.ScheduleProfileGuid, true), replyMarkup: inlineBackKeyboardMarkup);
+                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile, true), replyMarkup: inlineBackKeyboardMarkup);
                         break;
 
                     case Constants.IK_Back.callback:
-                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, group, user.ScheduleProfileGuid), replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+                        await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
                         break;
 
                     case Constants.IK_Add.callback:
@@ -43,7 +43,7 @@ namespace ScheduleBot.Bot {
                             user.Mode = Mode.AddingDiscipline;
                             dbContext.TemporaryAddition.Add(new(user, date));
                             dbContext.SaveChanges();
-                            await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, group, user.ScheduleProfileGuid));
+                            await botClient.EditMessageTextAsync(chatId: message.Chat, messageId: message.MessageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile));
                             await botClient.SendTextMessageAsync(chatId: message.Chat, text: GetStagesAddingDiscipline(user), replyMarkup: CancelKeyboardMarkup);
                         } catch(Exception e) {
 

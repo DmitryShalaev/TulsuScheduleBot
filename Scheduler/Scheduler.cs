@@ -10,24 +10,24 @@ namespace ScheduleBot.Scheduler {
 
         public Scheduler(ScheduleDbContext dbContext) => this.dbContext = dbContext;
 
-        public List<string> GetScheduleByWeak(int weeks, string group, Guid scheduleProfileGuid) {
+        public List<string> GetScheduleByWeak(int weeks, ScheduleProfile profile) {
             var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
 
             var schedules = new List<string>();
 
             for(int i = 1; i < 7; i++)
-                schedules.Add(GetScheduleByDate(dateOnly.AddDays(7 * weeks + i), group, scheduleProfileGuid));
+                schedules.Add(GetScheduleByDate(dateOnly.AddDays(7 * weeks + i), profile));
 
             return schedules;
         }
 
-        public string GetScheduleByDate(DateOnly date, string group, Guid scheduleProfileGuid, bool all = false) {
+        public string GetScheduleByDate(DateOnly date, ScheduleProfile profile, bool all = false) {
 
-            var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == scheduleProfileGuid).ToList();
+            var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID).ToList();
 
-            var list = dbContext.Disciplines.ToList().Where(i => i.Group == group && i.Date == date && (all || !completedDisciplines.Contains(i))).ToList();
+            var list = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && i.Date == date && (all || !completedDisciplines.Contains(i))).ToList();
 
-            list.AddRange(dbContext.CustomDiscipline.Where(i => i.ScheduleProfileGuid == scheduleProfileGuid && i.Date == date).Select(i => new Discipline(i)));
+            list.AddRange(dbContext.CustomDiscipline.Where(i => i.ScheduleProfileGuid == profile.ID && i.Date == date).Select(i => new Discipline(i)));
 
             list = list.OrderBy(i => i.StartTime).ToList();
 
@@ -60,13 +60,13 @@ namespace ScheduleBot.Scheduler {
             return str;
         }
 
-        public List<string> GetScheduleByDay(DayOfWeek dayOfWeek, string group, Guid scheduleProfileGuid) {
+        public List<string> GetScheduleByDay(DayOfWeek dayOfWeek, ScheduleProfile profile) {
             int weeks = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
             var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
             var list = new List<string>();
 
             for(int i = -1; i < 2; i++)
-                list.Add(GetScheduleByDate(dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek), group, scheduleProfileGuid));
+                list.Add(GetScheduleByDate(dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek), profile));
 
             return list;
         }
