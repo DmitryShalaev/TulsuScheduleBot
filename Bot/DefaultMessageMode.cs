@@ -63,7 +63,7 @@ namespace ScheduleBot.Bot {
                 case Constants.RK_Today:
                 case Constants.RK_Tomorrow:
                     await ScheduleRelevance(message.Chat, botClient, MainKeyboardMarkup);
-                    await TodayAndTomorrow(botClient, message.Chat, message.Text, IsAdmin, user.ScheduleProfile);
+                    await TodayAndTomorrow(botClient, message.Chat, message.Text, IsAdmin, group, user.ScheduleProfileGuid);
                     break;
 
                 case Constants.RK_ByDays:
@@ -77,7 +77,7 @@ namespace ScheduleBot.Bot {
                 case Constants.RK_Friday:
                 case Constants.RK_Saturday:
                     await ScheduleRelevance(message.Chat, botClient, DaysKeyboardMarkup);
-                    await DayOfWeek(botClient, message.Chat, message.Text, IsAdmin, user.ScheduleProfile);
+                    await DayOfWeek(botClient, message.Chat, message.Text, IsAdmin, group, user.ScheduleProfileGuid);
                     break;
 
                 case Constants.RK_ForAWeek:
@@ -87,7 +87,7 @@ namespace ScheduleBot.Bot {
                 case Constants.RK_ThisWeek:
                 case Constants.RK_NextWeek:
                     await ScheduleRelevance(message.Chat, botClient, WeekKeyboardMarkup);
-                    await Weeks(botClient, message.Chat, message.Text, IsAdmin, user.ScheduleProfile);
+                    await Weeks(botClient, message.Chat, message.Text, IsAdmin, group, user.ScheduleProfileGuid);
                     break;
 
                 case Constants.RK_AcademicPerformance:
@@ -129,14 +129,14 @@ namespace ScheduleBot.Bot {
                     }
 
                     if(message.Text != null)
-                        await GetScheduleByDate(botClient, message.Chat, message.Text, IsAdmin, user.ScheduleProfile);
+                        await GetScheduleByDate(botClient, message.Chat, message.Text, IsAdmin, group, user.ScheduleProfileGuid);
 
                     break;
             }
         }
 
-        private async Task GetScheduleByDate(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, ScheduleProfile profile) {
-            if(string.IsNullOrWhiteSpace(profile.Group)) {
+        private async Task GetScheduleByDate(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, string? group, Guid scheduleProfileGuid) {
+            if(string.IsNullOrWhiteSpace(group)) {
                 await GroupError(botClient, chatId);
                 return;
             }
@@ -146,7 +146,7 @@ namespace ScheduleBot.Bot {
                     var date = DateOnly.FromDateTime(DateTime.Parse(text));
 
                     await ScheduleRelevance(chatId, botClient, MainKeyboardMarkup);
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(date, profile), replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(date, group, scheduleProfileGuid), replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
                 } catch(Exception) {
                     await botClient.SendTextMessageAsync(chatId: chatId, text: $"Сообщение распознано как дата, но не соответствует формату.", replyMarkup: MainKeyboardMarkup);
                 }
@@ -162,20 +162,20 @@ namespace ScheduleBot.Bot {
             return;
         }
 
-        private async Task Weeks(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, ScheduleProfile profile) {
-            if(string.IsNullOrWhiteSpace(profile.Group)) {
+        private async Task Weeks(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, string? group, Guid scheduleProfileGuid) {
+            if(string.IsNullOrWhiteSpace(group)) {
                 await GroupError(botClient, chatId);
                 return;
             }
 
             switch(text) {
                 case Constants.RK_ThisWeek:
-                    foreach(var item in scheduler.GetScheduleByWeak(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, System.DayOfWeek.Monday) - 1, profile))
+                    foreach(var item in scheduler.GetScheduleByWeak(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, System.DayOfWeek.Monday) - 1, group, scheduleProfileGuid))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: item, replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
                     break;
                 case Constants.RK_NextWeek:
-                    foreach(var item in scheduler.GetScheduleByWeak(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, System.DayOfWeek.Monday), profile))
+                    foreach(var item in scheduler.GetScheduleByWeak(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, System.DayOfWeek.Monday), group, scheduleProfileGuid))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: item, replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
                     break;
@@ -205,57 +205,57 @@ namespace ScheduleBot.Bot {
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }
 
-        private async Task TodayAndTomorrow(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, ScheduleProfile profile) {
-            if(string.IsNullOrWhiteSpace(profile.Group)) {
+        private async Task TodayAndTomorrow(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, string? group, Guid scheduleProfileGuid) {
+            if(string.IsNullOrWhiteSpace(group)) {
                 await GroupError(botClient, chatId);
                 return;
             }
 
             switch(text) {
                 case Constants.RK_Today:
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now), profile), replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now), group, scheduleProfileGuid), replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
                     break;
 
                 case Constants.RK_Tomorrow:
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now.AddDays(1)), profile), replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now.AddDays(1)), group, scheduleProfileGuid), replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
                     break;
             }
         }
 
-        private async Task DayOfWeek(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, ScheduleProfile profile) {
-            if(string.IsNullOrWhiteSpace(profile.Group)) {
+        private async Task DayOfWeek(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, string? group, Guid scheduleProfileGuid) {
+            if(string.IsNullOrWhiteSpace(group)) {
                 await GroupError(botClient, chatId);
                 return;
             }
 
             switch(text) {
                 case Constants.RK_Monday:
-                    foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Monday, profile))
+                    foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Monday, group, scheduleProfileGuid))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: day, replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
                     break;
                 case Constants.RK_Tuesday:
-                    foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Tuesday, profile))
+                    foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Tuesday, group, scheduleProfileGuid))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: day, replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
                     break;
                 case Constants.RK_Wednesday:
-                    foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Wednesday, profile))
+                    foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Wednesday, group, scheduleProfileGuid))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: day, replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
                     break;
                 case Constants.RK_Thursday:
-                    foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Thursday, profile))
+                    foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Thursday, group, scheduleProfileGuid))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: day, replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
                     break;
                 case Constants.RK_Friday:
-                    foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Friday, profile))
+                    foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Friday, group, scheduleProfileGuid))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: day, replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
                     break;
                 case Constants.RK_Saturday:
-                    foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Saturday, profile))
+                    foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Saturday, group, scheduleProfileGuid))
                         await botClient.SendTextMessageAsync(chatId: chatId, text: day, replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
 
                     break;
