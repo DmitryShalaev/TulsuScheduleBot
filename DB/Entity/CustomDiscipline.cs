@@ -19,15 +19,15 @@ namespace ScheduleBot.DB.Entity {
         public Guid ScheduleProfileGuid { get; set; }
         public ScheduleProfile ScheduleProfile { get; set; }
 
-        [ForeignKey("TypeDTO")]
-        public Type Class { get; set; }
-        public TypeDTO TypeDTO { get; set; }
+        [ForeignKey("ClassDTO")]
+        public Class Class { get; set; }
+        public ClassDTO ClassDTO { get; set; }
 
         public CustomDiscipline() { }
 
         public CustomDiscipline(TemporaryAddition discipline, Guid scheduleProfileGuid) {
             Name = discipline.Name ?? throw new NullReferenceException("Name");
-            Class = Entity.Type.other;
+            Class = Entity.Class.other;
             Lecturer = discipline.Lecturer;
             LectureHall = discipline.LectureHall ?? throw new NullReferenceException("LectureHall");
             StartTime = discipline.StartTime ?? throw new NullReferenceException("StartTime");

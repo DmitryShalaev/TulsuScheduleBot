@@ -16,12 +16,12 @@ namespace ScheduleBot.DB.Entity {
         public Guid ScheduleProfileGuid { get; set; }
         public ScheduleProfile ScheduleProfile { get; set; }
 
-        [ForeignKey("TypeDTO")]
-        public Type Class { get; set; }
-        public TypeDTO TypeDTO { get; set; }
+        [ForeignKey("ClassDTO")]
+        public Class Class { get; set; }
+        public ClassDTO ClassDTO { get; set; }
 
         public override bool Equals(object? obj) => Equals(obj as CompletedDiscipline);
-        public bool Equals(CompletedDiscipline? discipline) => discipline is not null && Name == discipline.Name && Class == discipline.Class && discipline.Class != Type.other && Lecturer == discipline.Lecturer && Subgroup == discipline.Subgroup && (Date == null || Date.Equals(discipline.Date));
+        public bool Equals(CompletedDiscipline? discipline) => discipline is not null && Name == discipline.Name && Class == discipline.Class && Lecturer == discipline.Lecturer && Subgroup == discipline.Subgroup && (Date == null || Date.Equals(discipline.Date));
 
         public static bool operator ==(CompletedDiscipline? left, CompletedDiscipline? right) => left?.Equals(right) ?? false;
         public static bool operator !=(CompletedDiscipline? left, CompletedDiscipline? right) => !(left == right);
@@ -57,18 +57,5 @@ namespace ScheduleBot.DB.Entity {
             Date = discipline.Date;
             ScheduleProfileGuid = scheduleProfileGuid;
         }
-    }
-
-    public enum Type : byte {
-        all,
-        lab,
-        practice,
-        lecture,
-        other
-    }
-
-    public class TypeDTO {
-        public Type ID { get; set; }
-        public string Name { get; set; }
     }
 }

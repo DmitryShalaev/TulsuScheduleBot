@@ -19,9 +19,9 @@ namespace ScheduleBot.DB.Entity {
 
         public string Type { get; set; }
 
-        [ForeignKey("TypeDTO")]
-        public Type Class { get; set; }
-        public TypeDTO TypeDTO { get; set; }
+        [ForeignKey("ClassDTO")]
+        public Class Class { get; set; }
+        public ClassDTO ClassDTO { get; set; }
 
         public Discipline() { }
 
@@ -36,7 +36,7 @@ namespace ScheduleBot.DB.Entity {
 
             Lecturer = json.Value<string?>("PREP");
 
-            Class = (Type)Enum.Parse(typeof(Type), json.Value<string>("CLASS") ?? "other");
+            Class = (Class)Enum.Parse(typeof(Class), json.Value<string>("CLASS") ?? "other");
 
             var times = (json.Value<string>("TIME_Z") ?? throw new NullReferenceException("TIME_Z")).Split('-');
             StartTime = TimeOnly.Parse(times[0]);
@@ -47,7 +47,7 @@ namespace ScheduleBot.DB.Entity {
 
         public Discipline(CustomDiscipline discipline) {
             Name = discipline.Name;
-            Class = Entity.Type.other;
+            Class = Entity.Class.other;
             Lecturer = discipline.Lecturer;
             LectureHall = discipline.LectureHall;
             StartTime = discipline.StartTime;
@@ -79,5 +79,18 @@ namespace ScheduleBot.DB.Entity {
         }
 
         public static implicit operator CompletedDiscipline(Discipline discipline) => new() { Name = discipline.Name, Class = discipline.Class, Lecturer = discipline.Lecturer, Subgroup = discipline.Subgroup, Date = discipline.Date };
+    }
+
+    public enum Class : byte {
+        all,
+        lab,
+        practice,
+        lecture,
+        other
+    }
+
+    public class ClassDTO {
+        public Class ID { get; set; }
+        public string Name { get; set; }
     }
 }

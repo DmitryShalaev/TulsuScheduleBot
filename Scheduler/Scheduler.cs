@@ -5,7 +5,7 @@ using ScheduleBot.DB.Entity;
 
 namespace ScheduleBot.Scheduler {
     public class Scheduler {
-        public static Dictionary<DB.Entity.Type, string> TypeToString = new(){ { DB.Entity.Type.all, "Все"}, { DB.Entity.Type.lab, "Лаб. занятия" }, { DB.Entity.Type.practice, "Практические занятия" } };
+        public static Dictionary<DB.Entity.Class, string> TypeToString = new(){ { DB.Entity.Class.all, "Все"}, { DB.Entity.Class.lab, "Лаб. занятия" }, { DB.Entity.Class.practice, "Практические занятия" } };
         private readonly ScheduleDbContext dbContext;
 
         public Scheduler(ScheduleDbContext dbContext) => this.dbContext = dbContext;

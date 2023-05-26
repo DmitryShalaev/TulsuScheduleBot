@@ -14,8 +14,8 @@ namespace ScheduleBot.DB {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
-            foreach(Entity.Type type in Enum.GetValues(typeof(Entity.Type)).Cast<Entity.Type>())
-                modelBuilder.Entity<TypeDTO>().HasData(new TypeDTO() { ID = type, Name = type.ToString() });
+            foreach(Entity.Class type in Enum.GetValues(typeof(Entity.Class)).Cast<Entity.Class>())
+                modelBuilder.Entity<ClassDTO>().HasData(new ClassDTO() { ID = type, Name = type.ToString() });
 
             foreach(Entity.Mode type in Enum.GetValues(typeof(Entity.Mode)).Cast<Entity.Mode>())
                 modelBuilder.Entity<ModeDTO>().HasData(new ModeDTO() { ID = type, Name = type.ToString() });
@@ -32,7 +32,7 @@ namespace ScheduleBot.DB {
         public DbSet<Progress> Progresses { get; set; }
         public DbSet<CompletedDiscipline> CompletedDisciplines { get; set; }
         public DbSet<CustomDiscipline> CustomDiscipline { get; set; }
-        public DbSet<TypeDTO> Types { get; set; }
+        public DbSet<ClassDTO> Classes { get; set; }
         public DbSet<ModeDTO> Modes { get; set; }
         public DbSet<TelegramUser> TelegramUsers { get; set; }
         public DbSet<TemporaryAddition> TemporaryAddition { get; set; }
