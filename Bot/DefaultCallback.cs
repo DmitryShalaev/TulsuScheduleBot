@@ -58,17 +58,18 @@ namespace ScheduleBot.Bot {
 
                         if(str[0].Contains("Discipline")) {
                             var discipline = dbContext.Disciplines.FirstOrDefault(i => i.ID == uint.Parse(str[1]));
+                            var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid).ToList();
 
                             if(discipline is not null) {
                                 switch(str[0] ?? "") {
                                     case "DisciplineDay":
-                                        var dayCompletedDisciplines = dbContext.CompletedDisciplines.FirstOrDefault(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid && i.Date == discipline.Date && i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup);
+                                        CompletedDiscipline dayTmp = new(discipline, user.ScheduleProfileGuid);
+                                        var dayCompletedDisciplines = completedDisciplines.FirstOrDefault(i => i.Equals(dayTmp));
 
                                         if(dayCompletedDisciplines is not null)
                                             dbContext.CompletedDisciplines.Remove(dayCompletedDisciplines);
-                                        else {
-                                            dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid && i.Date == null && i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup));
-                                            dbContext.CompletedDisciplines.Add(new(discipline, user.ScheduleProfileGuid));
+                                        else {          
+                                            dbContext.CompletedDisciplines.Add(dayTmp);
                                         }
 
                                         dbContext.SaveChanges();
@@ -76,13 +77,14 @@ namespace ScheduleBot.Bot {
                                         break;
 
                                     case "DisciplineAlways":
-                                        var completedDisciplines = dbContext.CompletedDisciplines.FirstOrDefault(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid && i.Date == null && i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup);
+                                        CompletedDiscipline alwaysTmp = new(discipline, user.ScheduleProfileGuid) { Date = null };
+                                        var alwaysCompletedDisciplines = completedDisciplines.FirstOrDefault(i => i.Equals(alwaysTmp));
 
-                                        if(completedDisciplines is not null)
-                                            dbContext.CompletedDisciplines.Remove(completedDisciplines);
+                                        if(alwaysCompletedDisciplines is not null)
+                                            dbContext.CompletedDisciplines.Remove(alwaysCompletedDisciplines);
                                         else {
                                             dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid && i.Date != null && i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup));
-                                            dbContext.CompletedDisciplines.Add(new(discipline, user.ScheduleProfileGuid) { Date = null });
+                                            dbContext.CompletedDisciplines.Add(alwaysTmp);
                                         }
 
                                         dbContext.SaveChanges();
@@ -110,16 +112,17 @@ namespace ScheduleBot.Bot {
         private InlineKeyboardMarkup GetEditAdminInlineKeyboardButton(DateOnly date, string group, Guid scheduleProfileGuid) {
             var editButtons = new List<InlineKeyboardButton[]>();
 
-            var completedDiscipline = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == scheduleProfileGuid).ToList();
+            var сompletedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == scheduleProfileGuid).ToList();
 
             var disciplines = dbContext.Disciplines.Where(i => i.Group == group && i.Date == date).OrderBy(i => i.StartTime);
             if(disciplines.Any()) {
                 editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "В этот день", callbackData: "!"), InlineKeyboardButton.WithCallbackData(text: "Всегда", callbackData: "!") });
 
                 foreach(var item in disciplines) {
-                    var always = completedDiscipline.FirstOrDefault(i => i.Equals(new(item, scheduleProfileGuid) { Date = null })) is not null;
+                    CompletedDiscipline tmp = new(item, scheduleProfileGuid) { Date = null };
+                    var always = сompletedDisciplines.FirstOrDefault(i => i.Equals(tmp)) is not null;
 
-                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(always ? "🚫": (completedDiscipline.Contains(item) ? "❌" : "✅"))}", callbackData: $"{(always ? "!" : $"DisciplineDay {item.ID}")}"),
+                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(always ? "🚫" : (сompletedDisciplines.Contains(item) ? "❌" : "✅"))}", callbackData: $"{(always ? "!" : $"DisciplineDay {item.ID}")}"),
                                             InlineKeyboardButton.WithCallbackData(text: always ? "❌" : "✅", callbackData: $"DisciplineAlways {item.ID}")});
                 }
             }
