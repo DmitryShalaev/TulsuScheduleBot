@@ -98,9 +98,13 @@ namespace ScheduleBot.Bot {
                     break;
 
                 case Constants.RK_Exam:
-                    if(!string.IsNullOrWhiteSpace(user.ScheduleProfile.Group))
-                        await ScheduleRelevance(botClient, message.Chat, replyMarkup: ExamKeyboardMarkup);
-                    else
+                    if(!string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
+                        if(dbContext.Disciplines.Any(i => i.Group == user.ScheduleProfile.Group && i.Class == Class.other && i.Date >= DateOnly.FromDateTime(DateTime.Now)))
+                            await ScheduleRelevance(botClient, message.Chat, replyMarkup: ExamKeyboardMarkup);
+                        else
+                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: "В расписании нет будущих экзаменов.", replyMarkup: MainKeyboardMarkup);
+
+                    } else
                         await GroupError(botClient, message.Chat);
                     break;
 
@@ -176,7 +180,6 @@ namespace ScheduleBot.Bot {
                 }
             }
         }
-
 
         private async Task AcademicPerformancePerSemester(ITelegramBotClient botClient, ChatId chatId, string text, string StudentID) {
             var split = text.Split();
