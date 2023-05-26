@@ -186,17 +186,20 @@ namespace ScheduleBot.Bot {
                     }
 
                     if(message.Text?.Contains("/SetProfile") ?? false) {
-                        if(Guid.TryParse(message.Text?.Split(' ')[1] ?? "", out Guid profile)) {
-                            if(profile != user.ScheduleProfileGuid && dbContext.ScheduleProfile.Any(i => i.ID == profile)) {
-                                user.ScheduleProfileGuid = profile;
-                                dbContext.SaveChanges();
-                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Вы успешно сменили профиль", replyMarkup: MainKeyboardMarkup);
+                        try {
+                            if(Guid.TryParse(message.Text?.Split(' ')[1] ?? "", out Guid profile)) {
+                                if(profile != user.ScheduleProfileGuid && dbContext.ScheduleProfile.Any(i => i.ID == profile)) {
+                                    user.ScheduleProfileGuid = profile;
+                                    dbContext.SaveChanges();
+                                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Вы успешно сменили профиль", replyMarkup: MainKeyboardMarkup);
+                                } else {
+                                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Вы пытаетесь изменить свой профиль на текущий или на профиль, который не существует", replyMarkup: MainKeyboardMarkup);
+                                }
                             } else {
-                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Вы пытаетесь изменить свой профиль на текущий или на профиль, который не существует", replyMarkup: MainKeyboardMarkup);
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Идентификатор профиля не распознан", replyMarkup: MainKeyboardMarkup);
                             }
-                        } else {
-                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Идентификатор профиля не распознан", replyMarkup: MainKeyboardMarkup);
-                        }
+                        } catch(IndexOutOfRangeException) { }
+
                         return;
                     }
 
