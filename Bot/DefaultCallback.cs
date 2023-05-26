@@ -68,7 +68,7 @@ namespace ScheduleBot.Bot {
 
                                         if(dayCompletedDisciplines is not null)
                                             dbContext.CompletedDisciplines.Remove(dayCompletedDisciplines);
-                                        else {          
+                                        else {
                                             dbContext.CompletedDisciplines.Add(dayTmp);
                                         }
 

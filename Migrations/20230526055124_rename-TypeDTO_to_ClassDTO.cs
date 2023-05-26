@@ -4,14 +4,11 @@
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace ScheduleBot.Migrations
-{
+namespace ScheduleBot.Migrations {
     /// <inheritdoc />
-    public partial class renameTypeDTO_to_ClassDTO : Migration
-    {
+    public partial class renameTypeDTO_to_ClassDTO : Migration {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
+        protected override void Up(MigrationBuilder migrationBuilder) {
             migrationBuilder.DropForeignKey(
                 name: "FK_CompletedDisciplines_Types_Class",
                 table: "CompletedDisciplines");
@@ -29,13 +26,11 @@ namespace ScheduleBot.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Classes",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<byte>(type: "smallint", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Classes", x => x.ID);
                 });
 
@@ -77,8 +72,7 @@ namespace ScheduleBot.Migrations
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+        protected override void Down(MigrationBuilder migrationBuilder) {
             migrationBuilder.DropForeignKey(
                 name: "FK_CompletedDisciplines_Classes_Class",
                 table: "CompletedDisciplines");
@@ -96,13 +90,11 @@ namespace ScheduleBot.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Types",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<byte>(type: "smallint", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Types", x => x.ID);
                 });
 

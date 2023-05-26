@@ -16,7 +16,14 @@ namespace ScheduleBot.Bot {
         private readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { Constants.RK_Today, Constants.RK_Tomorrow },
                             new KeyboardButton[] { Constants.RK_ByDays, Constants.RK_ForAWeek },
+                            new KeyboardButton[] { Constants.RK_Exam },
                             new KeyboardButton[] { Constants.RK_Profile }
+                        })
+        { ResizeKeyboard = true };
+
+        private readonly ReplyKeyboardMarkup ExamKeyboardMarkup = new(new[] {
+                            new KeyboardButton[] { Constants.RK_NextExam, Constants.RK_AllExams },
+                            new KeyboardButton[] { Constants.RK_Back }
                         })
         { ResizeKeyboard = true };
 
@@ -88,6 +95,19 @@ namespace ScheduleBot.Bot {
                 case Constants.RK_NextWeek:
                     await ScheduleRelevance(message.Chat, botClient, WeekKeyboardMarkup);
                     await Weeks(botClient, message.Chat, message.Text, IsAdmin, user.ScheduleProfile);
+                    break;
+
+                case Constants.RK_Exam:
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: Constants.RK_Exam, replyMarkup: ExamKeyboardMarkup);
+                    await ScheduleRelevance(message.Chat, botClient, replyMarkup: ExamKeyboardMarkup);
+                    break;
+
+                case Constants.RK_AllExams:
+                    await Exams(botClient, message.Chat, user.ScheduleProfile);
+                    break;
+
+                case Constants.RK_NextExam:
+                    await Exams(botClient, message.Chat, user.ScheduleProfile, false);
                     break;
 
                 case Constants.RK_AcademicPerformance:
@@ -260,6 +280,16 @@ namespace ScheduleBot.Bot {
 
                     break;
             }
+        }
+
+        private async Task Exams(ITelegramBotClient botClient, ChatId chatId, ScheduleProfile profile, bool all = true) {
+            if(string.IsNullOrWhiteSpace(profile.Group)) {
+                await GroupError(botClient, chatId);
+                return;
+            }
+
+            foreach(var item in scheduler.GetExamse(profile, all))
+                await botClient.SendTextMessageAsync(chatId: chatId, text: item, replyMarkup: MainKeyboardMarkup);
         }
 
     }

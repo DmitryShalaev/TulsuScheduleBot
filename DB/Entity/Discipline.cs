@@ -12,7 +12,7 @@ namespace ScheduleBot.DB.Entity {
         public string? Lecturer { get; set; } = null;
         public string LectureHall { get; set; }
         public string? Subgroup { get; set; } = null;
-        public DateOnly? Date { get; set; }
+        public DateOnly Date { get; set; }
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
         public string Group { get; set; }

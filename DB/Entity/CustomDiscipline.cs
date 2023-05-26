@@ -9,7 +9,7 @@ namespace ScheduleBot.DB.Entity {
         public string Name { get; set; }
         public string? Lecturer { get; set; } = null;
         public string LectureHall { get; set; }
-        public DateOnly? Date { get; set; }
+        public DateOnly Date { get; set; }
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
 
@@ -32,7 +32,7 @@ namespace ScheduleBot.DB.Entity {
             LectureHall = discipline.LectureHall ?? throw new NullReferenceException("LectureHall");
             StartTime = discipline.StartTime ?? throw new NullReferenceException("StartTime");
             EndTime = discipline.EndTime ?? throw new NullReferenceException("EndTime");
-            Date = discipline.Date;
+            Date = discipline.Date ?? throw new NullReferenceException("Date");
             Type = discipline.Type ?? throw new NullReferenceException("Type");
 
             ScheduleProfileGuid = scheduleProfileGuid;
