@@ -1,47 +1,39 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace ScheduleBot.Migrations
-{
+namespace ScheduleBot.Migrations {
     /// <inheritdoc />
-    public partial class Init : Migration
-    {
+    public partial class Init : Migration {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
+        protected override void Up(MigrationBuilder migrationBuilder) {
             migrationBuilder.CreateTable(
                 name: "Classes",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<byte>(type: "smallint", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Classes", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Modes",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<byte>(type: "smallint", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Modes", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Progresses",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Discipline = table.Column<string>(type: "text", nullable: false),
@@ -50,29 +42,25 @@ namespace ScheduleBot.Migrations
                     Term = table.Column<int>(type: "integer", nullable: false),
                     StudentID = table.Column<string>(type: "text", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Progresses", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "ScheduleProfile",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<Guid>(type: "uuid", nullable: false),
                     OwnerID = table.Column<long>(type: "bigint", nullable: false),
                     Group = table.Column<string>(type: "text", nullable: true),
                     StudentID = table.Column<string>(type: "text", nullable: true)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_ScheduleProfile", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Disciplines",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
@@ -86,8 +74,7 @@ namespace ScheduleBot.Migrations
                     Type = table.Column<string>(type: "text", nullable: false),
                     Class = table.Column<byte>(type: "smallint", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Disciplines", x => x.ID);
                     table.ForeignKey(
                         name: "FK_Disciplines_Classes_Class",
@@ -99,8 +86,7 @@ namespace ScheduleBot.Migrations
 
             migrationBuilder.CreateTable(
                 name: "CompletedDisciplines",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
@@ -110,8 +96,7 @@ namespace ScheduleBot.Migrations
                     ScheduleProfileGuid = table.Column<Guid>(type: "uuid", nullable: false),
                     Class = table.Column<byte>(type: "smallint", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_CompletedDisciplines", x => x.ID);
                     table.ForeignKey(
                         name: "FK_CompletedDisciplines_Classes_Class",
@@ -129,8 +114,7 @@ namespace ScheduleBot.Migrations
 
             migrationBuilder.CreateTable(
                 name: "CustomDiscipline",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
@@ -143,8 +127,7 @@ namespace ScheduleBot.Migrations
                     ScheduleProfileGuid = table.Column<Guid>(type: "uuid", nullable: false),
                     Class = table.Column<byte>(type: "smallint", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_CustomDiscipline", x => x.ID);
                     table.ForeignKey(
                         name: "FK_CustomDiscipline_Classes_Class",
@@ -162,8 +145,7 @@ namespace ScheduleBot.Migrations
 
             migrationBuilder.CreateTable(
                 name: "TelegramUsers",
-                columns: table => new
-                {
+                columns: table => new {
                     ChatID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     FirstName = table.Column<string>(type: "text", nullable: false),
@@ -172,8 +154,7 @@ namespace ScheduleBot.Migrations
                     ScheduleProfileGuid = table.Column<Guid>(type: "uuid", nullable: false),
                     Mode = table.Column<byte>(type: "smallint", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_TelegramUsers", x => x.ChatID);
                     table.ForeignKey(
                         name: "FK_TelegramUsers_Modes_Mode",
@@ -191,8 +172,7 @@ namespace ScheduleBot.Migrations
 
             migrationBuilder.CreateTable(
                 name: "TemporaryAddition",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     User = table.Column<long>(type: "bigint", nullable: false),
@@ -206,8 +186,7 @@ namespace ScheduleBot.Migrations
                     StartTime = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
                     EndTime = table.Column<TimeOnly>(type: "time without time zone", nullable: true)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_TemporaryAddition", x => x.ID);
                     table.ForeignKey(
                         name: "FK_TemporaryAddition_TelegramUsers_User",
@@ -282,8 +261,7 @@ namespace ScheduleBot.Migrations
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+        protected override void Down(MigrationBuilder migrationBuilder) {
             migrationBuilder.DropTable(
                 name: "CompletedDisciplines");
 

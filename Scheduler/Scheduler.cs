@@ -74,7 +74,7 @@ namespace ScheduleBot.Scheduler {
         public List<string> GetExamse(ScheduleProfile profile, bool all) {
             var exams = new List<string>();
 
-            var disciplines = dbContext.Disciplines.Where(i => i.Group == profile.Group && i.Class == Class.other && i.Date >= DateOnly.FromDateTime(DateTime.Now)).OrderBy(i => i.Date);
+            var disciplines = dbContext.Disciplines.Where(i => i.Group == profile.Group && i.Class == Class.other && i.Date >= DateOnly.FromDateTime(DateTime.Now.Date)).OrderBy(i => i.Date);
             if(disciplines.Count() == 0) {
                 exams.Add("Ничего нет");
                 return exams;
@@ -87,7 +87,8 @@ namespace ScheduleBot.Scheduler {
             } else {
                 var item = disciplines.First();
 
-                var via = (DateTime.Parse(item.Date.ToString()) - DateTime.Now.Date).Days;
+                var via = (DateTime.Parse(item.Date.ToString()).Date - DateTime.Now.Date).Days;
+
                 #region Via
                 switch(via) {
                     case 0:
@@ -104,7 +105,7 @@ namespace ScheduleBot.Scheduler {
                         exams.Add($"Ближайший экзамен через {via} дня.");
                         break;
 
-                    default:
+                    case var _ when via > 0:
                         exams.Add($"Ближайший экзамен через {via} дней.");
                         break;
                 }
