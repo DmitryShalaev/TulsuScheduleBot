@@ -30,7 +30,8 @@ namespace ScheduleBot.DB.Entity {
         Default,
         AddingDiscipline,
         GroupСhange,
-        StudentIDСhange
+        StudentIDСhange,
+        ResetProfileLink
     }
 
     public class ModeDTO {

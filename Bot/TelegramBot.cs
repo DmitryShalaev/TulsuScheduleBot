@@ -109,6 +109,15 @@ namespace ScheduleBot.Bot {
                                         break;
                                 }
                                 break;
+
+                            case Mode.ResetProfileLink:
+                                switch(update.Type) {
+                                    case Telegram.Bot.Types.Enums.UpdateType.Message:
+                                    case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
+                                        await ResetProfileLink(botClient, message, user);
+                                        break;
+                                }
+                                break;
                         }
                     }
                     #endregion

@@ -18,31 +18,28 @@ namespace ScheduleBot.Bot {
                             new KeyboardButton[] { Constants.RK_ByDays, Constants.RK_ForAWeek },
                             new KeyboardButton[] { Constants.RK_Exam },
                             new KeyboardButton[] { Constants.RK_Profile }
-                        })
-        { ResizeKeyboard = true };
+                        }) { ResizeKeyboard = true };
 
         private readonly ReplyKeyboardMarkup ExamKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { Constants.RK_NextExam, Constants.RK_AllExams },
                             new KeyboardButton[] { Constants.RK_Back }
-                        })
-        { ResizeKeyboard = true };
+                        }) { ResizeKeyboard = true };
 
         private readonly ReplyKeyboardMarkup DaysKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { Constants.RK_Monday, Constants.RK_Tuesday },
                             new KeyboardButton[] { Constants.RK_Wednesday, Constants.RK_Thursday },
                             new KeyboardButton[] { Constants.RK_Friday, Constants.RK_Saturday },
                             new KeyboardButton[] { Constants.RK_Back }
-                        })
-        { ResizeKeyboard = true };
+                        }) { ResizeKeyboard = true };
 
-        private readonly ReplyKeyboardMarkup CancelKeyboardMarkup = new(Constants.RK_Cancel)
-        { ResizeKeyboard = true };
+        private readonly ReplyKeyboardMarkup CancelKeyboardMarkup = new(Constants.RK_Cancel) { ResizeKeyboard = true };
+
+        private readonly ReplyKeyboardMarkup ResetProfileLinkKeyboardMarkup = new(new KeyboardButton[] { Constants.RK_Reset, Constants.RK_Cancel }) { ResizeKeyboard = true };
 
         private readonly ReplyKeyboardMarkup WeekKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { Constants.RK_ThisWeek, Constants.RK_NextWeek },
                             new KeyboardButton[] { Constants.RK_Back }
-                        })
-        { ResizeKeyboard = true };
+                        }) { ResizeKeyboard = true };
         #endregion
 
         private async Task DefaultMessageModeAsync(Message message, ITelegramBotClient botClient, TelegramUser user, CancellationToken cancellationToken) {
@@ -104,23 +101,31 @@ namespace ScheduleBot.Bot {
                         else
                             await botClient.SendTextMessageAsync(chatId: message.Chat, text: "В расписании нет будущих экзаменов.", replyMarkup: MainKeyboardMarkup);
 
-                    } else
-                        await GroupError(botClient, message.Chat);
+                    } else {
+                        if(IsAdmin)
+                            await GroupErrorAdmin(botClient, message.Chat);
+                        else
+                            await GroupErrorUser(botClient, message.Chat);
+                    }
                     break;
 
                 case Constants.RK_AllExams:
-                    await Exams(botClient, message.Chat, user.ScheduleProfile);
+                    await Exams(botClient, message.Chat, user.ScheduleProfile, IsAdmin);
                     break;
 
                 case Constants.RK_NextExam:
-                    await Exams(botClient, message.Chat, user.ScheduleProfile, false);
+                    await Exams(botClient, message.Chat, user.ScheduleProfile, IsAdmin, false);
                     break;
 
                 case Constants.RK_AcademicPerformance:
-                    if(!string.IsNullOrWhiteSpace(user.ScheduleProfile.StudentID))
+                    if(!string.IsNullOrWhiteSpace(user.ScheduleProfile.StudentID)) {
                         await ProgressRelevance(botClient, message.Chat, GetTermsKeyboardMarkup(user.ScheduleProfile.StudentID));
-                    else
-                        await StudentIdError(botClient, message.Chat);
+                    } else {
+                        if(IsAdmin)
+                            await StudentIdErrorAdmin(botClient, message.Chat);
+                        else
+                            await StudentIdErrorUser(botClient, message.Chat);
+                    }
 
                     break;
 
@@ -128,13 +133,37 @@ namespace ScheduleBot.Bot {
                     await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Профиль", replyMarkup: GetProfileKeyboardMarkup(user));
                     break;
 
+                case Constants.RK_GetProfileLink:
+                    if(IsAdmin) {
+                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Если вы хотите поделиться своим расписанием с кем-то, просто отправьте им следующую команду: " +
+                        $"\n`/SetProfile {user.ScheduleProfileGuid}`" +
+                        $"\nЕсли другой пользователь введет эту команду, он сможет видеть расписание с вашими изменениями.", replyMarkup: MainKeyboardMarkup, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
+                    } else {
+                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Поделиться профилем может только его владелец!", replyMarkup: MainKeyboardMarkup);
+                    }
+                    break;
+
+                case Constants.RK_ResetProfileLink:
+                    if(!IsAdmin) {
+                        user.Mode = Mode.ResetProfileLink;
+                        dbContext.SaveChanges();
+                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Вы точно уверены что хотите восстановить свой профиль?", replyMarkup: ResetProfileLinkKeyboardMarkup);
+                    } else {
+                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Владельцу профиля нет смысла его восстанавливать!", replyMarkup: MainKeyboardMarkup);
+                    }
+
+                    break;
+
                 default:
                     if(message.Text?.Contains(Constants.RK_Semester) ?? false) {
-                        if(!string.IsNullOrWhiteSpace(studentID))
+                        if(!string.IsNullOrWhiteSpace(studentID)) {
                             await AcademicPerformancePerSemester(botClient, message.Chat, message.Text, studentID);
-                        else
-                            await StudentIdError(botClient, message.Chat);
-
+                        } else {
+                            if(IsAdmin)
+                                await StudentIdErrorAdmin(botClient, message.Chat);
+                            else
+                                await StudentIdErrorUser(botClient, message.Chat);
+                        }
                         return;
                     }
 
@@ -156,6 +185,18 @@ namespace ScheduleBot.Bot {
                         }
                     }
 
+                    if(message.Text?.Contains("/SetProfile") ?? false) {
+                        if(Guid.TryParse(message.Text?.Split(' ')[1] ?? "", out Guid profile)) {
+                            if(profile != user.ScheduleProfileGuid) {
+                                user.ScheduleProfileGuid = profile;
+                                dbContext.SaveChanges();
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Вы успешно сменили профиль", replyMarkup: MainKeyboardMarkup);
+                            } else {
+                                await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Вы пытаетесь сменить профиль на текущий", replyMarkup: MainKeyboardMarkup);
+                            }
+                        }
+                    }
+
                     if(message.Text != null)
                         await GetScheduleByDate(botClient, message.Chat, message.Text, IsAdmin, user.ScheduleProfile);
 
@@ -165,7 +206,10 @@ namespace ScheduleBot.Bot {
 
         private async Task GetScheduleByDate(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, ScheduleProfile profile) {
             if(string.IsNullOrWhiteSpace(profile.Group)) {
-                await GroupError(botClient, chatId);
+                if(IsAdmin)
+                    await GroupErrorAdmin(botClient, chatId);
+                else
+                    await GroupErrorUser(botClient, chatId);
                 return;
             }
 
@@ -191,7 +235,10 @@ namespace ScheduleBot.Bot {
 
         private async Task Weeks(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, ScheduleProfile profile) {
             if(string.IsNullOrWhiteSpace(profile.Group)) {
-                await GroupError(botClient, chatId);
+                if(IsAdmin)
+                    await GroupErrorAdmin(botClient, chatId);
+                else
+                    await GroupErrorUser(botClient, chatId);
                 return;
             }
 
@@ -224,8 +271,14 @@ namespace ScheduleBot.Bot {
         private ReplyKeyboardMarkup GetProfileKeyboardMarkup(TelegramUser user) {
             List<KeyboardButton[]> ProfileKeyboardMarkup = new();
 
-            if(user.ScheduleProfile.OwnerID == user.ChatID)
-                ProfileKeyboardMarkup.AddRange(new[] { new KeyboardButton[] { $"Номер группы: {user.ScheduleProfile.Group}" }, new KeyboardButton[] { $"Номер зачётки: {user.ScheduleProfile.StudentID}" } });
+            if(user.ScheduleProfile.OwnerID == user.ChatID) {
+                ProfileKeyboardMarkup.AddRange(new[] {  new KeyboardButton[] { $"Номер группы: {user.ScheduleProfile.Group}" },
+                                                        new KeyboardButton[] { $"Номер зачётки: {user.ScheduleProfile.StudentID}" },
+                                                        new KeyboardButton[] { Constants.RK_GetProfileLink }
+                                                     });
+            } else {
+                ProfileKeyboardMarkup.Add(new KeyboardButton[] { Constants.RK_ResetProfileLink });
+            }
 
             ProfileKeyboardMarkup.AddRange(new[] { new KeyboardButton[] { Constants.RK_AcademicPerformance }, new KeyboardButton[] { Constants.RK_Back } });
 
@@ -234,7 +287,10 @@ namespace ScheduleBot.Bot {
 
         private async Task TodayAndTomorrow(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, ScheduleProfile profile) {
             if(string.IsNullOrWhiteSpace(profile.Group)) {
-                await GroupError(botClient, chatId);
+                if(IsAdmin)
+                    await GroupErrorAdmin(botClient, chatId);
+                else
+                    await GroupErrorUser(botClient, chatId);
                 return;
             }
 
@@ -251,7 +307,10 @@ namespace ScheduleBot.Bot {
 
         private async Task DayOfWeek(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, ScheduleProfile profile) {
             if(string.IsNullOrWhiteSpace(profile.Group)) {
-                await GroupError(botClient, chatId);
+                if(IsAdmin)
+                    await GroupErrorAdmin(botClient, chatId);
+                else
+                    await GroupErrorUser(botClient, chatId);
                 return;
             }
 
@@ -289,9 +348,12 @@ namespace ScheduleBot.Bot {
             }
         }
 
-        private async Task Exams(ITelegramBotClient botClient, ChatId chatId, ScheduleProfile profile, bool all = true) {
+        private async Task Exams(ITelegramBotClient botClient, ChatId chatId, ScheduleProfile profile, bool IsAdmin, bool all = true) {
             if(string.IsNullOrWhiteSpace(profile.Group)) {
-                await GroupError(botClient, chatId);
+                if(IsAdmin)
+                    await GroupErrorAdmin(botClient, chatId);
+                else
+                    await GroupErrorUser(botClient, chatId);
                 return;
             }
 
