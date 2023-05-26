@@ -12,7 +12,7 @@ using ScheduleBot.DB;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    [Migration("20230524113326_Init")]
+    [Migration("20230526082853_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -24,6 +24,47 @@ namespace ScheduleBot.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("ScheduleBot.DB.Entity.ClassDTO", b =>
+                {
+                    b.Property<byte>("ID")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Classes");
+
+                    b.HasData(
+                        new
+                        {
+                            ID = (byte)0,
+                            Name = "all"
+                        },
+                        new
+                        {
+                            ID = (byte)1,
+                            Name = "lab"
+                        },
+                        new
+                        {
+                            ID = (byte)2,
+                            Name = "practice"
+                        },
+                        new
+                        {
+                            ID = (byte)3,
+                            Name = "lecture"
+                        },
+                        new
+                        {
+                            ID = (byte)4,
+                            Name = "other"
+                        });
+                });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.CompletedDiscipline", b =>
                 {
@@ -72,7 +113,7 @@ namespace ScheduleBot.Migrations
                     b.Property<byte>("Class")
                         .HasColumnType("smallint");
 
-                    b.Property<DateOnly?>("Date")
+                    b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
                     b.Property<TimeOnly>("EndTime")
@@ -119,7 +160,7 @@ namespace ScheduleBot.Migrations
                     b.Property<byte>("Class")
                         .HasColumnType("smallint");
 
-                    b.Property<DateOnly?>("Date")
+                    b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
                     b.Property<TimeOnly>("EndTime")
@@ -290,7 +331,7 @@ namespace ScheduleBot.Migrations
                     b.Property<int>("Counter")
                         .HasColumnType("integer");
 
-                    b.Property<DateOnly>("Date")
+                    b.Property<DateOnly?>("Date")
                         .HasColumnType("date");
 
                     b.Property<TimeOnly?>("EndTime")
@@ -321,50 +362,9 @@ namespace ScheduleBot.Migrations
                     b.ToTable("TemporaryAddition");
                 });
 
-            modelBuilder.Entity("ScheduleBot.DB.Entity.TypeDTO", b =>
-                {
-                    b.Property<byte>("ID")
-                        .HasColumnType("smallint");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("Types");
-
-                    b.HasData(
-                        new
-                        {
-                            ID = (byte)0,
-                            Name = "all"
-                        },
-                        new
-                        {
-                            ID = (byte)1,
-                            Name = "lab"
-                        },
-                        new
-                        {
-                            ID = (byte)2,
-                            Name = "practice"
-                        },
-                        new
-                        {
-                            ID = (byte)3,
-                            Name = "lecture"
-                        },
-                        new
-                        {
-                            ID = (byte)4,
-                            Name = "other"
-                        });
-                });
-
             modelBuilder.Entity("ScheduleBot.DB.Entity.CompletedDiscipline", b =>
                 {
-                    b.HasOne("ScheduleBot.DB.Entity.TypeDTO", "TypeDTO")
+                    b.HasOne("ScheduleBot.DB.Entity.ClassDTO", "ClassDTO")
                         .WithMany()
                         .HasForeignKey("Class")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -376,14 +376,14 @@ namespace ScheduleBot.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ScheduleProfile");
+                    b.Navigation("ClassDTO");
 
-                    b.Navigation("TypeDTO");
+                    b.Navigation("ScheduleProfile");
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.CustomDiscipline", b =>
                 {
-                    b.HasOne("ScheduleBot.DB.Entity.TypeDTO", "TypeDTO")
+                    b.HasOne("ScheduleBot.DB.Entity.ClassDTO", "ClassDTO")
                         .WithMany()
                         .HasForeignKey("Class")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -395,20 +395,20 @@ namespace ScheduleBot.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ScheduleProfile");
+                    b.Navigation("ClassDTO");
 
-                    b.Navigation("TypeDTO");
+                    b.Navigation("ScheduleProfile");
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.Discipline", b =>
                 {
-                    b.HasOne("ScheduleBot.DB.Entity.TypeDTO", "TypeDTO")
+                    b.HasOne("ScheduleBot.DB.Entity.ClassDTO", "ClassDTO")
                         .WithMany()
                         .HasForeignKey("Class")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("TypeDTO");
+                    b.Navigation("ClassDTO");
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.TelegramUser", b =>

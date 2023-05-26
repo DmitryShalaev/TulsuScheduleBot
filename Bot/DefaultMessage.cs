@@ -69,7 +69,7 @@ namespace ScheduleBot.Bot {
 
                 case Constants.RK_Today:
                 case Constants.RK_Tomorrow:
-                    await ScheduleRelevance(message.Chat, botClient, MainKeyboardMarkup);
+                    await ScheduleRelevance(botClient, message.Chat, MainKeyboardMarkup);
                     await TodayAndTomorrow(botClient, message.Chat, message.Text, IsAdmin, user.ScheduleProfile);
                     break;
 
@@ -83,7 +83,7 @@ namespace ScheduleBot.Bot {
                 case Constants.RK_Thursday:
                 case Constants.RK_Friday:
                 case Constants.RK_Saturday:
-                    await ScheduleRelevance(message.Chat, botClient, DaysKeyboardMarkup);
+                    await ScheduleRelevance(botClient, message.Chat, DaysKeyboardMarkup);
                     await DayOfWeek(botClient, message.Chat, message.Text, IsAdmin, user.ScheduleProfile);
                     break;
 
@@ -93,13 +93,15 @@ namespace ScheduleBot.Bot {
 
                 case Constants.RK_ThisWeek:
                 case Constants.RK_NextWeek:
-                    await ScheduleRelevance(message.Chat, botClient, WeekKeyboardMarkup);
+                    await ScheduleRelevance(botClient, message.Chat, WeekKeyboardMarkup);
                     await Weeks(botClient, message.Chat, message.Text, IsAdmin, user.ScheduleProfile);
                     break;
 
                 case Constants.RK_Exam:
-                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: Constants.RK_Exam, replyMarkup: ExamKeyboardMarkup);
-                    await ScheduleRelevance(message.Chat, botClient, replyMarkup: ExamKeyboardMarkup);
+                    if(!string.IsNullOrWhiteSpace(user.ScheduleProfile.Group))
+                        await ScheduleRelevance(botClient, message.Chat, replyMarkup: ExamKeyboardMarkup);
+                    else
+                        await GroupError(botClient, message.Chat);
                     break;
 
                 case Constants.RK_AllExams:
@@ -111,10 +113,10 @@ namespace ScheduleBot.Bot {
                     break;
 
                 case Constants.RK_AcademicPerformance:
-                    if(!string.IsNullOrEmpty(user.ScheduleProfile.StudentID))
-                        await ProgressRelevance(message.Chat, botClient, GetTermsKeyboardMarkup(user.ScheduleProfile.StudentID));
+                    if(!string.IsNullOrWhiteSpace(user.ScheduleProfile.StudentID))
+                        await ProgressRelevance(botClient, message.Chat, GetTermsKeyboardMarkup(user.ScheduleProfile.StudentID));
                     else
-                        await StudentIdError(message, botClient);
+                        await StudentIdError(botClient, message.Chat);
 
                     break;
 
@@ -124,8 +126,10 @@ namespace ScheduleBot.Bot {
 
                 default:
                     if(message.Text?.Contains(Constants.RK_Semester) ?? false) {
-                        if(!string.IsNullOrEmpty(studentID))
+                        if(!string.IsNullOrWhiteSpace(studentID))
                             await AcademicPerformancePerSemester(botClient, message.Chat, message.Text, studentID);
+                        else
+                            await StudentIdError(botClient, message.Chat);
 
                         return;
                     }
@@ -165,7 +169,7 @@ namespace ScheduleBot.Bot {
                 try {
                     var date = DateOnly.FromDateTime(DateTime.Parse(text));
 
-                    await ScheduleRelevance(chatId, botClient, MainKeyboardMarkup);
+                    await ScheduleRelevance(botClient, chatId, MainKeyboardMarkup);
                     await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(date, profile), replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
                 } catch(Exception) {
                     await botClient.SendTextMessageAsync(chatId: chatId, text: $"Сообщение распознано как дата, но не соответствует формату.", replyMarkup: MainKeyboardMarkup);

@@ -1,29 +1,47 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace ScheduleBot.Migrations {
+namespace ScheduleBot.Migrations
+{
     /// <inheritdoc />
-    public partial class Init : Migration {
+    public partial class Init : Migration
+    {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder) {
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
             migrationBuilder.CreateTable(
-                name: "Modes",
-                columns: table => new {
+                name: "Classes",
+                columns: table => new
+                {
                     ID = table.Column<byte>(type: "smallint", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Classes", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Modes",
+                columns: table => new
+                {
+                    ID = table.Column<byte>(type: "smallint", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_Modes", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Progresses",
-                columns: table => new {
+                columns: table => new
+                {
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Discipline = table.Column<string>(type: "text", nullable: false),
@@ -32,35 +50,120 @@ namespace ScheduleBot.Migrations {
                     Term = table.Column<int>(type: "integer", nullable: false),
                     StudentID = table.Column<string>(type: "text", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_Progresses", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "ScheduleProfile",
-                columns: table => new {
+                columns: table => new
+                {
                     ID = table.Column<Guid>(type: "uuid", nullable: false),
                     OwnerID = table.Column<long>(type: "bigint", nullable: false),
                     Group = table.Column<string>(type: "text", nullable: true),
                     StudentID = table.Column<string>(type: "text", nullable: true)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_ScheduleProfile", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Types",
-                columns: table => new {
-                    ID = table.Column<byte>(type: "smallint", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false)
+                name: "Disciplines",
+                columns: table => new
+                {
+                    ID = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Lecturer = table.Column<string>(type: "text", nullable: true),
+                    LectureHall = table.Column<string>(type: "text", nullable: false),
+                    Subgroup = table.Column<string>(type: "text", nullable: true),
+                    Date = table.Column<DateOnly>(type: "date", nullable: false),
+                    StartTime = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
+                    EndTime = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
+                    Group = table.Column<string>(type: "text", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false),
+                    Class = table.Column<byte>(type: "smallint", nullable: false)
                 },
-                constraints: table => {
-                    table.PrimaryKey("PK_Types", x => x.ID);
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Disciplines", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Disciplines_Classes_Class",
+                        column: x => x.Class,
+                        principalTable: "Classes",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CompletedDisciplines",
+                columns: table => new
+                {
+                    ID = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Lecturer = table.Column<string>(type: "text", nullable: true),
+                    Subgroup = table.Column<string>(type: "text", nullable: true),
+                    Date = table.Column<DateOnly>(type: "date", nullable: true),
+                    ScheduleProfileGuid = table.Column<Guid>(type: "uuid", nullable: false),
+                    Class = table.Column<byte>(type: "smallint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CompletedDisciplines", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_CompletedDisciplines_Classes_Class",
+                        column: x => x.Class,
+                        principalTable: "Classes",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CompletedDisciplines_ScheduleProfile_ScheduleProfileGuid",
+                        column: x => x.ScheduleProfileGuid,
+                        principalTable: "ScheduleProfile",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CustomDiscipline",
+                columns: table => new
+                {
+                    ID = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Lecturer = table.Column<string>(type: "text", nullable: true),
+                    LectureHall = table.Column<string>(type: "text", nullable: false),
+                    Date = table.Column<DateOnly>(type: "date", nullable: false),
+                    StartTime = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
+                    EndTime = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false),
+                    ScheduleProfileGuid = table.Column<Guid>(type: "uuid", nullable: false),
+                    Class = table.Column<byte>(type: "smallint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CustomDiscipline", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_CustomDiscipline_Classes_Class",
+                        column: x => x.Class,
+                        principalTable: "Classes",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CustomDiscipline_ScheduleProfile_ScheduleProfileGuid",
+                        column: x => x.ScheduleProfileGuid,
+                        principalTable: "ScheduleProfile",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "TelegramUsers",
-                columns: table => new {
+                columns: table => new
+                {
                     ChatID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     FirstName = table.Column<string>(type: "text", nullable: false),
@@ -69,7 +172,8 @@ namespace ScheduleBot.Migrations {
                     ScheduleProfileGuid = table.Column<Guid>(type: "uuid", nullable: false),
                     Mode = table.Column<byte>(type: "smallint", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_TelegramUsers", x => x.ChatID);
                     table.ForeignKey(
                         name: "FK_TelegramUsers_Modes_Mode",
@@ -86,93 +190,9 @@ namespace ScheduleBot.Migrations {
                 });
 
             migrationBuilder.CreateTable(
-                name: "CompletedDisciplines",
-                columns: table => new {
-                    ID = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Lecturer = table.Column<string>(type: "text", nullable: true),
-                    Subgroup = table.Column<string>(type: "text", nullable: true),
-                    Date = table.Column<DateOnly>(type: "date", nullable: true),
-                    ScheduleProfileGuid = table.Column<Guid>(type: "uuid", nullable: false),
-                    Class = table.Column<byte>(type: "smallint", nullable: false)
-                },
-                constraints: table => {
-                    table.PrimaryKey("PK_CompletedDisciplines", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_CompletedDisciplines_ScheduleProfile_ScheduleProfileGuid",
-                        column: x => x.ScheduleProfileGuid,
-                        principalTable: "ScheduleProfile",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CompletedDisciplines_Types_Class",
-                        column: x => x.Class,
-                        principalTable: "Types",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CustomDiscipline",
-                columns: table => new {
-                    ID = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Lecturer = table.Column<string>(type: "text", nullable: true),
-                    LectureHall = table.Column<string>(type: "text", nullable: false),
-                    Date = table.Column<DateOnly>(type: "date", nullable: true),
-                    StartTime = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
-                    EndTime = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
-                    Type = table.Column<string>(type: "text", nullable: false),
-                    ScheduleProfileGuid = table.Column<Guid>(type: "uuid", nullable: false),
-                    Class = table.Column<byte>(type: "smallint", nullable: false)
-                },
-                constraints: table => {
-                    table.PrimaryKey("PK_CustomDiscipline", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_CustomDiscipline_ScheduleProfile_ScheduleProfileGuid",
-                        column: x => x.ScheduleProfileGuid,
-                        principalTable: "ScheduleProfile",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CustomDiscipline_Types_Class",
-                        column: x => x.Class,
-                        principalTable: "Types",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Disciplines",
-                columns: table => new {
-                    ID = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Lecturer = table.Column<string>(type: "text", nullable: true),
-                    LectureHall = table.Column<string>(type: "text", nullable: false),
-                    Subgroup = table.Column<string>(type: "text", nullable: true),
-                    Date = table.Column<DateOnly>(type: "date", nullable: true),
-                    StartTime = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
-                    EndTime = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
-                    Group = table.Column<string>(type: "text", nullable: false),
-                    Type = table.Column<string>(type: "text", nullable: false),
-                    Class = table.Column<byte>(type: "smallint", nullable: false)
-                },
-                constraints: table => {
-                    table.PrimaryKey("PK_Disciplines", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Disciplines_Types_Class",
-                        column: x => x.Class,
-                        principalTable: "Types",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "TemporaryAddition",
-                columns: table => new {
+                columns: table => new
+                {
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     User = table.Column<long>(type: "bigint", nullable: false),
@@ -182,11 +202,12 @@ namespace ScheduleBot.Migrations {
                     Lecturer = table.Column<string>(type: "text", nullable: true),
                     LectureHall = table.Column<string>(type: "text", nullable: true),
                     Type = table.Column<string>(type: "text", nullable: true),
-                    Date = table.Column<DateOnly>(type: "date", nullable: false),
+                    Date = table.Column<DateOnly>(type: "date", nullable: true),
                     StartTime = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
                     EndTime = table.Column<TimeOnly>(type: "time without time zone", nullable: true)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_TemporaryAddition", x => x.ID);
                     table.ForeignKey(
                         name: "FK_TemporaryAddition_TelegramUsers_User",
@@ -194,6 +215,18 @@ namespace ScheduleBot.Migrations {
                         principalTable: "TelegramUsers",
                         principalColumn: "ChatID",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Classes",
+                columns: new[] { "ID", "Name" },
+                values: new object[,]
+                {
+                    { (byte)0, "all" },
+                    { (byte)1, "lab" },
+                    { (byte)2, "practice" },
+                    { (byte)3, "lecture" },
+                    { (byte)4, "other" }
                 });
 
             migrationBuilder.InsertData(
@@ -205,18 +238,6 @@ namespace ScheduleBot.Migrations {
                     { (byte)1, "AddingDiscipline" },
                     { (byte)2, "GroupСhange" },
                     { (byte)3, "StudentIDСhange" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Types",
-                columns: new[] { "ID", "Name" },
-                values: new object[,]
-                {
-                    { (byte)0, "all" },
-                    { (byte)1, "lab" },
-                    { (byte)2, "practice" },
-                    { (byte)3, "lecture" },
-                    { (byte)4, "other" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -261,7 +282,8 @@ namespace ScheduleBot.Migrations {
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder) {
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
             migrationBuilder.DropTable(
                 name: "CompletedDisciplines");
 
@@ -278,7 +300,7 @@ namespace ScheduleBot.Migrations {
                 name: "TemporaryAddition");
 
             migrationBuilder.DropTable(
-                name: "Types");
+                name: "Classes");
 
             migrationBuilder.DropTable(
                 name: "TelegramUsers");

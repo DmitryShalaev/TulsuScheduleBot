@@ -63,8 +63,8 @@ namespace ScheduleBot.Bot {
 
     public partial class TelegramBot {
         private async Task GroupError(ITelegramBotClient botClient, ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Для того, чтобы узнать расписание, необходимо указать номер группы в настройках профиля.", replyMarkup: MainKeyboardMarkup);
-        private async Task StudentIdError(Message message, ITelegramBotClient botClient) => await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Для того, чтобы узнать успеваемость, необходимо указать номер зачетной книжки в настройках профиля.", replyMarkup: MainKeyboardMarkup);
-        private async Task ScheduleRelevance(ChatId chatId, ITelegramBotClient botClient, IReplyMarkup? replyMarkup) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {Parser.scheduleLastUpdate.ToString("dd.MM HH:mm")}", replyMarkup: replyMarkup);
-        private async Task ProgressRelevance(ChatId chatId, ITelegramBotClient botClient, IReplyMarkup? replyMarkup) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Успеваемость актуально на {Parser.scheduleLastUpdate.ToString("dd.MM HH:mm")}", replyMarkup: replyMarkup);
+        private async Task StudentIdError(ITelegramBotClient botClient, ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Для того, чтобы узнать успеваемость, необходимо указать номер зачетной книжки в настройках профиля.", replyMarkup: MainKeyboardMarkup);
+        private async Task ScheduleRelevance(ITelegramBotClient botClient, ChatId chatId, IReplyMarkup? replyMarkup) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {Parser.scheduleLastUpdate.ToString("dd.MM HH:mm")}", replyMarkup: replyMarkup);
+        private async Task ProgressRelevance(ITelegramBotClient botClient, ChatId chatId, IReplyMarkup? replyMarkup) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Успеваемость актуально на {Parser.scheduleLastUpdate.ToString("dd.MM HH:mm")}", replyMarkup: replyMarkup);
     }
 }

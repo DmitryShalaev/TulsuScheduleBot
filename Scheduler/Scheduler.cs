@@ -39,7 +39,7 @@ namespace ScheduleBot.Scheduler {
 
             foreach(var item in list) {
                 str += $"⏰ {item.StartTime.ToString("HH:mm")}-{item.EndTime.ToString("HH:mm")} | {item.LectureHall}\n" +
-                       $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrEmpty(item.Subgroup) ? item.Subgroup : "")}\n" +
+                       $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}\n" +
                        $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n";
             }
 
@@ -119,7 +119,7 @@ namespace ScheduleBot.Scheduler {
             int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(item.Date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
             return $"📌{item.Date.ToString("dd.MM.yy")} - {char.ToUpper(item.Date.ToString("dddd")[0]) + item.Date.ToString("dddd").Substring(1)} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n" +
                    $"⏰ {item.StartTime.ToString("HH:mm")}-{item.EndTime.ToString("HH:mm")} | {item.LectureHall}\n" +
-                   $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrEmpty(item.Subgroup) ? item.Subgroup : "")}\n" +
+                   $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}\n" +
                    $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n";
         }
     }

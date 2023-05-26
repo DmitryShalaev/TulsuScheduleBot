@@ -12,11 +12,11 @@ using ScheduleBot.DB;
 namespace ScheduleBot {
     public class Program {
         static void Main(string[] args) {
-            if(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TelegramBotToken")) || string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TelegramBotConnectionString"))
+            if(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotToken")) || string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotConnectionString"))
 #if !DEBUG
-                || string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TelegramBot_FromEmail")) ||
-                string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TelegramBot_ToEmail")) ||
-                string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TelegramBot_PassEmail"))
+                || string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBot_FromEmail")) ||
+                string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBot_ToEmail")) ||
+                string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBot_PassEmail"))
 #endif
 ) {
                 Console.Error.WriteLine("Environment Variable is null");

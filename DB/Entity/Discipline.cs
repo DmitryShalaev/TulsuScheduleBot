@@ -32,7 +32,7 @@ namespace ScheduleBot.DB.Entity {
             Type = json.Value<string>("KOW") ?? throw new NullReferenceException("KOW");
 
             var _subgroup = json.Value<JToken>("GROUPS")?[0]?.Value<string>("PRIM");
-            Subgroup = string.IsNullOrEmpty(_subgroup) ? null : _subgroup;
+            Subgroup = string.IsNullOrWhiteSpace(_subgroup) ? null : _subgroup;
 
             Lecturer = json.Value<string?>("PREP");
 
