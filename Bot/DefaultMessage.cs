@@ -366,6 +366,5 @@ namespace ScheduleBot.Bot {
             foreach(var item in scheduler.GetExamse(profile, all))
                 await botClient.SendTextMessageAsync(chatId: chatId, text: item, replyMarkup: MainKeyboardMarkup);
         }
-
     }
 }

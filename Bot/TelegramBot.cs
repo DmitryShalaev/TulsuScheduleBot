@@ -127,8 +127,6 @@ namespace ScheduleBot.Bot {
                     await InlineQuery(botClient, update);
                     break;
             }
-
-
         }
 
         private Task HandleError(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken) => Task.CompletedTask;
