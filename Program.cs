@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Timers;
 
 #if !DEBUG
 using System.Net.Mail;
@@ -11,6 +12,9 @@ using ScheduleBot.DB;
 
 namespace ScheduleBot {
     public class Program {
+        static private System.Timers.Timer? Timer;
+        static private ScheduleDbContext? dbContext;
+
         static void Main(string[] args) {
             if(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotToken")) || string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotConnectionString"))
 #if !DEBUG
@@ -27,16 +31,22 @@ namespace ScheduleBot {
                 try {
                     CultureInfo.CurrentCulture = CultureInfo.CreateSpecificCulture("ru-RU");
 
-                    ScheduleDbContext dbContext = new();
+                    dbContext = new();
                     dbContext.Database.Migrate();
+
+                    StartTimer();
 
                     Parser parser = new(dbContext);
                     Scheduler.Scheduler scheduler = new(dbContext);
                     Bot.TelegramBot telegramBot = new(scheduler, dbContext);
 
                 } catch(Exception e) {
-                    Console.WriteLine(e.Message);
+                    if(Timer is not null) {
+                        Timer.Stop();
+                        Timer = null;
+                    }
 
+                    Console.WriteLine(e.Message);
 #if !DEBUG
                     MailAddress from = new MailAddress(Environment.GetEnvironmentVariable("TelegramBot_FromEmail") ?? "", "Error");
                     MailAddress to = new MailAddress(Environment.GetEnvironmentVariable("TelegramBot_ToEmail") ?? "");
@@ -52,6 +62,24 @@ namespace ScheduleBot {
                 }
 
             }
+        }
+
+        private static void StartTimer() {
+            TimeSpan delay = DateTime.Now.Date.AddDays(1) - DateTime.Now;
+            Timer = new() { Interval = delay.TotalMilliseconds };
+            Timer.Elapsed += Updating;
+            Timer.Start();
+        }
+
+        private static void Updating(object? sender = null, ElapsedEventArgs? e = null) {
+            if(dbContext is not null) {
+                foreach(var item in dbContext.TelegramUsers)
+                    item.TodayRequests = 0;
+
+                dbContext.SaveChanges();
+            }
+
+            StartTimer();
         }
     }
 }

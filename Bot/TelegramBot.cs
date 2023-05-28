@@ -36,7 +36,6 @@ namespace ScheduleBot.Bot {
 #if DEBUG
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
 #endif
-            TelegramUser? user = null;
 
             switch(update.Type) {
                 case Telegram.Bot.Types.Enums.UpdateType.Message:
@@ -48,7 +47,7 @@ namespace ScheduleBot.Bot {
                     if(message is not null) {
                         if(message.From is null) return;
 
-                        user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).FirstOrDefault(u => u.ChatID == message.Chat.Id);
+                        TelegramUser? user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).FirstOrDefault(u => u.ChatID == message.Chat.Id);
 
                         if(user is null) {
                             ScheduleProfile scheduleProfile = new ScheduleProfile(){ OwnerID = message.Chat.Id };
@@ -119,6 +118,12 @@ namespace ScheduleBot.Bot {
                                 }
                                 break;
                         }
+
+                        user.LastUpdate = DateTime.UtcNow;
+                        user.TodayRequests++;
+                        user.TotalRequests++;
+
+                        dbContext.SaveChanges();
                     }
                     #endregion
                     break;

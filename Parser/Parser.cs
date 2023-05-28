@@ -7,13 +7,11 @@ using Newtonsoft.Json.Linq;
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
-using Timer = System.Timers.Timer;
-
 namespace ScheduleBot {
     public class Parser {
         private readonly ScheduleDbContext dbContext;
         private readonly HttpClientHandler clientHandler;
-        private readonly Timer UpdatingTimer;
+        private readonly System.Timers.Timer UpdatingTimer;
 
         public static DateTime scheduleLastUpdate;
         public static DateTime progressLastUpdate;
