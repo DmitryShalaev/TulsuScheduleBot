@@ -17,7 +17,7 @@ namespace ScheduleBot.Bot {
                             new KeyboardButton[] { Constants.RK_Today, Constants.RK_Tomorrow },
                             new KeyboardButton[] { Constants.RK_ByDays, Constants.RK_ForAWeek },
                             new KeyboardButton[] { Constants.RK_Exam },
-                            new KeyboardButton[] { Constants.RK_Additional }
+                            new KeyboardButton[] { Constants.RK_Other }
                         }) { ResizeKeyboard = true };
 
         private readonly ReplyKeyboardMarkup AdditionalKeyboardMarkup = new(new[] {
@@ -88,7 +88,7 @@ namespace ScheduleBot.Bot {
                             user.CurrentPath = null;
                             dbContext.SaveChanges();
 
-                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: Constants.RK_Additional, replyMarkup: AdditionalKeyboardMarkup);
+                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: Constants.RK_Other, replyMarkup: AdditionalKeyboardMarkup);
                             break;
 
                         default:
@@ -191,8 +191,8 @@ namespace ScheduleBot.Bot {
 
                     break;
 
-                case Constants.RK_Additional:
-                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: Constants.RK_Additional, replyMarkup: AdditionalKeyboardMarkup);
+                case Constants.RK_Other:
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: Constants.RK_Other, replyMarkup: AdditionalKeyboardMarkup);
                     break;
 
                 case Constants.RK_Corps:
