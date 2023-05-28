@@ -11,6 +11,8 @@ namespace ScheduleBot.DB.Entity {
         public string? LastName { get; set; }
         public string? Username { get; set; }
 
+        public string? CurrentPath { get; set; }
+
         [ForeignKey("ScheduleProfile")]
         public Guid ScheduleProfileGuid { get; set; }
         public ScheduleProfile ScheduleProfile { get; set; }

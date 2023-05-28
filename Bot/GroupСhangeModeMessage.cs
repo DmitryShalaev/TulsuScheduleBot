@@ -11,7 +11,7 @@ namespace ScheduleBot.Bot {
                     user.Mode = Mode.Default;
                     dbContext.SaveChanges();
 
-                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Основное меню", replyMarkup: MainKeyboardMarkup);
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Профиль", replyMarkup: GetProfileKeyboardMarkup(user));
                     break;
 
                 default:
@@ -24,7 +24,7 @@ namespace ScheduleBot.Bot {
                         user.ScheduleProfile.Group = message.Text;
                         dbContext.SaveChanges();
 
-                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Номер группы успешно изменен на {message.Text} ", replyMarkup: MainKeyboardMarkup);
+                        await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Номер группы успешно изменен на {message.Text} ", replyMarkup: GetProfileKeyboardMarkup(user));
 
                         if(!flag)
                             parser.UpdatingDisciplines(message.Text);
@@ -43,7 +43,7 @@ namespace ScheduleBot.Bot {
                     user.Mode = Mode.Default;
                     dbContext.SaveChanges();
 
-                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Основное меню", replyMarkup: MainKeyboardMarkup);
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Профиль", replyMarkup: GetProfileKeyboardMarkup(user));
                     break;
 
                 default:
@@ -58,7 +58,7 @@ namespace ScheduleBot.Bot {
                             user.ScheduleProfile.StudentID = studentID.ToString();
                             dbContext.SaveChanges();
 
-                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Номер зачётки успешно изменен на {message.Text} ", replyMarkup: MainKeyboardMarkup);
+                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Номер зачётки успешно изменен на {message.Text} ", replyMarkup: GetProfileKeyboardMarkup(user));
 
                             if(!flag)
                                 parser.UpdatingProgress(studentID.ToString());

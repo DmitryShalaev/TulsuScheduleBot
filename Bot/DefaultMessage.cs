@@ -61,7 +61,18 @@ namespace ScheduleBot.Bot {
 
                 case Constants.RK_Back:
                 case Constants.RK_Cancel:
+                    switch(user.CurrentPath) {
+                        case Constants.RK_AcademicPerformance:
+                            user.CurrentPath = null;
+                            dbContext.SaveChanges();
+
+                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Профиль", replyMarkup: GetProfileKeyboardMarkup(user));
+                            break;
+
+                        default:
                     await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Основное меню", replyMarkup: MainKeyboardMarkup);
+                    break;
+                    }
                     break;
 
                 case Constants.RK_Today:
@@ -119,6 +130,8 @@ namespace ScheduleBot.Bot {
 
                 case Constants.RK_AcademicPerformance:
                     if(!string.IsNullOrWhiteSpace(user.ScheduleProfile.StudentID)) {
+                        user.CurrentPath = Constants.RK_AcademicPerformance;
+                        dbContext.SaveChanges();
                         await ProgressRelevance(botClient, message.Chat, GetTermsKeyboardMarkup(user.ScheduleProfile.StudentID));
                     } else {
                         if(IsAdmin)
@@ -364,7 +377,7 @@ namespace ScheduleBot.Bot {
             }
 
             foreach(var item in scheduler.GetExamse(profile, all))
-                await botClient.SendTextMessageAsync(chatId: chatId, text: item, replyMarkup: MainKeyboardMarkup);
+                await botClient.SendTextMessageAsync(chatId: chatId, text: item, replyMarkup: ExamKeyboardMarkup);
         }
     }
 }
