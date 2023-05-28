@@ -16,7 +16,7 @@ namespace ScheduleBot.Bot {
         private readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { Constants.RK_Today, Constants.RK_Tomorrow },
                             new KeyboardButton[] { Constants.RK_ByDays, Constants.RK_ForAWeek },
-                            new KeyboardButton[] { Constants.RK_Exam },
+                            new KeyboardButton[] { Constants.RK_Corps, Constants.RK_Exam },
                             new KeyboardButton[] { Constants.RK_Profile }
                         }) { ResizeKeyboard = true };
 
@@ -38,6 +38,19 @@ namespace ScheduleBot.Bot {
 
         private readonly ReplyKeyboardMarkup WeekKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { Constants.RK_ThisWeek, Constants.RK_NextWeek },
+                            new KeyboardButton[] { Constants.RK_Back }
+                        }) { ResizeKeyboard = true };
+
+        private readonly ReplyKeyboardMarkup CorpsKeyboardMarkup = new(new[] {
+                            new KeyboardButton[] { Constants.RK_MainCorps.text },
+                            new KeyboardButton[] { Constants.RK_1Corps.text, Constants.RK_2Corps.text, Constants.RK_3Corps.text, Constants.RK_4Corps.text, Constants.RK_5Corps.text },
+                            new KeyboardButton[] { Constants.RK_6Corps.text, Constants.RK_7Corps.text, Constants.RK_8Corps.text, Constants.RK_9Corps.text, Constants.RK_10Corps.text },
+                            new KeyboardButton[] { Constants.RK_11Corps.text, Constants.RK_12Corps.text, Constants.RK_13Corps.text, Constants.LaboratoryCorps.text, Constants.RK_FOC.text },
+                            new KeyboardButton[] { Constants.RK_SanatoriumDispensary.text },
+                            new KeyboardButton[] { Constants.RK_Stadium.text },
+                            new KeyboardButton[] { Constants.RK_PoolOnBoldin.text },
+                            new KeyboardButton[] { Constants.RK_SportsComplexOnBoldin.text },
+                            new KeyboardButton[] { Constants.RK_TechnicalCollege },
                             new KeyboardButton[] { Constants.RK_Back }
                         }) { ResizeKeyboard = true };
         #endregion
@@ -70,8 +83,8 @@ namespace ScheduleBot.Bot {
                             break;
 
                         default:
-                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Основное меню", replyMarkup: MainKeyboardMarkup);
-                    break;
+                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Основное меню", replyMarkup: MainKeyboardMarkup);
+                            break;
                     }
                     break;
 
@@ -150,7 +163,7 @@ namespace ScheduleBot.Bot {
                     if(IsAdmin) {
                         await botClient.SendTextMessageAsync(chatId: message.Chat, text: $"Если вы хотите поделиться своим расписанием с кем-то, просто отправьте им следующую команду: " +
                         $"\n`/SetProfile {user.ScheduleProfileGuid}`" +
-                        $"\nЕсли другой пользователь введет эту команду, он сможет видеть расписание с вашими изменениями.", replyMarkup: MainKeyboardMarkup, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
+                        $"\nЕсли другой пользователь введет эту команду, он сможет видеть расписание с вашими изменениями.", replyMarkup: GetProfileKeyboardMarkup(user), parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
                     } else {
                         await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Поделиться профилем может только его владелец!", replyMarkup: MainKeyboardMarkup);
                     }
@@ -166,6 +179,40 @@ namespace ScheduleBot.Bot {
                     }
 
                     break;
+
+                case Constants.RK_Corps:
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Выберите корпус, и я покажу где он на карте", replyMarkup: CorpsKeyboardMarkup);
+                    break;
+
+                #region Corps
+                case Constants.RK_FOC.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_FOC()); break;
+                case Constants.RK_1Corps.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_1Corps()); break;
+                case Constants.RK_2Corps.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_2Corps()); break;
+                case Constants.RK_3Corps.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_3Corps()); break;
+                case Constants.RK_4Corps.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_4Corps()); break;
+                case Constants.RK_5Corps.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_5Corps()); break;
+                case Constants.RK_6Corps.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_6Corps()); break;
+                case Constants.RK_7Corps.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_7Corps()); break;
+                case Constants.RK_8Corps.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_8Corps()); break;
+                case Constants.RK_9Corps.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_9Corps()); break;
+                case Constants.RK_10Corps.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_10Corps()); break;
+                case Constants.RK_11Corps.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_11Corps()); break;
+                case Constants.RK_12Corps.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_12Corps()); break;
+                case Constants.RK_13Corps.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_13Corps()); break;
+                case Constants.RK_Stadium.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_Stadium()); break;
+                case Constants.RK_MainCorps.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_MainCorps()); break;
+                case Constants.RK_PoolOnBoldin.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_PoolOnBoldin()); break;
+                case Constants.LaboratoryCorps.text: await SendCorpsInfo(botClient, message.Chat, new Constants.LaboratoryCorps()); break;
+                case Constants.RK_SanatoriumDispensary.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_SanatoriumDispensary()); break;
+                case Constants.RK_SportsComplexOnBoldin.text: await SendCorpsInfo(botClient, message.Chat, new Constants.RK_SportsComplexOnBoldin()); break;
+                case Constants.RK_TechnicalCollege:
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Технический колледж имени С.И. Мосина территориально расположен на трех площадках:", replyMarkup: CancelKeyboardMarkup);
+
+                    await botClient.SendVenueAsync(chatId: message.Chat, latitude: 54.200399f, longitude: 37.535350f, title: "", address: "поселок Мясново, 18-й проезд, 94", replyMarkup: CorpsKeyboardMarkup);
+                    await botClient.SendVenueAsync(chatId: message.Chat, latitude: 54.192146f, longitude: 37.588119f, title: "", address: "улица Вересаева, 12", replyMarkup: CorpsKeyboardMarkup);
+                    await botClient.SendVenueAsync(chatId: message.Chat, latitude: 54.199636f, longitude: 37.604477f, title: "", address: "улица Коминтерна, 21", replyMarkup: CorpsKeyboardMarkup);
+                    break;
+                #endregion
 
                 default:
                     if(message.Text?.Contains(Constants.RK_Semester) ?? false) {
@@ -222,6 +269,8 @@ namespace ScheduleBot.Bot {
                     break;
             }
         }
+
+        private async Task SendCorpsInfo(ITelegramBotClient botClient, ChatId chatId, Constants.Corps corps) => await botClient.SendVenueAsync(chatId: chatId, latitude: corps.Latitude, longitude: corps.Longitude, title: corps.Title, address: corps.Address, replyMarkup: CorpsKeyboardMarkup);
 
         private async Task GetScheduleByDate(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, ScheduleProfile profile) {
             if(string.IsNullOrWhiteSpace(profile.Group)) {
