@@ -66,7 +66,7 @@ namespace ScheduleBot {
 
         private static void StartTimer() {
             TimeSpan delay = DateTime.Now.Date.AddDays(1) - DateTime.Now;
-            Timer = new() { Interval = delay.TotalMilliseconds };
+            Timer = new() { Interval = delay.TotalMilliseconds, AutoReset = false };
             Timer.Elapsed += Updating;
             Timer.Start();
         }

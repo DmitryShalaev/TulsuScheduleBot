@@ -27,7 +27,8 @@ namespace ScheduleBot {
             };
 
             UpdatingTimer = new() {
-                Interval = 30 * 60 * 1000 //Minutes Seconds Milliseconds
+                Interval = 30 * 60 * 1000, //Minutes Seconds Milliseconds
+                AutoReset = false
             };
 
             if(updating) {
