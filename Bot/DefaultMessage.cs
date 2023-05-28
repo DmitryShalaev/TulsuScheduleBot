@@ -16,8 +16,15 @@ namespace ScheduleBot.Bot {
         private readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { Constants.RK_Today, Constants.RK_Tomorrow },
                             new KeyboardButton[] { Constants.RK_ByDays, Constants.RK_ForAWeek },
-                            new KeyboardButton[] { Constants.RK_Corps, Constants.RK_Exam },
-                            new KeyboardButton[] { Constants.RK_Profile }
+                            new KeyboardButton[] { Constants.RK_Exam },
+                            new KeyboardButton[] { Constants.RK_Additional }
+                        }) { ResizeKeyboard = true };
+
+        private readonly ReplyKeyboardMarkup AdditionalKeyboardMarkup = new(new[] {
+                            new KeyboardButton[] { Constants.RK_Profile },
+                            new KeyboardButton[] { Constants.RK_AcademicPerformance },
+                            new KeyboardButton[] { Constants.RK_Corps },
+                             new KeyboardButton[] { Constants.RK_Back }
                         }) { ResizeKeyboard = true };
 
         private readonly ReplyKeyboardMarkup ExamKeyboardMarkup = new(new[] {
@@ -76,10 +83,12 @@ namespace ScheduleBot.Bot {
                 case Constants.RK_Cancel:
                     switch(user.CurrentPath) {
                         case Constants.RK_AcademicPerformance:
+                        case Constants.RK_Profile:
+                        case Constants.RK_Corps:
                             user.CurrentPath = null;
                             dbContext.SaveChanges();
 
-                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Профиль", replyMarkup: GetProfileKeyboardMarkup(user));
+                            await botClient.SendTextMessageAsync(chatId: message.Chat, text: Constants.RK_Additional, replyMarkup: AdditionalKeyboardMarkup);
                             break;
 
                         default:
@@ -156,7 +165,9 @@ namespace ScheduleBot.Bot {
                     break;
 
                 case Constants.RK_Profile:
-                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Профиль", replyMarkup: GetProfileKeyboardMarkup(user));
+                    user.CurrentPath = Constants.RK_Profile;
+                    dbContext.SaveChanges();
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: Constants.RK_Profile, replyMarkup: GetProfileKeyboardMarkup(user));
                     break;
 
                 case Constants.RK_GetProfileLink:
@@ -180,7 +191,13 @@ namespace ScheduleBot.Bot {
 
                     break;
 
+                case Constants.RK_Additional:
+                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: Constants.RK_Additional, replyMarkup: AdditionalKeyboardMarkup);
+                    break;
+
                 case Constants.RK_Corps:
+                    user.CurrentPath = Constants.RK_Corps;
+                    dbContext.SaveChanges();
                     await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Выберите корпус, и я покажу где он на карте", replyMarkup: CorpsKeyboardMarkup);
                     break;
 
@@ -348,7 +365,7 @@ namespace ScheduleBot.Bot {
                 ProfileKeyboardMarkup.Add(new KeyboardButton[] { Constants.RK_ResetProfileLink });
             }
 
-            ProfileKeyboardMarkup.AddRange(new[] { new KeyboardButton[] { Constants.RK_AcademicPerformance }, new KeyboardButton[] { Constants.RK_Back } });
+            ProfileKeyboardMarkup.Add(new KeyboardButton[] { Constants.RK_Back });
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }
