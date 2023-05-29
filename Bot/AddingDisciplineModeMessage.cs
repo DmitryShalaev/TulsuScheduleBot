@@ -7,21 +7,6 @@ using Telegram.Bot.Types.ReplyMarkups;
 namespace ScheduleBot.Bot {
     public partial class TelegramBot {
 
-        private async Task AddingDisciplineMessageModeAsync(ITelegramBotClient botClient, Message message, TelegramUser user) {
-            switch(message.Text) {
-                case Constants.RK_Cancel:
-                    user.Mode = Mode.Default;
-                    dbContext.TemporaryAddition.Remove(dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First());
-                    dbContext.SaveChanges();
-                    await botClient.SendTextMessageAsync(chatId: message.Chat, text: "Основное меню", replyMarkup: MainKeyboardMarkup);
-                    break;
-
-                default:
-                    await SetStagesAddingDisciplineAsync(user, message, botClient);
-                    break;
-            }
-        }
-
         private async Task SetStagesAddingDisciplineAsync(TelegramUser user, Message message, ITelegramBotClient botClient) {
             var temporaryAddition = dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First();
 
