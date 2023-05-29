@@ -64,13 +64,13 @@ namespace ScheduleBot.Bot {
                                 switch(update.Type) {
                                     case Telegram.Bot.Types.Enums.UpdateType.Message:
                                     case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
-                                        await DefaultMessageModeAsync(message, botClient, user, cancellationToken);
+                                        await DefaultMessageModeAsync(message, botClient, user);
                                         break;
 
                                     case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
                                         if(update.CallbackQuery?.Data is null) return;
 
-                                        await DefaultCallbackModeAsync(message, botClient, user, cancellationToken, update.CallbackQuery.Data);
+                                        await DefaultCallbackModeAsync(message, botClient, user, update.CallbackQuery.Data);
                                         break;
                                 }
                                 break;
@@ -86,7 +86,7 @@ namespace ScheduleBot.Bot {
                                     case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
                                         if(update.CallbackQuery?.Data is null) return;
 
-                                        await AddingDisciplineCallbackModeAsync(message, botClient, user, cancellationToken, update.CallbackQuery.Data);
+                                        await AddingDisciplineCallbackModeAsync(message, botClient, user, update.CallbackQuery.Data);
                                         break;
                                 }
                                 break;

@@ -62,7 +62,7 @@ namespace ScheduleBot.Bot {
                         }) { ResizeKeyboard = true };
         #endregion
 
-        private async Task DefaultMessageModeAsync(Message message, ITelegramBotClient botClient, TelegramUser user, CancellationToken cancellationToken) {
+        private async Task DefaultMessageModeAsync(Message message, ITelegramBotClient botClient, TelegramUser user) {
             bool IsAdmin = user.ScheduleProfile.OwnerID == user.ChatID;
             string? group = user.ScheduleProfile.Group;
             string? studentID = user.ScheduleProfile.StudentID;

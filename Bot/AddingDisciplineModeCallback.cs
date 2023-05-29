@@ -6,7 +6,7 @@ using Telegram.Bot.Types;
 namespace ScheduleBot.Bot {
     public partial class TelegramBot {
 
-        private async Task AddingDisciplineCallbackModeAsync(Message message, ITelegramBotClient botClient, TelegramUser user, CancellationToken cancellationToken, string data) {
+        private async Task AddingDisciplineCallbackModeAsync(Message message, ITelegramBotClient botClient, TelegramUser user, string data) {
 
             List<string> str = data.Split(' ').ToList() ?? new();
             if(str.Count == 0) return;

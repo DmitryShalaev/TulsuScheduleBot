@@ -17,7 +17,7 @@ namespace ScheduleBot.Bot {
         private readonly InlineKeyboardMarkup inlineBackKeyboardMarkup = new(InlineKeyboardButton.WithCallbackData(Constants.IK_Back.text, Constants.IK_Back.callback));
         #endregion
 
-        private async Task DefaultCallbackModeAsync(Message message, ITelegramBotClient botClient, TelegramUser user, CancellationToken cancellationToken, string data) {
+        private async Task DefaultCallbackModeAsync(Message message, ITelegramBotClient botClient, TelegramUser user, string data) {
             bool IsAdmin = user.ScheduleProfile.OwnerID == user.ChatID;
             string? group = user.ScheduleProfile.Group;
 
