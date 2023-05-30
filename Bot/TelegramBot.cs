@@ -241,7 +241,7 @@ namespace ScheduleBot.Bot {
 
             foreach(var item in corps)
                 commandManager.AddMessageCommand(item.Text, Mode.Default, async (botClient, chatId, user, args) => {
-                    await SendCorpsInfo(botClient, chatId, item);
+                    await botClient.SendVenueAsync(chatId: chatId, latitude: item.Latitude, longitude: item.Longitude, title: item.Title, address: item.Address, replyMarkup: CorpsKeyboardMarkup);
                 });
 
             commandManager.AddMessageCommand(Constants.RK_TechnicalCollege, Mode.Default, async (botClient, chatId, user, args) => {

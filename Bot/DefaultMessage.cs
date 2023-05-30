@@ -61,8 +61,6 @@ namespace ScheduleBot.Bot {
                         }) { ResizeKeyboard = true };
         #endregion
 
-        private async Task SendCorpsInfo(ITelegramBotClient botClient, ChatId chatId, Constants.Corps corps) => await botClient.SendVenueAsync(chatId: chatId, latitude: corps.Latitude, longitude: corps.Longitude, title: corps.Title, address: corps.Address, replyMarkup: CorpsKeyboardMarkup);
-
         private async Task<bool> GetScheduleByDate(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, ScheduleProfile profile) {
             if(string.IsNullOrWhiteSpace(profile.Group)) {
                 if(IsAdmin)
