@@ -8,9 +8,6 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleBot.Bot {
     public partial class TelegramBot {
-        [GeneratedRegex("^\\d{1,2}[ ,./-](\\d{1,2}|\\w{3,8})([ ,./-](\\d{2}|\\d{4}))?$")]
-        private static partial Regex DateRegex();
-
         #region ReplyKeyboardMarkup
         public static readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { Constants.RK_Today, Constants.RK_Tomorrow },
@@ -60,30 +57,6 @@ namespace ScheduleBot.Bot {
                             new KeyboardButton[] { Constants.RK_Back }
                         }) { ResizeKeyboard = true };
         #endregion
-
-        private async Task<bool> GetScheduleByDate(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, ScheduleProfile profile) {
-            if(string.IsNullOrWhiteSpace(profile.Group)) {
-                if(IsAdmin)
-                    await GroupErrorAdmin(botClient, chatId);
-                else
-                    await GroupErrorUser(botClient, chatId);
-                return false;
-            }
-
-            if(DateRegex().IsMatch(text)) {
-                try {
-                    var date = DateOnly.FromDateTime(DateTime.Parse(text));
-
-                    await ScheduleRelevance(botClient, chatId, MainKeyboardMarkup);
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(date, profile), replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
-
-                    return true;
-                } catch(Exception) {
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: $"Сообщение распознано как дата, но не соответствует формату.", replyMarkup: MainKeyboardMarkup);
-                }
-            }
-            return false;
-        }
 
         private ReplyKeyboardMarkup GetTermsKeyboardMarkup(string StudentID) {
             List<KeyboardButton[]> TermsKeyboardMarkup = new();

@@ -12,9 +12,12 @@ namespace ScheduleBot.Bot {
         }
 
         public delegate Task Function(ITelegramBotClient botClient, ChatId chatId, TelegramUser user, string args);
+        public delegate Task<bool> TryFunction(ITelegramBotClient botClient, ChatId chatId, TelegramUser user, string args);
         public delegate string GetCommand(string message, TelegramUser user, out string args);
 
         private readonly Dictionary<string, (Check, Function)> MessageCommands;
+
+        private readonly List<(Check, TryFunction)>[] DefaultMessageCommands;
 
         private readonly ITelegramBotClient botClient;
         private readonly GetCommand getCommand;
@@ -23,6 +26,15 @@ namespace ScheduleBot.Bot {
             this.botClient = botClient;
             this.getCommand = getCommand;
             MessageCommands = new();
+
+            DefaultMessageCommands = new List<(Check, TryFunction)>[Enum.GetValues(typeof(Mode)).Length];
+        }
+
+        public void AddMessageCommand(Mode mode, TryFunction function, Check check = Check.none) {
+            if(DefaultMessageCommands[(byte)mode] is null)
+                DefaultMessageCommands[(byte)mode] = new() { (check, function) };
+            else
+                DefaultMessageCommands[(byte)mode].Add((check, function));
         }
 
         public void AddMessageCommand(string command, Mode mode, Function function, Check check = Check.none) {
@@ -38,34 +50,45 @@ namespace ScheduleBot.Bot {
             if(message is null) return false;
 
             if(MessageCommands.TryGetValue(getCommand(message, user, out var args), out var func)) {
-                switch(func.Item1) {
-                    case Check.group:
-                        if(string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
-                            if(user.IsAdmin())
-                                await TelegramBot.GroupErrorAdmin(botClient, chatId);
-                            else
-                                await TelegramBot.GroupErrorUser(botClient, chatId);
-                            return false;
-                        }
-                        break;
+                if(await CheckAsync(botClient, chatId, func.Item1, user)) {
+                    await func.Item2.Invoke(botClient, chatId, user, args);
 
-                    case Check.studentId:
-                        if(string.IsNullOrWhiteSpace(user.ScheduleProfile.StudentID)) {
-                            if(user.IsAdmin())
-                                await TelegramBot.StudentIdErrorAdmin(botClient, chatId);
-                            else
-                                await TelegramBot.StudentIdErrorUser(botClient, chatId);
-                            return false;
-                        }
-                        break;
+                    return true;
                 }
-
-                await func.Item2.Invoke(botClient, chatId, user, args);
-
-                return true;
             }
 
+            foreach(var item in DefaultMessageCommands[(byte)user.Mode])
+                if(await CheckAsync(botClient, chatId, item.Item1, user))
+                    if(await item.Item2.Invoke(botClient, chatId, user, message))
+                        return true;
+
+
             return false;
+        }
+
+        private async Task<bool> CheckAsync(ITelegramBotClient botClient, ChatId chatId, Check check, TelegramUser user) {
+            switch(check) {
+                case Check.group:
+                    if(string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
+                        if(user.IsAdmin())
+                            await TelegramBot.GroupErrorAdmin(botClient, chatId);
+                        else
+                            await TelegramBot.GroupErrorUser(botClient, chatId);
+                        return false;
+                    }
+                    break;
+
+                case Check.studentId:
+                    if(string.IsNullOrWhiteSpace(user.ScheduleProfile.StudentID)) {
+                        if(user.IsAdmin())
+                            await TelegramBot.StudentIdErrorAdmin(botClient, chatId);
+                        else
+                            await TelegramBot.StudentIdErrorUser(botClient, chatId);
+                        return false;
+                    }
+                    break;
+            }
+            return true;
         }
     }
 }

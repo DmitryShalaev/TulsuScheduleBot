@@ -23,6 +23,9 @@ namespace ScheduleBot.Bot {
         [GeneratedRegex("(^/[A-z]+)[ ]?([A-z0-9-]*)$")]
         private static partial Regex CommandMessageRegex();
 
+        [GeneratedRegex("^\\d{1,2}[ ,./-](\\d{1,2}|\\w{3,8})([ ,./-](\\d{2}|\\d{4}))?$")]
+        private static partial Regex DateRegex();
+
         private readonly ITelegramBotClient telegramBot;
         private readonly Scheduler.Scheduler scheduler;
         private readonly ScheduleDbContext dbContext;
@@ -73,7 +76,7 @@ namespace ScheduleBot.Bot {
                 }
             });
             commandManager.AddMessageCommand(new[] { Constants.RK_Back, Constants.RK_Cancel }, Mode.Default, async (botClient, chatId, user, args) => {
-                switch(user.CurrentPath) {
+                switch(user.CurrentPath ?? "") {
                     case Constants.RK_AcademicPerformance:
                     case Constants.RK_Profile:
                     case Constants.RK_Corps:
@@ -187,6 +190,22 @@ namespace ScheduleBot.Bot {
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Владельцу профиля нет смысла его восстанавливать!", replyMarkup: MainKeyboardMarkup);
                 }
             });
+            commandManager.AddMessageCommand(Constants.RK_Reset, Mode.ResetProfileLink, async (botClient, chatId, user, args) => {
+                user.Mode = Mode.Default;
+
+                var profile = dbContext.ScheduleProfile.FirstOrDefault(i => i.OwnerID == user.ChatID);
+                if(profile is not null) {
+                    user.ScheduleProfile = profile;
+                } else {
+                    profile = new() { OwnerID = user.ChatID };
+                    dbContext.ScheduleProfile.Add(profile);
+                    user.ScheduleProfile = profile;
+                }
+
+                dbContext.SaveChanges();
+
+                await botClient.SendTextMessageAsync(chatId: chatId, text: Constants.RK_Profile, replyMarkup: GetProfileKeyboardMarkup(user));
+            });
             commandManager.AddMessageCommand(Constants.RK_Other, Mode.Default, async (botClient, chatId, user, args) => {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: Constants.RK_Other, replyMarkup: AdditionalKeyboardMarkup);
             });
@@ -225,6 +244,34 @@ namespace ScheduleBot.Bot {
                     }
                 } catch(IndexOutOfRangeException) { }
             });
+            commandManager.AddMessageCommand(Mode.Default, async (botClient, chatId, user, args) => {
+                if(DateRegex().IsMatch(args)) {
+                    try {
+                        var date = DateOnly.FromDateTime(DateTime.Parse(args));
+
+                        await ScheduleRelevance(botClient, chatId, MainKeyboardMarkup);
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: user.IsAdmin() ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+
+                        return true;
+                    } catch(Exception) {
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"Сообщение распознано как дата, но не соответствует формату.", replyMarkup: MainKeyboardMarkup);
+                    }
+                }
+                return false;
+            }, CommandManager.Check.group);
+            commandManager.AddMessageCommand(Mode.AddingDiscipline, async (botClient, chatId, user, args) => {
+                await SetStagesAddingDisciplineAsync(botClient, chatId, args, user);
+                return true;
+            });
+            commandManager.AddMessageCommand(Mode.GroupСhange, async (botClient, chatId, user, args) => {
+                await GroupСhangeMessageMode(botClient, chatId, args, user);
+                return true;
+            });
+            commandManager.AddMessageCommand(Mode.StudentIDСhange, async (botClient, chatId, user, args) => {
+                await StudentIDСhangeMessageMode(botClient, chatId, args, user);
+                return true;
+            });
+
             #endregion
             #region Corps
             commandManager.AddMessageCommand(Constants.RK_Corps, Mode.Default, async (botClient, chatId, user, args) => {
@@ -307,64 +354,26 @@ namespace ScheduleBot.Bot {
                     case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
                         processed = await commandManager.OnMessageAsync(message.Chat, message.Text, user);
 
-                        if(!processed) {
-                            if(message.Text != null)
-                                processed = await GetScheduleByDate(botClient, message.Chat, message.Text, user.IsAdmin(), user.ScheduleProfile);
-                        }
                         break;
                 }
 
                 if(!processed) {
-                    switch(user.Mode) {
-                        case Mode.Default:
-                            switch(update.Type) {
-                                case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
+                    switch(update.Type) {
+                        case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
+
+                            switch(user.Mode) {
+                                case Mode.Default:
+
                                     if(update.CallbackQuery?.Data is null) return;
 
                                     await DefaultCallbackModeAsync(message, botClient, user, update.CallbackQuery.Data);
                                     break;
-                            }
-                            break;
 
-                        case Mode.AddingDiscipline:
-                            switch(update.Type) {
-                                case Telegram.Bot.Types.Enums.UpdateType.Message:
-                                case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
+                                case Mode.AddingDiscipline:
 
-                                    await SetStagesAddingDisciplineAsync(user, message, botClient);
-                                    break;
-
-                                case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
                                     if(update.CallbackQuery?.Data is null) return;
 
                                     await AddingDisciplineCallbackModeAsync(message, botClient, user, update.CallbackQuery.Data);
-                                    break;
-                            }
-                            break;
-
-                        case Mode.GroupСhange:
-                            switch(update.Type) {
-                                case Telegram.Bot.Types.Enums.UpdateType.Message:
-                                case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
-                                    await GroupСhangeMessageMode(botClient, message, user);
-                                    break;
-                            }
-                            break;
-
-                        case Mode.StudentIDСhange:
-                            switch(update.Type) {
-                                case Telegram.Bot.Types.Enums.UpdateType.Message:
-                                case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
-                                    await StudentIDСhangeMessageMode(botClient, message, user);
-                                    break;
-                            }
-                            break;
-
-                        case Mode.ResetProfileLink:
-                            switch(update.Type) {
-                                case Telegram.Bot.Types.Enums.UpdateType.Message:
-                                case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
-                                    await ResetProfileLink(botClient, message, user);
                                     break;
                             }
                             break;

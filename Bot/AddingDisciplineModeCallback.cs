@@ -18,7 +18,7 @@ namespace ScheduleBot.Bot {
                     temporaryAddition.EndTime = TimeOnly.Parse(str[1]);
                     temporaryAddition.Counter++;
 
-                    await SaveAddingDisciplineAsync(user, message, botClient, temporaryAddition);
+                    await SaveAddingDisciplineAsync(botClient, message.Chat, user, temporaryAddition);
 
                     break;
             }

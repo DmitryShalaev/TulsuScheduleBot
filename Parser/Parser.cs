@@ -23,7 +23,7 @@ namespace ScheduleBot {
                 AllowAutoRedirect = false,
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip | DecompressionMethods.None,
 
-                //Proxy = new WebProxy("127.0.0.1:8888"),
+                Proxy = new WebProxy("127.0.0.1:8888"),
             };
 
             UpdatingTimer = new() {
