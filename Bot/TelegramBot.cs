@@ -95,24 +95,9 @@ namespace ScheduleBot.Bot {
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: Constants.RK_MainMenu, replyMarkup: MainKeyboardMarkup);
             });
-            commandManager.AddMessageCommand(new[] { Constants.RK_Back, Constants.RK_Cancel }, Mode.GroupСhange, async (botClient, chatId, user, args) => {
-                user.Mode = Mode.Default;
-                dbContext.SaveChanges();
-
-                await botClient.SendTextMessageAsync(chatId: chatId, text: Constants.RK_Profile, replyMarkup: GetProfileKeyboardMarkup(user));
-            });
-            commandManager.AddMessageCommand(new[] { Constants.RK_Back, Constants.RK_Cancel }, Mode.StudentIDСhange, async (botClient, chatId, user, args) => {
-                user.Mode = Mode.Default;
-                dbContext.SaveChanges();
-
-                await botClient.SendTextMessageAsync(chatId: chatId, text: Constants.RK_Profile, replyMarkup: GetProfileKeyboardMarkup(user));
-            });
-            commandManager.AddMessageCommand(new[] { Constants.RK_Back, Constants.RK_Cancel }, Mode.ResetProfileLink, async (botClient, chatId, user, args) => {
-                user.Mode = Mode.Default;
-                dbContext.SaveChanges();
-
-                await botClient.SendTextMessageAsync(chatId: chatId, text: Constants.RK_Profile, replyMarkup: GetProfileKeyboardMarkup(user));
-            });
+            commandManager.AddMessageCommand(new[] { Constants.RK_Back, Constants.RK_Cancel }, Mode.GroupСhange, SetDefaultMode(dbContext));
+            commandManager.AddMessageCommand(new[] { Constants.RK_Back, Constants.RK_Cancel }, Mode.StudentIDСhange, SetDefaultMode(dbContext));
+            commandManager.AddMessageCommand(new[] { Constants.RK_Back, Constants.RK_Cancel }, Mode.ResetProfileLink, SetDefaultMode(dbContext));
             commandManager.AddMessageCommand(Constants.RK_Today, Mode.Default, async (botClient, chatId, user, args) => {
                 await ScheduleRelevance(botClient, chatId, MainKeyboardMarkup);
                 await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(DateOnly.FromDateTime(DateTime.Now), user.ScheduleProfile), replyMarkup: user.IsAdmin() ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
@@ -281,6 +266,13 @@ namespace ScheduleBot.Bot {
             new CancellationTokenSource().Token
            ).Wait();
         }
+
+        private CommandManager.Function SetDefaultMode(ScheduleDbContext dbContext) => async (botClient, chatId, user, args) => {
+            user.Mode = Mode.Default;
+            dbContext.SaveChanges();
+
+            await botClient.SendTextMessageAsync(chatId: chatId, text: Constants.RK_Profile, replyMarkup: GetProfileKeyboardMarkup(user));
+        };
 
         private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken) {
 #if DEBUG
