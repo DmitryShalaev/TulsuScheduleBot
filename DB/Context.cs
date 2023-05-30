@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 
 using ScheduleBot.DB.Entity;
 
@@ -9,7 +8,7 @@ namespace ScheduleBot.DB {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
             optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("TelegramBotConnectionString"));
 #if DEBUG
-            optionsBuilder.LogTo(Console.WriteLine, new[] { RelationalEventId.CommandExecuted });
+            //optionsBuilder.LogTo(Console.WriteLine, new[] { RelationalEventId.CommandExecuted });
 #endif
         }
 

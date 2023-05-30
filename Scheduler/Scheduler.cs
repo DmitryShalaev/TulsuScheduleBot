@@ -10,13 +10,15 @@ namespace ScheduleBot.Scheduler {
 
         public Scheduler(ScheduleDbContext dbContext) => this.dbContext = dbContext;
 
-        public List<string> GetScheduleByWeak(int weeks, ScheduleProfile profile) {
+        public List<(string, DateOnly)> GetScheduleByWeak(int weeks, ScheduleProfile profile) {
             var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
 
-            var schedules = new List<string>();
+            var schedules = new List<(string, DateOnly)>();
 
-            for(int i = 1; i < 7; i++)
-                schedules.Add(GetScheduleByDate(dateOnly.AddDays(7 * weeks + i), profile));
+            for(int i = 1; i < 7; i++) {
+                var tmp = dateOnly.AddDays(7 * weeks + i);
+                schedules.Add((GetScheduleByDate(tmp, profile), tmp));
+            }
 
             return schedules;
         }
@@ -60,14 +62,15 @@ namespace ScheduleBot.Scheduler {
             return str;
         }
 
-        public List<string> GetScheduleByDay(DayOfWeek dayOfWeek, ScheduleProfile profile) {
+        public List<(string, DateOnly)> GetScheduleByDay(DayOfWeek dayOfWeek, ScheduleProfile profile) {
             int weeks = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
             var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
 
-            var list = new List<string>();
-            for(int i = -1; i <= 1; i++)
-                list.Add(GetScheduleByDate(dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek), profile));
-
+            var list = new List<(string, DateOnly)>();
+            for(int i = -1; i <= 1; i++) {
+                var tmp = dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek);
+                list.Add((GetScheduleByDate(tmp, profile), tmp));
+            }
             return list;
         }
 

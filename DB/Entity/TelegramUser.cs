@@ -30,6 +30,8 @@ namespace ScheduleBot.DB.Entity {
         public static bool operator ==(TelegramUser? left, TelegramUser? right) => left?.Equals(right) ?? false;
         public static bool operator !=(TelegramUser? left, TelegramUser? right) => !(left == right);
         public override int GetHashCode() => ChatID.GetHashCode();
+
+        public bool IsAdmin() => ChatID == ScheduleProfile.OwnerID;
     }
 
     public enum Mode : byte {
