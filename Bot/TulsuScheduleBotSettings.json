@@ -1,7 +1,41 @@
 {
   "RK_MainMenu": "Основное меню",
+
   "RK_Today": "Сегодня",
   "RK_Tomorrow": "Завтра",
+
   "RK_ByDays": "По дням",
-  "RK_ForAWeek": "На неделю"
+  "RK_ForAWeek": "На неделю",
+
+  "RK_Profile" :"Профиль",
+  "RK_GroupNumber":"Номер групп",
+  "RK_StudentIDNumber": "Номер зачетк",
+
+  "RK_Exam" :"Экзамены",
+  "RK_NextExam" :"Ближайший экзаме",
+  "RK_AllExams": "Все экзамен",
+
+  "RK_AcademicPerformance": "Успеваемость",
+
+  "RK_Monday" :"Понедельник",
+  "RK_Tuesday" :"Вторник",
+  "RK_Wednesday" :"Среда",
+  "RK_Thursday" :"Четверг",
+  "RK_Friday" :"Пятница",
+  "RK_Saturday": "Суббота",
+
+  "RK_ThisWeek" :"Эта недел",
+  "RK_NextWeek": "Следующая недел",
+
+  "RK_Back": "Назад",
+  "RK_Cancel": "Отмена",
+  "RK_Reset": "Восстановить",
+
+  "RK_Semester": "семестр",
+
+  "RK_GetProfileLink" :"Поделиться профиле",
+  "RK_ResetProfileLink": "Восстановить свой профиль",
+
+  "RK_Corps" :"Корпуса",
+  "RK_Other": "Другое"
 }
