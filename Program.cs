@@ -16,13 +16,15 @@ namespace ScheduleBot {
         static private ScheduleDbContext? dbContext;
 
         static void Main(string[] args) {
-            if(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotToken")) || string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotConnectionString"))
+            if(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotToken")) ||
+                string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotConnectionString")) ||
+                string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotSettings"))
 #if !DEBUG
                 || string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBot_FromEmail")) ||
                 string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBot_ToEmail")) ||
                 string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBot_PassEmail"))
 #endif
-) {
+                ) {
                 Console.Error.WriteLine("Environment Variable is null");
                 return;
             }
