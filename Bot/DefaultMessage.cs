@@ -63,13 +63,13 @@ namespace ScheduleBot.Bot {
 
         private async Task SendCorpsInfo(ITelegramBotClient botClient, ChatId chatId, Constants.Corps corps) => await botClient.SendVenueAsync(chatId: chatId, latitude: corps.Latitude, longitude: corps.Longitude, title: corps.Title, address: corps.Address, replyMarkup: CorpsKeyboardMarkup);
 
-        private async Task GetScheduleByDate(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, ScheduleProfile profile) {
+        private async Task<bool> GetScheduleByDate(ITelegramBotClient botClient, ChatId chatId, string text, bool IsAdmin, ScheduleProfile profile) {
             if(string.IsNullOrWhiteSpace(profile.Group)) {
                 if(IsAdmin)
                     await GroupErrorAdmin(botClient, chatId);
                 else
                     await GroupErrorUser(botClient, chatId);
-                return;
+                return false;
             }
 
             if(DateRegex().IsMatch(text)) {
@@ -78,18 +78,13 @@ namespace ScheduleBot.Bot {
 
                     await ScheduleRelevance(botClient, chatId, MainKeyboardMarkup);
                     await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(date, profile), replyMarkup: IsAdmin ? inlineAdminKeyboardMarkup : inlineKeyboardMarkup);
+
+                    return true;
                 } catch(Exception) {
                     await botClient.SendTextMessageAsync(chatId: chatId, text: $"Сообщение распознано как дата, но не соответствует формату.", replyMarkup: MainKeyboardMarkup);
                 }
             }
-        }
-
-        private async Task AcademicPerformancePerSemester(ITelegramBotClient botClient, ChatId chatId, string text, string StudentID) {
-            var split = text.Split();
-            if(split == null || split.Count() < 2) return;
-
-            await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetProgressByTerm(int.Parse(split[0]), StudentID), replyMarkup: GetTermsKeyboardMarkup(StudentID));
-            return;
+            return false;
         }
 
         private ReplyKeyboardMarkup GetTermsKeyboardMarkup(string StudentID) {
@@ -108,8 +103,8 @@ namespace ScheduleBot.Bot {
             List<KeyboardButton[]> ProfileKeyboardMarkup = new();
 
             if(user.ScheduleProfile.OwnerID == user.ChatID) {
-                ProfileKeyboardMarkup.AddRange(new[] {  new KeyboardButton[] { $"Номер группы: {user.ScheduleProfile.Group}" },
-                                                        new KeyboardButton[] { $"Номер зачётки: {user.ScheduleProfile.StudentID}" },
+                ProfileKeyboardMarkup.AddRange(new[] {  new KeyboardButton[] { $"{Constants.RK_GroupNumber}: {user.ScheduleProfile.Group}" },
+                                                        new KeyboardButton[] { $"{Constants.RK_StudentIDNumber}: {user.ScheduleProfile.StudentID}" },
                                                         new KeyboardButton[] { Constants.RK_GetProfileLink }
                                                      });
             } else {

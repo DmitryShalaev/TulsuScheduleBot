@@ -13,6 +13,8 @@ namespace ScheduleBot.Bot {
         public const string RK_ForAWeek = "На неделю";
 
         public const string RK_Profile = "Профиль";
+        public const string RK_GroupNumber = "Номер группы";
+        public const string RK_StudentIDNumber = "Номер зачетки";
 
         public const string RK_Exam = "Экзамены";
         public const string RK_NextExam = "Ближайший экзамен";
