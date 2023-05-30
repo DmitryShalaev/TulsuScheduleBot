@@ -1,9 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using ScheduleBot.DB.Entity;
 
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
-using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleBot.Bot {

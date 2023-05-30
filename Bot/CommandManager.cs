@@ -11,21 +11,30 @@ namespace ScheduleBot.Bot {
             studentId
         }
 
-        public delegate Task Function(ITelegramBotClient botClient, ChatId chatId, TelegramUser user, string args);
-        public delegate Task<bool> TryFunction(ITelegramBotClient botClient, ChatId chatId, TelegramUser user, string args);
-        public delegate string GetCommand(string message, TelegramUser user, out string args);
+        public delegate Task MessageFunction(ITelegramBotClient botClient, ChatId chatId, TelegramUser user, string args);
+        public delegate Task CallbackFunction(ITelegramBotClient botClient, ChatId chatId, int messageId, TelegramUser user, string message, string args);
 
-        private readonly Dictionary<string, (Check, Function)> MessageCommands;
+        public delegate Task<bool> TryFunction(ITelegramBotClient botClient, ChatId chatId, TelegramUser user, string args);
+
+        public delegate string GetMessageCommand(string message, TelegramUser user, out string args);
+        public delegate string GetCallbackCommand(string message, TelegramUser user, out string args);
+
+        private readonly Dictionary<string, (Check, MessageFunction)> MessageCommands;
+        private readonly Dictionary<string, (Check, CallbackFunction)> CallbackCommands;
 
         private readonly List<(Check, TryFunction)>[] DefaultMessageCommands;
 
         private readonly ITelegramBotClient botClient;
-        private readonly GetCommand getCommand;
+        private readonly GetMessageCommand getMessageCommand;
+        private readonly GetCallbackCommand getCallbackCommand;
 
-        public CommandManager(ITelegramBotClient botClient, GetCommand getCommand) {
+        public CommandManager(ITelegramBotClient botClient, GetMessageCommand getCommand, GetCallbackCommand getCallbackCommand) {
             this.botClient = botClient;
-            this.getCommand = getCommand;
+            this.getMessageCommand = getCommand;
+            this.getCallbackCommand = getCallbackCommand;
+
             MessageCommands = new();
+            CallbackCommands = new();
 
             DefaultMessageCommands = new List<(Check, TryFunction)>[Enum.GetValues(typeof(Mode)).Length];
         }
@@ -37,31 +46,53 @@ namespace ScheduleBot.Bot {
                 DefaultMessageCommands[(byte)mode].Add((check, function));
         }
 
-        public void AddMessageCommand(string command, Mode mode, Function function, Check check = Check.none) {
+        public void AddMessageCommand(string command, Mode mode, MessageFunction function, Check check = Check.none) {
             MessageCommands.Add($"{command} {mode}", (check, function));
         }
 
-        public void AddMessageCommand(string[] commands, Mode mode, Function function, Check check = Check.none) {
+        public void AddMessageCommand(string[] commands, Mode mode, MessageFunction function, Check check = Check.none) {
             foreach(var command in commands)
                 AddMessageCommand(command, mode, function, check);
         }
 
-        public async Task<bool> OnMessageAsync(ChatId chatId, string? message, TelegramUser user) {
-            if(message is null) return false;
+        public void AddCallbackCommand(string command, Mode mode, CallbackFunction function, Check check = Check.none) {
+            CallbackCommands.Add($"{command} {mode}", (check, function)); ;
+        }
 
-            if(MessageCommands.TryGetValue(getCommand(message, user, out var args), out var func)) {
+        public async Task<bool> OnMessageAsync(ChatId chatId, string message, TelegramUser user) {
+            if(MessageCommands.TryGetValue(getMessageCommand(message, user, out var args), out var func)) {
                 if(await CheckAsync(botClient, chatId, func.Item1, user)) {
                     await func.Item2.Invoke(botClient, chatId, user, args);
-
                     return true;
+
+                } else {
+                    return false;
                 }
             }
 
-            foreach(var item in DefaultMessageCommands[(byte)user.Mode])
-                if(await CheckAsync(botClient, chatId, item.Item1, user))
+            foreach(var item in DefaultMessageCommands[(byte)user.Mode]) {
+                if(await CheckAsync(botClient, chatId, item.Item1, user)) {
                     if(await item.Item2.Invoke(botClient, chatId, user, message))
                         return true;
 
+                } else {
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
+        public async Task<bool> OnCallbackAsync(ChatId chatId, int messageId, string command, string message, TelegramUser user) {
+            if(CallbackCommands.TryGetValue(getCallbackCommand(command, user, out var args), out var func)) {
+                if(await CheckAsync(botClient, chatId, func.Item1, user)) {
+                    await func.Item2.Invoke(botClient, chatId, messageId, user, message, args);
+                    return true;
+
+                } else {
+                    return false;
+                }
+            }
 
             return false;
         }
