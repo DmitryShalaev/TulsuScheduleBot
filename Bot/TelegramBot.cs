@@ -388,7 +388,6 @@ namespace ScheduleBot.Bot {
 
                 await SaveAddingDisciplineAsync(botClient, chatId, user, temporaryAddition);
             });
-
             #endregion
             #region Corps
             commandManager.AddMessageCommand(Constants.RK_Corps, Mode.Default, async (botClient, chatId, user, args) => {
@@ -403,10 +402,11 @@ namespace ScheduleBot.Bot {
                                         new Constants.RK_SanatoriumDispensary(), new Constants.RK_SportsComplexOnBoldin()
                                         };
 
-            foreach(var item in corps)
+            foreach(var item in corps) {
                 commandManager.AddMessageCommand(item.Text, Mode.Default, async (botClient, chatId, user, args) => {
                     await botClient.SendVenueAsync(chatId: chatId, latitude: item.Latitude, longitude: item.Longitude, title: item.Title, address: item.Address, replyMarkup: CorpsKeyboardMarkup);
                 });
+            }
 
             commandManager.AddMessageCommand(Constants.RK_TechnicalCollege, Mode.Default, async (botClient, chatId, user, args) => {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: "Технический колледж имени С.И. Мосина территориально расположен на трех площадках:", replyMarkup: CancelKeyboardMarkup);

@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Timers;
 
@@ -11,7 +12,8 @@ namespace ScheduleBot {
     public class Parser {
         private readonly ScheduleDbContext dbContext;
         private readonly HttpClientHandler clientHandler;
-        private readonly System.Timers.Timer UpdatingTimer;
+        private readonly System.Timers.Timer UpdatingDisciplinesTimer;
+        private readonly System.Timers.Timer UpdatingProgressTimer;
 
         public static DateTime scheduleLastUpdate;
         public static DateTime progressLastUpdate;
@@ -26,22 +28,35 @@ namespace ScheduleBot {
                 //Proxy = new WebProxy("127.0.0.1:8888"),
             };
 
-            UpdatingTimer = new() {
+            UpdatingDisciplinesTimer = new() {
                 Interval = 30 * 60 * 1000, //Minutes Seconds Milliseconds
                 AutoReset = false
             };
 
+            UpdatingProgressTimer = new() {
+                Interval = 60 * 60 * 1000, //Minutes Seconds Milliseconds
+                AutoReset = false
+            };
+
             if(updating) {
-                UpdatingTimer.Elapsed += Updating;
-                Updating();
+                UpdatingDisciplinesTimer.Elapsed += UpdatingDisciplines;
+                UpdatingProgressTimer.Elapsed += UpdatingProgress;
+
+                UpdatingDisciplines(sender: null, e: null);
+                UpdatingProgress(sender: null, e: null);
             }
         }
 
-        private void Updating(object? sender = null, ElapsedEventArgs? e = null) {
-            UpdatingDisciplines();
-            UpdatingProgress();
+        private void UpdatingDisciplines(object? sender = null, ElapsedEventArgs? e = null) {
+            UpdatingDisciplines(group: null);
 
-            UpdatingTimer.Start();
+            UpdatingDisciplinesTimer.Start();
+        }
+
+        private void UpdatingProgress(object? sender = null, ElapsedEventArgs? e = null) {
+            UpdatingProgress(studentID: null);
+
+            UpdatingProgressTimer.Start();
         }
 
         public void UpdatingProgress(string? studentID = null) {
@@ -229,6 +244,5 @@ namespace ScheduleBot {
 
             return null;
         }
-
     }
 }
