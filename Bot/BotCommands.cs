@@ -33,9 +33,6 @@ namespace ScheduleBot.Bot {
                     using(HttpResponseMessage response = client.GetAsync(Environment.GetEnvironmentVariable("TelegramBotSettings")).Result) {
                         if(response.IsSuccessStatusCode) {
                             commands = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-
-                            using(StreamWriter sw = new("Bot/TulsuScheduleBotSettings.json"))
-                                sw.Write(commands);
                         } else {
                             throw new Exception();
                         }
