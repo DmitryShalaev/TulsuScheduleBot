@@ -30,8 +30,8 @@ namespace ScheduleBot.Bot {
                     editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} 🗑", callbackData: $"Delete {item.ID}") });
             }
 
-            editButtons.AddRange(new[] { new[] { InlineKeyboardButton.WithCallbackData(Constants.IK_Add.text, $"{Constants.IK_Add.callback} {date}") },
-                                         new[] { InlineKeyboardButton.WithCallbackData(Constants.IK_Back.text, $"{Constants.IK_Back.callback} {date}") }});
+            editButtons.AddRange(new[] { new[] { InlineKeyboardButton.WithCallbackData(commands.Callback["Add"].text, $"{commands.Callback["Add"].callback} {date}") },
+                                         new[] { InlineKeyboardButton.WithCallbackData(commands.Callback["Back"].text, $"{commands.Callback["Back"].callback} {date}") }});
 
             return new InlineKeyboardMarkup(editButtons);
         }
@@ -40,16 +40,16 @@ namespace ScheduleBot.Bot {
             var editButtons = new List<InlineKeyboardButton[]>();
 
             if(user.IsAdmin())
-                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: Constants.IK_ViewAll.text, callbackData: $"{Constants.IK_ViewAll.callback} {date}"),
-                                    InlineKeyboardButton.WithCallbackData(text: Constants.IK_Edit.text, callbackData: $"{Constants.IK_Edit.callback} {date}") });
+                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: commands.Callback["All"].text, callbackData: $"{commands.Callback["All"].callback} {date}"),
+                                    InlineKeyboardButton.WithCallbackData(text: commands.Callback["Edit"].text, callbackData: $"{commands.Callback["Edit"].callback} {date}") });
             else
-                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: Constants.IK_ViewAll.text, callbackData: $"{Constants.IK_ViewAll.callback} {date}") });
+                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: commands.Callback["All"].text, callbackData: $"{commands.Callback["All"].callback} {date}") });
 
             return new InlineKeyboardMarkup(editButtons);
         }
 
         private InlineKeyboardMarkup GetInlineBackKeyboardButton(DateOnly date, TelegramUser user) {
-            return new(InlineKeyboardButton.WithCallbackData(Constants.IK_Back.text, $"{Constants.IK_Back.callback} {date}")); ;
+            return new(InlineKeyboardButton.WithCallbackData(commands.Callback["Back"].text, $"{commands.Callback["Back"].callback} {date}")); ;
         }
 
     }

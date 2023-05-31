@@ -14,11 +14,11 @@ namespace ScheduleBot.Bot {
             if(inlineQuery is not null) {
                 string str = inlineQuery.Query.ToLower();
                 switch(str) {
-                    case var _ when str == Constants.RK_Today.ToLower():
+                    case var _ when str == commands.Message["Today"].ToLower():
                         await AnswerInlineQueryAsync(botClient, inlineQuery, DateOnly.FromDateTime(DateTime.Now));
                         break;
 
-                    case var _ when str == Constants.RK_Tomorrow.ToLower():
+                    case var _ when str == commands.Message["Tomorrow"].ToLower():
                         await AnswerInlineQueryAsync(botClient, inlineQuery, DateOnly.FromDateTime(DateTime.Now.AddDays(1)));
                         break;
 

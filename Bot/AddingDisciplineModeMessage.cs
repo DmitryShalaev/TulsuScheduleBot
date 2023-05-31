@@ -50,7 +50,7 @@ namespace ScheduleBot.Bot {
                 case 5:
                     var endTime = temporaryAddition.StartTime?.AddMinutes(95);
                     await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(user, temporaryAddition.Counter),
-                            replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: endTime?.ToString() ?? "endTime Error", callbackData: $"{Constants.IK_SetEndTime.callback} {endTime}")) { });
+                            replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: endTime?.ToString() ?? "endTime Error", callbackData: $"{commands.Callback["SetEndTime"].callback} {endTime}")) { });
                     break;
 
                 case 6:
@@ -73,9 +73,9 @@ namespace ScheduleBot.Bot {
 
         private string GetStagesAddingDiscipline(TelegramUser user, int? counter = null) {
             if(counter != null)
-                return Constants.StagesOfAdding[(int)counter];
+                return commands.StagesOfAdding[(int)counter];
 
-            return Constants.StagesOfAdding[dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First().Counter];
+            return commands.StagesOfAdding[dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First().Counter];
         }
 
         public TimeOnly ParseTime(string timeString) {

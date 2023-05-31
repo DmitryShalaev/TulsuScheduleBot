@@ -29,26 +29,25 @@ namespace ScheduleBot {
                 return;
             }
 
-            while(true) {
-                try {
-                    CultureInfo.CurrentCulture = CultureInfo.CreateSpecificCulture("ru-RU");
+            try {
+                CultureInfo.CurrentCulture = CultureInfo.CreateSpecificCulture("ru-RU");
 
-                    dbContext = new();
-                    dbContext.Database.Migrate();
+                dbContext = new();
+                dbContext.Database.Migrate();
 
-                    StartTimer();
+                StartTimer();
 
-                    Parser parser = new(dbContext);
-                    Scheduler.Scheduler scheduler = new(dbContext);
-                    Bot.TelegramBot telegramBot = new(scheduler, dbContext);
+                Parser parser = new(dbContext);
+                Scheduler.Scheduler scheduler = new(dbContext);
+                Bot.TelegramBot telegramBot = new(scheduler, dbContext);
 
-                } catch(Exception e) {
-                    if(Timer is not null) {
-                        Timer.Stop();
-                        Timer = null;
-                    }
+            } catch(Exception e) {
+                if(Timer is not null) {
+                    Timer.Stop();
+                    Timer = null;
+                }
 
-                    Console.WriteLine(e.Message);
+                Console.WriteLine(e.Message);
 #if !DEBUG
                     MailAddress from = new MailAddress(Environment.GetEnvironmentVariable("TelegramBot_FromEmail") ?? "", "Error");
                     MailAddress to = new MailAddress(Environment.GetEnvironmentVariable("TelegramBot_ToEmail") ?? "");
@@ -61,8 +60,6 @@ namespace ScheduleBot {
                     smtp.EnableSsl = true;
                     smtp.SendMailAsync(message).Wait();
 #endif
-                }
-
             }
         }
 

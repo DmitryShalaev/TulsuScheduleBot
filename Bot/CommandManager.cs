@@ -4,7 +4,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace ScheduleBot.Bot {
-    public partial class CommandManager {
+    public class CommandManager {
         public enum Check : byte {
             none,
             group,
