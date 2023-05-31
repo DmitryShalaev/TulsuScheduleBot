@@ -74,9 +74,6 @@ namespace ScheduleBot.Bot {
                 if(await CheckAsync(botClient, chatId, item.Item1, user)) {
                     if(await item.Item2.Invoke(botClient, chatId, user, message))
                         return true;
-
-                } else {
-                    return false;
                 }
             }
 
@@ -89,8 +86,6 @@ namespace ScheduleBot.Bot {
                     await func.Item2.Invoke(botClient, chatId, messageId, user, message, args);
                     return true;
 
-                } else {
-                    return false;
                 }
             }
 

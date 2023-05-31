@@ -23,7 +23,7 @@ namespace ScheduleBot.Bot {
         [GeneratedRegex("(^/[A-z]+)[ ]?([A-z0-9-]*)$")]
         private static partial Regex CommandMessageRegex();
 
-        [GeneratedRegex("^([A-z][A-z]+)\\s([0-9.:]+)$")]
+        [GeneratedRegex("^([A-z][A-z]+)[ ]([0-9.:]+)$")]
         private static partial Regex DisciplineCallbackRegex();
 
         [GeneratedRegex("^\\d{1,2}[ ,./-](\\d{1,2}|\\w{3,8})([ ,./-](\\d{2}|\\d{4}))?$")]
@@ -280,11 +280,47 @@ namespace ScheduleBot.Bot {
                 return true;
             });
             commandManager.AddMessageCommand(Mode.GroupСhange, async (botClient, chatId, user, args) => {
-                await GroupСhangeMessageMode(botClient, chatId, args, user);
+                await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: CancelKeyboardMarkup);
+                Parser parser = new(dbContext, false);
+                bool flag = dbContext.ScheduleProfile.Select(i=>i.Group).Contains(args);
+
+                if(flag || parser.GetDates(args) is not null) {
+                    user.Mode = Mode.Default;
+                    user.ScheduleProfile.Group = args;
+                    dbContext.SaveChanges();
+
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: $"Номер группы успешно изменен на {args} ", replyMarkup: GetProfileKeyboardMarkup(user));
+
+                    if(!flag)
+                        parser.UpdatingDisciplines(args);
+                } else {
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает или такой группы не существует", replyMarkup: CancelKeyboardMarkup);
+                }
                 return true;
             });
             commandManager.AddMessageCommand(Mode.StudentIDСhange, async (botClient, chatId, user, args) => {
-                await StudentIDСhangeMessageMode(botClient, chatId, args, user);
+                await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: CancelKeyboardMarkup);
+
+                if(int.TryParse(args, out int studentID)) {
+                    Parser parser = new(dbContext, false);
+                    bool flag = dbContext.ScheduleProfile.Select(i => i.StudentID).Contains(args);
+
+                    if(flag || parser.GetProgress(args) is not null) {
+                        user.Mode = Mode.Default;
+                        user.ScheduleProfile.StudentID = studentID.ToString();
+                        dbContext.SaveChanges();
+
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"Номер зачётки успешно изменен на {args} ", replyMarkup: GetProfileKeyboardMarkup(user));
+
+                        if(!flag)
+                            parser.UpdatingProgress(studentID.ToString());
+                    } else {
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает или указан неверный номер зачётки", replyMarkup: CancelKeyboardMarkup);
+                    }
+
+                } else {
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: "Не удалось распознать введенный номер зачётной книжки", replyMarkup: CancelKeyboardMarkup);
+                }
                 return true;
             });
 
