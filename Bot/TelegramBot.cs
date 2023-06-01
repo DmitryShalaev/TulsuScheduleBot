@@ -459,10 +459,10 @@ namespace ScheduleBot.Bot {
                 TelegramUser? user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).FirstOrDefault(u => u.ChatID == message.Chat.Id);
 
                 if(user is null) {
-                    ScheduleProfile scheduleProfile = new ScheduleProfile(){ OwnerID = message.Chat.Id };
+                    ScheduleProfile scheduleProfile = new ScheduleProfile(){ OwnerID = message.Chat.Id, LastAppeal = DateTime.UtcNow };
                     dbContext.ScheduleProfile.Add(scheduleProfile);
 
-                    user = new() { ChatID = message.Chat.Id, FirstName = message.From.FirstName, Username = message.From.Username, LastName = message.From.LastName, ScheduleProfile = scheduleProfile };
+                    user = new() { ChatID = message.Chat.Id, FirstName = message.From.FirstName, Username = message.From.Username, LastName = message.From.LastName, ScheduleProfile = scheduleProfile, LastAppeal = DateTime.UtcNow };
 
                     dbContext.TelegramUsers.Add(user);
                     dbContext.SaveChanges();
@@ -493,10 +493,9 @@ namespace ScheduleBot.Bot {
                         break;
                 }
 
-                user.LastAppeal = DateTime.UtcNow;
+                user.LastAppeal = user.ScheduleProfile.LastAppeal = DateTime.UtcNow;
                 user.TodayRequests++;
                 user.TotalRequests++;
-                user.ScheduleProfile.LastAppeal = DateTime.UtcNow;
 
                 dbContext.SaveChanges();
             } else {
