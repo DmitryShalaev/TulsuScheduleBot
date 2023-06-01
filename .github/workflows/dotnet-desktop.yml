@@ -16,7 +16,17 @@ jobs:
       with:
         dotnet-version: 7.0.x
 
+    - name: Check file changes
+      id: file_changes
+      run: |
+        if git diff --name-only ${{ github.base_ref }}...${{ github.head_ref }} -- Bot/TulsuScheduleBotSettings.json; then
+        echo "::set-output name=changed::true"
+        else
+        echo "::set-output name=changed::false"
+        fi
+ 
     - name: Deploy Gist
+      if: steps.file_changes.outputs.changed == 'true'
       uses: exuanbo/actions-deploy-gist@v1
       with:
         token: ${{ secrets.GIST_TOKEN }}
