@@ -16,24 +16,23 @@ jobs:
       with:
         dotnet-version: 7.0.x
 
-    - name: Check file changes
-      id: file_changes
-      run: |
-        if git diff --name-only ${{ github.base_ref }}...${{ github.head_ref }} -- Bot/TulsuScheduleBotSettings.json; then
-          echo 'CHANGES=true' >> $GITHUB_ENV
-        else
-          echo 'CHANGES=false' >> $GITHUB_ENV
-        fi
- 
-    - name: Deploy Gist
-      if: env.CHANGES == 'true'
-      uses: exuanbo/actions-deploy-gist@v1
+    - name: Verify Changed files
+      uses: tj-actions/verify-changed-files@v14
+      id: verify-changed-files
       with:
-        token: ${{ secrets.GIST_TOKEN }}
-        gist_id: ${{ secrets.GIST_ID }}
-        file_path: Bot/TulsuScheduleBotSettings.json
-        file_type: json
-        
+        files: |
+           TulsuScheduleBotSettings.json
+
+    - name: Deploy Gist
+      if: steps.verify-changed-files.outputs.files_changed == 'true'
+      run: |
+        uses: exuanbo/actions-deploy-gist@v1
+        with:
+          token: ${{ secrets.GIST_TOKEN }}
+          gist_id: ${{ secrets.GIST_ID }}
+          file_path: Bot/TulsuScheduleBotSettings.json
+          file_type: json
+         
     - name: DotNet Restore
       run: dotnet restore
     
