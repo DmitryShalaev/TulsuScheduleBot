@@ -195,6 +195,19 @@ namespace ScheduleBot.Migrations
                     b.ToTable("Disciplines");
                 });
 
+            modelBuilder.Entity("ScheduleBot.DB.Entity.GroupLastUpdate", b =>
+                {
+                    b.Property<string>("Group")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Update")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Group");
+
+                    b.ToTable("GroupLastUpdate");
+                });
+
             modelBuilder.Entity("ScheduleBot.DB.Entity.ModeDTO", b =>
                 {
                     b.Property<byte>("ID")
@@ -275,6 +288,9 @@ namespace ScheduleBot.Migrations
                     b.Property<string>("Group")
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("LastAppeal")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<long>("OwnerID")
                         .HasColumnType("bigint");
 
@@ -284,6 +300,19 @@ namespace ScheduleBot.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("ScheduleProfile");
+                });
+
+            modelBuilder.Entity("ScheduleBot.DB.Entity.StudentIDLastUpdate", b =>
+                {
+                    b.Property<string>("StudentID")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Update")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("StudentID");
+
+                    b.ToTable("StudentIDLastUpdate");
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.TelegramUser", b =>
@@ -301,11 +330,11 @@ namespace ScheduleBot.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("LastAppeal")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("LastName")
                         .HasColumnType("text");
-
-                    b.Property<DateTime?>("LastUpdate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<byte>("Mode")
                         .HasColumnType("smallint");

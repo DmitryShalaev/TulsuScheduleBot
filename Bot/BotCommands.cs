@@ -48,6 +48,9 @@ namespace ScheduleBot.Bot {
             Corps = commands["Corps"]?.ToObject<CorpsStruct[]>() ?? throw new NullReferenceException("Corps");
             StagesOfAdding = commands["StagesOfAdding"]?.ToObject<string[]>() ?? throw new NullReferenceException("StagesOfAdding");
             College = commands["College"]?.ToObject<CollegeStruct>() ?? throw new NullReferenceException("College");
+
+            Message.TrimExcess();
+            Callback.TrimExcess();
         }
     }
 }

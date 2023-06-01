@@ -36,5 +36,7 @@ namespace ScheduleBot.DB {
         public DbSet<TelegramUser> TelegramUsers { get; set; }
         public DbSet<TemporaryAddition> TemporaryAddition { get; set; }
         public DbSet<ScheduleProfile> ScheduleProfile { get; set; }
+        public DbSet<GroupLastUpdate> GroupLastUpdate { get; set; }
+        public DbSet<StudentIDLastUpdate> StudentIDLastUpdate { get; set; }
     }
 }

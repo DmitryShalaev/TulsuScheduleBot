@@ -1,6 +1,9 @@
-﻿using System.Net;
+﻿using System.Data;
+using System.Net;
 using System.Text;
 using System.Timers;
+
+using Microsoft.EntityFrameworkCore;
 
 using Newtonsoft.Json.Linq;
 
@@ -13,9 +16,6 @@ namespace ScheduleBot {
         private readonly HttpClientHandler clientHandler;
         private readonly System.Timers.Timer UpdatingDisciplinesTimer;
         private readonly System.Timers.Timer UpdatingProgressTimer;
-
-        public static DateTime scheduleLastUpdate;
-        public static DateTime progressLastUpdate;
 
         public Parser(ScheduleDbContext dbContext, bool updating = true) {
             this.dbContext = dbContext;
@@ -62,7 +62,11 @@ namespace ScheduleBot {
             void Get(string iStudentID) {
                 var progress = GetProgress(iStudentID);
                 if(progress != null) {
-                    progressLastUpdate = DateTime.Now;
+                    var studentIDLastUpdate = dbContext.StudentIDLastUpdate.SingleOrDefault(i => i.StudentID == iStudentID);
+                    if(studentIDLastUpdate is null)
+                        dbContext.StudentIDLastUpdate.Add(new() { StudentID = iStudentID, Update = DateTime.UtcNow });
+                    else
+                        studentIDLastUpdate.Update = DateTime.UtcNow;
 
                     var _list = dbContext.Progresses.Where(i => i.StudentID == iStudentID).ToList();
 
@@ -75,15 +79,16 @@ namespace ScheduleBot {
                     }
 
                     except = _list.Except(progress);
-                    if(except.Any()) {
+                    if(except.Any())
                         dbContext.Progresses.RemoveRange(except);
-                        dbContext.SaveChanges();
-                    }
+
+                    dbContext.SaveChanges();
                 }
             }
 
             if(string.IsNullOrWhiteSpace(studentID)) {
-                foreach(var iStudentID in dbContext.ScheduleProfile.Select(i => i.StudentID).Distinct().ToList()) {
+                var dateNow = DateTime.UtcNow;
+                foreach(var iStudentID in dbContext.ScheduleProfile.Where(i => (dateNow - i.LastAppeal).TotalDays <= 7).Select(i => i.StudentID).Distinct().ToList()) {
                     if(string.IsNullOrWhiteSpace(iStudentID)) continue;
 
                     Get(iStudentID);
@@ -100,7 +105,11 @@ namespace ScheduleBot {
                 if(disciplines != null) {
                     var dates = GetDates(iGroup);
                     if(dates != null) {
-                        scheduleLastUpdate = DateTime.Now;
+                        var groupLastUpdate = dbContext.GroupLastUpdate.SingleOrDefault(i => i.Group == iGroup);
+                        if(groupLastUpdate is null)
+                            dbContext.GroupLastUpdate.Add(new() { Group = iGroup, Update = DateTime.UtcNow });
+                        else
+                            groupLastUpdate.Update = DateTime.UtcNow;
 
                         var _list = dbContext.Disciplines.Where(i => i.Group == iGroup && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
 
@@ -113,16 +122,17 @@ namespace ScheduleBot {
                         }
 
                         except = _list.Except(disciplines);
-                        if(except.Any()) {
+                        if(except.Any())
                             dbContext.Disciplines.RemoveRange(except);
-                            dbContext.SaveChanges();
-                        }
+
+                        dbContext.SaveChanges();
                     }
                 }
             }
 
             if(string.IsNullOrWhiteSpace(group)) {
-                foreach(var iGroup in dbContext.ScheduleProfile.Select(i => i.Group).Distinct().ToList()) {
+                var dateNow = DateTime.UtcNow;
+                foreach(var iGroup in dbContext.ScheduleProfile.Where(i => (dateNow - i.LastAppeal).TotalDays <= 7).Select(i => i.Group).Distinct().ToList()) {
                     if(string.IsNullOrWhiteSpace(iGroup)) continue;
 
                     Get(iGroup);
@@ -189,7 +199,6 @@ namespace ScheduleBot {
                     client.DefaultRequestHeaders.Add("Sec-Fetch-Site", "same-origin");
                     client.DefaultRequestHeaders.Add("Connection", "keep-alive");
                     client.DefaultRequestHeaders.Add("Host", "tulsu.ru");
-
                     #endregion
 
                     using(var content = new StringContent($"search_value={group}", Encoding.UTF8, "application/x-www-form-urlencoded"))

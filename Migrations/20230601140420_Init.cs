@@ -4,8 +4,6 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace ScheduleBot.Migrations {
     /// <inheritdoc />
     public partial class Init : Migration {
@@ -19,6 +17,16 @@ namespace ScheduleBot.Migrations {
                 },
                 constraints: table => {
                     table.PrimaryKey("PK_Classes", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GroupLastUpdate",
+                columns: table => new {
+                    Group = table.Column<string>(type: "text", nullable: false),
+                    Update = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table => {
+                    table.PrimaryKey("PK_GroupLastUpdate", x => x.Group);
                 });
 
             migrationBuilder.CreateTable(
@@ -52,10 +60,21 @@ namespace ScheduleBot.Migrations {
                     ID = table.Column<Guid>(type: "uuid", nullable: false),
                     OwnerID = table.Column<long>(type: "bigint", nullable: false),
                     Group = table.Column<string>(type: "text", nullable: true),
-                    StudentID = table.Column<string>(type: "text", nullable: true)
+                    StudentID = table.Column<string>(type: "text", nullable: true),
+                    LastAppeal = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table => {
                     table.PrimaryKey("PK_ScheduleProfile", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StudentIDLastUpdate",
+                columns: table => new {
+                    StudentID = table.Column<string>(type: "text", nullable: false),
+                    Update = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table => {
+                    table.PrimaryKey("PK_StudentIDLastUpdate", x => x.StudentID);
                 });
 
             migrationBuilder.CreateTable(
@@ -151,6 +170,10 @@ namespace ScheduleBot.Migrations {
                     FirstName = table.Column<string>(type: "text", nullable: false),
                     LastName = table.Column<string>(type: "text", nullable: true),
                     Username = table.Column<string>(type: "text", nullable: true),
+                    CurrentPath = table.Column<string>(type: "text", nullable: true),
+                    LastAppeal = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    TotalRequests = table.Column<long>(type: "bigint", nullable: false),
+                    TodayRequests = table.Column<long>(type: "bigint", nullable: false),
                     ScheduleProfileGuid = table.Column<Guid>(type: "uuid", nullable: false),
                     Mode = table.Column<byte>(type: "smallint", nullable: false)
                 },
@@ -216,7 +239,8 @@ namespace ScheduleBot.Migrations {
                     { (byte)0, "Default" },
                     { (byte)1, "AddingDiscipline" },
                     { (byte)2, "GroupСhange" },
-                    { (byte)3, "StudentIDСhange" }
+                    { (byte)3, "StudentIDСhange" },
+                    { (byte)4, "ResetProfileLink" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -272,7 +296,13 @@ namespace ScheduleBot.Migrations {
                 name: "Disciplines");
 
             migrationBuilder.DropTable(
+                name: "GroupLastUpdate");
+
+            migrationBuilder.DropTable(
                 name: "Progresses");
+
+            migrationBuilder.DropTable(
+                name: "StudentIDLastUpdate");
 
             migrationBuilder.DropTable(
                 name: "TemporaryAddition");

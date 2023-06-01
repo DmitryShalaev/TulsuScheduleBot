@@ -12,7 +12,7 @@ using ScheduleBot.DB;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    [Migration("20230526082853_Init")]
+    [Migration("20230601140420_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -198,6 +198,19 @@ namespace ScheduleBot.Migrations
                     b.ToTable("Disciplines");
                 });
 
+            modelBuilder.Entity("ScheduleBot.DB.Entity.GroupLastUpdate", b =>
+                {
+                    b.Property<string>("Group")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Update")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Group");
+
+                    b.ToTable("GroupLastUpdate");
+                });
+
             modelBuilder.Entity("ScheduleBot.DB.Entity.ModeDTO", b =>
                 {
                     b.Property<byte>("ID")
@@ -231,6 +244,11 @@ namespace ScheduleBot.Migrations
                         {
                             ID = (byte)3,
                             Name = "StudentIDСhange"
+                        },
+                        new
+                        {
+                            ID = (byte)4,
+                            Name = "ResetProfileLink"
                         });
                 });
 
@@ -273,6 +291,9 @@ namespace ScheduleBot.Migrations
                     b.Property<string>("Group")
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("LastAppeal")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<long>("OwnerID")
                         .HasColumnType("bigint");
 
@@ -284,6 +305,19 @@ namespace ScheduleBot.Migrations
                     b.ToTable("ScheduleProfile");
                 });
 
+            modelBuilder.Entity("ScheduleBot.DB.Entity.StudentIDLastUpdate", b =>
+                {
+                    b.Property<string>("StudentID")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Update")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("StudentID");
+
+                    b.ToTable("StudentIDLastUpdate");
+                });
+
             modelBuilder.Entity("ScheduleBot.DB.Entity.TelegramUser", b =>
                 {
                     b.Property<long>("ChatID")
@@ -292,9 +326,15 @@ namespace ScheduleBot.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ChatID"));
 
+                    b.Property<string>("CurrentPath")
+                        .HasColumnType("text");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("LastAppeal")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LastName")
                         .HasColumnType("text");
@@ -304,6 +344,12 @@ namespace ScheduleBot.Migrations
 
                     b.Property<Guid>("ScheduleProfileGuid")
                         .HasColumnType("uuid");
+
+                    b.Property<long>("TodayRequests")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TotalRequests")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Username")
                         .HasColumnType("text");

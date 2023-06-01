@@ -13,7 +13,7 @@ namespace ScheduleBot.DB.Entity {
 
         public string? CurrentPath { get; set; }
 
-        public DateTime? LastUpdate { get; set; }
+        public DateTime LastAppeal { get; set; }
         public long TotalRequests { get; set; } = 0;
         public long TodayRequests { get; set; } = 0;
 

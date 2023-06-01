@@ -116,5 +116,15 @@ namespace ScheduleBot.Bot {
             }
             return true;
         }
+
+        public void TrimExcess() {
+            MessageCommands.TrimExcess();
+            CallbackCommands.TrimExcess();
+
+            foreach(var item in DefaultMessageCommands) {
+                if(item is not null)
+                    item.TrimExcess();
+            }
+        }
     }
 }
