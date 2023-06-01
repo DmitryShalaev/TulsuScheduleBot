@@ -24,7 +24,6 @@ namespace ScheduleBot.Scheduler {
         }
 
         public string GetScheduleByDate(DateOnly date, ScheduleProfile profile, bool all = false) {
-
             var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID).ToList();
 
             var list = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && i.Date == date && (all || !completedDisciplines.Contains(i))).ToList();
@@ -44,7 +43,6 @@ namespace ScheduleBot.Scheduler {
                        $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}\n" +
                        $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n";
             }
-
             return str;
         }
 

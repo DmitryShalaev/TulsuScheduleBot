@@ -33,7 +33,7 @@ namespace ScheduleBot.Bot {
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }
 
-        private ReplyKeyboardMarkup GetCorpsKeyboardMarkup() {
+        private static ReplyKeyboardMarkup GetCorpsKeyboardMarkup() {
             List<KeyboardButton[]> ProfileKeyboardMarkup = new();
             ProfileKeyboardMarkup.Add(new KeyboardButton[] { commands.Corps[0].text });
 

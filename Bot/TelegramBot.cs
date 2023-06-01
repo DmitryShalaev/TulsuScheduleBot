@@ -407,12 +407,12 @@ namespace ScheduleBot.Bot {
             commandManager.AddMessageCommand(commands.Message["Corps"], Mode.Default, async (botClient, chatId, user, args) => {
                 user.CurrentPath = commands.Message["Corps"];
                 dbContext.SaveChanges();
-                await botClient.SendTextMessageAsync(chatId: chatId, text: "Выберите корпус, и я покажу где он на карте", replyMarkup: GetCorpsKeyboardMarkup());
+                await botClient.SendTextMessageAsync(chatId: chatId, text: "Выберите корпус, и я покажу где он на карте", replyMarkup: CorpsKeyboardMarkup);
             });
 
             foreach(var item in commands.Corps) {
                 commandManager.AddMessageCommand(item.text, Mode.Default, async (botClient, chatId, user, args) => {
-                    await botClient.SendVenueAsync(chatId: chatId, latitude: item.latitude, longitude: item.longitude, title: item.title, address: item.address, replyMarkup: GetCorpsKeyboardMarkup());
+                    await botClient.SendVenueAsync(chatId: chatId, latitude: item.latitude, longitude: item.longitude, title: item.title, address: item.address, replyMarkup: CorpsKeyboardMarkup);
                 });
             }
 
@@ -420,7 +420,7 @@ namespace ScheduleBot.Bot {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.College.title, replyMarkup: CancelKeyboardMarkup);
 
                 foreach(var item in commands.College.corps)
-                    await botClient.SendVenueAsync(chatId: chatId, latitude: item.latitude, longitude: item.longitude, title: "", address: item.address, replyMarkup: GetCorpsKeyboardMarkup());
+                    await botClient.SendVenueAsync(chatId: chatId, latitude: item.latitude, longitude: item.longitude, title: "", address: item.address, replyMarkup: CorpsKeyboardMarkup);
             });
             #endregion
             #endregion
@@ -449,11 +449,6 @@ namespace ScheduleBot.Bot {
 #if DEBUG
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update) + "\n");
 #endif
-            if(update.Type == Telegram.Bot.Types.Enums.UpdateType.InlineQuery) {
-                await InlineQuery(botClient, update);
-                return;
-            }
-
             Message? message = update.Message ?? update.EditedMessage ?? update.CallbackQuery?.Message;
 
             if(message is not null) {
@@ -491,6 +486,11 @@ namespace ScheduleBot.Bot {
                 user.TotalRequests++;
 
                 dbContext.SaveChanges();
+            } else {
+                if(update.Type == Telegram.Bot.Types.Enums.UpdateType.InlineQuery) {
+                    await InlineQuery(botClient, update);
+                    return;
+                }
             }
         }
 

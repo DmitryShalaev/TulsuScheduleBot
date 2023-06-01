@@ -62,7 +62,7 @@ namespace ScheduleBot.Bot {
         public async Task<bool> OnMessageAsync(ChatId chatId, string message, TelegramUser user) {
             if(MessageCommands.TryGetValue(getMessageCommand(message, user, out var args), out var func)) {
                 if(await CheckAsync(botClient, chatId, func.Item1, user)) {
-                    await func.Item2.Invoke(botClient, chatId, user, args);
+                    await func.Item2(botClient, chatId, user, args);
                     return true;
 
                 } else {
@@ -72,7 +72,7 @@ namespace ScheduleBot.Bot {
 
             foreach(var item in DefaultMessageCommands[(byte)user.Mode]) {
                 if(await CheckAsync(botClient, chatId, item.Item1, user)) {
-                    if(await item.Item2.Invoke(botClient, chatId, user, message))
+                    if(await item.Item2(botClient, chatId, user, message))
                         return true;
                 }
             }
@@ -83,7 +83,7 @@ namespace ScheduleBot.Bot {
         public async Task<bool> OnCallbackAsync(ChatId chatId, int messageId, string command, string message, TelegramUser user) {
             if(CallbackCommands.TryGetValue(getCallbackCommand(command, user, out var args), out var func)) {
                 if(await CheckAsync(botClient, chatId, func.Item1, user)) {
-                    await func.Item2.Invoke(botClient, chatId, messageId, user, message, args);
+                    await func.Item2(botClient, chatId, messageId, user, message, args);
                     return true;
 
                 }
