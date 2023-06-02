@@ -16,12 +16,7 @@ jobs:
       with:
         dotnet-version: 7.0.x
 
-    - name: Verify Changed files
-      uses: tj-actions/verify-changed-files@v14
-      id: verify-changed-files
-
-    - name: Deploy Gist
-      if: contains(steps.verify-changed-files.outputs.changed_files, 'TulsuScheduleBotSettings.json')
+    - name: Deploy Gist 
       uses: exuanbo/actions-deploy-gist@v1
       with:
         token: ${{ secrets.GIST_TOKEN }}
