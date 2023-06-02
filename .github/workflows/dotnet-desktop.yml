@@ -21,10 +21,10 @@ jobs:
       id: verify-changed-files
       with:
         files: |
-           Bot/TulsuScheduleBotSettings.json
+            TulsuScheduleBotSettings.json
 
     - name: Deploy Gist
-      if: steps.verify-changed-files.outputs.files_changed == 'true'
+      if: contains(steps.verify-changed-files.outputs.changed_files, 'TulsuScheduleBotSettings.json')
       uses: exuanbo/actions-deploy-gist@v1
       with:
         token: ${{ secrets.GIST_TOKEN }}
