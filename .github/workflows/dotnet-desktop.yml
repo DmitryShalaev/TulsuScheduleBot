@@ -15,14 +15,6 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 7.0.x
-
-    - name: Deploy Gist 
-      uses: exuanbo/actions-deploy-gist@v1
-      with:
-        token: ${{ secrets.GIST_TOKEN }}
-        gist_id: ${{ secrets.GIST_ID }}
-        file_path: Bot/TulsuScheduleBotSettings.json
-        file_type: json
          
     - name: DotNet Restore
       run: dotnet restore
