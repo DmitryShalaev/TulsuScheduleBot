@@ -47,7 +47,7 @@ namespace ScheduleBot {
                     MailAddress to = new MailAddress(Environment.GetEnvironmentVariable("TelegramBot_ToEmail") ?? "");
                     MailMessage message = new MailMessage(from, to);
                     message.Subject = "Error";
-                    message.Body = e.Message;
+                    message.Body = e.ToString();
 
                     SmtpClient smtp = new SmtpClient("smtp.yandex.ru", 25);
                     smtp.Credentials = new NetworkCredential(Environment.GetEnvironmentVariable("TelegramBot_FromEmail"), Environment.GetEnvironmentVariable("TelegramBot_PassEmail"));

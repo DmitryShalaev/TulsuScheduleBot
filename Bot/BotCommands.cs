@@ -26,9 +26,9 @@ namespace ScheduleBot.Bot {
         public CollegeStruct College { get; private set; }
 
         public BotCommands() {
-            using(StreamReader sr = new("Bot/TulsuScheduleBotSettings.json")) {
-                JObject commands = JObject.Parse(sr.ReadToEnd());
 
+            using(StreamReader sr = new(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + @"/Bot/TulsuScheduleBotSettings.json")) {
+                JObject commands = JObject.Parse(sr.ReadToEnd());
 
                 Message = commands["Message"]?.ToObject<Dictionary<string, string>>() ?? throw new NullReferenceException("Message");
                 Callback = commands["Callback"]?.ToObject<Dictionary<string, CallbackStruct>>() ?? throw new NullReferenceException("Callback");
