@@ -17,8 +17,7 @@ namespace ScheduleBot {
 
         static void Main(string[] args) {
             if(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotToken")) ||
-                string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotConnectionString")) ||
-                string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotSettings"))
+                string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotConnectionString"))
 #if !DEBUG
                 || string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBot_FromEmail")) ||
                 string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBot_ToEmail")) ||
@@ -42,12 +41,7 @@ namespace ScheduleBot {
                 Bot.TelegramBot telegramBot = new(scheduler, dbContext);
 
             } catch(Exception e) {
-                if(Timer is not null) {
-                    Timer.Stop();
-                    Timer = null;
-                }
-
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
 #if !DEBUG
                     MailAddress from = new MailAddress(Environment.GetEnvironmentVariable("TelegramBot_FromEmail") ?? "", "Error");
                     MailAddress to = new MailAddress(Environment.GetEnvironmentVariable("TelegramBot_ToEmail") ?? "");
