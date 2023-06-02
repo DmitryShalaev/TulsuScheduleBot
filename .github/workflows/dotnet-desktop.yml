@@ -21,8 +21,7 @@ jobs:
       id: verify-changed-files
       with:
         files: |
-           Bot
-           TulsuScheduleBotSettings.json
+           Bot/TulsuScheduleBotSettings.json
 
     - name: Deploy Gist
       if: steps.verify-changed-files.outputs.files_changed == 'true'
