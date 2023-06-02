@@ -18,7 +18,7 @@ namespace ScheduleBot.DB.Entity {
         public string? Lecturer { get; set; }
         public string? LectureHall { get; set; }
         public string? Type { get; set; }
-        public DateOnly? Date { get; set; }
+        public DateOnly Date { get; set; }
         public TimeOnly? StartTime { get; set; }
         public TimeOnly? EndTime { get; set; }
 

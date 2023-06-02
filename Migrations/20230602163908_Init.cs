@@ -4,6 +4,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace ScheduleBot.Migrations {
     /// <inheritdoc />
     public partial class Init : Migration {
@@ -205,7 +207,7 @@ namespace ScheduleBot.Migrations {
                     Lecturer = table.Column<string>(type: "text", nullable: true),
                     LectureHall = table.Column<string>(type: "text", nullable: true),
                     Type = table.Column<string>(type: "text", nullable: true),
-                    Date = table.Column<DateOnly>(type: "date", nullable: true),
+                    Date = table.Column<DateOnly>(type: "date", nullable: false),
                     StartTime = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
                     EndTime = table.Column<TimeOnly>(type: "time without time zone", nullable: true)
                 },
@@ -240,7 +242,13 @@ namespace ScheduleBot.Migrations {
                     { (byte)1, "AddingDiscipline" },
                     { (byte)2, "GroupСhange" },
                     { (byte)3, "StudentIDСhange" },
-                    { (byte)4, "ResetProfileLink" }
+                    { (byte)4, "ResetProfileLink" },
+                    { (byte)5, "CustomEditName" },
+                    { (byte)6, "CustomEditLecturer" },
+                    { (byte)7, "CustomEditType" },
+                    { (byte)8, "CustomEditLectureHall" },
+                    { (byte)9, "CustomEditStartTime" },
+                    { (byte)10, "CustomEditEndTime" }
                 });
 
             migrationBuilder.CreateIndex(

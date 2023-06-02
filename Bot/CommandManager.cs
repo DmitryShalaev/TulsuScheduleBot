@@ -55,6 +55,17 @@ namespace ScheduleBot.Bot {
                 AddMessageCommand(command, mode, function, check);
         }
 
+        public void AddMessageCommand(string[] commands, Mode[] modes, MessageFunction function, Check check = Check.none) {
+            foreach(var command in commands)
+                foreach(var mode in modes)
+                    AddMessageCommand(command, mode, function, check);
+        }
+
+        public void AddMessageCommand(string command, Mode[] modes, MessageFunction function, Check check = Check.none) {
+            foreach(var mode in modes)
+                AddMessageCommand(command, mode, function, check);
+        }
+
         public void AddCallbackCommand(string command, Mode mode, CallbackFunction function, Check check = Check.none) {
             CallbackCommands.Add($"{command} {mode}", (check, function)); ;
         }

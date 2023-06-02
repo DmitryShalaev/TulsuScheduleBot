@@ -27,13 +27,29 @@ namespace ScheduleBot.Bot {
                 editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "Пользовательские", callbackData: "!") });
 
                 foreach(var item in castom)
-                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} 🗑", callbackData: $"Delete {item.ID}") });
+                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} 🔧", callbackData: $"CustomEdit {item.ID}"),
+                                            InlineKeyboardButton.WithCallbackData(text: $"🗑", callbackData: $"Delete {item.ID}"),});
             }
 
             editButtons.AddRange(new[] { new[] { InlineKeyboardButton.WithCallbackData(commands.Callback["Add"].text, $"{commands.Callback["Add"].callback} {date}") },
                                          new[] { InlineKeyboardButton.WithCallbackData(commands.Callback["Back"].text, $"{commands.Callback["Back"].callback} {date}") }});
 
             return new InlineKeyboardMarkup(editButtons);
+        }
+
+        private InlineKeyboardMarkup GetCustomEditAdminInlineKeyboardButton(CustomDiscipline customDiscipline) {
+            var buttons = new List<InlineKeyboardButton[]>();
+
+            buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"Название: {customDiscipline.Name}", $"CustomEditName {customDiscipline.ID}") });
+            buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"Лектор: {customDiscipline.Lecturer}", $"CustomEditLecturer {customDiscipline.ID}") });
+            buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"Тип: {customDiscipline.Type}", $"CustomEditType {customDiscipline.ID}"),
+                                InlineKeyboardButton.WithCallbackData($"Аудитория: {customDiscipline.LectureHall}", $"CustomEditLectureHall {customDiscipline.ID}") });
+            buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"Время начала: {customDiscipline.StartTime}", $"CustomEditStartTime {customDiscipline.ID}") ,
+                                InlineKeyboardButton.WithCallbackData($"Время конца: {customDiscipline.EndTime}", $"CustomEditEndTime {customDiscipline.ID}") });
+
+            buttons.Add(new[] { InlineKeyboardButton.WithCallbackData(commands.Callback["CustomEditCancel"].text, $"{commands.Callback["CustomEditCancel"].callback} {customDiscipline.Date}") });
+
+            return new InlineKeyboardMarkup(buttons);
         }
 
         private InlineKeyboardMarkup GetInlineKeyboardButton(DateOnly date, TelegramUser user) {

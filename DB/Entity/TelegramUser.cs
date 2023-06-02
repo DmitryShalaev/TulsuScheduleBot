@@ -39,7 +39,13 @@ namespace ScheduleBot.DB.Entity {
         AddingDiscipline,
         GroupСhange,
         StudentIDСhange,
-        ResetProfileLink
+        ResetProfileLink,
+        CustomEditName,
+        CustomEditLecturer,
+        CustomEditType,
+        CustomEditLectureHall,
+        CustomEditStartTime,
+        CustomEditEndTime
     }
 
     public class ModeDTO {

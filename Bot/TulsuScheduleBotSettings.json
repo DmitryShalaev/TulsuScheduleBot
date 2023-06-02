@@ -54,6 +54,10 @@
       "text": "Назад",
       "callback": "Back"
     },
+    "CustomEditCancel": {
+      "text": "Отмена",
+      "callback": "Cancel"
+    },
     "Add": {
       "text": "Добавить",
       "callback": "Add"

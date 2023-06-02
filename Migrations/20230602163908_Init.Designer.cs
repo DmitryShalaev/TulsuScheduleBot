@@ -12,7 +12,7 @@ using ScheduleBot.DB;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    [Migration("20230601140420_Init")]
+    [Migration("20230602163908_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -249,6 +249,36 @@ namespace ScheduleBot.Migrations
                         {
                             ID = (byte)4,
                             Name = "ResetProfileLink"
+                        },
+                        new
+                        {
+                            ID = (byte)5,
+                            Name = "CustomEditName"
+                        },
+                        new
+                        {
+                            ID = (byte)6,
+                            Name = "CustomEditLecturer"
+                        },
+                        new
+                        {
+                            ID = (byte)7,
+                            Name = "CustomEditType"
+                        },
+                        new
+                        {
+                            ID = (byte)8,
+                            Name = "CustomEditLectureHall"
+                        },
+                        new
+                        {
+                            ID = (byte)9,
+                            Name = "CustomEditStartTime"
+                        },
+                        new
+                        {
+                            ID = (byte)10,
+                            Name = "CustomEditEndTime"
                         });
                 });
 
@@ -377,7 +407,7 @@ namespace ScheduleBot.Migrations
                     b.Property<int>("Counter")
                         .HasColumnType("integer");
 
-                    b.Property<DateOnly?>("Date")
+                    b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
                     b.Property<TimeOnly?>("EndTime")

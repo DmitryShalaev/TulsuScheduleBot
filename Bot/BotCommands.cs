@@ -32,7 +32,11 @@ namespace ScheduleBot.Bot {
                 using(var client = new HttpClient()) {
                     using(HttpResponseMessage response = client.GetAsync(Environment.GetEnvironmentVariable("TelegramBotSettings")).Result) {
                         if(response.IsSuccessStatusCode) {
+#if DEBUG
+                            throw new Exception();
+#else
                             commands = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+#endif
                         } else {
                             throw new Exception();
                         }

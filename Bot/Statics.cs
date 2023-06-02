@@ -60,7 +60,6 @@ namespace ScheduleBot.Bot {
                         }) { ResizeKeyboard = true };
 
         private readonly ReplyKeyboardMarkup CorpsKeyboardMarkup = GetCorpsKeyboardMarkup();
-
         #endregion
 
         public static async Task GroupErrorAdmin(ITelegramBotClient botClient, ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Для того, чтобы узнать расписание, необходимо указать номер группы в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
