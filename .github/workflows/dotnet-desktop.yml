@@ -26,13 +26,12 @@ jobs:
 
     - name: Deploy Gist
       if: steps.verify-changed-files.outputs.files_changed == 'true'
-      run: |
-        uses: exuanbo/actions-deploy-gist@v1
-        with:
-          token: ${{ secrets.GIST_TOKEN }}
-          gist_id: ${{ secrets.GIST_ID }}
-          file_path: Bot/TulsuScheduleBotSettings.json
-          file_type: json
+      uses: exuanbo/actions-deploy-gist@v1
+      with:
+        token: ${{ secrets.GIST_TOKEN }}
+        gist_id: ${{ secrets.GIST_ID }}
+        file_path: Bot/TulsuScheduleBotSettings.json
+        file_type: json
          
     - name: DotNet Restore
       run: dotnet restore
