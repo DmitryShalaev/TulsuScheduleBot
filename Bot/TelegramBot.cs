@@ -654,14 +654,6 @@ namespace ScheduleBot.Bot {
                     dbContext.SaveChanges();
                 }
 
-                if((DateTime.UtcNow - user.ScheduleProfile.LastAppeal).TotalDays > 7) {
-                    if(user.ScheduleProfile.Group is not null && (DateTime.UtcNow - dbContext.GroupLastUpdate.Single(i => i.Group == user.ScheduleProfile.Group).Update).TotalDays > 1)
-                        parser.UpdatingDisciplines(user.ScheduleProfile.Group);
-
-                    if(user.ScheduleProfile.StudentID is not null && (DateTime.UtcNow - dbContext.StudentIDLastUpdate.Single(i => i.StudentID == user.ScheduleProfile.StudentID).Update).TotalDays > 1)
-                        parser.UpdatingProgress(user.ScheduleProfile.StudentID);
-                }
-
                 switch(update.Type) {
                     case Telegram.Bot.Types.Enums.UpdateType.Message:
                     case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
