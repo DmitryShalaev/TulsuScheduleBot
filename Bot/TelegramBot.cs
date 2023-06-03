@@ -413,14 +413,14 @@ namespace ScheduleBot.Bot {
                 }
             }, CommandManager.Check.group);
             commandManager.AddCallbackCommand("Delete", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                var customDiscipline = dbContext.CustomDiscipline.FirstOrDefault(i => i.ID == uint.Parse(args));
+                var customDiscipline = dbContext.CustomDiscipline.SingleOrDefault(i => i.ID == uint.Parse(args));
 
                 if(customDiscipline is not null) {
                     if(user.IsAdmin()) {
                         dbContext.CustomDiscipline.Remove(customDiscipline);
                         dbContext.SaveChanges();
 
-                        await botClient.EditMessageReplyMarkupAsync(chatId: chatId, messageId: messageId, replyMarkup: GetEditAdminInlineKeyboardButton(customDiscipline.Date, user.ScheduleProfile));
+                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(customDiscipline.Date, user.ScheduleProfile), replyMarkup: GetEditAdminInlineKeyboardButton(customDiscipline.Date, user.ScheduleProfile));
                     } else {
                         await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(customDiscipline.Date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(customDiscipline.Date, user));
                     }
