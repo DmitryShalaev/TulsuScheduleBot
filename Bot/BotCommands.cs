@@ -18,12 +18,18 @@ namespace ScheduleBot.Bot {
             public string title;
             public CorpsStruct[] corps;
         }
+        public struct ConfigStruct {
+            public int GroupUpdateTime;
+            public int StudentIDUpdateTime;
+
+        }
 
         public Dictionary<string, string> Message { get; private set; }
         public Dictionary<string, CallbackStruct> Callback { get; private set; }
         public CorpsStruct[] Corps { get; private set; }
         public string[] StagesOfAdding { get; private set; }
         public CollegeStruct College { get; private set; }
+        public ConfigStruct Config { get; private set; }
 
         public BotCommands() {
 
@@ -35,6 +41,7 @@ namespace ScheduleBot.Bot {
                 Corps = commands["Corps"]?.ToObject<CorpsStruct[]>() ?? throw new NullReferenceException("Corps");
                 StagesOfAdding = commands["StagesOfAdding"]?.ToObject<string[]>() ?? throw new NullReferenceException("StagesOfAdding");
                 College = commands["College"]?.ToObject<CollegeStruct>() ?? throw new NullReferenceException("College");
+                Config = commands["Config"]?.ToObject<ConfigStruct>() ?? throw new NullReferenceException("Config");
 
                 Message.TrimExcess();
                 Callback.TrimExcess();

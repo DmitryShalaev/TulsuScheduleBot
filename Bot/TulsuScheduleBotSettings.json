@@ -1,4 +1,9 @@
 {
+  "Config": {
+    "GroupUpdateTime": "30",
+    "StudentIDUpdateTime": "60"
+  },
+
   "Message": {
     "MainMenu": "Основное меню",
 

@@ -1,7 +1,6 @@
 ﻿using System.Data;
 using System.Net;
 using System.Text;
-using System.Timers;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -14,10 +13,8 @@ namespace ScheduleBot {
     public class Parser {
         private readonly ScheduleDbContext dbContext;
         private readonly HttpClientHandler clientHandler;
-        private readonly System.Timers.Timer UpdatingDisciplinesTimer;
-        private readonly System.Timers.Timer UpdatingProgressTimer;
 
-        public Parser(ScheduleDbContext dbContext, bool updating = true) {
+        public Parser(ScheduleDbContext dbContext) {
             this.dbContext = dbContext;
 
             clientHandler = new() {
@@ -26,119 +23,63 @@ namespace ScheduleBot {
 
                 //Proxy = new WebProxy("127.0.0.1:8888"),
             };
+        }
 
-            UpdatingDisciplinesTimer = new() {
-                Interval = 30 * 60 * 1000, //Minutes Seconds Milliseconds
-                AutoReset = false
-            };
+        public void UpdatingProgress(string studentID) {
+            var progress = GetProgress(studentID);
+            if(progress != null) {
+                var studentIDLastUpdate = dbContext.StudentIDLastUpdate.SingleOrDefault(i => i.StudentID == studentID);
+                if(studentIDLastUpdate is null)
+                    dbContext.StudentIDLastUpdate.Add(new() { StudentID = studentID, Update = DateTime.UtcNow });
+                else
+                    studentIDLastUpdate.Update = DateTime.UtcNow;
 
-            UpdatingProgressTimer = new() {
-                Interval = 60 * 60 * 1000, //Minutes Seconds Milliseconds
-                AutoReset = false
-            };
+                var _list = dbContext.Progresses.Where(i => i.StudentID == studentID).ToList();
 
-            if(updating) {
-                UpdatingDisciplinesTimer.Elapsed += UpdatingDisciplines;
-                UpdatingProgressTimer.Elapsed += UpdatingProgress;
+                var except = progress.Except(_list);
+                if(except.Any()) {
+                    dbContext.Progresses.AddRange(except);
 
-                UpdatingDisciplines(sender: null, e: null);
-                UpdatingProgress(sender: null, e: null);
+                    dbContext.SaveChanges();
+                    _list = dbContext.Progresses.Where(i => i.StudentID == studentID).ToList();
+                }
+
+                except = _list.Except(progress);
+                if(except.Any())
+                    dbContext.Progresses.RemoveRange(except);
+
+                dbContext.SaveChanges();
             }
         }
 
-        private void UpdatingDisciplines(object? sender = null, ElapsedEventArgs? e = null) {
-            UpdatingDisciplines(group: null);
+        public void UpdatingDisciplines(string group) {
+            var disciplines = GetDisciplines(group);
 
-            UpdatingDisciplinesTimer.Start();
-        }
-
-        private void UpdatingProgress(object? sender = null, ElapsedEventArgs? e = null) {
-            UpdatingProgress(studentID: null);
-
-            UpdatingProgressTimer.Start();
-        }
-
-        public void UpdatingProgress(string? studentID = null) {
-            void Get(string iStudentID) {
-                var progress = GetProgress(iStudentID);
-                if(progress != null) {
-                    var studentIDLastUpdate = dbContext.StudentIDLastUpdate.SingleOrDefault(i => i.StudentID == iStudentID);
-                    if(studentIDLastUpdate is null)
-                        dbContext.StudentIDLastUpdate.Add(new() { StudentID = iStudentID, Update = DateTime.UtcNow });
+            if(disciplines != null) {
+                var dates = GetDates(group);
+                if(dates != null) {
+                    var groupLastUpdate = dbContext.GroupLastUpdate.SingleOrDefault(i => i.Group == group);
+                    if(groupLastUpdate is null)
+                        dbContext.GroupLastUpdate.Add(new() { Group = group, Update = DateTime.UtcNow });
                     else
-                        studentIDLastUpdate.Update = DateTime.UtcNow;
+                        groupLastUpdate.Update = DateTime.UtcNow;
 
-                    var _list = dbContext.Progresses.Where(i => i.StudentID == iStudentID).ToList();
+                    var _list = dbContext.Disciplines.Where(i => i.Group == group && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
 
-                    var except = progress.Except(_list);
+                    var except = disciplines.Except(_list);
                     if(except.Any()) {
-                        dbContext.Progresses.AddRange(except);
+                        dbContext.Disciplines.AddRange(except);
 
                         dbContext.SaveChanges();
-                        _list = dbContext.Progresses.Where(i => i.StudentID == iStudentID).ToList();
+                        _list = dbContext.Disciplines.Where(i => i.Group == group && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
                     }
 
-                    except = _list.Except(progress);
+                    except = _list.Except(disciplines);
                     if(except.Any())
-                        dbContext.Progresses.RemoveRange(except);
+                        dbContext.Disciplines.RemoveRange(except);
 
                     dbContext.SaveChanges();
                 }
-            }
-
-            if(string.IsNullOrWhiteSpace(studentID)) {
-                var dateNow = DateTime.UtcNow;
-                foreach(var iStudentID in dbContext.ScheduleProfile.Where(i => (dateNow - i.LastAppeal).TotalDays <= 7).Select(i => i.StudentID).Distinct().ToList()) {
-                    if(string.IsNullOrWhiteSpace(iStudentID)) continue;
-
-                    Get(iStudentID);
-                }
-            } else {
-                Get(studentID);
-            }
-        }
-
-        public void UpdatingDisciplines(string? group = null) {
-            void Get(string iGroup) {
-                var disciplines = GetDisciplines(iGroup);
-
-                if(disciplines != null) {
-                    var dates = GetDates(iGroup);
-                    if(dates != null) {
-                        var groupLastUpdate = dbContext.GroupLastUpdate.SingleOrDefault(i => i.Group == iGroup);
-                        if(groupLastUpdate is null)
-                            dbContext.GroupLastUpdate.Add(new() { Group = iGroup, Update = DateTime.UtcNow });
-                        else
-                            groupLastUpdate.Update = DateTime.UtcNow;
-
-                        var _list = dbContext.Disciplines.Where(i => i.Group == iGroup && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
-
-                        var except = disciplines.Except(_list);
-                        if(except.Any()) {
-                            dbContext.Disciplines.AddRange(except);
-
-                            dbContext.SaveChanges();
-                            _list = dbContext.Disciplines.Where(i => i.Group == iGroup && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
-                        }
-
-                        except = _list.Except(disciplines);
-                        if(except.Any())
-                            dbContext.Disciplines.RemoveRange(except);
-
-                        dbContext.SaveChanges();
-                    }
-                }
-            }
-
-            if(string.IsNullOrWhiteSpace(group)) {
-                var dateNow = DateTime.UtcNow;
-                foreach(var iGroup in dbContext.ScheduleProfile.Where(i => (dateNow - i.LastAppeal).TotalDays <= 7).Select(i => i.Group).Distinct().ToList()) {
-                    if(string.IsNullOrWhiteSpace(iGroup)) continue;
-
-                    Get(iGroup);
-                }
-            } else {
-                Get(group);
             }
         }
 
