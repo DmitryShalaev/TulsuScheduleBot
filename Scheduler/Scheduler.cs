@@ -26,7 +26,7 @@ namespace ScheduleBot.Scheduler {
         public string GetScheduleByDate(DateOnly date, ScheduleProfile profile, bool all = false) {
             var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID).ToList();
 
-            var list = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && i.Date == date && (all || !completedDisciplines.Contains(i))).ToList();
+            var list = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && i.Date == date && (all || !completedDisciplines.Contains((CompletedDiscipline)i))).ToList();
 
             list.AddRange(dbContext.CustomDiscipline.Where(i => i.ScheduleProfileGuid == profile.ID && i.Date == date).Select(i => new Discipline(i)));
 
@@ -75,7 +75,9 @@ namespace ScheduleBot.Scheduler {
         public List<string> GetExamse(ScheduleProfile profile, bool all) {
             var exams = new List<string>();
 
-            var disciplines = dbContext.Disciplines.Where(i => i.Group == profile.Group && i.Class == Class.other && i.Date >= DateOnly.FromDateTime(DateTime.Now.Date)).OrderBy(i => i.Date);
+            var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID).ToList();
+            var disciplines = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && !completedDisciplines.Contains((CompletedDiscipline)i) && i.Class == Class.other && i.Date >= DateOnly.FromDateTime(DateTime.Now.Date)).OrderBy(i => i.Date);
+
             if(disciplines.Count() == 0) {
                 exams.Add("Ничего нет");
                 return exams;

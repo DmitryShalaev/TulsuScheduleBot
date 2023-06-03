@@ -49,13 +49,5 @@ namespace ScheduleBot.DB.Entity {
             Date = discipline.Date;
             ScheduleProfileGuid = scheduleProfileGuid;
         }
-
-        public CompletedDiscipline(CustomDiscipline discipline, Guid scheduleProfileGuid) {
-            Name = discipline.Name;
-            Lecturer = discipline.Lecturer;
-            Class = discipline.Class;
-            Date = discipline.Date;
-            ScheduleProfileGuid = scheduleProfileGuid;
-        }
     }
 }

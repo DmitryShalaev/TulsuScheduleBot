@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScheduleBot.DB;
@@ -11,9 +12,11 @@ using ScheduleBot.DB;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230603151227_add-Class_Custom")]
+    partial class addClass_Custom
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -112,6 +115,9 @@ namespace ScheduleBot.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
+                    b.Property<byte>("Class")
+                        .HasColumnType("smallint");
+
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
@@ -140,6 +146,8 @@ namespace ScheduleBot.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("Class");
 
                     b.HasIndex("ScheduleProfileGuid");
 
@@ -456,11 +464,19 @@ namespace ScheduleBot.Migrations
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.CustomDiscipline", b =>
                 {
+                    b.HasOne("ScheduleBot.DB.Entity.ClassDTO", "ClassDTO")
+                        .WithMany()
+                        .HasForeignKey("Class")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ScheduleBot.DB.Entity.ScheduleProfile", "ScheduleProfile")
                         .WithMany()
                         .HasForeignKey("ScheduleProfileGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ClassDTO");
 
                     b.Navigation("ScheduleProfile");
                 });

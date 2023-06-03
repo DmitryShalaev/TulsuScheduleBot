@@ -78,7 +78,7 @@ namespace ScheduleBot.DB.Entity {
             return hash.GetHashCode();
         }
 
-        public static implicit operator CompletedDiscipline(Discipline discipline) => new() { Name = discipline.Name, Class = discipline.Class, Lecturer = discipline.Lecturer, Subgroup = discipline.Subgroup, Date = discipline.Date };
+        public static explicit operator CompletedDiscipline(Discipline discipline) => new() { Name = discipline.Name, Class = discipline.Class, Lecturer = discipline.Lecturer, Subgroup = discipline.Subgroup, Date = discipline.Date };
     }
 
     public enum Class : byte {
@@ -86,7 +86,8 @@ namespace ScheduleBot.DB.Entity {
         lab,
         practice,
         lecture,
-        other
+        other,
+        custom
     }
 
     public class ClassDTO {

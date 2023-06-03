@@ -74,6 +74,22 @@ namespace ScheduleBot.Bot {
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Для начала работы с ботом необходимо указать номер учебной группы", replyMarkup: CancelKeyboardMarkup);
                 }
             });
+            commandManager.AddMessageCommand("/SetProfile", Mode.Default, async (botClient, chatId, user, args) => {
+                try {
+                    if(Guid.TryParse(args, out Guid profile)) {
+                        if(profile != user.ScheduleProfileGuid && dbContext.ScheduleProfile.Any(i => i.ID == profile)) {
+                            user.ScheduleProfileGuid = profile;
+                            dbContext.SaveChanges();
+                            await botClient.SendTextMessageAsync(chatId: chatId, text: "Вы успешно сменили профиль", replyMarkup: MainKeyboardMarkup);
+                        } else {
+                            await botClient.SendTextMessageAsync(chatId: chatId, text: "Вы пытаетесь изменить свой профиль на текущий или на профиль, который не существует", replyMarkup: MainKeyboardMarkup);
+                        }
+                    } else {
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: "Идентификатор профиля не распознан", replyMarkup: MainKeyboardMarkup);
+                    }
+                } catch(IndexOutOfRangeException) { }
+            });
+
             commandManager.AddMessageCommand(new[] { commands.Message["Back"], commands.Message["Cancel"] }, Mode.Default, async (botClient, chatId, user, args) => {
                 if(user.CurrentPath == commands.Message["AcademicPerformance"] ||
                     user.CurrentPath == commands.Message["Profile"] ||
@@ -111,6 +127,7 @@ namespace ScheduleBot.Bot {
                 user.CurrentPath = null;
                 dbContext.SaveChanges();
             });
+            
             commandManager.AddMessageCommand(commands.Message["Today"], Mode.Default, async (botClient, chatId, user, args) => {
                 await ScheduleRelevance(botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), MainKeyboardMarkup);
                 var date = DateOnly.FromDateTime(DateTime.Now);
@@ -121,6 +138,7 @@ namespace ScheduleBot.Bot {
                 var date = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
                 await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
             }, CommandManager.Check.group);
+           
             commandManager.AddMessageCommand(commands.Message["ByDays"], Mode.Default, async (botClient, chatId, user, args) => {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["ByDays"], replyMarkup: DaysKeyboardMarkup);
             });
@@ -154,6 +172,7 @@ namespace ScheduleBot.Bot {
                 foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Saturday, user.ScheduleProfile))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: GetInlineKeyboardButton(day.Item2, user));
             }, CommandManager.Check.group);
+           
             commandManager.AddMessageCommand(commands.Message["ForAWeek"], Mode.Default, async (botClient, chatId, user, args) => {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["ForAWeek"], replyMarkup: WeekKeyboardMarkup);
             });
@@ -167,6 +186,7 @@ namespace ScheduleBot.Bot {
                 foreach(var item in scheduler.GetScheduleByWeak(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, System.DayOfWeek.Monday), user.ScheduleProfile))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: item.Item1, replyMarkup: GetInlineKeyboardButton(item.Item2, user));
             }, CommandManager.Check.group);
+            
             commandManager.AddMessageCommand(commands.Message["Exam"], Mode.Default, async (botClient, chatId, user, args) => {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Exam"], replyMarkup: ExamKeyboardMarkup);
             }, CommandManager.Check.group);
@@ -180,6 +200,11 @@ namespace ScheduleBot.Bot {
                 foreach(var item in scheduler.GetExamse(user.ScheduleProfile, false))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: item, replyMarkup: ExamKeyboardMarkup);
             }, CommandManager.Check.group);
+
+            commandManager.AddMessageCommand(commands.Message["Other"], Mode.Default, async (botClient, chatId, user, args) => {
+                await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Other"], replyMarkup: AdditionalKeyboardMarkup);
+            });
+
             commandManager.AddMessageCommand(commands.Message["AcademicPerformance"], Mode.Default, async (botClient, chatId, user, args) => {
                 user.CurrentPath = commands.Message["AcademicPerformance"];
                 dbContext.SaveChanges();
@@ -188,6 +213,13 @@ namespace ScheduleBot.Bot {
 
                 await ProgressRelevance(botClient, chatId, StudentID, GetTermsKeyboardMarkup(StudentID));
             }, CommandManager.Check.studentId);
+            commandManager.AddMessageCommand(commands.Message["Semester"], Mode.Default, async (botClient, chatId, user, args) => {
+                var StudentID = user.ScheduleProfile.StudentID ?? throw new NullReferenceException("StudentID");
+
+                await ProgressRelevance(botClient, chatId, StudentID, GetTermsKeyboardMarkup(StudentID));
+                await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetProgressByTerm(int.Parse(args), StudentID), replyMarkup: GetTermsKeyboardMarkup(StudentID));
+            }, CommandManager.Check.studentId);
+
             commandManager.AddMessageCommand(commands.Message["Profile"], Mode.Default, async (botClient, chatId, user, args) => {
                 user.CurrentPath = commands.Message["Profile"];
                 dbContext.SaveChanges();
@@ -210,7 +242,7 @@ namespace ScheduleBot.Bot {
                 } else {
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Владельцу профиля нет смысла его восстанавливать!", replyMarkup: MainKeyboardMarkup);
                 }
-            });
+            });    
             commandManager.AddMessageCommand(commands.Message["Reset"], Mode.ResetProfileLink, async (botClient, chatId, user, args) => {
                 user.Mode = Mode.Default;
 
@@ -227,15 +259,7 @@ namespace ScheduleBot.Bot {
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Profile"], replyMarkup: GetProfileKeyboardMarkup(user));
             });
-            commandManager.AddMessageCommand(commands.Message["Other"], Mode.Default, async (botClient, chatId, user, args) => {
-                await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Other"], replyMarkup: AdditionalKeyboardMarkup);
-            });
-            commandManager.AddMessageCommand(commands.Message["Semester"], Mode.Default, async (botClient, chatId, user, args) => {
-                var StudentID = user.ScheduleProfile.StudentID ?? throw new NullReferenceException("StudentID");
-
-                await ProgressRelevance(botClient, chatId, StudentID, GetTermsKeyboardMarkup(StudentID));
-                await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetProgressByTerm(int.Parse(args), StudentID), replyMarkup: GetTermsKeyboardMarkup(StudentID));
-            }, CommandManager.Check.studentId);
+                      
             commandManager.AddMessageCommand(commands.Message["GroupNumber"], Mode.Default, async (botClient, chatId, user, args) => {
                 if(user.IsAdmin()) {
                     user.Mode = Mode.GroupСhange;
@@ -252,21 +276,7 @@ namespace ScheduleBot.Bot {
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Хотите сменить номер зачётки? Если да, то напишите новый номер", replyMarkup: CancelKeyboardMarkup);
                 }
             });
-            commandManager.AddMessageCommand("/SetProfile", Mode.Default, async (botClient, chatId, user, args) => {
-                try {
-                    if(Guid.TryParse(args, out Guid profile)) {
-                        if(profile != user.ScheduleProfileGuid && dbContext.ScheduleProfile.Any(i => i.ID == profile)) {
-                            user.ScheduleProfileGuid = profile;
-                            dbContext.SaveChanges();
-                            await botClient.SendTextMessageAsync(chatId: chatId, text: "Вы успешно сменили профиль", replyMarkup: MainKeyboardMarkup);
-                        } else {
-                            await botClient.SendTextMessageAsync(chatId: chatId, text: "Вы пытаетесь изменить свой профиль на текущий или на профиль, который не существует", replyMarkup: MainKeyboardMarkup);
-                        }
-                    } else {
-                        await botClient.SendTextMessageAsync(chatId: chatId, text: "Идентификатор профиля не распознан", replyMarkup: MainKeyboardMarkup);
-                    }
-                } catch(IndexOutOfRangeException) { }
-            });
+           
             commandManager.AddMessageCommand(Mode.Default, async (botClient, chatId, user, args) => {
                 if(DateRegex().IsMatch(args)) {
                     try {
@@ -282,10 +292,12 @@ namespace ScheduleBot.Bot {
                 }
                 return false;
             }, CommandManager.Check.group);
+           
             commandManager.AddMessageCommand(Mode.AddingDiscipline, async (botClient, chatId, user, args) => {
                 await SetStagesAddingDisciplineAsync(botClient, chatId, args, user);
                 return true;
             });
+            
             commandManager.AddMessageCommand(Mode.GroupСhange, async (botClient, chatId, user, args) => {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: CancelKeyboardMarkup);
                 bool flag = dbContext.GroupLastUpdate.Select(i => i.Group).Contains(args);
@@ -328,152 +340,10 @@ namespace ScheduleBot.Bot {
                 }
                 return true;
             });
+           
             commandManager.AddMessageCommand(Mode.ResetProfileLink, async (botClient, chatId, user, args) => {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: "Выберите один из представленных вариантов!", replyMarkup: ResetProfileLinkKeyboardMarkup);
                 return true;
-            });
-
-            commandManager.AddCallbackCommand(commands.Callback["Edit"].callback, Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                if(DateOnly.TryParse(args, out DateOnly date)) {
-                    if(user.IsAdmin())
-                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile, true), replyMarkup: GetEditAdminInlineKeyboardButton(date, user.ScheduleProfile));
-                    else
-                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
-                }
-            }, CommandManager.Check.group);
-            commandManager.AddCallbackCommand(commands.Callback["All"].callback, Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                if(DateOnly.TryParse(args, out DateOnly date))
-                    await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile, true), replyMarkup: GetInlineBackKeyboardButton(date, user));
-            }, CommandManager.Check.group);
-            commandManager.AddCallbackCommand(commands.Callback["Back"].callback, Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                if(DateOnly.TryParse(args, out DateOnly date))
-                    await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
-            }, CommandManager.Check.group);
-            commandManager.AddCallbackCommand(commands.Callback["Add"].callback, Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                if(DateOnly.TryParse(args, out DateOnly date)) {
-                    if(user.IsAdmin()) {
-                        try {
-                            user.Mode = Mode.AddingDiscipline;
-                            user.CurrentPath = $"{messageId} {date}";
-                            dbContext.TemporaryAddition.Add(new(user, date));
-                            dbContext.SaveChanges();
-                            await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile));
-                            await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(user), replyMarkup: CancelKeyboardMarkup);
-                        } catch(Exception e) {
-
-                            await Console.Out.WriteLineAsync(e.Message);
-                        }
-                    } else {
-                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
-                    }
-                }
-            }, CommandManager.Check.group);
-            commandManager.AddCallbackCommand("DisciplineDay", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                var discipline = dbContext.Disciplines.FirstOrDefault(i => i.ID == uint.Parse(args));
-                if(discipline is not null) {
-                    if(user.IsAdmin()) {
-                        var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid).ToList();
-
-                        CompletedDiscipline dayTmp = new(discipline, user.ScheduleProfileGuid);
-                        var dayCompletedDisciplines = completedDisciplines.FirstOrDefault(i => i.Equals(dayTmp));
-
-                        if(dayCompletedDisciplines is not null)
-                            dbContext.CompletedDisciplines.Remove(dayCompletedDisciplines);
-                        else
-                            dbContext.CompletedDisciplines.Add(dayTmp);
-
-                        dbContext.SaveChanges();
-                        await botClient.EditMessageReplyMarkupAsync(chatId: chatId, messageId: messageId, replyMarkup: GetEditAdminInlineKeyboardButton(discipline.Date, user.ScheduleProfile));
-                    } else {
-                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(discipline.Date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(discipline.Date, user));
-                    }
-                }
-            }, CommandManager.Check.group);
-            commandManager.AddCallbackCommand("DisciplineAlways", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                var discipline = dbContext.Disciplines.FirstOrDefault(i => i.ID == uint.Parse(args));
-                if(discipline is not null) {
-                    if(user.IsAdmin()) {
-                        var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid).ToList();
-
-                        CompletedDiscipline alwaysTmp = new(discipline, user.ScheduleProfileGuid) { Date = null };
-                        var alwaysCompletedDisciplines = completedDisciplines.FirstOrDefault(i => i.Equals(alwaysTmp));
-
-                        if(alwaysCompletedDisciplines is not null) {
-                            dbContext.CompletedDisciplines.Remove(alwaysCompletedDisciplines);
-                        } else {
-                            dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid && i.Date != null && i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup));
-                            dbContext.CompletedDisciplines.Add(alwaysTmp);
-                        }
-
-                        dbContext.SaveChanges();
-                        await botClient.EditMessageReplyMarkupAsync(chatId: chatId, messageId: messageId, replyMarkup: GetEditAdminInlineKeyboardButton(discipline.Date, user.ScheduleProfile));
-                    } else {
-                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(discipline.Date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(discipline.Date, user));
-                    }
-                }
-            }, CommandManager.Check.group);
-            commandManager.AddCallbackCommand("Delete", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                var customDiscipline = dbContext.CustomDiscipline.SingleOrDefault(i => i.ID == uint.Parse(args));
-
-                if(customDiscipline is not null) {
-                    if(user.IsAdmin()) {
-                        dbContext.CustomDiscipline.Remove(customDiscipline);
-                        dbContext.SaveChanges();
-
-                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(customDiscipline.Date, user.ScheduleProfile), replyMarkup: GetEditAdminInlineKeyboardButton(customDiscipline.Date, user.ScheduleProfile));
-                    } else {
-                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(customDiscipline.Date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(customDiscipline.Date, user));
-                    }
-                }
-            }, CommandManager.Check.group);
-            commandManager.AddCallbackCommand(commands.Callback["SetEndTime"].callback, Mode.AddingDiscipline, async (botClient, chatId, messageId, user, message, args) => {
-                var temporaryAddition = dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First();
-
-                temporaryAddition.EndTime = TimeOnly.Parse(args);
-                temporaryAddition.Counter++;
-
-                await SaveAddingDisciplineAsync(botClient, chatId, user, temporaryAddition);
-            });
-            commandManager.AddCallbackCommand(commands.Callback["CustomEditCancel"].callback, Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                if(DateOnly.TryParse(args, out DateOnly date))
-                    if(user.IsAdmin())
-                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetEditAdminInlineKeyboardButton(date, user.ScheduleProfile));
-                    else
-                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
-            }, CommandManager.Check.group);
-            commandManager.AddCallbackCommand("CustomEdit", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                var customDiscipline = dbContext.CustomDiscipline.FirstOrDefault(i => i.ID == uint.Parse(args));
-                if(customDiscipline is not null) {
-                    if(user.IsAdmin()) {
-                        await botClient.EditMessageReplyMarkupAsync(chatId: chatId, messageId: messageId, replyMarkup: GetCustomEditAdminInlineKeyboardButton(customDiscipline));
-                    } else {
-                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(customDiscipline.Date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(customDiscipline.Date, user));
-                    }
-                }
-            }, CommandManager.Check.group);
-            commandManager.AddCallbackCommand("CustomEditName", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                await CustomEdit(scheduler, dbContext, botClient, chatId, messageId, user, args, Mode.CustomEditName,
-                "Хотите изменить название предмета? Если да, то напишите новое");
-            });
-            commandManager.AddCallbackCommand("CustomEditLecturer", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                await CustomEdit(scheduler, dbContext, botClient, chatId, messageId, user, args, Mode.CustomEditLecturer,
-                "Хотите изменить лектора? Если да, то напишите нового");
-            });
-            commandManager.AddCallbackCommand("CustomEditType", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                await CustomEdit(scheduler, dbContext, botClient, chatId, messageId, user, args, Mode.CustomEditType,
-                "Хотите изменить тип предмета? Если да, то напишите новый");
-            });
-            commandManager.AddCallbackCommand("CustomEditLectureHall", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                await CustomEdit(scheduler, dbContext, botClient, chatId, messageId, user, args, Mode.CustomEditLectureHall,
-                "Хотите изменить аудиторию? Если да, то напишите новую");
-            });
-            commandManager.AddCallbackCommand("CustomEditStartTime", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                await CustomEdit(scheduler, dbContext, botClient, chatId, messageId, user, args, Mode.CustomEditStartTime,
-                "Хотите изменить время начала пары? Если да, то напишите новое");
-            });
-            commandManager.AddCallbackCommand("CustomEditEndTime", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
-                await CustomEdit(scheduler, dbContext, botClient, chatId, messageId, user, args, Mode.CustomEditEndTime,
-                "Хотите изменить время конца пары? Если да, то напишите новое");
             });
 
             commandManager.AddMessageCommand(Mode.CustomEditName, async (botClient, chatId, user, args) => {
@@ -571,6 +441,152 @@ namespace ScheduleBot.Bot {
                 }
 
                 return true;
+            });
+
+            commandManager.AddCallbackCommand(commands.Callback["Edit"].callback, Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
+                if(DateOnly.TryParse(args, out DateOnly date)) {
+                    if(user.IsAdmin())
+                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile, true), replyMarkup: GetEditAdminInlineKeyboardButton(date, user.ScheduleProfile));
+                    else
+                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
+                }
+            }, CommandManager.Check.group);
+            commandManager.AddCallbackCommand(commands.Callback["All"].callback, Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
+                if(DateOnly.TryParse(args, out DateOnly date))
+                    await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile, true), replyMarkup: GetInlineBackKeyboardButton(date, user));
+            }, CommandManager.Check.group);
+            commandManager.AddCallbackCommand(commands.Callback["Back"].callback, Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
+                if(DateOnly.TryParse(args, out DateOnly date))
+                    await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
+            }, CommandManager.Check.group);
+            commandManager.AddCallbackCommand(commands.Callback["Add"].callback, Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
+                if(DateOnly.TryParse(args, out DateOnly date)) {
+                    if(user.IsAdmin()) {
+                        try {
+                            user.Mode = Mode.AddingDiscipline;
+                            user.CurrentPath = $"{messageId} {date}";
+                            dbContext.TemporaryAddition.Add(new(user, date));
+                            dbContext.SaveChanges();
+                            await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile));
+                            await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(user), replyMarkup: CancelKeyboardMarkup);
+                        } catch(Exception e) {
+
+                            await Console.Out.WriteLineAsync(e.Message);
+                        }
+                    } else {
+                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
+                    }
+                }
+            }, CommandManager.Check.group);
+
+            commandManager.AddCallbackCommand(commands.Callback["SetEndTime"].callback, Mode.AddingDiscipline, async (botClient, chatId, messageId, user, message, args) => {
+                var temporaryAddition = dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First();
+
+                temporaryAddition.EndTime = TimeOnly.Parse(args);
+                temporaryAddition.Counter++;
+
+                await SaveAddingDisciplineAsync(botClient, chatId, user, temporaryAddition);
+            });
+
+            commandManager.AddCallbackCommand("DisciplineDay", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
+                var discipline = dbContext.Disciplines.FirstOrDefault(i => i.ID == uint.Parse(args));
+                if(discipline is not null) {
+                    if(user.IsAdmin()) {
+                        var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid).ToList();
+
+                        CompletedDiscipline dayTmp = new(discipline, user.ScheduleProfileGuid);
+                        var dayCompletedDisciplines = completedDisciplines.FirstOrDefault(i => i.Equals(dayTmp));
+
+                        if(dayCompletedDisciplines is not null)
+                            dbContext.CompletedDisciplines.Remove(dayCompletedDisciplines);
+                        else
+                            dbContext.CompletedDisciplines.Add(dayTmp);
+
+                        dbContext.SaveChanges();
+                        await botClient.EditMessageReplyMarkupAsync(chatId: chatId, messageId: messageId, replyMarkup: GetEditAdminInlineKeyboardButton(discipline.Date, user.ScheduleProfile));
+                    } else {
+                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(discipline.Date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(discipline.Date, user));
+                    }
+                }
+            }, CommandManager.Check.group);
+            commandManager.AddCallbackCommand("DisciplineAlways", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
+                var discipline = dbContext.Disciplines.FirstOrDefault(i => i.ID == uint.Parse(args));
+                if(discipline is not null) {
+                    if(user.IsAdmin()) {
+                        var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid).ToList();
+
+                        CompletedDiscipline alwaysTmp = new(discipline, user.ScheduleProfileGuid) { Date = null };
+                        var alwaysCompletedDisciplines = completedDisciplines.FirstOrDefault(i => i.Equals(alwaysTmp));
+
+                        if(alwaysCompletedDisciplines is not null) {
+                            dbContext.CompletedDisciplines.Remove(alwaysCompletedDisciplines);
+                        } else {
+                            dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid && i.Date != null && i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup));
+                            dbContext.CompletedDisciplines.Add(alwaysTmp);
+                        }
+
+                        dbContext.SaveChanges();
+                        await botClient.EditMessageReplyMarkupAsync(chatId: chatId, messageId: messageId, replyMarkup: GetEditAdminInlineKeyboardButton(discipline.Date, user.ScheduleProfile));
+                    } else {
+                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(discipline.Date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(discipline.Date, user));
+                    }
+                }
+            }, CommandManager.Check.group);
+            commandManager.AddCallbackCommand("Delete", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
+                var customDiscipline = dbContext.CustomDiscipline.SingleOrDefault(i => i.ID == uint.Parse(args));
+
+                if(customDiscipline is not null) {
+                    if(user.IsAdmin()) {
+                        dbContext.CustomDiscipline.Remove(customDiscipline);
+                        dbContext.SaveChanges();
+
+                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(customDiscipline.Date, user.ScheduleProfile), replyMarkup: GetEditAdminInlineKeyboardButton(customDiscipline.Date, user.ScheduleProfile));
+                    } else {
+                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(customDiscipline.Date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(customDiscipline.Date, user));
+                    }
+                }
+            }, CommandManager.Check.group);
+            
+            commandManager.AddCallbackCommand(commands.Callback["CustomEditCancel"].callback, Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
+                if(DateOnly.TryParse(args, out DateOnly date))
+                    if(user.IsAdmin())
+                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetEditAdminInlineKeyboardButton(date, user.ScheduleProfile));
+                    else
+                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
+            }, CommandManager.Check.group); 
+            commandManager.AddCallbackCommand("CustomEdit", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
+                var customDiscipline = dbContext.CustomDiscipline.FirstOrDefault(i => i.ID == uint.Parse(args));
+                if(customDiscipline is not null) {
+                    if(user.IsAdmin()) {
+                        await botClient.EditMessageReplyMarkupAsync(chatId: chatId, messageId: messageId, replyMarkup: GetCustomEditAdminInlineKeyboardButton(customDiscipline));
+                    } else {
+                        await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(customDiscipline.Date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(customDiscipline.Date, user));
+                    }
+                }
+            }, CommandManager.Check.group);
+            commandManager.AddCallbackCommand("CustomEditName", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
+                await CustomEdit(scheduler, dbContext, botClient, chatId, messageId, user, args, Mode.CustomEditName,
+                "Хотите изменить название предмета? Если да, то напишите новое");
+            });
+            commandManager.AddCallbackCommand("CustomEditLecturer", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
+                await CustomEdit(scheduler, dbContext, botClient, chatId, messageId, user, args, Mode.CustomEditLecturer,
+                "Хотите изменить лектора? Если да, то напишите нового");
+            });
+            commandManager.AddCallbackCommand("CustomEditType", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
+                await CustomEdit(scheduler, dbContext, botClient, chatId, messageId, user, args, Mode.CustomEditType,
+                "Хотите изменить тип предмета? Если да, то напишите новый");
+            });
+            commandManager.AddCallbackCommand("CustomEditLectureHall", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
+                await CustomEdit(scheduler, dbContext, botClient, chatId, messageId, user, args, Mode.CustomEditLectureHall,
+                "Хотите изменить аудиторию? Если да, то напишите новую");
+            });
+            commandManager.AddCallbackCommand("CustomEditStartTime", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
+                await CustomEdit(scheduler, dbContext, botClient, chatId, messageId, user, args, Mode.CustomEditStartTime,
+                "Хотите изменить время начала пары? Если да, то напишите новое");
+            });
+            commandManager.AddCallbackCommand("CustomEditEndTime", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
+                await CustomEdit(scheduler, dbContext, botClient, chatId, messageId, user, args, Mode.CustomEditEndTime,
+                "Хотите изменить время конца пары? Если да, то напишите новое");
             });
             #endregion
             #region Corps
