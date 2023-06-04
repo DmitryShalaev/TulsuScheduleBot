@@ -127,7 +127,7 @@ namespace ScheduleBot.Bot {
                 user.CurrentPath = null;
                 dbContext.SaveChanges();
             });
-            
+
             commandManager.AddMessageCommand(commands.Message["Today"], Mode.Default, async (botClient, chatId, user, args) => {
                 await ScheduleRelevance(botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), MainKeyboardMarkup);
                 var date = DateOnly.FromDateTime(DateTime.Now);
@@ -138,10 +138,10 @@ namespace ScheduleBot.Bot {
                 var date = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
                 await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
             }, CommandManager.Check.group);
-           
+
             commandManager.AddMessageCommand(commands.Message["ByDays"], Mode.Default, async (botClient, chatId, user, args) => {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["ByDays"], replyMarkup: DaysKeyboardMarkup);
-            });
+            }, CommandManager.Check.group);
             commandManager.AddMessageCommand(commands.Message["Monday"], Mode.Default, async (botClient, chatId, user, args) => {
                 await ScheduleRelevance(botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), DaysKeyboardMarkup);
                 foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Monday, user.ScheduleProfile))
@@ -172,10 +172,10 @@ namespace ScheduleBot.Bot {
                 foreach(var day in scheduler.GetScheduleByDay(System.DayOfWeek.Saturday, user.ScheduleProfile))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: GetInlineKeyboardButton(day.Item2, user));
             }, CommandManager.Check.group);
-           
+
             commandManager.AddMessageCommand(commands.Message["ForAWeek"], Mode.Default, async (botClient, chatId, user, args) => {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["ForAWeek"], replyMarkup: WeekKeyboardMarkup);
-            });
+            }, CommandManager.Check.group);
             commandManager.AddMessageCommand(commands.Message["ThisWeek"], Mode.Default, async (botClient, chatId, user, args) => {
                 await ScheduleRelevance(botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), WeekKeyboardMarkup);
                 foreach(var item in scheduler.GetScheduleByWeak(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, System.DayOfWeek.Monday) - 1, user.ScheduleProfile))
@@ -186,7 +186,7 @@ namespace ScheduleBot.Bot {
                 foreach(var item in scheduler.GetScheduleByWeak(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, System.DayOfWeek.Monday), user.ScheduleProfile))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: item.Item1, replyMarkup: GetInlineKeyboardButton(item.Item2, user));
             }, CommandManager.Check.group);
-            
+
             commandManager.AddMessageCommand(commands.Message["Exam"], Mode.Default, async (botClient, chatId, user, args) => {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Exam"], replyMarkup: ExamKeyboardMarkup);
             }, CommandManager.Check.group);
@@ -242,7 +242,7 @@ namespace ScheduleBot.Bot {
                 } else {
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Владельцу профиля нет смысла его восстанавливать!", replyMarkup: MainKeyboardMarkup);
                 }
-            });    
+            });
             commandManager.AddMessageCommand(commands.Message["Reset"], Mode.ResetProfileLink, async (botClient, chatId, user, args) => {
                 user.Mode = Mode.Default;
 
@@ -259,7 +259,7 @@ namespace ScheduleBot.Bot {
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Profile"], replyMarkup: GetProfileKeyboardMarkup(user));
             });
-                      
+
             commandManager.AddMessageCommand(commands.Message["GroupNumber"], Mode.Default, async (botClient, chatId, user, args) => {
                 if(user.IsAdmin()) {
                     user.Mode = Mode.GroupСhange;
@@ -276,7 +276,7 @@ namespace ScheduleBot.Bot {
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Хотите сменить номер зачётки? Если да, то напишите новый номер", replyMarkup: CancelKeyboardMarkup);
                 }
             });
-           
+
             commandManager.AddMessageCommand(Mode.Default, async (botClient, chatId, user, args) => {
                 if(DateRegex().IsMatch(args)) {
                     try {
@@ -292,12 +292,12 @@ namespace ScheduleBot.Bot {
                 }
                 return false;
             }, CommandManager.Check.group);
-           
+
             commandManager.AddMessageCommand(Mode.AddingDiscipline, async (botClient, chatId, user, args) => {
                 await SetStagesAddingDisciplineAsync(botClient, chatId, args, user);
                 return true;
             });
-            
+
             commandManager.AddMessageCommand(Mode.GroupСhange, async (botClient, chatId, user, args) => {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: CancelKeyboardMarkup);
                 bool flag = dbContext.GroupLastUpdate.Select(i => i.Group).Contains(args);
@@ -340,7 +340,7 @@ namespace ScheduleBot.Bot {
                 }
                 return true;
             });
-           
+
             commandManager.AddMessageCommand(Mode.ResetProfileLink, async (botClient, chatId, user, args) => {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: "Выберите один из представленных вариантов!", replyMarkup: ResetProfileLinkKeyboardMarkup);
                 return true;
@@ -546,14 +546,14 @@ namespace ScheduleBot.Bot {
                     }
                 }
             }, CommandManager.Check.group);
-            
+
             commandManager.AddCallbackCommand(commands.Callback["CustomEditCancel"].callback, Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
                 if(DateOnly.TryParse(args, out DateOnly date))
                     if(user.IsAdmin())
                         await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetEditAdminInlineKeyboardButton(date, user.ScheduleProfile));
                     else
                         await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
-            }, CommandManager.Check.group); 
+            }, CommandManager.Check.group);
             commandManager.AddCallbackCommand("CustomEdit", Mode.Default, async (botClient, chatId, messageId, user, message, args) => {
                 var customDiscipline = dbContext.CustomDiscipline.FirstOrDefault(i => i.ID == uint.Parse(args));
                 if(customDiscipline is not null) {
