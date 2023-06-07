@@ -15,13 +15,13 @@ namespace ScheduleBot.Bot {
         [GeneratedRegex("(^/[A-z]+)[ ]?([A-z0-9-]*)$")]
         private static partial Regex CommandMessageRegex();
 
-        [GeneratedRegex("^([A-z][A-z]+)[ ]([0-9.:]+)$")]
+        [GeneratedRegex("^([A-z][A-z]+)[ ]([0-9.:]+[|0-9.:]*)$")]
         private static partial Regex DisciplineCallbackRegex();
 
         [GeneratedRegex("^\\d{1,2}[ ,./-](\\d{1,2}|\\w{3,8})([ ,./-](\\d{2}|\\d{4}))?$")]
         private static partial Regex DateRegex();
 
-        private static readonly BotCommands commands = new BotCommands();
+        public static readonly BotCommands commands = new BotCommands();
 
         #region ReplyKeyboardMarkup
         public static readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
@@ -69,8 +69,10 @@ namespace ScheduleBot.Bot {
 
         private async Task ScheduleRelevance(ITelegramBotClient botClient, ChatId chatId, string group, IReplyMarkup? replyMarkup) {
             if((DateTime.UtcNow - dbContext.GroupLastUpdate.Single(i => i.Group == group).Update).TotalMinutes > commands.Config.GroupUpdateTime) {
-                await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: replyMarkup);
+                var messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: replyMarkup)).MessageId;
                 parser.UpdatingDisciplines(group);
+
+                await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
             }
 
             await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {dbContext.GroupLastUpdate.Single(i => i.Group == group).Update.ToLocalTime().ToString("dd.MM HH:mm")}", replyMarkup: replyMarkup);
@@ -78,8 +80,10 @@ namespace ScheduleBot.Bot {
 
         private async Task ProgressRelevance(ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup) {
             if((DateTime.UtcNow - dbContext.StudentIDLastUpdate.Single(i => i.StudentID == studentID).Update).TotalMinutes > commands.Config.StudentIDUpdateTime) {
-                await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: replyMarkup);
+                var messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...",  replyMarkup: replyMarkup)).MessageId;
                 parser.UpdatingProgress(studentID);
+
+                await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
             }
 
             await botClient.SendTextMessageAsync(chatId: chatId, text: $"Успеваемость актуально на {dbContext.StudentIDLastUpdate.Single(i => i.StudentID == studentID).Update.ToLocalTime().ToString("dd.MM HH:mm")}", replyMarkup: replyMarkup);

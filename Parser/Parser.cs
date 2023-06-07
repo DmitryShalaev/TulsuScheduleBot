@@ -1,11 +1,13 @@
 ﻿using System.Data;
 using System.Net;
 using System.Text;
+using System.Timers;
 
 using Microsoft.EntityFrameworkCore;
 
 using Newtonsoft.Json.Linq;
 
+using ScheduleBot.Bot;
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
@@ -13,8 +15,9 @@ namespace ScheduleBot {
     public class Parser {
         private readonly ScheduleDbContext dbContext;
         private readonly HttpClientHandler clientHandler;
+        private readonly System.Timers.Timer UpdatingDisciplinesTimer;
 
-        public Parser(ScheduleDbContext dbContext) {
+        public Parser(ScheduleDbContext dbContext, BotCommands commands) {
             this.dbContext = dbContext;
 
             clientHandler = new() {
@@ -23,12 +26,32 @@ namespace ScheduleBot {
 
                 //Proxy = new WebProxy("127.0.0.1:8888"),
             };
+
+            UpdatingDisciplinesTimer = new() {
+                Interval = commands.Config.GroupUpdateTime * 60 * 1000, //Minutes Seconds Milliseconds
+                AutoReset = false
+            };
+
+            UpdatingDisciplinesTimer.Elapsed += UpdatingDisciplines;
+
+            UpdatingDisciplines(sender: null, e: null);
+        }
+
+        private void UpdatingDisciplines(object? sender = null, ElapsedEventArgs? e = null) {
+            var dateNow = DateTime.UtcNow;
+            foreach(var item in dbContext.ScheduleProfile.Where(i => (dateNow - i.LastAppeal).TotalDays <= 1).Select(i => i.Group).Distinct().ToList()) {
+                if(string.IsNullOrWhiteSpace(item)) continue;
+
+                UpdatingDisciplines(group: item);
+            }
+
+            UpdatingDisciplinesTimer.Start();
         }
 
         public void UpdatingProgress(string studentID) {
             var progress = GetProgress(studentID);
             if(progress != null) {
-                var studentIDLastUpdate = dbContext.StudentIDLastUpdate.SingleOrDefault(i => i.StudentID == studentID);
+                var studentIDLastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID);
                 if(studentIDLastUpdate is null)
                     dbContext.StudentIDLastUpdate.Add(new() { StudentID = studentID, Update = DateTime.UtcNow });
                 else
@@ -58,7 +81,7 @@ namespace ScheduleBot {
             if(disciplines != null) {
                 var dates = GetDates(group);
                 if(dates != null) {
-                    var groupLastUpdate = dbContext.GroupLastUpdate.SingleOrDefault(i => i.Group == group);
+                    var groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group);
                     if(groupLastUpdate is null)
                         dbContext.GroupLastUpdate.Add(new() { Group = group, Update = DateTime.UtcNow });
                     else

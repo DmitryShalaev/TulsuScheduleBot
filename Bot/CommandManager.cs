@@ -87,7 +87,6 @@ namespace ScheduleBot.Bot {
                         return true;
                 }
             }
-
             return false;
         }
 
@@ -96,10 +95,8 @@ namespace ScheduleBot.Bot {
                 if(await CheckAsync(botClient, chatId, func.Item1, user)) {
                     await func.Item2(botClient, chatId, messageId, user, message, args);
                     return true;
-
                 }
             }
-
             return false;
         }
 
