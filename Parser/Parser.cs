@@ -38,8 +38,7 @@ namespace ScheduleBot {
         }
 
         private void UpdatingDisciplines(object? sender = null, ElapsedEventArgs? e = null) {
-            var dateNow = DateTime.UtcNow;
-            foreach(var item in dbContext.ScheduleProfile.Where(i => (dateNow - i.LastAppeal).TotalDays <= 1).Select(i => i.Group).Distinct().ToList()) {
+            foreach(var item in dbContext.ScheduleProfile.Where(i => (DateTime.UtcNow - i.LastAppeal).TotalDays <= 7).Select(i => i.Group).Distinct().ToList()) {
                 if(string.IsNullOrWhiteSpace(item)) continue;
 
                 UpdatingDisciplines(group: item);
