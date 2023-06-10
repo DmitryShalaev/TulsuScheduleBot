@@ -38,5 +38,6 @@ namespace ScheduleBot.DB {
         public DbSet<ScheduleProfile> ScheduleProfile { get; set; }
         public DbSet<GroupLastUpdate> GroupLastUpdate { get; set; }
         public DbSet<StudentIDLastUpdate> StudentIDLastUpdate { get; set; }
+        public DbSet<MessageLog> MessageLog { get; set; }
     }
 }

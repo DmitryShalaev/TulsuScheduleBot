@@ -283,12 +283,16 @@ namespace ScheduleBot.Bot {
 
                         await ScheduleRelevance(botClient, chatId, user.ScheduleProfile.Group ?? "", MainKeyboardMarkup);
                         await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
-
-                        return true;
                     } catch(Exception) {
                         await botClient.SendTextMessageAsync(chatId: chatId, text: $"Сообщение распознано как дата, но не соответствует формату.", replyMarkup: MainKeyboardMarkup);
+                        dbContext.MessageLog.Add(new() { Message = args, User = user });
                     }
+                    return true;
                 }
+
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"Команда не распознана пожалуйста используйте кнопки или укажите дату в формате \"день месяц год\".\nНапример: \"1 мая 2023\", \"1 05 23\", \"1 5\"", replyMarkup: MainKeyboardMarkup);
+                dbContext.MessageLog.Add(new() { Message = args, User = user });
+
                 return false;
             }, CommandManager.Check.group);
 
@@ -298,6 +302,11 @@ namespace ScheduleBot.Bot {
             });
 
             commandManager.AddMessageCommand(Mode.GroupСhange, async (botClient, chatId, user, args) => {
+                if(args.Length > 15) {
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: "Номер группы не может содержать более 15 символов.", replyMarkup: CancelKeyboardMarkup);
+                    return false;
+                }
+
                 var messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: CancelKeyboardMarkup)).MessageId;
                 bool flag = dbContext.GroupLastUpdate.Select(i => i.Group).Contains(args);
 
@@ -318,6 +327,11 @@ namespace ScheduleBot.Bot {
                 return true;
             });
             commandManager.AddMessageCommand(Mode.StudentIDСhange, async (botClient, chatId, user, args) => {
+                if(args.Length > 10) {
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: "Номер зачетки не может содержать более 10 символов.", replyMarkup: CancelKeyboardMarkup);
+                    return false;
+                }
+
                 var messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: CancelKeyboardMarkup)).MessageId;
 
                 if(int.TryParse(args, out int studentID)) {
