@@ -210,7 +210,8 @@ namespace ScheduleBot.Bot {
 
                 var StudentID = user.ScheduleProfile.StudentID ?? throw new NullReferenceException("StudentID");
 
-                await ProgressRelevance(botClient, chatId, StudentID, GetTermsKeyboardMarkup(StudentID));
+                await ProgressRelevance(botClient, chatId, StudentID, null, false);
+                await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["AcademicPerformance"], replyMarkup: GetTermsKeyboardMarkup(StudentID));
             }, CommandManager.Check.studentId);
             commandManager.AddMessageCommand(commands.Message["Semester"], Mode.Default, async (botClient, chatId, user, args) => {
                 var StudentID = user.ScheduleProfile.StudentID ?? throw new NullReferenceException("StudentID");

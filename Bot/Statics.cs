@@ -68,25 +68,28 @@ namespace ScheduleBot.Bot {
         public static async Task StudentIdErrorUser(ITelegramBotClient botClient, ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Попросите владельца профиля указать номер зачетной книжки в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
 
         private async Task ScheduleRelevance(ITelegramBotClient botClient, ChatId chatId, string group, IReplyMarkup? replyMarkup) {
-            if((DateTime.UtcNow - dbContext.GroupLastUpdate.Single(i => i.Group == group).Update).TotalMinutes > commands.Config.GroupUpdateTime) {
-                var messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: replyMarkup)).MessageId;
+            var groupLastUpdate = dbContext.GroupLastUpdate.Single(i => i.Group == group).Update;
+            if((DateTime.UtcNow - groupLastUpdate).TotalMinutes > commands.Config.GroupUpdateTime) {
+                var messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
                 parser.UpdatingDisciplines(group);
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
             }
 
-            await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {dbContext.GroupLastUpdate.Single(i => i.Group == group).Update.ToLocalTime().ToString("dd.MM HH:mm")}", replyMarkup: replyMarkup);
+            await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {groupLastUpdate.ToLocalTime().ToString("dd.MM HH:mm")}", replyMarkup: replyMarkup);
         }
 
-        private async Task ProgressRelevance(ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup) {
-            if((DateTime.UtcNow - dbContext.StudentIDLastUpdate.Single(i => i.StudentID == studentID).Update).TotalMinutes > commands.Config.StudentIDUpdateTime) {
-                var messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...",  replyMarkup: replyMarkup)).MessageId;
+        private async Task ProgressRelevance(ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
+            var studentIDlastUpdate = dbContext.StudentIDLastUpdate.Single(i => i.StudentID == studentID).Update;
+            if((DateTime.UtcNow - studentIDlastUpdate).TotalMinutes > commands.Config.StudentIDUpdateTime) {
+                var messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
                 parser.UpdatingProgress(studentID);
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
             }
 
-            await botClient.SendTextMessageAsync(chatId: chatId, text: $"Успеваемость актуально на {dbContext.StudentIDLastUpdate.Single(i => i.StudentID == studentID).Update.ToLocalTime().ToString("dd.MM HH:mm")}", replyMarkup: replyMarkup);
+            if(send)
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"Успеваемость актуально на {studentIDlastUpdate.ToLocalTime().ToString("dd.MM HH:mm")}", replyMarkup: replyMarkup);
         }
     }
 }
