@@ -114,7 +114,7 @@ namespace ScheduleBot.Scheduler {
                 }
                 #endregion
 
-                exams.Add(Get(item));
+                exams[0]+=$"\n\n{Get(item)}";
             }
             return exams;
         }
