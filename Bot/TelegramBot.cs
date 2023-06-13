@@ -641,7 +641,11 @@ namespace ScheduleBot.Bot {
                 HandleError,
             new ReceiverOptions {
                 AllowedUpdates = { },
+#if DEBUG
+                ThrowPendingUpdates = true
+#else
                 ThrowPendingUpdates = false
+#endif
             },
             new CancellationTokenSource().Token
            ).Wait();
