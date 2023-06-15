@@ -76,7 +76,7 @@ namespace ScheduleBot.Scheduler {
             var exams = new List<string>();
 
             var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID).ToList();
-            var disciplines = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && i.Class == Class.other && DateTime.Parse($"{i.Date} {i.EndTime.AddHours(2)}") >= DateTime.Now && !completedDisciplines.Contains((CompletedDiscipline)i)).OrderBy(i => i.Date);
+            var disciplines = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && i.Class == Class.other && DateTime.Parse($"{i.Date} {i.EndTime}") >= DateTime.Now && !completedDisciplines.Contains((CompletedDiscipline)i)).OrderBy(i => i.Date);
 
             if(disciplines.Count() == 0) {
                 exams.Add("Ничего нет");
@@ -114,7 +114,7 @@ namespace ScheduleBot.Scheduler {
                 }
                 #endregion
 
-                exams[0]+=$"\n\n{Get(item)}";
+                exams[0] += $"\n\n{Get(item)}";
             }
             return exams;
         }

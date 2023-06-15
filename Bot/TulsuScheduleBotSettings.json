@@ -1,7 +1,7 @@
 {
   "Config": {
     "GroupUpdateTime": "30",
-    "StudentIDUpdateTime": "60"
+    "StudentIDUpdateTime": "30"
   },
 
   "Message": {

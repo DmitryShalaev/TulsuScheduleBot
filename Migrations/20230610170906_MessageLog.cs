@@ -1,29 +1,24 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace ScheduleBot.Migrations
-{
+namespace ScheduleBot.Migrations {
     /// <inheritdoc />
-    public partial class MessageLog : Migration
-    {
+    public partial class MessageLog : Migration {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
+        protected override void Up(MigrationBuilder migrationBuilder) {
             migrationBuilder.CreateTable(
                 name: "MessageLog",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserChatID = table.Column<long>(type: "bigint", nullable: false),
                     Message = table.Column<string>(type: "text", nullable: false),
                     Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_MessageLog", x => x.ID);
                     table.ForeignKey(
                         name: "FK_MessageLog_TelegramUsers_UserChatID",
@@ -40,8 +35,7 @@ namespace ScheduleBot.Migrations
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+        protected override void Down(MigrationBuilder migrationBuilder) {
             migrationBuilder.DropTable(
                 name: "MessageLog");
         }
