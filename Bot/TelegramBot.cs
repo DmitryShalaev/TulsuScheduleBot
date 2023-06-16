@@ -286,13 +286,11 @@ namespace ScheduleBot.Bot {
                         await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
                     } catch(Exception) {
                         await botClient.SendTextMessageAsync(chatId: chatId, text: $"Сообщение распознано как дата, но не соответствует формату.", replyMarkup: MainKeyboardMarkup);
-                        dbContext.MessageLog.Add(new() { Message = args, User = user });
                     }
                     return true;
                 }
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: $"Команда не распознана пожалуйста используйте кнопки или укажите дату в формате \"день месяц год\".\nНапример: \"1 мая 2023\", \"1 05 23\", \"1 5\"", replyMarkup: MainKeyboardMarkup);
-                dbContext.MessageLog.Add(new() { Message = args, User = user });
 
                 return false;
             }, CommandManager.Check.group);
@@ -685,6 +683,7 @@ namespace ScheduleBot.Bot {
                         if(message.Text is null) return;
 
                         await commandManager.OnMessageAsync(message.Chat, message.Text, user);
+                        dbContext.MessageLog.Add(new() { Message = message.Text, User = user });
                         break;
 
                     case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
