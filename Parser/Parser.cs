@@ -17,8 +17,12 @@ namespace ScheduleBot {
         private readonly HttpClientHandler clientHandler;
         private readonly System.Timers.Timer UpdatingDisciplinesTimer;
 
-        public Parser(ScheduleDbContext dbContext, BotCommands commands) {
+        public delegate Task UpdatedDisciplines(List<(string Group, DateOnly Date)> values);
+        private event UpdatedDisciplines Notify;
+
+        public Parser(ScheduleDbContext dbContext, BotCommands commands, UpdatedDisciplines updatedDisciplines) {
             this.dbContext = dbContext;
+            this.Notify += updatedDisciplines;
 
             clientHandler = new() {
                 AllowAutoRedirect = false,
@@ -78,6 +82,8 @@ namespace ScheduleBot {
             var disciplines = GetDisciplines(group);
 
             if(disciplines != null) {
+                List<Discipline> updatedDisciplines = new();
+
                 var dates = GetDates(group);
                 if(dates != null) {
                     var groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group);
@@ -92,15 +98,26 @@ namespace ScheduleBot {
                     if(except.Any()) {
                         dbContext.Disciplines.AddRange(except);
 
+                        if(_list.Any())
+                            updatedDisciplines.AddRange(except);
+
                         dbContext.SaveChanges();
                         _list = dbContext.Disciplines.Where(i => i.Group == group && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
                     }
 
                     except = _list.Except(disciplines);
-                    if(except.Any())
+                    if(except.Any()) {
                         dbContext.Disciplines.RemoveRange(except);
 
+                        updatedDisciplines.AddRange(except);
+                    }
+
                     dbContext.SaveChanges();
+
+                    if(updatedDisciplines.Any()) {
+                        DateOnly date = DateOnly.FromDateTime(DateTime.UtcNow);
+                        Notify.Invoke(updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().ToList()).Wait();
+                    }
                 }
             }
         }

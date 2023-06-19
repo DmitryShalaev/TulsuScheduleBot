@@ -22,13 +22,16 @@ namespace ScheduleBot.Bot {
             if(user.ScheduleProfile.OwnerID == user.ChatID) {
                 ProfileKeyboardMarkup.AddRange(new[] {  new KeyboardButton[] { $"{commands.Message["GroupNumber"]}: {user.ScheduleProfile.Group}" },
                                                         new KeyboardButton[] { $"{commands.Message["StudentIDNumber"]}: {user.ScheduleProfile.StudentID}" },
-                                                        new KeyboardButton[] { commands.Message["GetProfileLink"]}
+                                                        new KeyboardButton[] { commands.Message["GetProfileLink"] }
                                                      });
             } else {
                 ProfileKeyboardMarkup.Add(new KeyboardButton[] { commands.Message["ResetProfileLink"] });
             }
 
-            ProfileKeyboardMarkup.Add(new KeyboardButton[] { commands.Message["Back"] });
+            ProfileKeyboardMarkup.AddRange(new[] {
+                new KeyboardButton[] { $"{commands.Message["Notifications"]}: выкл" },
+                new KeyboardButton[] { commands.Message["Back"] }
+            });
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }
