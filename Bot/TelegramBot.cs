@@ -280,17 +280,21 @@ namespace ScheduleBot.Bot {
             commandManager.AddMessageCommand(Mode.Default, async (botClient, chatId, user, args) => {
                 if(DateRegex().IsMatch(args)) {
                     try {
-                        var date = DateOnly.FromDateTime(DateTime.Parse(args));
+                        DateOnly date;
+                        if(DateTime.TryParse(args, out var _date))
+                            date = DateOnly.FromDateTime(_date);
+                        else
+                            date = DateOnly.FromDateTime(DateTime.Parse($"{args} {DateTime.Now.Month}"));
 
                         await ScheduleRelevance(botClient, chatId, user.ScheduleProfile.Group ?? "", MainKeyboardMarkup);
                         await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
                     } catch(Exception) {
-                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"Сообщение распознано как дата, но не соответствует формату.", replyMarkup: MainKeyboardMarkup);
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"Команда распознана как дата, но не соответствует формату \"день месяц год\".\nНапример: \"1 мая 2023\", \"1 05 23\", \"1 5\", \"1\"", replyMarkup: MainKeyboardMarkup);
                     }
                     return true;
                 }
 
-                await botClient.SendTextMessageAsync(chatId: chatId, text: $"Команда не распознана пожалуйста используйте кнопки или укажите дату в формате \"день месяц год\".\nНапример: \"1 мая 2023\", \"1 05 23\", \"1 5\"", replyMarkup: MainKeyboardMarkup);
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"Команда не распознана пожалуйста используйте кнопки или укажите дату в формате \"день месяц год\".\nНапример: \"1 мая 2023\", \"1 05 23\", \"1 5\", \"1\"", replyMarkup: MainKeyboardMarkup);
 
                 return false;
             }, CommandManager.Check.group);

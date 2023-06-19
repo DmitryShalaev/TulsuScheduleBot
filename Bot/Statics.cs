@@ -18,7 +18,7 @@ namespace ScheduleBot.Bot {
         [GeneratedRegex("^([A-z][A-z]+)[ ]([0-9.:]+[|0-9.:]*)$")]
         private static partial Regex DisciplineCallbackRegex();
 
-        [GeneratedRegex("^\\d{1,2}[ ,./-](\\d{1,2}|\\w{3,8})([ ,./-](\\d{2}|\\d{4}))?$")]
+        [GeneratedRegex("^\\d{1,2}([ ,.-](\\d{1,2}|\\w{3,8}))?([ ,.-](\\d{2}|\\d{4}))?$")]
         private static partial Regex DateRegex();
 
         public static readonly BotCommands commands = new BotCommands();
