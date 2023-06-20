@@ -36,6 +36,14 @@ namespace ScheduleBot.DB.Entity {
         public override int GetHashCode() => ChatID.GetHashCode();
 
         public bool IsAdmin() => ChatID == ScheduleProfile.OwnerID;
+
+        public TelegramUser() { }
+
+        public TelegramUser(TelegramUser telegramUser) {
+            ChatID = telegramUser.ChatID;
+            ScheduleProfile = telegramUser.ScheduleProfile;
+            Notifications = telegramUser.Notifications;
+        }
     }
 
     public enum Mode : byte {
