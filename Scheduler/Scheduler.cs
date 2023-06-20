@@ -28,7 +28,7 @@ namespace ScheduleBot.Scheduler {
 
             var list = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && i.Date == date && (all || !completedDisciplines.Contains((CompletedDiscipline)i))).ToList();
 
-            list.AddRange(dbContext.CustomDiscipline.Where(i => i.ScheduleProfileGuid == profile.ID && i.Date == date).Select(i => new Discipline(i)));
+            list.AddRange(dbContext.CustomDiscipline.Where(i => i.IsAdded && i.ScheduleProfileGuid == profile.ID && i.Date == date).Select(i => new Discipline(i)));
 
             list = list.OrderBy(i => i.StartTime).ToList();
 

@@ -46,14 +46,14 @@ namespace ScheduleBot.DB.Entity {
         }
 
         public Discipline(CustomDiscipline discipline) {
-            Name = discipline.Name;
+            Name = discipline.Name ?? throw new NullReferenceException("Name");
             Class = Entity.Class.other;
             Lecturer = discipline.Lecturer;
-            LectureHall = discipline.LectureHall;
-            StartTime = discipline.StartTime;
-            EndTime = discipline.EndTime;
+            LectureHall = discipline.LectureHall ?? throw new NullReferenceException("LectureHall");
+            StartTime = discipline.StartTime ?? throw new NullReferenceException("StartTime");
+            EndTime = discipline.EndTime ?? throw new NullReferenceException("EndTime");
             Date = discipline.Date;
-            Type = discipline.Type;
+            Type = discipline.Type ?? throw new NullReferenceException("Type");
         }
 
         public override bool Equals(object? obj) => Equals(obj as Discipline);

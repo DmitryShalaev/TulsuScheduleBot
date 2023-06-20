@@ -103,14 +103,14 @@ namespace ScheduleBot.Bot {
                 dbContext.SaveChanges();
             });
             commandManager.AddMessageCommand(commands.Message["Cancel"], Mode.AddingDiscipline, async (chatId, user, args) => {
-                var tmp = dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First();
+                var tmp = dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate).First();
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["MainMenu"], replyMarkup: MainKeyboardMarkup);
                 await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(tmp.Date, user.ScheduleProfile, true), replyMarkup: GetEditAdminInlineKeyboardButton(tmp.Date, user.ScheduleProfile));
 
                 user.Mode = Mode.Default;
                 user.CurrentPath = null;
-                dbContext.TemporaryAddition.Remove(tmp);
+                dbContext.CustomDiscipline.Remove(tmp);
                 dbContext.SaveChanges();
             });
             commandManager.AddMessageCommand(commands.Message["Cancel"], new[] { Mode.GroupСhange, Mode.StudentIDСhange, Mode.ResetProfileLink }, SetDefaultMode(dbContext));
@@ -484,7 +484,7 @@ namespace ScheduleBot.Bot {
                     if(user.IsAdmin()) {
                         user.Mode = Mode.AddingDiscipline;
                         user.CurrentPath = $"{messageId} {date}";
-                        dbContext.TemporaryAddition.Add(new(user, date));
+                        dbContext.CustomDiscipline.Add(new(user.ScheduleProfile, date));
                         dbContext.SaveChanges();
                         await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile));
                         await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(user), replyMarkup: CancelKeyboardMarkup);
@@ -495,7 +495,7 @@ namespace ScheduleBot.Bot {
             }, CommandManager.Check.group);
 
             commandManager.AddCallbackCommand(commands.Callback["SetEndTime"].callback, Mode.AddingDiscipline, async (chatId, messageId, user, message, args) => {
-                var temporaryAddition = dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First();
+                var temporaryAddition = dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate).First();
 
                 temporaryAddition.EndTime = TimeOnly.Parse(args);
                 temporaryAddition.Counter++;

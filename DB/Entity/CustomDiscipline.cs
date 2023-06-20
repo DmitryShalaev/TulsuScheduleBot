@@ -6,14 +6,18 @@ namespace ScheduleBot.DB.Entity {
     public class CustomDiscipline : IEquatable<CustomDiscipline?> {
         public long ID { get; set; }
 
-        public string Name { get; set; }
-        public string? Lecturer { get; set; } = null;
-        public string LectureHall { get; set; }
-        public DateOnly Date { get; set; }
-        public TimeOnly StartTime { get; set; }
-        public TimeOnly EndTime { get; set; }
+        public DateTime AddDate { get; set; } = DateTime.UtcNow;
 
-        public string Type { get; set; }
+        public int Counter { get; set; } = 0;
+        public bool IsAdded { get; set; } = false;
+
+        public string? Name { get; set; }
+        public string? Lecturer { get; set; }
+        public string? LectureHall { get; set; }
+        public string? Type { get; set; }
+        public DateOnly Date { get; set; }
+        public TimeOnly? StartTime { get; set; }
+        public TimeOnly? EndTime { get; set; }
 
         [ForeignKey("ScheduleProfile")]
         public Guid ScheduleProfileGuid { get; set; }
@@ -21,16 +25,9 @@ namespace ScheduleBot.DB.Entity {
 
         public CustomDiscipline() { }
 
-        public CustomDiscipline(TemporaryAddition discipline, Guid scheduleProfileGuid) {
-            Name = discipline.Name ?? throw new NullReferenceException("Name");
-            Lecturer = discipline.Lecturer;
-            LectureHall = discipline.LectureHall ?? throw new NullReferenceException("LectureHall");
-            StartTime = discipline.StartTime ?? throw new NullReferenceException("StartTime");
-            EndTime = discipline.EndTime ?? throw new NullReferenceException("EndTime");
-            Date = discipline.Date;
-            Type = discipline.Type ?? throw new NullReferenceException("Type");
-
-            ScheduleProfileGuid = scheduleProfileGuid;
+        public CustomDiscipline(ScheduleProfile scheduleProfile, DateOnly date) {
+            ScheduleProfile = scheduleProfile;
+            Date = date;
         }
 
         public override bool Equals(object? obj) => Equals(obj as CustomDiscipline);
@@ -44,7 +41,7 @@ namespace ScheduleBot.DB.Entity {
 
             hash += Name?.GetHashCode() ?? 0;
             hash += Lecturer?.GetHashCode() ?? 0;
-            hash += LectureHall.GetHashCode();
+            hash += LectureHall?.GetHashCode() ?? 0;
             hash += Date.GetHashCode();
             hash += StartTime.GetHashCode();
             hash += EndTime.GetHashCode();
