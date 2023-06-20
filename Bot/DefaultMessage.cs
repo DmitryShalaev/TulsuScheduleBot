@@ -19,16 +19,19 @@ namespace ScheduleBot.Bot {
         private ReplyKeyboardMarkup GetProfileKeyboardMarkup(TelegramUser user) {
             List<KeyboardButton[]> ProfileKeyboardMarkup = new();
 
-            if(user.ScheduleProfile.OwnerID == user.ChatID) {
+            if(user.IsAdmin()) {
                 ProfileKeyboardMarkup.AddRange(new[] {  new KeyboardButton[] { $"{commands.Message["GroupNumber"]}: {user.ScheduleProfile.Group}" },
                                                         new KeyboardButton[] { $"{commands.Message["StudentIDNumber"]}: {user.ScheduleProfile.StudentID}" },
-                                                        new KeyboardButton[] { commands.Message["GetProfileLink"]}
+                                                        new KeyboardButton[] { commands.Message["GetProfileLink"] }
                                                      });
             } else {
                 ProfileKeyboardMarkup.Add(new KeyboardButton[] { commands.Message["ResetProfileLink"] });
             }
 
-            ProfileKeyboardMarkup.Add(new KeyboardButton[] { commands.Message["Back"] });
+            ProfileKeyboardMarkup.AddRange(new[] {
+                //new KeyboardButton[] { $"{commands.Message["Notifications"]}: {(user.Notifications is null ? "выкл": "вкл")}" },
+                new KeyboardButton[] { commands.Message["Back"] }
+            });
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }

@@ -8,72 +8,71 @@ namespace ScheduleBot.Bot {
     public partial class TelegramBot {
 
         private async Task SetStagesAddingDisciplineAsync(ITelegramBotClient botClient, ChatId chatId, string message, TelegramUser user) {
-            var temporaryAddition = dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First();
+            var customDiscipline = dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate).First();
 
             try {
-                switch(temporaryAddition.Counter) {
+                switch(customDiscipline.Counter) {
                     case 0:
-                        temporaryAddition.Name = message;
+                        customDiscipline.Name = message;
                         break;
                     case 1:
-                        temporaryAddition.Type = message;
+                        customDiscipline.Type = message;
                         break;
                     case 2:
-                        temporaryAddition.Lecturer = message;
+                        customDiscipline.Lecturer = message;
                         break;
                     case 3:
-                        temporaryAddition.LectureHall = message;
+                        customDiscipline.LectureHall = message;
                         break;
                     case 4:
-                        temporaryAddition.StartTime = ParseTime(message);
+                        customDiscipline.StartTime = ParseTime(message);
                         break;
                     case 5:
-                        temporaryAddition.EndTime = ParseTime(message);
+                        customDiscipline.EndTime = ParseTime(message);
                         break;
                 }
             } catch(Exception) {
-                await botClient.SendTextMessageAsync(chatId: chatId, text: "Ошибка! " + GetStagesAddingDiscipline(user, temporaryAddition.Counter), replyMarkup: CancelKeyboardMarkup);
+                await botClient.SendTextMessageAsync(chatId: chatId, text: "Ошибка! " + GetStagesAddingDiscipline(user, customDiscipline.Counter), replyMarkup: CancelKeyboardMarkup);
                 return;
             }
 
             dbContext.SaveChanges();
 
-            switch(++temporaryAddition.Counter) {
+            switch(++customDiscipline.Counter) {
                 case 0:
                 case 1:
                 case 2:
                 case 3:
                 case 4:
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(user, temporaryAddition.Counter), replyMarkup: CancelKeyboardMarkup);
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(user, customDiscipline.Counter), replyMarkup: CancelKeyboardMarkup);
                     break;
 
                 case 5:
-                    var endTime = temporaryAddition.StartTime?.AddMinutes(95);
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(user, temporaryAddition.Counter),
+                    var endTime = customDiscipline.StartTime?.AddMinutes(95);
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(user, customDiscipline.Counter),
                             replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: endTime?.ToString() ?? "endTime Error", callbackData: $"{commands.Callback["SetEndTime"].callback} {endTime}")) { });
                     break;
 
                 case 6:
-                    await SaveAddingDisciplineAsync(botClient, chatId, user, temporaryAddition);
+                    await SaveAddingDisciplineAsync(botClient, chatId, user, customDiscipline);
                     break;
             }
         }
 
-        private async Task SaveAddingDisciplineAsync(ITelegramBotClient botClient, ChatId chatId, TelegramUser user, TemporaryAddition temporaryAddition) {
-            dbContext.CustomDiscipline.Add(new(temporaryAddition, user.ScheduleProfileGuid));
-            dbContext.TemporaryAddition.Remove(temporaryAddition);
+        private async Task SaveAddingDisciplineAsync(ITelegramBotClient botClient, ChatId chatId, TelegramUser user, CustomDiscipline customDiscipline) {
+            customDiscipline.IsAdded = true;
             user.Mode = Mode.Default;
             dbContext.SaveChanges();
 
-            await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(user, temporaryAddition.Counter), replyMarkup: MainKeyboardMarkup);
-            await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(temporaryAddition.Date, user.ScheduleProfile), replyMarkup: GetEditAdminInlineKeyboardButton(temporaryAddition.Date, user.ScheduleProfile));
+            await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(user, customDiscipline.Counter), replyMarkup: MainKeyboardMarkup);
+            await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(customDiscipline.Date, user.ScheduleProfile), replyMarkup: GetEditAdminInlineKeyboardButton(customDiscipline.Date, user.ScheduleProfile));
         }
 
         private string GetStagesAddingDiscipline(TelegramUser user, int? counter = null) {
             if(counter != null)
                 return commands.StagesOfAdding[(int)counter];
 
-            return commands.StagesOfAdding[dbContext.TemporaryAddition.Where(i => i.TelegramUser == user).OrderByDescending(i => i.AddDate).First().Counter];
+            return commands.StagesOfAdding[dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate).First().Counter];
         }
 
         public TimeOnly ParseTime(string timeString) {

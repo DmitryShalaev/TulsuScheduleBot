@@ -34,10 +34,10 @@ namespace ScheduleBot.DB {
         public DbSet<ClassDTO> Classes { get; set; }
         public DbSet<ModeDTO> Modes { get; set; }
         public DbSet<TelegramUser> TelegramUsers { get; set; }
-        public DbSet<TemporaryAddition> TemporaryAddition { get; set; }
         public DbSet<ScheduleProfile> ScheduleProfile { get; set; }
         public DbSet<GroupLastUpdate> GroupLastUpdate { get; set; }
         public DbSet<StudentIDLastUpdate> StudentIDLastUpdate { get; set; }
         public DbSet<MessageLog> MessageLog { get; set; }
+        public DbSet<Notifications> Notifications { get; set; }
     }
 }
