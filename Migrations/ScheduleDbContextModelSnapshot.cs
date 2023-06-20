@@ -229,12 +229,12 @@ namespace ScheduleBot.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long>("UserChatID")
+                    b.Property<long>("TelegramUserChatID")
                         .HasColumnType("bigint");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("UserChatID");
+                    b.HasIndex("TelegramUserChatID");
 
                     b.ToTable("MessageLog");
                 });
@@ -310,6 +310,34 @@ namespace ScheduleBot.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ScheduleBot.DB.Entity.Notifications", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
+
+                    b.Property<TimeOnly?>("DNDStart")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<TimeOnly?>("DNDStop")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<int>("Days")
+                        .HasColumnType("integer");
+
+                    b.Property<long?>("OwnerID")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("OwnerID")
+                        .IsUnique();
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("ScheduleBot.DB.Entity.Progress", b =>
                 {
                     b.Property<long>("ID")
@@ -352,13 +380,15 @@ namespace ScheduleBot.Migrations
                     b.Property<DateTime>("LastAppeal")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("OwnerID")
+                    b.Property<long?>("OwnerID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("StudentID")
                         .HasColumnType("text");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("OwnerID");
 
                     b.ToTable("ScheduleProfile");
                 });
@@ -400,6 +430,9 @@ namespace ScheduleBot.Migrations
                     b.Property<byte>("Mode")
                         .HasColumnType("smallint");
 
+                    b.Property<long?>("NotificationsID")
+                        .HasColumnType("bigint");
+
                     b.Property<Guid>("ScheduleProfileGuid")
                         .HasColumnType("uuid");
 
@@ -415,6 +448,8 @@ namespace ScheduleBot.Migrations
                     b.HasKey("ChatID");
 
                     b.HasIndex("Mode");
+
+                    b.HasIndex("NotificationsID");
 
                     b.HasIndex("ScheduleProfileGuid");
 
@@ -464,13 +499,31 @@ namespace ScheduleBot.Migrations
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.MessageLog", b =>
                 {
-                    b.HasOne("ScheduleBot.DB.Entity.TelegramUser", "User")
+                    b.HasOne("ScheduleBot.DB.Entity.TelegramUser", "TelegramUser")
                         .WithMany()
-                        .HasForeignKey("UserChatID")
+                        .HasForeignKey("TelegramUserChatID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("TelegramUser");
+                });
+
+            modelBuilder.Entity("ScheduleBot.DB.Entity.Notifications", b =>
+                {
+                    b.HasOne("ScheduleBot.DB.Entity.TelegramUser", "TelegramUser")
+                        .WithOne()
+                        .HasForeignKey("ScheduleBot.DB.Entity.Notifications", "OwnerID");
+
+                    b.Navigation("TelegramUser");
+                });
+
+            modelBuilder.Entity("ScheduleBot.DB.Entity.ScheduleProfile", b =>
+                {
+                    b.HasOne("ScheduleBot.DB.Entity.TelegramUser", "TelegramUser")
+                        .WithMany()
+                        .HasForeignKey("OwnerID");
+
+                    b.Navigation("TelegramUser");
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.TelegramUser", b =>
@@ -481,6 +534,10 @@ namespace ScheduleBot.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ScheduleBot.DB.Entity.Notifications", "Notifications")
+                        .WithMany()
+                        .HasForeignKey("NotificationsID");
+
                     b.HasOne("ScheduleBot.DB.Entity.ScheduleProfile", "ScheduleProfile")
                         .WithMany()
                         .HasForeignKey("ScheduleProfileGuid")
@@ -488,6 +545,8 @@ namespace ScheduleBot.Migrations
                         .IsRequired();
 
                     b.Navigation("ModeDTO");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("ScheduleProfile");
                 });

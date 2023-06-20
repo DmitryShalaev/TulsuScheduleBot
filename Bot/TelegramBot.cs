@@ -250,7 +250,7 @@ namespace ScheduleBot.Bot {
                 if(profile is not null) {
                     user.ScheduleProfile = profile;
                 } else {
-                    profile = new() { OwnerID = user.ChatID };
+                    profile = new() { TelegramUser = user };
                     dbContext.ScheduleProfile.Add(profile);
                     user.ScheduleProfile = profile;
                 }
@@ -611,6 +611,18 @@ namespace ScheduleBot.Bot {
                 await CustomEdit(scheduler, dbContext, botClient, chatId, messageId, user, args, Mode.CustomEditEndTime,
                 "Хотите изменить время конца пары? Если да, то напишите новое");
             });
+
+            commandManager.AddMessageCommand(commands.Message["Notifications"], Mode.Default, async (chatId, user, args) => {
+                var tmp = new Notifications() { Days = 7, TelegramUser = user };
+                dbContext.Notifications.Add(tmp);
+                user.Notifications = tmp;
+
+                dbContext.SaveChanges();
+
+                await botClient.SendTextMessageAsync(chatId: chatId, text: "Ok");
+            });
+
+
             #endregion
             #region Corps
             commandManager.AddMessageCommand(commands.Message["Corps"], Mode.Default, async (chatId, user, args) => {
@@ -669,15 +681,18 @@ namespace ScheduleBot.Bot {
             if(message is not null) {
                 if(message.From is null) return;
 
-                TelegramUser? user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).FirstOrDefault(u => u.ChatID == message.Chat.Id);
+                TelegramUser? user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).Include(u => u.Notifications).FirstOrDefault(u => u.ChatID == message.Chat.Id);
 
                 if(user is null) {
-                    ScheduleProfile scheduleProfile = new ScheduleProfile(){ OwnerID = message.Chat.Id, LastAppeal = DateTime.UtcNow };
+                    ScheduleProfile scheduleProfile = new ScheduleProfile(){ LastAppeal = DateTime.UtcNow };
                     dbContext.ScheduleProfile.Add(scheduleProfile);
+                    dbContext.SaveChanges();
 
                     user = new() { ChatID = message.Chat.Id, FirstName = message.From.FirstName, Username = message.From.Username, LastName = message.From.LastName, ScheduleProfile = scheduleProfile, LastAppeal = DateTime.UtcNow };
 
                     dbContext.TelegramUsers.Add(user);
+                    scheduleProfile.TelegramUser = user;
+
                     dbContext.SaveChanges();
                 }
 
@@ -687,7 +702,7 @@ namespace ScheduleBot.Bot {
                         if(message.Text is null) return;
 
                         await commandManager.OnMessageAsync(message.Chat, message.Text, user);
-                        dbContext.MessageLog.Add(new() { Message = message.Text, User = user });
+                        dbContext.MessageLog.Add(new() { Message = message.Text, TelegramUser = user });
                         break;
 
                     case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
