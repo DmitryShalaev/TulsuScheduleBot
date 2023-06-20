@@ -22,7 +22,7 @@ namespace ScheduleBot.Bot {
             this.dbContext = dbContext;
 
             botClient = new TelegramBotClient(Environment.GetEnvironmentVariable("TelegramBotToken") ?? "");
-            
+
             parser = new(dbContext, commands, UpdatedDisciplinesAsync);
 
             commandManager = new(botClient, (string message, TelegramUser user, out string args) => {
@@ -105,13 +105,13 @@ namespace ScheduleBot.Bot {
             commandManager.AddMessageCommand(commands.Message["Cancel"], Mode.AddingDiscipline, async (chatId, user, args) => {
                 var tmp = dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate).First();
 
-                await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["MainMenu"], replyMarkup: MainKeyboardMarkup);
-                await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(tmp.Date, user.ScheduleProfile, true), replyMarkup: GetEditAdminInlineKeyboardButton(tmp.Date, user.ScheduleProfile));
-
                 user.Mode = Mode.Default;
                 user.CurrentPath = null;
                 dbContext.CustomDiscipline.Remove(tmp);
                 dbContext.SaveChanges();
+
+                await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["MainMenu"], replyMarkup: MainKeyboardMarkup);
+                await botClient.SendTextMessageAsync(chatId: chatId, text: scheduler.GetScheduleByDate(tmp.Date, user.ScheduleProfile, true), replyMarkup: GetEditAdminInlineKeyboardButton(tmp.Date, user.ScheduleProfile));
             });
             commandManager.AddMessageCommand(commands.Message["Cancel"], new[] { Mode.GroupСhange, Mode.StudentIDСhange, Mode.ResetProfileLink }, SetDefaultMode(dbContext));
             commandManager.AddMessageCommand(commands.Message["Cancel"], new[] { Mode.CustomEditName, Mode.CustomEditLecturer, Mode.CustomEditLectureHall, Mode.CustomEditType, Mode.CustomEditStartTime, Mode.CustomEditEndTime }, async (chatId, user, args) => {
