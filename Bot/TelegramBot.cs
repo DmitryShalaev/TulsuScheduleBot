@@ -613,9 +613,7 @@ namespace ScheduleBot.Bot {
             });
 
             commandManager.AddMessageCommand(commands.Message["Notifications"], Mode.Default, async (chatId, user, args) => {
-                var tmp = new Notifications() { Days = 7, TelegramUser = user };
-                dbContext.Notifications.Add(tmp);
-                user.Notifications = tmp;
+                user.Notifications.IsEnabled = true;
 
                 dbContext.SaveChanges();
 
@@ -684,14 +682,26 @@ namespace ScheduleBot.Bot {
                 TelegramUser? user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).Include(u => u.Notifications).FirstOrDefault(u => u.ChatID == message.Chat.Id);
 
                 if(user is null) {
-                    ScheduleProfile scheduleProfile = new ScheduleProfile(){ LastAppeal = DateTime.UtcNow };
+                    ScheduleProfile scheduleProfile = new(){ LastAppeal = DateTime.UtcNow };
                     dbContext.ScheduleProfile.Add(scheduleProfile);
+
+                    Notifications notifications = new();
+                    dbContext.Notifications.Add(notifications);
                     dbContext.SaveChanges();
 
-                    user = new() { ChatID = message.Chat.Id, FirstName = message.From.FirstName, Username = message.From.Username, LastName = message.From.LastName, ScheduleProfile = scheduleProfile, LastAppeal = DateTime.UtcNow };
+                    user = new() {
+                        ChatID = message.Chat.Id,
+                        Username = message.From.Username,
+                        FirstName = message.From.FirstName,
+                        LastName = message.From.LastName,
+                        ScheduleProfile = scheduleProfile,
+                        Notifications = notifications,
+                        LastAppeal = DateTime.UtcNow
+                    };
 
                     dbContext.TelegramUsers.Add(user);
-                    scheduleProfile.TelegramUser = user;
+
+                    notifications.TelegramUser = scheduleProfile.TelegramUser = user;
 
                     dbContext.SaveChanges();
                 }

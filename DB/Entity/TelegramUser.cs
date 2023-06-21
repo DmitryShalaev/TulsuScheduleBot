@@ -22,8 +22,8 @@ namespace ScheduleBot.DB.Entity {
         public ScheduleProfile ScheduleProfile { get; set; }
 
         [ForeignKey("Notifications")]
-        public long? NotificationsID { get; set; }
-        public Notifications? Notifications { get; set; }
+        public long NotificationsID { get; set; }
+        public Notifications Notifications { get; set; }
 
         [ForeignKey("ModeDTO")]
         public Mode Mode { get; set; } = Mode.Default;
