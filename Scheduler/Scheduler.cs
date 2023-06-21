@@ -116,7 +116,7 @@ namespace ScheduleBot.Scheduler {
                         exams.Add($"Ближайший экзамен через {via} дня.");
                         break;
 
-                    case var _ when via > 0:
+                    case var _ when via > 4:
                         exams.Add($"Ближайший экзамен через {via} дней.");
                         break;
                 }

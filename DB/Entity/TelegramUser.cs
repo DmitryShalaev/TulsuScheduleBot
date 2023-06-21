@@ -57,7 +57,8 @@ namespace ScheduleBot.DB.Entity {
         CustomEditType,
         CustomEditLectureHall,
         CustomEditStartTime,
-        CustomEditEndTime
+        CustomEditEndTime,
+        DaysNotifications
     }
 
     public class ModeDTO {

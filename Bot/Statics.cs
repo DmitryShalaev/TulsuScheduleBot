@@ -6,17 +6,20 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleBot.Bot {
     public partial class TelegramBot {
-        [GeneratedRegex("^[А-Я][а-я]*[ ]?[а-я]*$")]
+        [GeneratedRegex("^[А-я]+[ ]?[а-я]*$")]
         private static partial Regex DefaultMessageRegex();
         [GeneratedRegex("^([0-9]+)[ ]([а-я]+)$")]
         private static partial Regex TermsMessageRegex();
-        [GeneratedRegex("(^[А-Я][а-я]*[ ]?[а-я]*):")]
+        [GeneratedRegex("(^[А-я]+[ ]?[а-я]*):")]
         private static partial Regex GroupOrStudentIDMessageRegex();
         [GeneratedRegex("(^/[A-z]+)[ ]?([A-z0-9-]*)$")]
         private static partial Regex CommandMessageRegex();
 
-        [GeneratedRegex("^([A-z][A-z]+)[ ]([0-9.:]+[|0-9.:]*)$")]
+        [GeneratedRegex("^([A-z]+)[ ]([0-9.:]+[|0-9.:]*)$")]
         private static partial Regex DisciplineCallbackRegex();
+
+        [GeneratedRegex("^([A-z]+)[ ]([A-z]+)$")]
+        private static partial Regex NotificationsCallbackRegex();
 
         [GeneratedRegex("^\\d{1,2}([ ,.-](\\d{1,2}|\\w{3,8}))?([ ,.-](\\d{2}|\\d{4}))?$")]
         private static partial Regex DateRegex();

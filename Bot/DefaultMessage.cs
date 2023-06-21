@@ -1,5 +1,7 @@
 ﻿using ScheduleBot.DB.Entity;
 
+using Telegram.Bot.Types;
+using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleBot.Bot {
@@ -29,7 +31,7 @@ namespace ScheduleBot.Bot {
             }
 
             ProfileKeyboardMarkup.AddRange(new[] {
-                //new KeyboardButton[] { $"{commands.Message["Notifications"]}: {(user.Notifications is null ? "выкл": "вкл")}" },
+                new KeyboardButton[] { commands.Message["Notifications"] },
                 new KeyboardButton[] { commands.Message["Back"] }
             });
 

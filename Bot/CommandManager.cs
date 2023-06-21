@@ -47,7 +47,7 @@ namespace ScheduleBot.Bot {
         }
 
         public void AddMessageCommand(string command, Mode mode, MessageFunction function, Check check = Check.none) {
-            MessageCommands.Add($"{command} {mode}", (check, function));
+            MessageCommands.Add($"{command} {mode}".ToLower(), (check, function));
         }
 
         public void AddMessageCommand(string[] commands, Mode mode, MessageFunction function, Check check = Check.none) {
@@ -67,11 +67,11 @@ namespace ScheduleBot.Bot {
         }
 
         public void AddCallbackCommand(string command, Mode mode, CallbackFunction function, Check check = Check.none) {
-            CallbackCommands.Add($"{command} {mode}", (check, function)); ;
+            CallbackCommands.Add($"{command} {mode}".ToLower(), (check, function)); ;
         }
 
         public async Task<bool> OnMessageAsync(ChatId chatId, string message, TelegramUser user) {
-            if(MessageCommands.TryGetValue(getMessageCommand(message, user, out var args), out var func)) {
+            if(MessageCommands.TryGetValue(getMessageCommand(message.ToLower(), user, out var args), out var func)) {
                 if(await CheckAsync(chatId, func.Item1, user)) {
                     await func.Item2(chatId, user, args);
                     return true;
@@ -91,7 +91,7 @@ namespace ScheduleBot.Bot {
         }
 
         public async Task<bool> OnCallbackAsync(ChatId chatId, int messageId, string command, string message, TelegramUser user) {
-            if(CallbackCommands.TryGetValue(getCallbackCommand(command, user, out var args), out var func)) {
+            if(CallbackCommands.TryGetValue(getCallbackCommand(command.ToLower(), user, out var args), out var func)) {
                 if(await CheckAsync(chatId, func.Item1, user)) {
                     await func.Item2(chatId, messageId, user, message, args);
                     return true;

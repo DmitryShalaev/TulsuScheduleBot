@@ -116,7 +116,7 @@ namespace ScheduleBot {
 
                     if(updatedDisciplines.Any()) {
                         DateOnly date = DateOnly.FromDateTime(DateTime.UtcNow);
-                        Notify.Invoke(updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().ToList()).Wait();
+                        Notify.Invoke(updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList()).Wait();
                     }
                 }
             }

@@ -64,8 +64,38 @@ namespace ScheduleBot.Bot {
             return new InlineKeyboardMarkup(editButtons);
         }
 
-        private InlineKeyboardMarkup GetInlineBackKeyboardButton(DateOnly date, TelegramUser user) {
+        private InlineKeyboardMarkup GetBackInlineKeyboardButton(DateOnly date, TelegramUser user) {
             return new(InlineKeyboardButton.WithCallbackData(commands.Callback["Back"].text, $"{commands.Callback["Back"].callback} {date}")); ;
+        }
+
+
+        private InlineKeyboardMarkup GetNotificationsInlineKeyboardButton(TelegramUser user) {
+            var buttons = new List<InlineKeyboardButton[]>();
+
+            if(user.Notifications.IsEnabled)
+                buttons.Add(new[] { InlineKeyboardButton.WithCallbackData("Выключить уведомления", "ToggleNotifications off") });
+            else
+                buttons.Add(new[] { InlineKeyboardButton.WithCallbackData("Включить уведомления", "ToggleNotifications on") });
+
+            string via(int days) {
+                switch(days) {
+                    case 1:
+                        return $"{days} день";
+
+                    case 2:
+                    case 3:
+                    case 4:
+                        return $"{days} дня";
+
+                    case var _ when days > 4:
+                        return $"{days} дней";
+                }
+                return "";
+            }
+
+            buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"В период: {via(user.Notifications.Days)}", "DaysNotifications") });
+
+            return new InlineKeyboardMarkup(buttons);
         }
 
     }
