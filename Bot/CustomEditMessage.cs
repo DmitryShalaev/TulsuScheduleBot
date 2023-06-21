@@ -15,7 +15,7 @@ namespace ScheduleBot.Bot {
                     user.CurrentPath = $"{discipline.ID}";
                     dbContext.SaveChanges();
 
-                    await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(discipline.Date, user.ScheduleProfile));
+                    await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
                     await botClient.SendTextMessageAsync(chatId: chatId, text: text, replyMarkup: CancelKeyboardMarkup);
                     return;
                 }

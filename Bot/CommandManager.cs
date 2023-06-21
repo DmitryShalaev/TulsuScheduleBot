@@ -24,12 +24,12 @@ namespace ScheduleBot.Bot {
 
         private readonly List<(Check, TryFunction)>[] DefaultMessageCommands;
 
-        private readonly ITelegramBotClient botClient;
+        private readonly TelegramBot telegramBot;
         private readonly GetMessageCommand getMessageCommand;
         private readonly GetCallbackCommand getCallbackCommand;
 
-        public CommandManager(ITelegramBotClient botClient, GetMessageCommand getCommand, GetCallbackCommand getCallbackCommand) {
-            this.botClient = botClient;
+        public CommandManager(TelegramBot telegramBot, GetMessageCommand getCommand, GetCallbackCommand getCallbackCommand) {
+            this.telegramBot = telegramBot;
             this.getMessageCommand = getCommand;
             this.getCallbackCommand = getCallbackCommand;
 
@@ -105,9 +105,9 @@ namespace ScheduleBot.Bot {
                 case Check.group:
                     if(string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
                         if(user.IsAdmin())
-                            await TelegramBot.GroupErrorAdmin(botClient, chatId);
+                            await telegramBot.GroupErrorAdmin(chatId, user);
                         else
-                            await TelegramBot.GroupErrorUser(botClient, chatId);
+                            await telegramBot.GroupErrorUser(chatId);
                         return false;
                     }
                     break;
@@ -115,9 +115,9 @@ namespace ScheduleBot.Bot {
                 case Check.studentId:
                     if(string.IsNullOrWhiteSpace(user.ScheduleProfile.StudentID)) {
                         if(user.IsAdmin())
-                            await TelegramBot.StudentIdErrorAdmin(botClient, chatId);
+                            await telegramBot.StudentIdErrorAdmin(chatId, user);
                         else
-                            await TelegramBot.StudentIdErrorUser(botClient, chatId);
+                            await telegramBot.StudentIdErrorUser(chatId);
                         return false;
                     }
                     break;
