@@ -87,7 +87,8 @@ namespace ScheduleBot.Bot {
             var groupLastUpdate = dbContext.GroupLastUpdate.Single(i => i.Group == group).Update.ToLocalTime();
             if((DateTime.Now - groupLastUpdate).TotalMinutes > commands.Config.GroupUpdateTime) {
                 var messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
-                parser.UpdatingDisciplines(group);
+                if(!parser.UpdatingDisciplines(group))
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
             }
@@ -99,8 +100,9 @@ namespace ScheduleBot.Bot {
             var studentIDlastUpdate = dbContext.StudentIDLastUpdate.Single(i => i.StudentID == studentID).Update.ToLocalTime();
             if((DateTime.Now - studentIDlastUpdate).TotalMinutes > commands.Config.StudentIDUpdateTime) {
                 var messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
-                parser.UpdatingProgress(studentID);
-
+                if(!parser.UpdatingProgress(studentID))
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
+                
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
             }
 

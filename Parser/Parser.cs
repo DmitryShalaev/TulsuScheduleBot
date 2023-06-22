@@ -51,7 +51,7 @@ namespace ScheduleBot {
             UpdatingDisciplinesTimer.Start();
         }
 
-        public void UpdatingProgress(string studentID) {
+        public bool UpdatingProgress(string studentID) {
             var progress = GetProgress(studentID);
             if(progress != null) {
                 var studentIDLastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID);
@@ -75,17 +75,20 @@ namespace ScheduleBot {
                     dbContext.Progresses.RemoveRange(except);
 
                 dbContext.SaveChanges();
+
+                return true;
             }
+            return false;
         }
 
-        public void UpdatingDisciplines(string group) {
-            var disciplines = GetDisciplines(group);
+        public bool UpdatingDisciplines(string group) {
+            var dates = GetDates(group);
+            if(dates != null) {
 
-            if(disciplines != null) {
-                List<Discipline> updatedDisciplines = new();
+                var disciplines = GetDisciplines(group);
+                if(disciplines != null) {
+                    List<Discipline> updatedDisciplines = new();
 
-                var dates = GetDates(group);
-                if(dates != null) {
                     var groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group);
                     if(groupLastUpdate is null)
                         dbContext.GroupLastUpdate.Add(new() { Group = group, Update = DateTime.UtcNow });
@@ -118,8 +121,11 @@ namespace ScheduleBot {
                         DateOnly date = DateOnly.FromDateTime(DateTime.Now);
                         Notify.Invoke(updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList()).Wait();
                     }
+
+                    return true;
                 }
             }
+            return false;
         }
 
         public List<Discipline>? GetDisciplines(string group) {
