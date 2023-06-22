@@ -726,7 +726,7 @@ namespace ScheduleBot.Bot {
                 TelegramUser? user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).Include(u => u.Notifications).FirstOrDefault(u => u.ChatID == message.Chat.Id);
 
                 if(user is null) {
-                    ScheduleProfile scheduleProfile = new(){ LastAppeal = DateTime.UtcNow };
+                    ScheduleProfile scheduleProfile = new();
                     dbContext.ScheduleProfile.Add(scheduleProfile);
 
                     Notifications notifications = new();
@@ -739,8 +739,7 @@ namespace ScheduleBot.Bot {
                         FirstName = message.From.FirstName,
                         LastName = message.From.LastName,
                         ScheduleProfile = scheduleProfile,
-                        Notifications = notifications,
-                        LastAppeal = DateTime.UtcNow
+                        Notifications = notifications
                     };
 
                     dbContext.TelegramUsers.Add(user);

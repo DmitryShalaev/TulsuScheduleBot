@@ -42,7 +42,7 @@ namespace ScheduleBot {
         }
 
         private void UpdatingDisciplines(object? sender = null, ElapsedEventArgs? e = null) {
-            foreach(var item in dbContext.ScheduleProfile.Where(i => (DateTime.UtcNow - i.LastAppeal).TotalDays <= 7).Select(i => i.Group).Distinct().ToList()) {
+            foreach(var item in dbContext.ScheduleProfile.Where(i => (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= 7).Select(i => i.Group).Distinct().ToList()) {
                 if(string.IsNullOrWhiteSpace(item)) continue;
 
                 UpdatingDisciplines(group: item);
@@ -115,7 +115,7 @@ namespace ScheduleBot {
                     dbContext.SaveChanges();
 
                     if(updatedDisciplines.Any()) {
-                        DateOnly date = DateOnly.FromDateTime(DateTime.UtcNow);
+                        DateOnly date = DateOnly.FromDateTime(DateTime.Now);
                         Notify.Invoke(updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList()).Wait();
                     }
                 }

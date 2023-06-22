@@ -12,6 +12,6 @@ namespace ScheduleBot.DB.Entity {
         public string? Group { get; set; }
         public string? StudentID { get; set; }
 
-        public DateTime LastAppeal { get; set; }
+        public DateTime LastAppeal { get; set; } = DateTime.UtcNow;
     }
 }

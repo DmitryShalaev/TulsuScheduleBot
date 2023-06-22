@@ -22,8 +22,7 @@ namespace ScheduleBot.Bot {
                 int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(item.Date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
                 string str = $"{item.Date.ToString("dd.MM.yy")} - {char.ToUpper(item.Date.ToString("dddd")[0]) + item.Date.ToString("dddd").Substring(1)} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})";
 
-                var date = DateTime.Now;
-                var days = (DateTime.Parse(item.Date.ToString()) - date).TotalDays;
+                var days = (DateTime.Parse(item.Date.ToString()) - DateTime.Now.Date).TotalDays;
 
                 foreach(var user in telegramUsers.Where(i => i.ScheduleProfile.Group == item.Group && days <= i.Notifications.Days)) {
                     if(!user.Flag) {

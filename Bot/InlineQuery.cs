@@ -39,7 +39,7 @@ namespace ScheduleBot.Bot {
             TelegramUser? user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).FirstOrDefault(u => u.ChatID == inlineQuery.From.Id);
 
             if(user is not null && !string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
-                if((DateTime.UtcNow - dbContext.GroupLastUpdate.Single(i => i.Group == user.ScheduleProfile.Group).Update).TotalMinutes > commands.Config.GroupUpdateTime)
+                if((DateTime.Now - dbContext.GroupLastUpdate.Single(i => i.Group == user.ScheduleProfile.Group).Update.ToLocalTime()).TotalMinutes > commands.Config.GroupUpdateTime)
                     parser.UpdatingDisciplines(user.ScheduleProfile.Group);
 
                 await botClient.AnswerInlineQueryAsync(inlineQuery.Id, new[] {
