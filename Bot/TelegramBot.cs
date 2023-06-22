@@ -763,6 +763,7 @@ namespace ScheduleBot.Bot {
                         if(update.CallbackQuery?.Data is null || message.Text is null) return;
 
                         await commandManager.OnCallbackAsync(message.Chat, message.MessageId, update.CallbackQuery.Data, message.Text, user);
+                        dbContext.MessageLog.Add(new() { Message = update.CallbackQuery.Data, TelegramUser = user });
                         break;
                 }
 
