@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Timers;
 
 #if !DEBUG
@@ -68,7 +69,13 @@ namespace ScheduleBot {
                 foreach(var item in dbContext.TelegramUsers)
                     item.TodayRequests = 0;
 
-                dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => i.Date.AddMonths(1) < DateOnly.FromDateTime(DateTime.UtcNow)));
+                var date = DateOnly.FromDateTime(DateTime.UtcNow);
+                dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => i.Date.AddDays(7) < date));
+
+                if(date.Day == 1 && (date.Month == 2 || date.Month == 8)) 
+                    dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines);
+                else 
+                    dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines.Where(i => i.Date != null && i.Date.Value.AddDays(7) < date));
 
                 dbContext.SaveChanges();
             }
