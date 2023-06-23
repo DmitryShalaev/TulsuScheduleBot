@@ -1,7 +1,5 @@
 ﻿using ScheduleBot.DB.Entity;
 
-using Telegram.Bot.Types;
-using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleBot.Bot {
@@ -9,7 +7,7 @@ namespace ScheduleBot.Bot {
         private ReplyKeyboardMarkup GetTermsKeyboardMarkup(string StudentID) {
             List<KeyboardButton[]> TermsKeyboardMarkup = new();
 
-            var terms = dbContext.Progresses.Where(i => i.StudentID == StudentID && i.Mark != null).Select(i => i.Term).Distinct().OrderBy(i => i).ToArray();
+            var terms = dbContext.Progresses.Where(i => i.StudentID == StudentID).Select(i => i.Term).Distinct().OrderBy(i => i).ToArray();
             for(int i = 0; i < terms.Length; i++)
                 TermsKeyboardMarkup.Add(new KeyboardButton[] { $"{terms[i]} {commands.Message["Semester"]}", i + 1 < terms.Length ? $"{terms[++i]} {commands.Message["Semester"]}" : "" });
 

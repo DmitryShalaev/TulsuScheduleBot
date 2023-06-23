@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace ScheduleBot.DB.Entity {
+﻿namespace ScheduleBot.DB.Entity {
 #pragma warning disable CS8618
     public class MessageLog {
         public long ID { get; set; }

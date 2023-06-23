@@ -5,7 +5,6 @@ using ScheduleBot.DB.Entity;
 
 namespace ScheduleBot.Scheduler {
     public class Scheduler {
-        public static Dictionary<DB.Entity.Class, string> TypeToString = new(){ { DB.Entity.Class.all, "Все"}, { DB.Entity.Class.lab, "Лаб. занятия" }, { DB.Entity.Class.practice, "Практические занятия" } };
         private readonly ScheduleDbContext dbContext;
 
         public Scheduler(ScheduleDbContext dbContext) => this.dbContext = dbContext;
@@ -47,7 +46,7 @@ namespace ScheduleBot.Scheduler {
         }
 
         public string GetProgressByTerm(int term, string StudentID) {
-            var progresses = dbContext.Progresses.Where(i => i.StudentID == StudentID && i.Term == term && i.Mark != null);
+            var progresses = dbContext.Progresses.Where(i => i.StudentID == StudentID && i.Term == term);
 
             string str = $"📌 Семестр {term}\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
 

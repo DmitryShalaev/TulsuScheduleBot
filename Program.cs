@@ -1,5 +1,4 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Timers;
 
 #if !DEBUG
@@ -37,8 +36,7 @@ namespace ScheduleBot {
 
                 StartTimer();
 
-                Scheduler.Scheduler scheduler = new(dbContext);
-                Bot.TelegramBot telegramBot = new(scheduler, dbContext);
+                Bot.TelegramBot telegramBot = new(new(dbContext), dbContext);
 
             } catch(Exception e) {
                 Console.WriteLine(e);
@@ -72,9 +70,9 @@ namespace ScheduleBot {
                 var date = DateOnly.FromDateTime(DateTime.UtcNow);
                 dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => i.Date.AddDays(7) < date));
 
-                if(date.Day == 1 && (date.Month == 2 || date.Month == 8)) 
+                if(date.Day == 1 && (date.Month == 2 || date.Month == 8))
                     dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines);
-                else 
+                else
                     dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines.Where(i => i.Date != null && i.Date.Value.AddDays(7) < date));
 
                 dbContext.SaveChanges();

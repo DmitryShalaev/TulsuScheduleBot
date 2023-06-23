@@ -102,7 +102,7 @@ namespace ScheduleBot.Bot {
                 var messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
                 if(!parser.UpdatingProgress(studentID))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
-                
+
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
             }
 
