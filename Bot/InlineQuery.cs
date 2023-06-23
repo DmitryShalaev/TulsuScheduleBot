@@ -25,7 +25,12 @@ namespace ScheduleBot.Bot {
                     default:
                         if(DateRegex().IsMatch(str)) {
                             try {
-                                var date = DateOnly.FromDateTime(DateTime.Parse(str));
+                                DateOnly date;
+                                if(DateTime.TryParse(str, out var _date))
+                                    date = DateOnly.FromDateTime(_date);
+                                else
+                                    date = DateOnly.FromDateTime(DateTime.Parse($"{str} {DateTime.Now.Month}"));
+
                                 await AnswerInlineQueryAsync(botClient, inlineQuery, date);
                             } catch(Exception) { }
                         }
