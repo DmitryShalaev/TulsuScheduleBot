@@ -98,7 +98,8 @@ namespace ScheduleBot.Bot {
             commandManager.AddMessageCommand(new[] { commands.Message["Back"], commands.Message["Cancel"] }, Mode.Default, async (chatId, user, args) => {
                 if(user.CurrentPath == commands.Message["AcademicPerformance"] ||
                     user.CurrentPath == commands.Message["Profile"] ||
-                    user.CurrentPath == commands.Message["Corps"]) {
+                    user.CurrentPath == commands.Message["Corps"] ||
+                    user.CurrentPath == commands.Message["Exam"]) {
 
                     await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Other"], replyMarkup: AdditionalKeyboardMarkup);
                 } else {
@@ -207,6 +208,9 @@ namespace ScheduleBot.Bot {
             }, CommandManager.Check.group);
 
             commandManager.AddMessageCommand(commands.Message["Exam"], Mode.Default, async (chatId, user, args) => {
+                user.CurrentPath = commands.Message["Exam"];
+                dbContext.SaveChanges();
+
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Exam"], replyMarkup: ExamKeyboardMarkup);
             }, CommandManager.Check.group);
             commandManager.AddMessageCommand(commands.Message["AllExams"], Mode.Default, async (chatId, user, args) => {

@@ -32,15 +32,14 @@ namespace ScheduleBot.Bot {
         public static readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["Today"], commands.Message["Tomorrow"] },
                             new KeyboardButton[] { commands.Message["ByDays"], commands.Message["ForAWeek"]},
-                            new KeyboardButton[] { commands.Message["Exam"]},
                             new KeyboardButton[] { commands.Message["Other"]}
                         }) { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup AdditionalKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["Profile"]},
-                            new KeyboardButton[] { commands.Message["AcademicPerformance"]},
+                            new KeyboardButton[] { commands.Message["AcademicPerformance"], commands.Message["Exam"]},
                             new KeyboardButton[] { commands.Message["Corps"]},
-                             new KeyboardButton[] { commands.Message["Back"]}
+                            new KeyboardButton[] { commands.Message["Back"]}
                         }) { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup ExamKeyboardMarkup = new(new[] {

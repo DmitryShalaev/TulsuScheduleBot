@@ -20,8 +20,7 @@ namespace ScheduleBot.Bot {
             List<KeyboardButton[]> ProfileKeyboardMarkup = new();
 
             if(user.IsAdmin()) {
-                ProfileKeyboardMarkup.AddRange(new[] {  new KeyboardButton[] { $"{commands.Message["GroupNumber"]}: {user.ScheduleProfile.Group}" },
-                                                        new KeyboardButton[] { $"{commands.Message["StudentIDNumber"]}: {user.ScheduleProfile.StudentID}" },
+                ProfileKeyboardMarkup.AddRange(new[] {  new KeyboardButton[] { $"{commands.Message["GroupNumber"]}:\n{user.ScheduleProfile.Group}", $"{commands.Message["StudentIDNumber"]}:\n{user.ScheduleProfile.StudentID}" },
                                                         new KeyboardButton[] { commands.Message["GetProfileLink"] }
                                                      });
             } else {
