@@ -6,7 +6,7 @@ using Telegram.Bot.Types;
 
 namespace ScheduleBot.Bot {
     public partial class TelegramBot {
-        private async Task CustomEdit(Scheduler.Scheduler scheduler, ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args, Mode mode, string text) {
+        private async Task CustomEdit(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args, Mode mode, string text) {
             var tmp = args.Split('|');
             var discipline = dbContext.CustomDiscipline.FirstOrDefault(i => i.ID == uint.Parse(tmp[0]));
             if(discipline is not null) {
@@ -21,7 +21,7 @@ namespace ScheduleBot.Bot {
                 }
             }
             if(DateOnly.TryParse(tmp[1], out DateOnly date))
-                await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: scheduler.GetScheduleByDate(date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
+                await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
         }
     }
 }

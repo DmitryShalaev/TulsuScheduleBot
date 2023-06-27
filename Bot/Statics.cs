@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
+using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
@@ -66,7 +67,7 @@ namespace ScheduleBot.Bot {
         private readonly ReplyKeyboardMarkup CorpsKeyboardMarkup = GetCorpsKeyboardMarkup();
         #endregion
 
-        public async Task GroupErrorAdmin(ChatId chatId, TelegramUser user) {
+        public async Task GroupErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
             user.Mode = Mode.GroupСhange;
             dbContext.SaveChanges();
 
@@ -74,7 +75,7 @@ namespace ScheduleBot.Bot {
         }
         public async Task GroupErrorUser(ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Попросите владельца профиля указать номер группы в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
 
-        public async Task StudentIdErrorAdmin(ChatId chatId, TelegramUser user) {
+        public async Task StudentIdErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
             user.Mode = Mode.StudentIDСhange;
             dbContext.SaveChanges();
 
@@ -82,11 +83,11 @@ namespace ScheduleBot.Bot {
         }
         public async Task StudentIdErrorUser(ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Попросите владельца профиля указать номер зачетной книжки в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
 
-        private async Task ScheduleRelevance(ITelegramBotClient botClient, ChatId chatId, string group, IReplyMarkup? replyMarkup) {
+        private async Task ScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string group, IReplyMarkup? replyMarkup) {
             var groupLastUpdate = dbContext.GroupLastUpdate.Single(i => i.Group == group).Update.ToLocalTime();
             if((DateTime.Now - groupLastUpdate).TotalMinutes > commands.Config.GroupUpdateTime) {
                 var messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
-                if(!parser.UpdatingDisciplines(group))
+                if(!parser.UpdatingDisciplines(dbContext, group))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
@@ -95,11 +96,11 @@ namespace ScheduleBot.Bot {
             await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {groupLastUpdate.ToString("dd.MM HH:mm")}", replyMarkup: replyMarkup);
         }
 
-        private async Task ProgressRelevance(ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
+        private async Task ProgressRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
             var studentIDlastUpdate = dbContext.StudentIDLastUpdate.Single(i => i.StudentID == studentID).Update.ToLocalTime();
             if((DateTime.Now - studentIDlastUpdate).TotalMinutes > commands.Config.StudentIDUpdateTime) {
                 var messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
-                if(!parser.UpdatingProgress(studentID))
+                if(!parser.UpdatingProgress(dbContext, studentID))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);

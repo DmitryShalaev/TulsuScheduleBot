@@ -13,16 +13,14 @@ using ScheduleBot.DB.Entity;
 
 namespace ScheduleBot {
     public class Parser {
-        private readonly ScheduleDbContext dbContext;
         private readonly HttpClientHandler clientHandler;
         private readonly System.Timers.Timer UpdatingDisciplinesTimer;
 
-        public delegate Task UpdatedDisciplines(List<(string Group, DateOnly Date)> values);
+        public delegate Task UpdatedDisciplines(ScheduleDbContext dbContext, List<(string Group, DateOnly Date)> values);
         private event UpdatedDisciplines Notify;
 
-        public Parser(ScheduleDbContext dbContext, BotCommands commands, UpdatedDisciplines updatedDisciplines) {
-            this.dbContext = dbContext;
-            this.Notify += updatedDisciplines;
+        public Parser(BotCommands commands, UpdatedDisciplines updatedDisciplines) {
+            Notify += updatedDisciplines;
 
             clientHandler = new() {
                 AllowAutoRedirect = false,
@@ -42,16 +40,18 @@ namespace ScheduleBot {
         }
 
         private void UpdatingDisciplines(object? sender = null, ElapsedEventArgs? e = null) {
+            ScheduleDbContext dbContext = new();
+
             foreach(var item in dbContext.ScheduleProfile.Where(i => (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= 7).Select(i => i.Group).Distinct().ToList()) {
                 if(string.IsNullOrWhiteSpace(item)) continue;
 
-                UpdatingDisciplines(group: item);
+                UpdatingDisciplines(dbContext, group: item);
             }
 
             UpdatingDisciplinesTimer.Start();
         }
 
-        public bool UpdatingProgress(string studentID) {
+        public bool UpdatingProgress(ScheduleDbContext dbContext, string studentID) {
             var progress = GetProgress(studentID);
             if(progress != null) {
                 var studentIDLastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID);
@@ -81,7 +81,7 @@ namespace ScheduleBot {
             return false;
         }
 
-        public bool UpdatingDisciplines(string group) {
+        public bool UpdatingDisciplines(ScheduleDbContext dbContext, string group) {
             var dates = GetDates(group);
             if(dates != null) {
 
@@ -119,7 +119,7 @@ namespace ScheduleBot {
 
                     if(updatedDisciplines.Any()) {
                         DateOnly date = DateOnly.FromDateTime(DateTime.Now);
-                        Notify.Invoke(updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList()).Wait();
+                        Notify.Invoke(dbContext, updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList()).Wait();
                     }
 
                     return true;

@@ -36,7 +36,7 @@ namespace ScheduleBot {
 
                 StartTimer();
 
-                Bot.TelegramBot telegramBot = new(new(dbContext), dbContext);
+                Bot.TelegramBot telegramBot = new();
 
             } catch(Exception e) {
                 Console.WriteLine(e);

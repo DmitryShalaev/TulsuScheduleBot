@@ -1,10 +1,11 @@
-﻿using ScheduleBot.DB.Entity;
+﻿using ScheduleBot.DB;
+using ScheduleBot.DB.Entity;
 
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleBot.Bot {
     public partial class TelegramBot {
-        private ReplyKeyboardMarkup GetTermsKeyboardMarkup(string StudentID) {
+        private ReplyKeyboardMarkup GetTermsKeyboardMarkup(ScheduleDbContext dbContext, string StudentID) {
             List<KeyboardButton[]> TermsKeyboardMarkup = new();
 
             var terms = dbContext.Progresses.Where(i => i.StudentID == StudentID).Select(i => i.Term).Distinct().OrderBy(i => i).ToArray();

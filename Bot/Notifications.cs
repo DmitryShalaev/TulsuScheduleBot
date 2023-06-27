@@ -2,6 +2,7 @@
 
 using Microsoft.EntityFrameworkCore;
 
+using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
@@ -15,7 +16,7 @@ namespace ScheduleBot.Bot {
 
     public partial class TelegramBot {
 
-        private async Task UpdatedDisciplinesAsync(List<(string Group, DateOnly Date)> values) {
+        private async Task UpdatedDisciplinesAsync(ScheduleDbContext dbContext, List<(string Group, DateOnly Date)> values) {
             var telegramUsers = dbContext.TelegramUsers.Include(u => u.Notifications).Where(u => u.Notifications.IsEnabled).Include(u => u.ScheduleProfile).Select(u => new ExtendedTelegramUser(u)).ToList();
 
             foreach(var item in values) {

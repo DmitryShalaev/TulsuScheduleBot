@@ -1,10 +1,11 @@
-﻿using ScheduleBot.DB.Entity;
+﻿using ScheduleBot.DB;
+using ScheduleBot.DB.Entity;
 
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleBot.Bot {
     public partial class TelegramBot {
-        private InlineKeyboardMarkup GetEditAdminInlineKeyboardButton(DateOnly date, ScheduleProfile scheduleProfile) {
+        private InlineKeyboardMarkup GetEditAdminInlineKeyboardButton(ScheduleDbContext dbContext, DateOnly date, ScheduleProfile scheduleProfile) {
             var editButtons = new List<InlineKeyboardButton[]>();
 
             var сompletedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == scheduleProfile.ID).ToList();

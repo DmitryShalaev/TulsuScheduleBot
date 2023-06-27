@@ -13,7 +13,9 @@ namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
     [Migration("20230621060339_upd-notifications")]
+#pragma warning disable CS8981 // Имя типа содержит только строчные символы ASCII. Такие имена могут резервироваться для языка.
     partial class updnotifications
+#pragma warning restore CS8981 // Имя типа содержит только строчные символы ASCII. Такие имена могут резервироваться для языка.
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

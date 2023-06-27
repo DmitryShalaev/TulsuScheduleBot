@@ -3,26 +3,22 @@
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
-namespace ScheduleBot.Scheduler {
-    public class Scheduler {
-        private readonly ScheduleDbContext dbContext;
-
-        public Scheduler(ScheduleDbContext dbContext) => this.dbContext = dbContext;
-
-        public List<(string, DateOnly)> GetScheduleByWeak(int weeks, ScheduleProfile profile) {
+namespace ScheduleBot {
+    public static class Scheduler {
+        public static List<(string, DateOnly)> GetScheduleByWeak(ScheduleDbContext dbContext, int weeks, ScheduleProfile profile) {
             var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
 
             var schedules = new List<(string, DateOnly)>();
 
             for(int i = 1; i < 7; i++) {
                 var tmp = dateOnly.AddDays(7 * weeks + i);
-                schedules.Add((GetScheduleByDate(tmp, profile), tmp));
+                schedules.Add((GetScheduleByDate(dbContext, tmp, profile), tmp));
             }
 
             return schedules;
         }
 
-        public string GetScheduleByDate(DateOnly date, ScheduleProfile profile, bool all = false) {
+        public static string GetScheduleByDate(ScheduleDbContext dbContext, DateOnly date, ScheduleProfile profile, bool all = false) {
             var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID).ToList();
 
             var list = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && i.Date == date && (all || !completedDisciplines.Contains((CompletedDiscipline)i))).ToList();
@@ -45,7 +41,7 @@ namespace ScheduleBot.Scheduler {
             return str;
         }
 
-        public string GetProgressByTerm(int term, string StudentID) {
+        public static string GetProgressByTerm(ScheduleDbContext dbContext, int term, string StudentID) {
             var progresses = dbContext.Progresses.Where(i => i.StudentID == StudentID && i.Term == term);
 
             string str = $"📌 Семестр {term}\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
@@ -59,19 +55,19 @@ namespace ScheduleBot.Scheduler {
             return str;
         }
 
-        public List<(string, DateOnly)> GetScheduleByDay(DayOfWeek dayOfWeek, ScheduleProfile profile) {
+        public static List<(string, DateOnly)> GetScheduleByDay(ScheduleDbContext dbContext, DayOfWeek dayOfWeek, ScheduleProfile profile) {
             int weeks = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
             var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
 
             var list = new List<(string, DateOnly)>();
             for(int i = -1; i <= 1; i++) {
                 var tmp = dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek);
-                list.Add((GetScheduleByDate(tmp, profile), tmp));
+                list.Add((GetScheduleByDate(dbContext, tmp, profile), tmp));
             }
             return list;
         }
 
-        public List<string> GetExamse(ScheduleProfile profile, bool all) {
+        public static List<string> GetExamse(ScheduleDbContext dbContext, ScheduleProfile profile, bool all) {
             var exams = new List<string>();
 
             var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID).ToList();
