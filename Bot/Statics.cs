@@ -38,7 +38,7 @@ namespace ScheduleBot.Bot {
 
         private static readonly ReplyKeyboardMarkup AdditionalKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["Profile"]},
-                            new KeyboardButton[] { commands.Message["AcademicPerformance"], commands.Message["Exam"]},
+                            new KeyboardButton[] { commands.Message["Exam"], commands.Message["AcademicPerformance"] },
                             new KeyboardButton[] { commands.Message["Corps"]},
                             new KeyboardButton[] { commands.Message["Back"]}
                         }) { ResizeKeyboard = true };
