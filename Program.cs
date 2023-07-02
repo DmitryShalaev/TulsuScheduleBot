@@ -68,7 +68,7 @@ namespace ScheduleBot {
                 foreach(var item in dbContext.TelegramUsers.ToList())
                     item.TodayRequests = 0;
 
-                var date = DateOnly.FromDateTime(DateTime.UtcNow);
+                var date = DateOnly.FromDateTime(DateTime.Now);
                 dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => i.Date.AddDays(7) < date));
 
                 if(date.Day == 1 && (date.Month == 2 || date.Month == 8))
