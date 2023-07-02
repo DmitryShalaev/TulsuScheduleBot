@@ -13,7 +13,6 @@ using ScheduleBot.DB;
 namespace ScheduleBot {
     public class Program {
         static private System.Timers.Timer? Timer;
-        static private ScheduleDbContext? dbContext;
 
         static void Main(string[] args) {
             if(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotToken")) ||
@@ -31,8 +30,8 @@ namespace ScheduleBot {
             try {
                 CultureInfo.CurrentCulture = CultureInfo.CreateSpecificCulture("ru-RU");
 
-                dbContext = new();
-                dbContext.Database.Migrate();
+                using(ScheduleDbContext dbContext = new())
+                    dbContext.Database.Migrate();
 
                 StartTimer();
                 Bot.TelegramBot telegramBot = new();
@@ -64,7 +63,7 @@ namespace ScheduleBot {
         }
 
         private static void Updating(object? sender = null, ElapsedEventArgs? e = null) {
-            if(dbContext is not null) {
+            using(ScheduleDbContext dbContext = new()) {
                 foreach(var item in dbContext.TelegramUsers.ToList())
                     item.TodayRequests = 0;
 
@@ -77,8 +76,7 @@ namespace ScheduleBot {
                     dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines.Where(i => i.Date != null && i.Date.Value.AddDays(7) < date));
 
                 dbContext.SaveChanges();
-            } else
-                throw new NullReferenceException("dbContext");
+            }
 
             StartTimer();
         }
