@@ -710,7 +710,7 @@ namespace ScheduleBot.Bot {
 #endif
             },
             new CancellationTokenSource().Token
-           ).Wait();
+           );
         }
 
         private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken) {

@@ -35,8 +35,9 @@ namespace ScheduleBot {
                 dbContext.Database.Migrate();
 
                 StartTimer();
-
                 Bot.TelegramBot telegramBot = new();
+
+                Thread.Sleep(Timeout.Infinite);
 
             } catch(Exception e) {
                 Console.WriteLine(e);
@@ -56,7 +57,7 @@ namespace ScheduleBot {
         }
 
         private static void StartTimer() {
-            TimeSpan delay = DateTime.Now.Date.AddDays(1) - DateTime.Now;
+            TimeSpan delay = DateTime.Now.AddDays(1) - DateTime.Now;
             Timer = new() { Interval = delay.TotalMilliseconds, AutoReset = false };
             Timer.Elapsed += Updating;
             Timer.Start();
@@ -64,7 +65,7 @@ namespace ScheduleBot {
 
         private static void Updating(object? sender = null, ElapsedEventArgs? e = null) {
             if(dbContext is not null) {
-                foreach(var item in dbContext.TelegramUsers)
+                foreach(var item in dbContext.TelegramUsers.ToList())
                     item.TodayRequests = 0;
 
                 var date = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -76,7 +77,8 @@ namespace ScheduleBot {
                     dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines.Where(i => i.Date != null && i.Date.Value.AddDays(7) < date));
 
                 dbContext.SaveChanges();
-            }
+            } else
+                throw new NullReferenceException("dbContext");
 
             StartTimer();
         }
