@@ -12,8 +12,6 @@ using ScheduleBot.DB;
 
 namespace ScheduleBot {
     public class Program {
-        static private System.Timers.Timer? Timer;
-
         static void Main(string[] args) {
             if(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotToken")) ||
                 string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotConnectionString"))
@@ -30,13 +28,14 @@ namespace ScheduleBot {
             try {
                 CultureInfo.CurrentCulture = CultureInfo.CreateSpecificCulture("ru-RU");
 
-                using(ScheduleDbContext dbContext = new())
+                using(ScheduleDbContext dbContext = new()) {
                     dbContext.Database.Migrate();
+                    dbContext.ClearTemporary();
 
-                StartTimer();
-                Bot.TelegramBot telegramBot = new();
+                    Bot.TelegramBot telegramBot = new();
 
-                Thread.Sleep(Timeout.Infinite);
+                    Thread.Sleep(Timeout.Infinite);
+                }
 
             } catch(Exception e) {
                 Console.WriteLine(e);
@@ -53,32 +52,8 @@ namespace ScheduleBot {
                     smtp.SendMailAsync(message).Wait();
 #endif
             }
-        }
 
-        private static void StartTimer() {
-            TimeSpan delay = DateTime.Now.AddDays(1) - DateTime.Now;
-            Timer = new() { Interval = delay.TotalMilliseconds, AutoReset = false };
-            Timer.Elapsed += Updating;
-            Timer.Start();
-        }
 
-        private static void Updating(object? sender = null, ElapsedEventArgs? e = null) {
-            using(ScheduleDbContext dbContext = new()) {
-                foreach(var item in dbContext.TelegramUsers.ToList())
-                    item.TodayRequests = 0;
-
-                var date = DateOnly.FromDateTime(DateTime.Now);
-                dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => i.Date.AddDays(7) < date));
-
-                if(date.Day == 1 && (date.Month == 2 || date.Month == 8))
-                    dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines);
-                else
-                    dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines.Where(i => i.Date != null && i.Date.Value.AddDays(7) < date));
-
-                dbContext.SaveChanges();
-            }
-
-            StartTimer();
         }
     }
 }
