@@ -125,7 +125,7 @@ namespace ScheduleBot.Bot {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["MainMenu"], replyMarkup: MainKeyboardMarkup);
 
                 if(!string.IsNullOrWhiteSpace(user.CurrentPath)) {
-                    if(user.IsAdmin()) {
+                    if(user.IsOwner()) {
                         var discipline = dbContext.CustomDiscipline.Single(i => i.ID == uint.Parse(user.CurrentPath));
                         await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, discipline.Date, user.ScheduleProfile, true), replyMarkup: GetCustomEditAdminInlineKeyboardButton(discipline));
                     }
@@ -245,7 +245,7 @@ namespace ScheduleBot.Bot {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Profile"], replyMarkup: GetProfileKeyboardMarkup(user));
             });
             commandManager.AddMessageCommand(commands.Message["GetProfileLink"], Mode.Default, async (dbContext, chatId, user, args) => {
-                if(user.IsAdmin()) {
+                if(user.IsOwner()) {
                     await botClient.SendTextMessageAsync(chatId: chatId, text: $"Если вы хотите поделиться своим расписанием с кем-то, просто отправьте им следующую команду: " +
                     $"\n`/SetProfile {user.ScheduleProfileGuid}`" +
                     $"\nЕсли другой пользователь введет эту команду, он сможет видеть расписание с вашими изменениями.", replyMarkup: GetProfileKeyboardMarkup(user), parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
@@ -254,7 +254,7 @@ namespace ScheduleBot.Bot {
                 }
             });
             commandManager.AddMessageCommand(commands.Message["ResetProfileLink"], Mode.Default, async (dbContext, chatId, user, args) => {
-                if(!user.IsAdmin()) {
+                if(!user.IsOwner()) {
                     user.Mode = Mode.ResetProfileLink;
                     dbContext.SaveChanges();
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Вы точно уверены что хотите восстановить свой профиль?", replyMarkup: ResetProfileLinkKeyboardMarkup);
@@ -280,7 +280,7 @@ namespace ScheduleBot.Bot {
             });
 
             commandManager.AddMessageCommand(commands.Message["GroupNumber"], Mode.Default, async (dbContext, chatId, user, args) => {
-                if(user.IsAdmin()) {
+                if(user.IsOwner()) {
                     user.Mode = Mode.GroupСhange;
                     dbContext.SaveChanges();
 
@@ -288,7 +288,7 @@ namespace ScheduleBot.Bot {
                 }
             });
             commandManager.AddMessageCommand(commands.Message["StudentIDNumber"], Mode.Default, async (dbContext, chatId, user, args) => {
-                if(user.IsAdmin()) {
+                if(user.IsOwner()) {
                     user.Mode = Mode.StudentIDСhange;
                     dbContext.SaveChanges();
 
@@ -503,7 +503,7 @@ namespace ScheduleBot.Bot {
 
             commandManager.AddCallbackCommand(commands.Callback["Edit"].callback, Mode.Default, async (dbContext, chatId, messageId, user, message, args) => {
                 if(DateOnly.TryParse(args, out DateOnly date)) {
-                    if(user.IsAdmin())
+                    if(user.IsOwner())
                         await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile, true), replyMarkup: GetEditAdminInlineKeyboardButton(dbContext, date, user.ScheduleProfile));
                     else
                         await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
@@ -519,7 +519,7 @@ namespace ScheduleBot.Bot {
             }, CommandManager.Check.group);
             commandManager.AddCallbackCommand(commands.Callback["Add"].callback, Mode.Default, async (dbContext, chatId, messageId, user, message, args) => {
                 if(DateOnly.TryParse(args, out DateOnly date)) {
-                    if(user.IsAdmin()) {
+                    if(user.IsOwner()) {
                         user.Mode = Mode.AddingDiscipline;
                         user.CurrentPath = $"{messageId} {date}";
                         dbContext.CustomDiscipline.Add(new(user.ScheduleProfile, date));
@@ -545,7 +545,7 @@ namespace ScheduleBot.Bot {
                 var tmp = args.Split('|');
                 var discipline = dbContext.Disciplines.FirstOrDefault(i => i.ID == uint.Parse(tmp[0]));
                 if(discipline is not null) {
-                    if(user.IsAdmin()) {
+                    if(user.IsOwner()) {
                         var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid).ToList();
 
                         CompletedDiscipline dayTmp = new(discipline, user.ScheduleProfileGuid);
@@ -569,7 +569,7 @@ namespace ScheduleBot.Bot {
                 var tmp = args.Split('|');
                 var discipline = dbContext.Disciplines.FirstOrDefault(i => i.ID == uint.Parse(tmp[0]));
                 if(discipline is not null) {
-                    if(user.IsAdmin()) {
+                    if(user.IsOwner()) {
                         var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid).ToList();
 
                         CompletedDiscipline alwaysTmp = new(discipline, user.ScheduleProfileGuid) { Date = null };
@@ -595,7 +595,7 @@ namespace ScheduleBot.Bot {
                 var tmp = args.Split('|');
                 var customDiscipline = dbContext.CustomDiscipline.FirstOrDefault(i => i.ID == uint.Parse(tmp[0]));
                 if(customDiscipline is not null) {
-                    if(user.IsAdmin()) {
+                    if(user.IsOwner()) {
                         dbContext.CustomDiscipline.Remove(customDiscipline);
                         dbContext.SaveChanges();
 
@@ -608,7 +608,7 @@ namespace ScheduleBot.Bot {
             }, CommandManager.Check.group);
             commandManager.AddCallbackCommand(commands.Callback["CustomEditCancel"].callback, Mode.Default, async (dbContext, chatId, messageId, user, message, args) => {
                 if(DateOnly.TryParse(args, out DateOnly date))
-                    if(user.IsAdmin())
+                    if(user.IsOwner())
                         await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetEditAdminInlineKeyboardButton(dbContext, date, user.ScheduleProfile));
                     else
                         await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
@@ -617,7 +617,7 @@ namespace ScheduleBot.Bot {
                 var tmp = args.Split('|');
                 var customDiscipline = dbContext.CustomDiscipline.FirstOrDefault(i => i.ID == uint.Parse(tmp[0]));
                 if(customDiscipline is not null) {
-                    if(user.IsAdmin()) {
+                    if(user.IsOwner()) {
                         await botClient.EditMessageReplyMarkupAsync(chatId: chatId, messageId: messageId, replyMarkup: GetCustomEditAdminInlineKeyboardButton(customDiscipline));
                         return;
                     }
@@ -671,6 +671,13 @@ namespace ScheduleBot.Bot {
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
                 await botClient.SendTextMessageAsync(chatId: chatId, text: "Хотите изменить количество дней? Если да, то напишите новое", replyMarkup: CancelKeyboardMarkup);
             });
+
+            #region Admin
+            commandManager.AddMessageCommand("/ClearTmp", Mode.Default, async (dbContext, chatId, user, args) => {
+                dbContext.ClearTemporary();
+                await botClient.SendTextMessageAsync(chatId: chatId, text: "OK");
+            }, CommandManager.Check.admin);
+            #endregion
             #endregion
             #region Corps
             commandManager.AddMessageCommand(commands.Message["Corps"], Mode.Default, async (dbContext, chatId, user, args) => {

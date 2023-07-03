@@ -20,7 +20,7 @@ namespace ScheduleBot.Bot {
         private ReplyKeyboardMarkup GetProfileKeyboardMarkup(TelegramUser user) {
             List<KeyboardButton[]> ProfileKeyboardMarkup = new();
 
-            if(user.IsAdmin()) {
+            if(user.IsOwner()) {
                 ProfileKeyboardMarkup.AddRange(new[] {  new KeyboardButton[] { $"{commands.Message["GroupNumber"]}:\n{user.ScheduleProfile.Group}", $"{commands.Message["StudentIDNumber"]}:\n{user.ScheduleProfile.StudentID}" },
                                                         new KeyboardButton[] { commands.Message["GetProfileLink"] }
                                                      });

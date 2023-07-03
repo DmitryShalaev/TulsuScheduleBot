@@ -8,7 +8,8 @@ namespace ScheduleBot.Bot {
         public enum Check : byte {
             none,
             group,
-            studentId
+            studentId,
+            admin
         }
 
         public delegate Task MessageFunction(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user, string args);
@@ -103,7 +104,7 @@ namespace ScheduleBot.Bot {
             switch(check) {
                 case Check.group:
                     if(string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
-                        if(user.IsAdmin())
+                        if(user.IsOwner())
                             await telegramBot.GroupErrorAdmin(dbContext, chatId, user);
                         else
                             await telegramBot.GroupErrorUser(chatId);
@@ -113,13 +114,16 @@ namespace ScheduleBot.Bot {
 
                 case Check.studentId:
                     if(string.IsNullOrWhiteSpace(user.ScheduleProfile.StudentID)) {
-                        if(user.IsAdmin())
+                        if(user.IsOwner())
                             await telegramBot.StudentIdErrorAdmin(dbContext, chatId, user);
                         else
                             await telegramBot.StudentIdErrorUser(chatId);
                         return false;
                     }
                     break;
+
+                case Check.admin:
+                    return user.IsAdmin;
             }
             return true;
         }

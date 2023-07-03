@@ -56,7 +56,7 @@ namespace ScheduleBot.Bot {
         private InlineKeyboardMarkup GetInlineKeyboardButton(DateOnly date, TelegramUser user) {
             var editButtons = new List<InlineKeyboardButton[]>();
 
-            if(user.IsAdmin())
+            if(user.IsOwner())
                 editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: commands.Callback["All"].text, callbackData: $"{commands.Callback["All"].callback} {date}"),
                                     InlineKeyboardButton.WithCallbackData(text: commands.Callback["Edit"].text, callbackData: $"{commands.Callback["Edit"].callback} {date}") });
             else

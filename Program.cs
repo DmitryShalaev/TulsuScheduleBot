@@ -30,7 +30,7 @@ namespace ScheduleBot {
 
                 using(ScheduleDbContext dbContext = new()) {
                     dbContext.Database.Migrate();
-                    dbContext.ClearTemporary();
+                    dbContext.StartClearTemporary();
 
                     Bot.TelegramBot telegramBot = new();
 

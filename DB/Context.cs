@@ -4,7 +4,7 @@ using ScheduleBot.DB.Entity;
 
 namespace ScheduleBot.DB {
     public class ScheduleDbContext : DbContext {
-        private System.Timers.Timer? ClearTemporaryTimer;
+        private System.Timers.Timer? Timer;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
             optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("TelegramBotConnectionString"));
@@ -24,33 +24,37 @@ namespace ScheduleBot.DB {
             SaveChanges();
         }
 
-        public void ClearTemporary() {
-            if(ClearTemporaryTimer is not null) {
-                ClearTemporaryTimer.Stop();
-                ClearTemporaryTimer.Dispose();
-                ClearTemporaryTimer = null;
+        public void StartClearTemporary() {
+            if(Timer is not null) {
+                Timer.Stop();
+                Timer.Dispose();
+                Timer = null;
             }
 
             TimeSpan delay = DateTime.Now.AddDays(1) - DateTime.Now;
-            ClearTemporaryTimer = new(delay.TotalMilliseconds);
-            ClearTemporaryTimer.Elapsed += (o, e) => {
-                foreach(var item in TelegramUsers)
-                    item.TodayRequests = 0;
-
-                var date = DateOnly.FromDateTime(DateTime.Now);
-                CustomDiscipline.RemoveRange(CustomDiscipline.Where(i => i.Date.AddDays(7) < date));
-
-                if(date.Day == 1 && (date.Month == 2 || date.Month == 8))
-                    CompletedDisciplines.RemoveRange(CompletedDisciplines);
-                else
-                    CompletedDisciplines.RemoveRange(CompletedDisciplines.Where(i => i.Date != null && i.Date.Value.AddDays(7) < date));
-
-                SaveChanges();
-
+            Timer = new(delay.TotalMilliseconds);
+            Timer.Elapsed += (o, e) => {
                 ClearTemporary();
+
+                StartClearTemporary();
             };
-            ClearTemporaryTimer.AutoReset = false;
-            ClearTemporaryTimer.Enabled = true;
+            Timer.AutoReset = false;
+            Timer.Enabled = true;
+        }
+
+        public void ClearTemporary() {
+            foreach(var item in TelegramUsers)
+                item.TodayRequests = 0;
+
+            var date = DateOnly.FromDateTime(DateTime.Now);
+            CustomDiscipline.RemoveRange(CustomDiscipline.Where(i => i.Date.AddDays(7) < date));
+
+            if(date.Day == 1 && (date.Month == 2 || date.Month == 8))
+                CompletedDisciplines.RemoveRange(CompletedDisciplines);
+            else
+                CompletedDisciplines.RemoveRange(CompletedDisciplines.Where(i => i.Date != null && i.Date.Value.AddDays(7) < date));
+
+            SaveChanges();
         }
 
 #pragma warning disable CS8618

@@ -17,6 +17,8 @@ namespace ScheduleBot.DB.Entity {
         public long TotalRequests { get; set; } = 0;
         public long TodayRequests { get; set; } = 0;
 
+        public bool IsAdmin { get; set; } = false;
+
         [ForeignKey("ScheduleProfile")]
         public Guid ScheduleProfileGuid { get; set; }
         public ScheduleProfile ScheduleProfile { get; set; }
@@ -35,7 +37,7 @@ namespace ScheduleBot.DB.Entity {
         public static bool operator !=(TelegramUser? left, TelegramUser? right) => !(left == right);
         public override int GetHashCode() => ChatID.GetHashCode();
 
-        public bool IsAdmin() => ChatID == ScheduleProfile.OwnerID;
+        public bool IsOwner() => ChatID == ScheduleProfile.OwnerID;
 
         public TelegramUser() { }
 

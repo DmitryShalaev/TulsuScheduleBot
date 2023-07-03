@@ -10,7 +10,7 @@ namespace ScheduleBot.Bot {
             var tmp = args.Split('|');
             var discipline = dbContext.CustomDiscipline.FirstOrDefault(i => i.ID == uint.Parse(tmp[0]));
             if(discipline is not null) {
-                if(user.IsAdmin()) {
+                if(user.IsOwner()) {
                     user.Mode = mode;
                     user.CurrentPath = $"{discipline.ID}";
                     dbContext.SaveChanges();
