@@ -4,11 +4,7 @@ using ScheduleBot.DB.Entity;
 
 namespace ScheduleBot.DB {
     public class ScheduleDbContext : DbContext {
-        private System.Timers.Timer? Timer;
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-            optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("TelegramBotConnectionString"));
-        }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("TelegramBotConnectionString"));
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             foreach(Entity.Class type in Enum.GetValues(typeof(Entity.Class)).Cast<Entity.Class>())
@@ -21,39 +17,6 @@ namespace ScheduleBot.DB {
         public void CleanDB() {
             Database.EnsureDeleted();
             Database.EnsureCreated();
-            SaveChanges();
-        }
-
-        public void StartClearTemporary() {
-            if(Timer is not null) {
-                Timer.Stop();
-                Timer.Dispose();
-                Timer = null;
-            }
-
-            TimeSpan delay = DateTime.Now.AddDays(1) - DateTime.Now;
-            Timer = new(delay.TotalMilliseconds);
-            Timer.Elapsed += (o, e) => {
-                ClearTemporary();
-
-                StartClearTemporary();
-            };
-            Timer.AutoReset = false;
-            Timer.Enabled = true;
-        }
-
-        public void ClearTemporary() {
-            foreach(var item in TelegramUsers)
-                item.TodayRequests = 0;
-
-            var date = DateOnly.FromDateTime(DateTime.Now);
-            CustomDiscipline.RemoveRange(CustomDiscipline.Where(i => i.Date.AddDays(7) < date));
-
-            if(date.Day == 1 && (date.Month == 2 || date.Month == 8))
-                CompletedDisciplines.RemoveRange(CompletedDisciplines);
-            else
-                CompletedDisciplines.RemoveRange(CompletedDisciplines.Where(i => i.Date != null && i.Date.Value.AddDays(7) < date));
-
             SaveChanges();
         }
 

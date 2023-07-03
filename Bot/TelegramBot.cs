@@ -2,6 +2,10 @@
 
 using Microsoft.EntityFrameworkCore;
 
+using Quartz;
+using Quartz.Impl;
+using Quartz.Impl.Matchers;
+
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
@@ -673,9 +677,19 @@ namespace ScheduleBot.Bot {
             });
 
             #region Admin
-            commandManager.AddMessageCommand("/ClearTmp", Mode.Default, async (dbContext, chatId, user, args) => {
-                dbContext.ClearTemporary();
-                await botClient.SendTextMessageAsync(chatId: chatId, text: "OK");
+            commandManager.AddMessageCommand("/GetJob", Mode.Default, async (dbContext, chatId, user, args) => {
+                ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
+                IScheduler scheduler = await schedulerFactory.GetScheduler();
+
+                var jobKeys = await scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup());
+                foreach(var jobKey in jobKeys) {
+                    var triggers = await scheduler.GetTriggersOfJob(jobKey);
+                    foreach(var trigger in triggers) {
+                        var triggerState = await scheduler.GetTriggerState(trigger.Key);
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"Job {jobKey} with trigger {trigger.Key} is {triggerState}");
+                    }
+                }
+
             }, CommandManager.Check.admin);
             #endregion
             #endregion

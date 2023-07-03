@@ -9,6 +9,7 @@ using System.Net;
 using Microsoft.EntityFrameworkCore;
 
 using ScheduleBot.DB;
+using ScheduleBot.DB.Jobs;
 
 namespace ScheduleBot {
     public class Program {
@@ -30,7 +31,8 @@ namespace ScheduleBot {
 
                 using(ScheduleDbContext dbContext = new()) {
                     dbContext.Database.Migrate();
-                    dbContext.StartClearTemporary();
+
+                    ClearTemporaryJob.StartAsync().Wait();
 
                     Bot.TelegramBot telegramBot = new();
 
