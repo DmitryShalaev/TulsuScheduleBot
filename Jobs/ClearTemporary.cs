@@ -1,9 +1,10 @@
 ﻿using Quartz;
 using Quartz.Impl;
 
-namespace ScheduleBot.DB.Jobs {
-    public class ClearTemporaryJob : IJob {
+using ScheduleBot.DB;
 
+namespace ScheduleBot.Jobs {
+    public class ClearTemporaryJob : IJob {
         public static async Task StartAsync() {
             ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
             IScheduler scheduler = await schedulerFactory.GetScheduler();
@@ -28,10 +29,10 @@ namespace ScheduleBot.DB.Jobs {
                 var date = DateOnly.FromDateTime(DateTime.Now);
                 dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => i.Date.AddDays(7) < date));
 
-                if(date.Day == 1 && (date.Month == 2 || date.Month == 8))
-                    dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines);
-                else
-                    dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines.Where(i => i.Date != null && i.Date.Value.AddDays(7) < date));
+                dbContext.CompletedDisciplines.RemoveRange(
+                    date.Day == 1 && (date.Month == 2 || date.Month == 8) ?
+                    dbContext.CompletedDisciplines : dbContext.CompletedDisciplines.Where(i => i.Date != null && i.Date.Value.AddDays(7) < date)
+                );
 
                 dbContext.SaveChanges();
             }

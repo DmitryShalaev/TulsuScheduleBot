@@ -9,9 +9,10 @@ using System.Net;
 using Microsoft.EntityFrameworkCore;
 
 using ScheduleBot.DB;
-using ScheduleBot.DB.Jobs;
+using ScheduleBot.Jobs;
 
-namespace ScheduleBot {
+namespace ScheduleBot
+{
     public class Program {
         static void Main(string[] args) {
             if(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotToken")) ||

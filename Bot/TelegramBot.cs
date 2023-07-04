@@ -148,12 +148,12 @@ namespace ScheduleBot.Bot {
             });
 
             commandManager.AddMessageCommand(commands.Message["Today"], Mode.Default, async (dbContext, chatId, user, args) => {
-                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), MainKeyboardMarkup);
+                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, MainKeyboardMarkup);
                 var date = DateOnly.FromDateTime(DateTime.Now);
                 await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
             }, CommandManager.Check.group);
             commandManager.AddMessageCommand(commands.Message["Tomorrow"], Mode.Default, async (dbContext, chatId, user, args) => {
-                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), MainKeyboardMarkup);
+                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, MainKeyboardMarkup);
                 var date = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
                 await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
             }, CommandManager.Check.group);
@@ -162,32 +162,32 @@ namespace ScheduleBot.Bot {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["ByDays"], replyMarkup: DaysKeyboardMarkup);
             }, CommandManager.Check.group);
             commandManager.AddMessageCommand(commands.Message["Monday"], Mode.Default, async (dbContext, chatId, user, args) => {
-                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), DaysKeyboardMarkup);
+                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, DaysKeyboardMarkup);
                 foreach(var day in Scheduler.GetScheduleByDay(dbContext, System.DayOfWeek.Monday, user.ScheduleProfile))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: GetInlineKeyboardButton(day.Item2, user));
             }, CommandManager.Check.group);
             commandManager.AddMessageCommand(commands.Message["Tuesday"], Mode.Default, async (dbContext, chatId, user, args) => {
-                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), DaysKeyboardMarkup);
+                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, DaysKeyboardMarkup);
                 foreach(var day in Scheduler.GetScheduleByDay(dbContext, System.DayOfWeek.Tuesday, user.ScheduleProfile))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: GetInlineKeyboardButton(day.Item2, user));
             }, CommandManager.Check.group);
             commandManager.AddMessageCommand(commands.Message["Wednesday"], Mode.Default, async (dbContext, chatId, user, args) => {
-                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), DaysKeyboardMarkup);
+                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, DaysKeyboardMarkup);
                 foreach(var day in Scheduler.GetScheduleByDay(dbContext, System.DayOfWeek.Wednesday, user.ScheduleProfile))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: GetInlineKeyboardButton(day.Item2, user));
             }, CommandManager.Check.group);
             commandManager.AddMessageCommand(commands.Message["Thursday"], Mode.Default, async (dbContext, chatId, user, args) => {
-                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), DaysKeyboardMarkup);
+                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, DaysKeyboardMarkup);
                 foreach(var day in Scheduler.GetScheduleByDay(dbContext, System.DayOfWeek.Thursday, user.ScheduleProfile))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: GetInlineKeyboardButton(day.Item2, user));
             }, CommandManager.Check.group);
             commandManager.AddMessageCommand(commands.Message["Friday"], Mode.Default, async (dbContext, chatId, user, args) => {
-                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), DaysKeyboardMarkup);
+                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, DaysKeyboardMarkup);
                 foreach(var day in Scheduler.GetScheduleByDay(dbContext, System.DayOfWeek.Friday, user.ScheduleProfile))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: GetInlineKeyboardButton(day.Item2, user));
             }, CommandManager.Check.group);
             commandManager.AddMessageCommand(commands.Message["Saturday"], Mode.Default, async (dbContext, chatId, user, args) => {
-                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), DaysKeyboardMarkup);
+                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, DaysKeyboardMarkup);
                 foreach(var day in Scheduler.GetScheduleByDay(dbContext, System.DayOfWeek.Saturday, user.ScheduleProfile))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: GetInlineKeyboardButton(day.Item2, user));
             }, CommandManager.Check.group);
@@ -196,12 +196,12 @@ namespace ScheduleBot.Bot {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["ForAWeek"], replyMarkup: WeekKeyboardMarkup);
             }, CommandManager.Check.group);
             commandManager.AddMessageCommand(commands.Message["ThisWeek"], Mode.Default, async (dbContext, chatId, user, args) => {
-                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), WeekKeyboardMarkup);
+                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, WeekKeyboardMarkup);
                 foreach(var item in Scheduler.GetScheduleByWeak(dbContext, CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, System.DayOfWeek.Monday) - 1, user.ScheduleProfile))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: item.Item1, replyMarkup: GetInlineKeyboardButton(item.Item2, user));
             }, CommandManager.Check.group);
             commandManager.AddMessageCommand(commands.Message["NextWeek"], Mode.Default, async (dbContext, chatId, user, args) => {
-                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), WeekKeyboardMarkup);
+                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, WeekKeyboardMarkup);
                 foreach(var item in Scheduler.GetScheduleByWeak(dbContext, CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, System.DayOfWeek.Monday), user.ScheduleProfile))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: item.Item1, replyMarkup: GetInlineKeyboardButton(item.Item2, user));
             }, CommandManager.Check.group);
@@ -213,12 +213,12 @@ namespace ScheduleBot.Bot {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Exam"], replyMarkup: ExamKeyboardMarkup);
             }, CommandManager.Check.group);
             commandManager.AddMessageCommand(commands.Message["AllExams"], Mode.Default, async (dbContext, chatId, user, args) => {
-                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), ExamKeyboardMarkup);
+                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, ExamKeyboardMarkup);
                 foreach(var item in Scheduler.GetExamse(dbContext, user.ScheduleProfile, true))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: item, replyMarkup: ExamKeyboardMarkup);
             }, CommandManager.Check.group);
             commandManager.AddMessageCommand(commands.Message["NextExam"], Mode.Default, async (dbContext, chatId, user, args) => {
-                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group ?? throw new NullReferenceException("Group"), ExamKeyboardMarkup);
+                await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, ExamKeyboardMarkup);
                 foreach(var item in Scheduler.GetExamse(dbContext, user.ScheduleProfile, false))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: item, replyMarkup: ExamKeyboardMarkup);
             }, CommandManager.Check.group);
@@ -231,13 +231,13 @@ namespace ScheduleBot.Bot {
                 user.CurrentPath = commands.Message["AcademicPerformance"];
                 dbContext.SaveChanges();
 
-                var StudentID = user.ScheduleProfile.StudentID ?? throw new NullReferenceException("StudentID");
+                var StudentID = user.ScheduleProfile.StudentID!;
 
                 await ProgressRelevance(dbContext, botClient, chatId, StudentID, null, false);
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["AcademicPerformance"], replyMarkup: GetTermsKeyboardMarkup(dbContext, StudentID));
             }, CommandManager.Check.studentId);
             commandManager.AddMessageCommand(commands.Message["Semester"], Mode.Default, async (dbContext, chatId, user, args) => {
-                var StudentID = user.ScheduleProfile.StudentID ?? throw new NullReferenceException("StudentID");
+                var StudentID = user.ScheduleProfile.StudentID!;
 
                 await ProgressRelevance(dbContext, botClient, chatId, StudentID, GetTermsKeyboardMarkup(dbContext, StudentID));
                 await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetProgressByTerm(dbContext, int.Parse(args), StudentID), replyMarkup: GetTermsKeyboardMarkup(dbContext, StudentID));
@@ -312,7 +312,7 @@ namespace ScheduleBot.Bot {
                         else
                             date = DateOnly.FromDateTime(DateTime.Parse($"{args} {DateTime.Now.Month}"));
 
-                        await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group ?? "", MainKeyboardMarkup);
+                        await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, MainKeyboardMarkup);
                         await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
                     } catch(Exception) {
                         await botClient.SendTextMessageAsync(chatId: chatId, text: $"Команда распознана как дата, но не соответствует формату \"день месяц год\".\nНапример: \"1 мая 2023\", \"1 05 23\", \"1 5\", \"1\"", replyMarkup: MainKeyboardMarkup);
