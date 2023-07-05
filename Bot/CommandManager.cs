@@ -132,10 +132,8 @@ namespace ScheduleBot.Bot {
             MessageCommands.TrimExcess();
             CallbackCommands.TrimExcess();
 
-            foreach(var item in DefaultMessageCommands) {
-                if(item is not null)
-                    item.TrimExcess();
-            }
+            foreach(var item in DefaultMessageCommands)
+                item?.TrimExcess();
         }
     }
 }

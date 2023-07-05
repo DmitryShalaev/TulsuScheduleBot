@@ -77,7 +77,7 @@ namespace ScheduleBot.Bot {
         }
 
         public TimeOnly ParseTime(string timeString) {
-            string[] separators = { ":", ";", ".", "," };
+            string[] separators = { ":", ";", ".", ",", " " };
 
             string[] parts = timeString.Split(separators, StringSplitOptions.RemoveEmptyEntries);
 

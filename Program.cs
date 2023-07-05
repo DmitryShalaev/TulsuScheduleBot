@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Timers;
 
 #if !DEBUG
 using System.Net.Mail;
@@ -11,8 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using ScheduleBot.DB;
 using ScheduleBot.Jobs;
 
-namespace ScheduleBot
-{
+namespace ScheduleBot {
     public class Program {
         static void Main(string[] args) {
             if(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotToken")) ||
@@ -36,8 +34,6 @@ namespace ScheduleBot
                     ClearTemporaryJob.StartAsync().Wait();
 
                     Bot.TelegramBot telegramBot = new();
-
-                    Thread.Sleep(Timeout.Infinite);
                 }
 
             } catch(Exception e) {
