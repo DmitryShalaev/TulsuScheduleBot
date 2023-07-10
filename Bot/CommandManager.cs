@@ -12,10 +12,10 @@ namespace ScheduleBot.Bot {
             admin
         }
 
-        public delegate Task MessageFunction(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user, string args);
+        public delegate Task MessageFunction(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args);
         public delegate Task CallbackFunction(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args);
 
-        public delegate Task<bool> TryFunction(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user, string args);
+        public delegate Task<bool> TryFunction(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args);
 
         public delegate string GetCommand(string message, TelegramUser user, out string args);
 
@@ -70,10 +70,10 @@ namespace ScheduleBot.Bot {
             CallbackCommands.Add($"{command} {mode}".ToLower(), (check, function)); ;
         }
 
-        public async Task<bool> OnMessageAsync(ScheduleDbContext dbContext, ChatId chatId, string message, TelegramUser user) {
+        public async Task<bool> OnMessageAsync(ScheduleDbContext dbContext, ChatId chatId, int messageId, string message, TelegramUser user) {
             if(MessageCommands.TryGetValue(getMessageCommand(message.ToLower(), user, out var args), out var func)) {
                 if(await CheckAsync(dbContext, chatId, func.Item1, user)) {
-                    await func.Item2(dbContext, chatId, user, args);
+                    await func.Item2(dbContext, chatId, messageId, user, args);
                     return true;
 
                 } else {
@@ -83,7 +83,7 @@ namespace ScheduleBot.Bot {
 
             foreach(var item in DefaultMessageCommands[(byte)user.Mode]) {
                 if(await CheckAsync(dbContext, chatId, item.Item1, user)) {
-                    if(await item.Item2(dbContext, chatId, user, message))
+                    if(await item.Item2(dbContext, chatId, messageId, user, message))
                         return true;
                 }
             }

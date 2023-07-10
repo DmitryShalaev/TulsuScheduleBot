@@ -12,11 +12,12 @@ namespace ScheduleBot.Bot {
             if(discipline is not null) {
                 if(user.IsOwner()) {
                     user.Mode = mode;
-                    user.CurrentPath = $"{discipline.ID}";
-                    dbContext.SaveChanges();
+                    user.TempData = $"{discipline.ID}";
 
                     await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: text, replyMarkup: CancelKeyboardMarkup);
+                    user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: text, replyMarkup: CancelKeyboardMarkup)).MessageId;
+
+                    dbContext.SaveChanges();
                     return;
                 }
             }
