@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 using Quartz;
 using Quartz.Impl;
@@ -8,6 +6,8 @@ using Quartz.Impl.Matchers;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
+
+using System.Globalization;
 
 using Telegram.Bot;
 using Telegram.Bot.Polling;
@@ -332,6 +332,7 @@ namespace ScheduleBot.Bot {
                     } catch(Exception) {
                         await botClient.SendTextMessageAsync(chatId: chatId, text: $"Команда распознана как дата, но не соответствует формату \"день месяц год\".\nНапример: \"1 мая 2023\", \"1 05 23\", \"1 5\", \"1\"", replyMarkup: MainKeyboardMarkup);
                     }
+
                     return true;
                 }
 
@@ -399,7 +400,6 @@ namespace ScheduleBot.Bot {
                     } else {
                         user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает или указан неверный номер зачётки", replyMarkup: CancelKeyboardMarkup)).MessageId;
                     }
-
                 } else {
                     user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Не удалось распознать введенный номер зачётной книжки", replyMarkup: CancelKeyboardMarkup)).MessageId;
                 }
@@ -607,6 +607,7 @@ namespace ScheduleBot.Bot {
                         return;
                     }
                 }
+
                 if(DateOnly.TryParse(tmp[1], out DateOnly date))
                     await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
             }, CommandManager.Check.group);
@@ -632,6 +633,7 @@ namespace ScheduleBot.Bot {
                         return;
                     }
                 }
+
                 if(DateOnly.TryParse(tmp[1], out DateOnly date))
                     await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
             }, CommandManager.Check.group);
@@ -648,6 +650,7 @@ namespace ScheduleBot.Bot {
                         return;
                     }
                 }
+
                 if(DateOnly.TryParse(tmp[1], out DateOnly date))
                     await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
             }, CommandManager.Check.group);
@@ -667,6 +670,7 @@ namespace ScheduleBot.Bot {
                         return;
                     }
                 }
+
                 if(DateOnly.TryParse(tmp[1], out DateOnly date))
                     await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
             }, CommandManager.Check.group);
@@ -716,25 +720,9 @@ namespace ScheduleBot.Bot {
                 user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Хотите изменить количество дней? Если да, то напишите новое", replyMarkup: CancelKeyboardMarkup)).MessageId;
 
                 dbContext.SaveChanges();
-            });
-
-            #region Admin
-            commandManager.AddMessageCommand("/GetJob", Mode.Default, async (dbContext, chatId, messageId, user, args) => {
-                ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
-                IScheduler scheduler = await schedulerFactory.GetScheduler();
-
-                var jobKeys = await scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup());
-                foreach(var jobKey in jobKeys) {
-                    var triggers = await scheduler.GetTriggersOfJob(jobKey);
-                    foreach(var trigger in triggers) {
-                        var triggerState = await scheduler.GetTriggerState(trigger.Key);
-                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"Job {jobKey} with trigger {trigger.Key} is {triggerState}");
-                    }
-                }
-
-            }, CommandManager.Check.admin);
+            }); 
             #endregion
-            #endregion
+
             #region Corps
             commandManager.AddMessageCommand(commands.Message["Corps"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 user.TempData = commands.Message["Corps"];

@@ -39,16 +39,16 @@ namespace ScheduleBot.Bot {
         }
 
         private InlineKeyboardMarkup GetCustomEditAdminInlineKeyboardButton(CustomDiscipline customDiscipline) {
-            var buttons = new List<InlineKeyboardButton[]>();
+            var buttons = new List<InlineKeyboardButton[]> {
+                new[] { InlineKeyboardButton.WithCallbackData($"Название: {customDiscipline.Name}", $"CustomEditName {customDiscipline.ID}|{customDiscipline.Date}") },
+                new[] { InlineKeyboardButton.WithCallbackData($"Лектор: {customDiscipline.Lecturer}", $"CustomEditLecturer {customDiscipline.ID}|{customDiscipline.Date}") },
+                new[] { InlineKeyboardButton.WithCallbackData($"Тип: {customDiscipline.Type}", $"CustomEditType {customDiscipline.ID}|{customDiscipline.Date}"),
+                                InlineKeyboardButton.WithCallbackData($"Аудитория: {customDiscipline.LectureHall}", $"CustomEditLectureHall {customDiscipline.ID}|{customDiscipline.Date}") },
+                new[] { InlineKeyboardButton.WithCallbackData($"Время начала: {customDiscipline.StartTime}", $"CustomEditStartTime {customDiscipline.ID}|{customDiscipline.Date}") ,
+                                InlineKeyboardButton.WithCallbackData($"Время конца: {customDiscipline.EndTime}", $"CustomEditEndTime {customDiscipline.ID}|{customDiscipline.Date}") },
 
-            buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"Название: {customDiscipline.Name}", $"CustomEditName {customDiscipline.ID}|{customDiscipline.Date}") });
-            buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"Лектор: {customDiscipline.Lecturer}", $"CustomEditLecturer {customDiscipline.ID}|{customDiscipline.Date}") });
-            buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"Тип: {customDiscipline.Type}", $"CustomEditType {customDiscipline.ID}|{customDiscipline.Date}"),
-                                InlineKeyboardButton.WithCallbackData($"Аудитория: {customDiscipline.LectureHall}", $"CustomEditLectureHall {customDiscipline.ID}|{customDiscipline.Date}") });
-            buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"Время начала: {customDiscipline.StartTime}", $"CustomEditStartTime {customDiscipline.ID}|{customDiscipline.Date}") ,
-                                InlineKeyboardButton.WithCallbackData($"Время конца: {customDiscipline.EndTime}", $"CustomEditEndTime {customDiscipline.ID}|{customDiscipline.Date}") });
-
-            buttons.Add(new[] { InlineKeyboardButton.WithCallbackData(commands.Callback["CustomEditCancel"].text, $"{commands.Callback["CustomEditCancel"].callback} {customDiscipline.Date}") });
+                new[] { InlineKeyboardButton.WithCallbackData(commands.Callback["CustomEditCancel"].text, $"{commands.Callback["CustomEditCancel"].callback} {customDiscipline.Date}") }
+            };
 
             return new InlineKeyboardMarkup(buttons);
         }
@@ -68,7 +68,6 @@ namespace ScheduleBot.Bot {
         private InlineKeyboardMarkup GetBackInlineKeyboardButton(DateOnly date, TelegramUser user) {
             return new(InlineKeyboardButton.WithCallbackData(commands.Callback["Back"].text, $"{commands.Callback["Back"].callback} {date}")); ;
         }
-
 
         private InlineKeyboardMarkup GetNotificationsInlineKeyboardButton(TelegramUser user) {
             var buttons = new List<InlineKeyboardButton[]>();
@@ -91,6 +90,7 @@ namespace ScheduleBot.Bot {
                     case var _ when days > 4:
                         return $"{days} дней";
                 }
+
                 return "";
             }
 
@@ -98,6 +98,5 @@ namespace ScheduleBot.Bot {
 
             return new InlineKeyboardMarkup(buttons);
         }
-
     }
 }

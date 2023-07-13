@@ -36,7 +36,6 @@ namespace ScheduleBot.Bot {
                     default:
                         break;
                 }
-
             } catch(Exception) {
                 user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Ошибка! " + GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: CancelKeyboardMarkup)).MessageId;
                 return;
@@ -102,8 +101,7 @@ namespace ScheduleBot.Bot {
             if(parts.Length != 2)
                 throw new ArgumentException(timeString);
 
-            int hours, minutes;
-            if(!int.TryParse(parts[0], out hours) || !int.TryParse(parts[1], out minutes))
+            if(!int.TryParse(parts[0], out int hours) || !int.TryParse(parts[1], out int minutes))
                 throw new ArgumentException(timeString);
 
             return new TimeOnly(hours, minutes);

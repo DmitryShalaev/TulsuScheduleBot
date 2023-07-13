@@ -35,9 +35,9 @@ namespace ScheduleBot.Bot {
                                 await AnswerInlineQueryAsync(dbContext, botClient, inlineQuery, date);
                             } catch(Exception) { }
                         }
+
                         break;
                 }
-
             }
         }
 

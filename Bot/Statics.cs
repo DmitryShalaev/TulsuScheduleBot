@@ -1,7 +1,7 @@
-﻿using System.Text.RegularExpressions;
-
-using ScheduleBot.DB;
+﻿using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
+
+using System.Text.RegularExpressions;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -27,7 +27,7 @@ namespace ScheduleBot.Bot {
         [GeneratedRegex("^\\d{1,2}([ ,.-](\\d{1,2}|\\w{3,8}))?([ ,.-](\\d{2}|\\d{4}))?$")]
         private static partial Regex DateRegex();
 
-        public static readonly BotCommands commands = new BotCommands();
+        public static readonly BotCommands commands = new();
 
         #region ReplyKeyboardMarkup
         public static readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
@@ -57,7 +57,7 @@ namespace ScheduleBot.Bot {
 
         private static readonly ReplyKeyboardMarkup CancelKeyboardMarkup = new(commands.Message["Cancel"]) { ResizeKeyboard = true };
 
-        private static readonly ReplyKeyboardMarkup ResetProfileLinkKeyboardMarkup = new(new KeyboardButton[] { commands.Message["Reset"], commands.Message["Cancel"]}) { ResizeKeyboard = true };
+        private static readonly ReplyKeyboardMarkup ResetProfileLinkKeyboardMarkup = new(new KeyboardButton[] { commands.Message["Reset"], commands.Message["Cancel"] }) { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup WeekKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["ThisWeek"], commands.Message["NextWeek"]},
@@ -94,7 +94,7 @@ namespace ScheduleBot.Bot {
                 groupLastUpdate = dbContext.GroupLastUpdate.First(i => i.Group == group).Update.ToLocalTime();
             }
 
-            await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {groupLastUpdate.ToString("dd.MM HH:mm")}", replyMarkup: replyMarkup);
+            await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {groupLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
         private async Task ProgressRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
@@ -109,7 +109,7 @@ namespace ScheduleBot.Bot {
             }
 
             if(send)
-                await botClient.SendTextMessageAsync(chatId: chatId, text: $"Успеваемость актуально на {studentIDlastUpdate.ToString("dd.MM HH:mm")}", replyMarkup: replyMarkup);
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"Успеваемость актуально на {studentIDlastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
     }
 }

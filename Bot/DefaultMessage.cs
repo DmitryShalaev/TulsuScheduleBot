@@ -37,8 +37,9 @@ namespace ScheduleBot.Bot {
         }
 
         private static ReplyKeyboardMarkup GetCorpsKeyboardMarkup() {
-            List<KeyboardButton[]> ProfileKeyboardMarkup = new();
-            ProfileKeyboardMarkup.Add(new KeyboardButton[] { commands.Corps[0].text });
+            List<KeyboardButton[]> ProfileKeyboardMarkup = new() {
+                new KeyboardButton[] { commands.Corps[0].text }
+            };
 
             for(int i = 0; i < 3; i++) {
                 List<KeyboardButton> keyboardButtonsLine = new();

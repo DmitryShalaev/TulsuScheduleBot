@@ -28,9 +28,9 @@ namespace ScheduleBot.Bot {
         private readonly GetCommand getMessageCommand;
         private readonly GetCommand getCallbackCommand;
 
-        public CommandManager(TelegramBot telegramBot, GetCommand getCommand, GetCommand getCallbackCommand) {
+        public CommandManager(TelegramBot telegramBot, GetCommand getMessageCommand, GetCommand getCallbackCommand) {
             this.telegramBot = telegramBot;
-            this.getMessageCommand = getCommand;
+            this.getMessageCommand = getMessageCommand;
             this.getCallbackCommand = getCallbackCommand;
 
             MessageCommands = new();
@@ -46,9 +46,7 @@ namespace ScheduleBot.Bot {
                 DefaultMessageCommands[(byte)mode].Add((check, function));
         }
 
-        public void AddMessageCommand(string command, Mode mode, MessageFunction function, Check check = Check.none) {
-            MessageCommands.Add($"{command} {mode}".ToLower(), (check, function));
-        }
+        public void AddMessageCommand(string command, Mode mode, MessageFunction function, Check check = Check.none) => MessageCommands.Add($"{command} {mode}".ToLower(), (check, function));
 
         public void AddMessageCommand(string[] commands, Mode mode, MessageFunction function, Check check = Check.none) {
             foreach(var command in commands)
@@ -87,6 +85,7 @@ namespace ScheduleBot.Bot {
                         return true;
                 }
             }
+
             return false;
         }
 
@@ -97,6 +96,7 @@ namespace ScheduleBot.Bot {
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -110,6 +110,7 @@ namespace ScheduleBot.Bot {
                             await telegramBot.GroupErrorUser(chatId);
                         return false;
                     }
+
                     break;
 
                 case Check.studentId:
@@ -120,11 +121,13 @@ namespace ScheduleBot.Bot {
                             await telegramBot.StudentIdErrorUser(chatId);
                         return false;
                     }
+
                     break;
 
                 case Check.admin:
                     return user.IsAdmin;
             }
+
             return true;
         }
 

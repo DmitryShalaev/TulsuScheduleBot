@@ -1,7 +1,7 @@
-﻿using System.Globalization;
-
-using ScheduleBot.DB;
+﻿using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
+
+using System.Globalization;
 
 namespace ScheduleBot {
     public static class Scheduler {
@@ -28,9 +28,9 @@ namespace ScheduleBot {
             list = list.OrderBy(i => i.StartTime).ToList();
 
             int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-            string str = $"📌{date.ToString("dd.MM.yy")} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd").Substring(1)} ({(weekNumber % 2 == 0 ? "чётная неделя":"нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
+            string str = $"📌{date.ToString("dd.MM.yy")} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
 
-            if(list.Count() == 0)
+            if(list.Count == 0)
                 return str += "Ничего нет";
 
             foreach(var item in list) {
@@ -38,15 +38,16 @@ namespace ScheduleBot {
                        $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}\n" +
                        $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n";
             }
+
             return str;
         }
 
         public static string GetProgressByTerm(ScheduleDbContext dbContext, int term, string StudentID) {
-            var progresses = dbContext.Progresses.Where(i => i.StudentID == StudentID && i.Term == term);
+            var progresses = dbContext.Progresses.Where(i => i.StudentID == StudentID && i.Term == term).OrderBy(i => i.Discipline);
 
             string str = $"📌 Семестр {term}\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
 
-            if(progresses.Count() == 0)
+            if(!progresses.Any())
                 return str += "В этом семестре нет проставленных баллов";
 
             foreach(var item in progresses)
@@ -64,6 +65,7 @@ namespace ScheduleBot {
                 var tmp = dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek);
                 list.Add((GetScheduleByDate(dbContext, tmp, profile), tmp));
             }
+
             return list;
         }
 
@@ -73,14 +75,14 @@ namespace ScheduleBot {
             var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID).ToList();
             var disciplines = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && i.Class == Class.other && DateTime.Parse($"{i.Date} {i.EndTime}") >= DateTime.Now && !completedDisciplines.Contains((CompletedDiscipline)i)).OrderBy(i => i.Date);
 
-            if(disciplines.Count() == 0) {
+            if(!disciplines.Any()) {
                 exams.Add("Ничего нет");
                 return exams;
             }
 
-            string Get(Discipline item) {
+            static string Get(Discipline item) {
                 int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(item.Date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-                return $"📌{item.Date.ToString("dd.MM.yy")} - {char.ToUpper(item.Date.ToString("dddd")[0]) + item.Date.ToString("dddd").Substring(1)} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n" +
+                return $"📌{item.Date.ToString("dd.MM.yy")} - {char.ToUpper(item.Date.ToString("dddd")[0]) + item.Date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n" +
                        $"⏰ {item.StartTime.ToString("HH:mm")}-{item.EndTime.ToString("HH:mm")} | {item.LectureHall}\n" +
                        $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}\n" +
                        $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n";
@@ -119,6 +121,7 @@ namespace ScheduleBot {
 
                 exams[0] += $"\n\n{Get(item)}";
             }
+
             return exams;
         }
     }

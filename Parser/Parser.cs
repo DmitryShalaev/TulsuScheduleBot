@@ -1,15 +1,15 @@
-﻿using System.Data;
-using System.Net;
-using System.Text;
-using System.Timers;
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 using Newtonsoft.Json.Linq;
 
 using ScheduleBot.Bot;
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
+
+using System.Data;
+using System.Net;
+using System.Text;
+using System.Timers;
 
 namespace ScheduleBot {
     public class Parser {
@@ -78,6 +78,7 @@ namespace ScheduleBot {
 
                 return true;
             }
+
             return false;
         }
 
@@ -125,6 +126,7 @@ namespace ScheduleBot {
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -199,6 +201,7 @@ namespace ScheduleBot {
             } catch(Exception) {
                 return null;
             }
+
             return null;
         }
 

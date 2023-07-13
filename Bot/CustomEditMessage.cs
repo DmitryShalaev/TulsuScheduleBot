@@ -21,6 +21,7 @@ namespace ScheduleBot.Bot {
                     return;
                 }
             }
+
             if(DateOnly.TryParse(tmp[1], out DateOnly date))
                 await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
         }

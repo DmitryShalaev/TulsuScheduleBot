@@ -35,24 +35,23 @@ namespace ScheduleBot {
 
                     Bot.TelegramBot telegramBot = new();
                 }
-
             } catch(Exception e) {
                 Console.WriteLine(e);
 #if !DEBUG
-                    MailAddress from = new MailAddress(Environment.GetEnvironmentVariable("TelegramBot_FromEmail") ?? "", "Error");
-                    MailAddress to = new MailAddress(Environment.GetEnvironmentVariable("TelegramBot_ToEmail") ?? "");
-                    MailMessage message = new MailMessage(from, to);
-                    message.Subject = "Error";
-                    message.Body = e.ToString();
+                MailAddress from = new(Environment.GetEnvironmentVariable("TelegramBot_FromEmail") ?? "", "Error");
+                MailAddress to = new(Environment.GetEnvironmentVariable("TelegramBot_ToEmail") ?? "");
+                MailMessage message = new(from, to) {
+                    Subject = "Error",
+                    Body = e.ToString()
+                };
 
-                    SmtpClient smtp = new SmtpClient("smtp.yandex.ru", 25);
-                    smtp.Credentials = new NetworkCredential(Environment.GetEnvironmentVariable("TelegramBot_FromEmail"), Environment.GetEnvironmentVariable("TelegramBot_PassEmail"));
-                    smtp.EnableSsl = true;
-                    smtp.SendMailAsync(message).Wait();
+                SmtpClient smtp = new("smtp.yandex.ru", 25) {
+                    Credentials = new NetworkCredential(Environment.GetEnvironmentVariable("TelegramBot_FromEmail"), Environment.GetEnvironmentVariable("TelegramBot_PassEmail")),
+                    EnableSsl = true
+                };
+                smtp.SendMailAsync(message).Wait();
 #endif
             }
-
-
         }
     }
 }

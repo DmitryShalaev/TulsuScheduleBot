@@ -36,6 +36,7 @@ namespace ScheduleBot.Jobs {
 
                 dbContext.SaveChanges();
             }
+
             return Task.CompletedTask;
         }
     }
