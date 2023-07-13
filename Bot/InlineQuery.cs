@@ -27,7 +27,7 @@ namespace ScheduleBot.Bot {
                         if(DateRegex().IsMatch(str)) {
                             try {
                                 DateOnly date;
-                                if(DateTime.TryParse(str, out var _date))
+                                if(DateTime.TryParse(str, out DateTime _date))
                                     date = DateOnly.FromDateTime(_date);
                                 else
                                     date = DateOnly.FromDateTime(DateTime.Parse($"{str} {DateTime.Now.Month}"));

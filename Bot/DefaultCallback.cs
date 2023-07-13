@@ -10,24 +10,24 @@ namespace ScheduleBot.Bot {
 
             var сompletedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == scheduleProfile.ID).ToList();
 
-            var disciplines = dbContext.Disciplines.Where(i => i.Group == scheduleProfile.Group && i.Date == date).OrderBy(i => i.StartTime);
+            IOrderedQueryable<Discipline> disciplines = dbContext.Disciplines.Where(i => i.Group == scheduleProfile.Group && i.Date == date).OrderBy(i => i.StartTime);
             if(disciplines.Any()) {
                 editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "В этот день", callbackData: "!"), InlineKeyboardButton.WithCallbackData(text: "Всегда", callbackData: "!") });
 
-                foreach(var item in disciplines) {
+                foreach(Discipline? item in disciplines) {
                     CompletedDiscipline tmp = new(item, scheduleProfile.ID) { Date = null };
-                    var always = сompletedDisciplines.FirstOrDefault(i => i.Equals(tmp)) is not null;
+                    bool always = сompletedDisciplines.FirstOrDefault(i => i.Equals(tmp)) is not null;
 
                     editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(always ? "🚫" : (сompletedDisciplines.Contains((CompletedDiscipline)item) ? "❌" : "✅"))}", callbackData: $"{(always ? "!" : $"DisciplineDay {item.ID}|{item.Date}")}"),
                                             InlineKeyboardButton.WithCallbackData(text: always ? "❌" : "✅", callbackData: $"DisciplineAlways {item.ID}|{item.Date}")});
                 }
             }
 
-            var castom = dbContext.CustomDiscipline.Where(i => i.ScheduleProfileGuid == scheduleProfile.ID && i.Date == date).OrderBy(i => i.StartTime);
+            IOrderedQueryable<CustomDiscipline> castom = dbContext.CustomDiscipline.Where(i => i.ScheduleProfileGuid == scheduleProfile.ID && i.Date == date).OrderBy(i => i.StartTime);
             if(castom.Any()) {
                 editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "Пользовательские", callbackData: "!") });
 
-                foreach(var item in castom)
+                foreach(CustomDiscipline? item in castom)
                     editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} 🔧", callbackData: $"CustomEdit {item.ID}|{item.Date}"),
                                             InlineKeyboardButton.WithCallbackData(text: $"🗑", callbackData: $"CustomDelete {item.ID}|{item.Date}"),});
             }
@@ -77,22 +77,12 @@ namespace ScheduleBot.Bot {
             else
                 buttons.Add(new[] { InlineKeyboardButton.WithCallbackData("Включить уведомления", "ToggleNotifications on") });
 
-            string via(int days) {
-                switch(days) {
-                    case 1:
-                        return $"{days} день";
-
-                    case 2:
-                    case 3:
-                    case 4:
-                        return $"{days} дня";
-
-                    case var _ when days > 4:
-                        return $"{days} дней";
-                }
-
-                return "";
-            }
+            string via(int days) => days switch {
+                1 => $"{days} день",
+                2 or 3 or 4 => $"{days} дня",
+                var _ when days > 4 => $"{days} дней",
+                _ => "",
+            };
 
             buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"В период: {via(user.Notifications.Days)}", "DaysNotifications") });
 

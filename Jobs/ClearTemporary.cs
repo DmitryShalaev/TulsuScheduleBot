@@ -23,7 +23,7 @@ namespace ScheduleBot.Jobs {
 
         Task IJob.Execute(IJobExecutionContext context) {
             using(ScheduleDbContext dbContext = new()) {
-                foreach(var item in dbContext.TelegramUsers)
+                foreach(DB.Entity.TelegramUser item in dbContext.TelegramUsers)
                     item.TodayRequests = 0;
 
                 var date = DateOnly.FromDateTime(DateTime.Now);

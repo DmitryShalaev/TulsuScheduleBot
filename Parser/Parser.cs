@@ -42,7 +42,7 @@ namespace ScheduleBot {
         private void UpdatingDisciplines(object? sender = null, ElapsedEventArgs? e = null) {
             ScheduleDbContext dbContext = new();
 
-            foreach(var item in dbContext.ScheduleProfile.Where(i => (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= 7).Select(i => i.Group).Distinct().ToList()) {
+            foreach(string? item in dbContext.ScheduleProfile.Where(i => (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= 7).Select(i => i.Group).Distinct().ToList()) {
                 if(string.IsNullOrWhiteSpace(item)) continue;
 
                 UpdatingDisciplines(dbContext, group: item);
@@ -52,9 +52,9 @@ namespace ScheduleBot {
         }
 
         public bool UpdatingProgress(ScheduleDbContext dbContext, string studentID) {
-            var progress = GetProgress(studentID);
+            List<Progress>? progress = GetProgress(studentID);
             if(progress != null) {
-                var studentIDLastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID);
+                StudentIDLastUpdate? studentIDLastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID);
                 if(studentIDLastUpdate is null)
                     dbContext.StudentIDLastUpdate.Add(new() { StudentID = studentID, Update = DateTime.UtcNow });
                 else
@@ -62,7 +62,7 @@ namespace ScheduleBot {
 
                 var _list = dbContext.Progresses.Where(i => i.StudentID == studentID).ToList();
 
-                var except = progress.Except(_list);
+                IEnumerable<Progress> except = progress.Except(_list);
                 if(except.Any()) {
                     dbContext.Progresses.AddRange(except);
 
@@ -83,14 +83,14 @@ namespace ScheduleBot {
         }
 
         public bool UpdatingDisciplines(ScheduleDbContext dbContext, string group) {
-            var dates = GetDates(group);
+            (DateOnly min, DateOnly max)? dates = GetDates(group);
             if(dates != null) {
 
-                var disciplines = GetDisciplines(group);
+                List<Discipline>? disciplines = GetDisciplines(group);
                 if(disciplines != null) {
                     List<Discipline> updatedDisciplines = new();
 
-                    var groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group);
+                    GroupLastUpdate? groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group);
                     if(groupLastUpdate is null)
                         dbContext.GroupLastUpdate.Add(new() { Group = group, Update = DateTime.UtcNow });
                     else
@@ -98,7 +98,7 @@ namespace ScheduleBot {
 
                     var _list = dbContext.Disciplines.Where(i => i.Group == group && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
 
-                    var except = disciplines.Except(_list);
+                    IEnumerable<Discipline> except = disciplines.Except(_list);
                     if(except.Any()) {
                         dbContext.Disciplines.AddRange(except);
 
@@ -119,7 +119,7 @@ namespace ScheduleBot {
                     dbContext.SaveChanges();
 
                     if(updatedDisciplines.Any()) {
-                        DateOnly date = DateOnly.FromDateTime(DateTime.Now);
+                        var date = DateOnly.FromDateTime(DateTime.Now);
                         Notify.Invoke(dbContext, updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList()).Wait();
                     }
 
@@ -155,7 +155,7 @@ namespace ScheduleBot {
                     using(var content = new StringContent($"search_field=GROUP_P&search_value={group}", Encoding.UTF8, "application/x-www-form-urlencoded"))
                     using(HttpResponseMessage response = client.PostAsync("https://tulsu.ru/schedule/queries/GetSchedule.php", content).Result)
                         if(response.IsSuccessStatusCode) {
-                            JArray jObject = JArray.Parse(response.Content.ReadAsStringAsync().Result);
+                            var jObject = JArray.Parse(response.Content.ReadAsStringAsync().Result);
                             if(jObject.Count == 0) throw new Exception();
 
                             return jObject.Select(j => new Discipline(j, group)).ToList();
@@ -192,7 +192,7 @@ namespace ScheduleBot {
                     using(var content = new StringContent($"search_value={group}", Encoding.UTF8, "application/x-www-form-urlencoded"))
                     using(HttpResponseMessage response = client.PostAsync("https://tulsu.ru/schedule/queries/GetDates.php", content).Result)
                         if(response.IsSuccessStatusCode) {
-                            JObject jObject = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+                            var jObject = JObject.Parse(response.Content.ReadAsStringAsync().Result);
 
                             return (DateOnly.Parse(jObject.Value<string>("MIN_DATE") ?? throw new NullReferenceException("MIN_DATE")),
                                     DateOnly.Parse(jObject.Value<string>("MAX_DATE") ?? throw new NullReferenceException("MAX_DATE")));

@@ -31,14 +31,14 @@ namespace ScheduleBot.DB.Entity {
             Name = json.Value<string>("DISCIP") ?? throw new NullReferenceException("DISCIP");
             Type = json.Value<string>("KOW") ?? throw new NullReferenceException("KOW");
 
-            var _subgroup = json.Value<JToken>("GROUPS")?[0]?.Value<string>("PRIM");
+            string? _subgroup = json.Value<JToken>("GROUPS")?[0]?.Value<string>("PRIM");
             Subgroup = string.IsNullOrWhiteSpace(_subgroup) ? null : _subgroup;
 
             Lecturer = json.Value<string?>("PREP");
 
             Class = (Class)Enum.Parse(typeof(Class), json.Value<string>("CLASS") ?? "other");
 
-            var times = (json.Value<string>("TIME_Z") ?? throw new NullReferenceException("TIME_Z")).Split('-');
+            string[] times = (json.Value<string>("TIME_Z") ?? throw new NullReferenceException("TIME_Z")).Split('-');
             StartTime = TimeOnly.Parse(times[0]);
             EndTime = TimeOnly.Parse(times[1]);
 

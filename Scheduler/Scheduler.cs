@@ -11,7 +11,7 @@ namespace ScheduleBot {
             var schedules = new List<(string, DateOnly)>();
 
             for(int i = 1; i < 7; i++) {
-                var tmp = dateOnly.AddDays(7 * weeks + i);
+                DateOnly tmp = dateOnly.AddDays(7 * weeks + i);
                 schedules.Add((GetScheduleByDate(dbContext, tmp, profile), tmp));
             }
 
@@ -33,7 +33,7 @@ namespace ScheduleBot {
             if(list.Count == 0)
                 return str += "Ничего нет";
 
-            foreach(var item in list) {
+            foreach(Discipline? item in list) {
                 str += $"⏰ {item.StartTime.ToString("HH:mm")}-{item.EndTime.ToString("HH:mm")} | {item.LectureHall}\n" +
                        $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}\n" +
                        $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n";
@@ -43,14 +43,14 @@ namespace ScheduleBot {
         }
 
         public static string GetProgressByTerm(ScheduleDbContext dbContext, int term, string StudentID) {
-            var progresses = dbContext.Progresses.Where(i => i.StudentID == StudentID && i.Term == term).OrderBy(i => i.Discipline);
+            IOrderedQueryable<Progress> progresses = dbContext.Progresses.Where(i => i.StudentID == StudentID && i.Term == term).OrderBy(i => i.Discipline);
 
             string str = $"📌 Семестр {term}\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
 
             if(!progresses.Any())
                 return str += "В этом семестре нет проставленных баллов";
 
-            foreach(var item in progresses)
+            foreach(Progress? item in progresses)
                 str += $"🔹 {item.Discipline} | {item.Mark} | {item.MarkTitle}\n";
 
             return str;
@@ -62,7 +62,7 @@ namespace ScheduleBot {
 
             var list = new List<(string, DateOnly)>();
             for(int i = -1; i <= 1; i++) {
-                var tmp = dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek);
+                DateOnly tmp = dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek);
                 list.Add((GetScheduleByDate(dbContext, tmp, profile), tmp));
             }
 
@@ -73,7 +73,7 @@ namespace ScheduleBot {
             var exams = new List<string>();
 
             var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID).ToList();
-            var disciplines = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && i.Class == Class.other && DateTime.Parse($"{i.Date} {i.EndTime}") >= DateTime.Now && !completedDisciplines.Contains((CompletedDiscipline)i)).OrderBy(i => i.Date);
+            IOrderedEnumerable<Discipline> disciplines = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && i.Class == Class.other && DateTime.Parse($"{i.Date} {i.EndTime}") >= DateTime.Now && !completedDisciplines.Contains((CompletedDiscipline)i)).OrderBy(i => i.Date);
 
             if(!disciplines.Any()) {
                 exams.Add("Ничего нет");
@@ -89,13 +89,13 @@ namespace ScheduleBot {
             }
 
             if(all) {
-                foreach(var item in disciplines)
+                foreach(Discipline? item in disciplines)
                     exams.Add(Get(item));
 
             } else {
-                var item = disciplines.First();
+                Discipline item = disciplines.First();
 
-                var via = (DateTime.Parse(item.Date.ToString()).Date - DateTime.Now.Date).Days;
+                int via = (DateTime.Parse(item.Date.ToString()).Date - DateTime.Now.Date).Days;
 
                 #region Via
                 switch(via) {

@@ -34,7 +34,7 @@ namespace ScheduleBot.Bot {
         public BotCommands() {
 
             using(StreamReader sr = new(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + @"/Bot/TulsuScheduleBotSettings.json")) {
-                JObject commands = JObject.Parse(sr.ReadToEnd());
+                var commands = JObject.Parse(sr.ReadToEnd());
 
                 Message = commands["Message"]?.ToObject<Dictionary<string, string>>() ?? throw new NullReferenceException("Message");
                 Callback = commands["Callback"]?.ToObject<Dictionary<string, CallbackStruct>>() ?? throw new NullReferenceException("Callback");

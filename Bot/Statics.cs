@@ -84,9 +84,9 @@ namespace ScheduleBot.Bot {
         public async Task StudentIdErrorUser(ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Попросите владельца профиля указать номер зачетной книжки в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
 
         private async Task ScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string group, IReplyMarkup? replyMarkup) {
-            var groupLastUpdate = dbContext.GroupLastUpdate.First(i => i.Group == group).Update.ToLocalTime();
+            DateTime groupLastUpdate = dbContext.GroupLastUpdate.First(i => i.Group == group).Update.ToLocalTime();
             if((DateTime.Now - groupLastUpdate).TotalMinutes > commands.Config.GroupUpdateTime) {
-                var messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
+                int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
                 if(!parser.UpdatingDisciplines(dbContext, group))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
 
@@ -98,9 +98,9 @@ namespace ScheduleBot.Bot {
         }
 
         private async Task ProgressRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
-            var studentIDlastUpdate = dbContext.StudentIDLastUpdate.First(i => i.StudentID == studentID).Update.ToLocalTime();
+            DateTime studentIDlastUpdate = dbContext.StudentIDLastUpdate.First(i => i.StudentID == studentID).Update.ToLocalTime();
             if((DateTime.Now - studentIDlastUpdate).TotalMinutes > commands.Config.StudentIDUpdateTime) {
-                var messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
+                int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
                 if(!parser.UpdatingProgress(dbContext, studentID))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
 

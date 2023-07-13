@@ -9,7 +9,7 @@ namespace ScheduleBot.Bot {
     public partial class TelegramBot {
 
         private async Task SetStagesAddingDisciplineAsync(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, int messageId, string message, TelegramUser user) {
-            var customDiscipline = dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate).First();
+            CustomDiscipline customDiscipline = dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate).First();
 
             await DeleteTempMessage(user, messageId);
 
@@ -53,7 +53,7 @@ namespace ScheduleBot.Bot {
                     break;
 
                 case 5:
-                    var endTime = customDiscipline.StartTime?.AddMinutes(95);
+                    TimeOnly? endTime = customDiscipline.StartTime?.AddMinutes(95);
                     user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter),
                             replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: endTime?.ToString() ?? "endTime Error", callbackData: $"{commands.Callback["SetEndTime"].callback} {endTime}")))).MessageId;
                     break;
