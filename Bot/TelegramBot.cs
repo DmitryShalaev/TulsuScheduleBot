@@ -17,7 +17,7 @@ namespace ScheduleBot.Bot {
         private readonly Parser parser;
 
         public TelegramBot() {
-            botClient = new TelegramBotClient(Environment.GetEnvironmentVariable("TelegramBotToken") ?? "");
+            botClient = new TelegramBotClient(Environment.GetEnvironmentVariable("TelegramBotToken")!);
 
             parser = new(commands, UpdatedDisciplinesAsync);
 
