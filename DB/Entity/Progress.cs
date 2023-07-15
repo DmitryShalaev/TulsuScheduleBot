@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace ScheduleBot.DB.Entity {
+namespace ScheduleBot.DB.Entity
+{
 
 #pragma warning disable CS8618
-    public class Progress : IEquatable<Progress?> {
+    public class Progress : IEquatable<Progress?>
+    {
         public long ID { get; set; }
 
         public string Discipline { get; set; }
@@ -15,7 +17,8 @@ namespace ScheduleBot.DB.Entity {
 
         public Progress() { }
 
-        public Progress(JToken json, string studentID) {
+        public Progress(JToken json, string studentID)
+        {
             Discipline = json.Value<string>("DISCIPLINE") ?? throw new NullReferenceException("DISCIPLINE");
             Mark = json.Value<int?>("MARK");
             Term = json.Value<int>("TERM");
@@ -30,7 +33,8 @@ namespace ScheduleBot.DB.Entity {
         public static bool operator ==(Progress? left, Progress? right) => left?.Equals(right) ?? false;
         public static bool operator !=(Progress? left, Progress? right) => !(left == right);
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             int hash = 17;
 
             hash += Discipline.GetHashCode();

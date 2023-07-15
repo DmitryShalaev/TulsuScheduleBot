@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ScheduleBot.DB.Entity {
-    public class Notifications {
+namespace ScheduleBot.DB.Entity
+{
+    public class Notifications
+    {
         public long ID { get; set; }
 
         public bool IsEnabled { get; set; } = false;

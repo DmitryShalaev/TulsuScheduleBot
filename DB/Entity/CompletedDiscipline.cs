@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ScheduleBot.DB.Entity {
+namespace ScheduleBot.DB.Entity
+{
 
 #pragma warning disable CS8618
-    public class CompletedDiscipline : IEquatable<CompletedDiscipline?> {
+    public class CompletedDiscipline : IEquatable<CompletedDiscipline?>
+    {
         public long ID { get; set; }
 
         public string Name { get; set; }
@@ -26,7 +28,8 @@ namespace ScheduleBot.DB.Entity {
         public static bool operator ==(CompletedDiscipline? left, CompletedDiscipline? right) => left?.Equals(right) ?? false;
         public static bool operator !=(CompletedDiscipline? left, CompletedDiscipline? right) => !(left == right);
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             int hash = 17;
 
             hash += Name?.GetHashCode() ?? 0;
@@ -41,7 +44,8 @@ namespace ScheduleBot.DB.Entity {
 
         public CompletedDiscipline() { }
 
-        public CompletedDiscipline(Discipline discipline, Guid scheduleProfileGuid) {
+        public CompletedDiscipline(Discipline discipline, Guid scheduleProfileGuid)
+        {
             Name = discipline.Name;
             Lecturer = discipline.Lecturer;
             Class = discipline.Class;

@@ -3,9 +3,12 @@ using Quartz.Impl;
 
 using ScheduleBot.DB;
 
-namespace ScheduleBot.Jobs {
-    public class ClearTemporaryJob : IJob {
-        public static async Task StartAsync() {
+namespace ScheduleBot.Jobs
+{
+    public class ClearTemporaryJob : IJob
+    {
+        public static async Task StartAsync()
+        {
             ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
             IScheduler scheduler = await schedulerFactory.GetScheduler();
 
@@ -21,9 +24,11 @@ namespace ScheduleBot.Jobs {
             await scheduler.ScheduleJob(job, trigger);
         }
 
-        Task IJob.Execute(IJobExecutionContext context) {
-            using(ScheduleDbContext dbContext = new()) {
-                foreach(DB.Entity.TelegramUser item in dbContext.TelegramUsers)
+        Task IJob.Execute(IJobExecutionContext context)
+        {
+            using (ScheduleDbContext dbContext = new())
+            {
+                foreach (DB.Entity.TelegramUser item in dbContext.TelegramUsers)
                     item.TodayRequests = 0;
 
                 var date = DateOnly.FromDateTime(DateTime.Now);

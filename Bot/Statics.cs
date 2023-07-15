@@ -7,8 +7,10 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace ScheduleBot.Bot {
-    public partial class TelegramBot {
+namespace ScheduleBot.Bot
+{
+    public partial class TelegramBot
+    {
         [GeneratedRegex("^[А-я]+[ ]?[а-я]*$")]
         private static partial Regex DefaultMessageRegex();
         [GeneratedRegex("^([0-9]+)[ ]([а-я]+)$")]
@@ -34,26 +36,30 @@ namespace ScheduleBot.Bot {
                             new KeyboardButton[] { commands.Message["Today"], commands.Message["Tomorrow"] },
                             new KeyboardButton[] { commands.Message["ByDays"], commands.Message["ForAWeek"]},
                             new KeyboardButton[] { commands.Message["Other"]}
-                        }) { ResizeKeyboard = true };
+                        })
+        { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup AdditionalKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["Profile"]},
                             new KeyboardButton[] { commands.Message["Exam"], commands.Message["AcademicPerformance"] },
                             new KeyboardButton[] { commands.Message["Corps"]},
                             new KeyboardButton[] { commands.Message["Back"]}
-                        }) { ResizeKeyboard = true };
+                        })
+        { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup ExamKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["NextExam"], commands.Message["AllExams"]},
                             new KeyboardButton[] { commands.Message["Back"]}
-                        }) { ResizeKeyboard = true };
+                        })
+        { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup DaysKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["Monday"], commands.Message["Tuesday"]},
                             new KeyboardButton[] { commands.Message["Wednesday"], commands.Message["Thursday"]},
                             new KeyboardButton[] { commands.Message["Friday"], commands.Message["Saturday"]},
                             new KeyboardButton[] { commands.Message["Back"]}
-                        }) { ResizeKeyboard = true };
+                        })
+        { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup CancelKeyboardMarkup = new(commands.Message["Cancel"]) { ResizeKeyboard = true };
 
@@ -62,12 +68,14 @@ namespace ScheduleBot.Bot {
         private static readonly ReplyKeyboardMarkup WeekKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["ThisWeek"], commands.Message["NextWeek"]},
                             new KeyboardButton[] { commands.Message["Back"] }
-                        }) { ResizeKeyboard = true };
+                        })
+        { ResizeKeyboard = true };
 
         private readonly ReplyKeyboardMarkup CorpsKeyboardMarkup = GetCorpsKeyboardMarkup();
         #endregion
 
-        public async Task GroupErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
+        public async Task GroupErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user)
+        {
             user.Mode = Mode.GroupСhange;
             dbContext.SaveChanges();
 
@@ -75,7 +83,8 @@ namespace ScheduleBot.Bot {
         }
         public async Task GroupErrorUser(ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Попросите владельца профиля указать номер группы в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
 
-        public async Task StudentIdErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
+        public async Task StudentIdErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user)
+        {
             user.Mode = Mode.StudentIDСhange;
             dbContext.SaveChanges();
 
@@ -83,11 +92,13 @@ namespace ScheduleBot.Bot {
         }
         public async Task StudentIdErrorUser(ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Попросите владельца профиля указать номер зачетной книжки в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
 
-        private async Task ScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string group, IReplyMarkup? replyMarkup) {
+        private async Task ScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string group, IReplyMarkup? replyMarkup)
+        {
             DateTime groupLastUpdate = dbContext.GroupLastUpdate.First(i => i.Group == group).Update.ToLocalTime();
-            if((DateTime.Now - groupLastUpdate).TotalMinutes > commands.Config.GroupUpdateTime) {
+            if ((DateTime.Now - groupLastUpdate).TotalMinutes > commands.Config.GroupUpdateTime)
+            {
                 int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
-                if(!parser.UpdatingDisciplines(dbContext, group))
+                if (!parser.UpdatingDisciplines(dbContext, group))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
@@ -97,18 +108,20 @@ namespace ScheduleBot.Bot {
             await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {groupLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
-        private async Task ProgressRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
+        private async Task ProgressRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true)
+        {
             DateTime studentIDlastUpdate = dbContext.StudentIDLastUpdate.First(i => i.StudentID == studentID).Update.ToLocalTime();
-            if((DateTime.Now - studentIDlastUpdate).TotalMinutes > commands.Config.StudentIDUpdateTime) {
+            if ((DateTime.Now - studentIDlastUpdate).TotalMinutes > commands.Config.StudentIDUpdateTime)
+            {
                 int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
-                if(!parser.UpdatingProgress(dbContext, studentID))
+                if (!parser.UpdatingProgress(dbContext, studentID))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
                 studentIDlastUpdate = dbContext.StudentIDLastUpdate.First(i => i.StudentID == studentID).Update.ToLocalTime();
             }
 
-            if(send)
+            if (send)
                 await botClient.SendTextMessageAsync(chatId: chatId, text: $"Успеваемость актуально на {studentIDlastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
     }

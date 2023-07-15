@@ -2,13 +2,16 @@
 
 #nullable disable
 
-namespace ScheduleBot.Migrations {
+namespace ScheduleBot.Migrations
+{
     /// <inheritdoc />
 #pragma warning disable CS8981 // Имя типа содержит только строчные символы ASCII. Такие имена могут резервироваться для языка.
-    public partial class updnotifications : Migration {
+    public partial class updnotifications : Migration
+    {
 #pragma warning restore CS8981 // Имя типа содержит только строчные символы ASCII. Такие имена могут резервироваться для языка.
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder) {
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
             migrationBuilder.DropForeignKey(
                 name: "FK_TelegramUsers_Notifications_NotificationsID",
                 table: "TelegramUsers");
@@ -40,7 +43,8 @@ namespace ScheduleBot.Migrations {
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder) {
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
             migrationBuilder.DropForeignKey(
                 name: "FK_TelegramUsers_Notifications_NotificationsID",
                 table: "TelegramUsers");

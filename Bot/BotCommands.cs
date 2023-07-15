@@ -1,24 +1,30 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace ScheduleBot.Bot {
-    public class BotCommands {
-        public struct CallbackStruct {
+namespace ScheduleBot.Bot
+{
+    public class BotCommands
+    {
+        public struct CallbackStruct
+        {
             public string text;
             public string callback;
         }
-        public struct CorpsStruct {
+        public struct CorpsStruct
+        {
             public string text;
             public float latitude;
             public float longitude;
             public string title;
             public string address;
         }
-        public struct CollegeStruct {
+        public struct CollegeStruct
+        {
             public string text;
             public string title;
             public CorpsStruct[] corps;
         }
-        public struct ConfigStruct {
+        public struct ConfigStruct
+        {
             public int GroupUpdateTime;
             public int StudentIDUpdateTime;
 
@@ -31,9 +37,11 @@ namespace ScheduleBot.Bot {
         public CollegeStruct College { get; private set; }
         public ConfigStruct Config { get; private set; }
 
-        public BotCommands() {
+        public BotCommands()
+        {
 
-            using(StreamReader sr = new(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + @"/Bot/TulsuScheduleBotSettings.json")) {
+            using (StreamReader sr = new(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + @"/Bot/TulsuScheduleBotSettings.json"))
+            {
                 var commands = JObject.Parse(sr.ReadToEnd());
 
                 Message = commands["Message"]?.ToObject<Dictionary<string, string>>() ?? throw new NullReferenceException("Message");

@@ -2,10 +2,12 @@
 
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ScheduleBot.DB.Entity {
+namespace ScheduleBot.DB.Entity
+{
 
 #pragma warning disable CS8618
-    public class Discipline : IEquatable<Discipline?> {
+    public class Discipline : IEquatable<Discipline?>
+    {
         public long ID { get; set; }
 
         public string Name { get; set; }
@@ -25,7 +27,8 @@ namespace ScheduleBot.DB.Entity {
 
         public Discipline() { }
 
-        public Discipline(JToken json, string group) {
+        public Discipline(JToken json, string group)
+        {
             LectureHall = json.Value<string>("AUD") ?? throw new NullReferenceException("AUD");
             Date = DateOnly.Parse(json.Value<string>("DATE_Z") ?? throw new NullReferenceException("DATE_Z"));
             Name = json.Value<string>("DISCIP") ?? throw new NullReferenceException("DISCIP");
@@ -45,7 +48,8 @@ namespace ScheduleBot.DB.Entity {
             Group = group;
         }
 
-        public Discipline(CustomDiscipline discipline) {
+        public Discipline(CustomDiscipline discipline)
+        {
             Name = discipline.Name ?? throw new NullReferenceException("Name");
             Class = Entity.Class.other;
             Lecturer = discipline.Lecturer;
@@ -62,7 +66,8 @@ namespace ScheduleBot.DB.Entity {
         public static bool operator ==(Discipline? left, Discipline? right) => left?.Equals(right) ?? false;
         public static bool operator !=(Discipline? left, Discipline? right) => !(left == right);
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             int hash = 17;
 
             hash += Name?.GetHashCode() ?? 0;
@@ -81,7 +86,8 @@ namespace ScheduleBot.DB.Entity {
         public static explicit operator CompletedDiscipline(Discipline discipline) => new() { Name = discipline.Name, Class = discipline.Class, Lecturer = discipline.Lecturer, Subgroup = discipline.Subgroup, Date = discipline.Date };
     }
 
-    public enum Class : byte {
+    public enum Class : byte
+    {
         all,
         lab,
         practice,
@@ -90,7 +96,8 @@ namespace ScheduleBot.DB.Entity {
         custom
     }
 
-    public class ClassDTO {
+    public class ClassDTO
+    {
         public Class ID { get; set; }
         public string Name { get; set; }
     }
