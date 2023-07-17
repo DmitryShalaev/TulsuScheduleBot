@@ -7,19 +7,14 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.InlineQueryResults;
 
-namespace ScheduleBot.Bot
-{
-    public partial class TelegramBot
-    {
-        private async Task InlineQuery(ScheduleDbContext dbContext, ITelegramBotClient botClient, Update update)
-        {
+namespace ScheduleBot.Bot {
+    public partial class TelegramBot {
+        private async Task InlineQuery(ScheduleDbContext dbContext, ITelegramBotClient botClient, Update update) {
             InlineQuery? inlineQuery = update.InlineQuery;
 
-            if (inlineQuery is not null)
-            {
+            if(inlineQuery is not null) {
                 string str = inlineQuery.Query.ToLower();
-                switch (str)
-                {
+                switch(str) {
                     case var _ when str == commands.Message["Today"].ToLower():
                         await AnswerInlineQueryAsync(dbContext, botClient, inlineQuery, DateOnly.FromDateTime(DateTime.Now));
                         break;
@@ -29,19 +24,13 @@ namespace ScheduleBot.Bot
                         break;
 
                     default:
-                        if (DateRegex().IsMatch(str))
-                        {
-                            try
-                            {
-                                DateOnly date;
-                                if (DateTime.TryParse(str, out DateTime _date))
-                                    date = DateOnly.FromDateTime(_date);
-                                else
-                                    date = DateOnly.FromDateTime(DateTime.Parse($"{str} {DateTime.Now.Month}"));
-
+                        if(DateRegex().IsMatch(str)) {
+                            try {
+                                DateOnly date = DateTime.TryParse(str, out DateTime _date)
+                                    ? DateOnly.FromDateTime(_date)
+                                    : DateOnly.FromDateTime(DateTime.Parse($"{str} {DateTime.Now.Month}"));
                                 await AnswerInlineQueryAsync(dbContext, botClient, inlineQuery, date);
-                            }
-                            catch (Exception) { }
+                            } catch(Exception) { }
                         }
 
                         break;
@@ -49,13 +38,11 @@ namespace ScheduleBot.Bot
             }
         }
 
-        private async Task AnswerInlineQueryAsync(ScheduleDbContext dbContext, ITelegramBotClient botClient, InlineQuery inlineQuery, DateOnly date)
-        {
+        private async Task AnswerInlineQueryAsync(ScheduleDbContext dbContext, ITelegramBotClient botClient, InlineQuery inlineQuery, DateOnly date) {
             TelegramUser? user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).FirstOrDefault(u => u.ChatID == inlineQuery.From.Id);
 
-            if (user is not null && !string.IsNullOrWhiteSpace(user.ScheduleProfile.Group))
-            {
-                if ((DateTime.Now - dbContext.GroupLastUpdate.Single(i => i.Group == user.ScheduleProfile.Group).Update.ToLocalTime()).TotalMinutes > commands.Config.GroupUpdateTime)
+            if(user is not null && !string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
+                if((DateTime.Now - dbContext.GroupLastUpdate.Single(i => i.Group == user.ScheduleProfile.Group).Update.ToLocalTime()).TotalMinutes > commands.Config.GroupUpdateTime)
                     parser.UpdatingDisciplines(dbContext, user.ScheduleProfile.Group);
 
                 await botClient.AnswerInlineQueryAsync(inlineQuery.Id, new[] {

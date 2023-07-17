@@ -2,11 +2,9 @@
 
 #nullable disable
 
-namespace ScheduleBot.Migrations
-{
+namespace ScheduleBot.Migrations {
     /// <inheritdoc />
-    public partial class addMode : Migration
-    {
+    public partial class addMode : Migration {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder) => migrationBuilder.InsertData(
                 table: "Modes",

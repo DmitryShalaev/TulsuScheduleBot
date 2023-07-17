@@ -1,11 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ScheduleBot.DB.Entity
-{
+namespace ScheduleBot.DB.Entity {
 #pragma warning disable CS8618
-    public class TelegramUser : IEquatable<TelegramUser?>
-    {
+    public class TelegramUser : IEquatable<TelegramUser?> {
         [Key]
         public long ChatID { get; set; }
 
@@ -44,16 +42,14 @@ namespace ScheduleBot.DB.Entity
 
         public TelegramUser() { }
 
-        public TelegramUser(TelegramUser telegramUser)
-        {
+        public TelegramUser(TelegramUser telegramUser) {
             ChatID = telegramUser.ChatID;
             ScheduleProfile = telegramUser.ScheduleProfile;
             Notifications = telegramUser.Notifications;
         }
     }
 
-    public enum Mode : byte
-    {
+    public enum Mode : byte {
         Default,
         AddingDiscipline,
         GroupСhange,
@@ -68,8 +64,7 @@ namespace ScheduleBot.DB.Entity
         DaysNotifications
     }
 
-    public class ModeDTO
-    {
+    public class ModeDTO {
         public Mode ID { get; set; }
         public string Name { get; set; }
     }

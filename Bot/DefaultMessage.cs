@@ -3,16 +3,13 @@ using ScheduleBot.DB.Entity;
 
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace ScheduleBot.Bot
-{
-    public partial class TelegramBot
-    {
-        private ReplyKeyboardMarkup GetTermsKeyboardMarkup(ScheduleDbContext dbContext, string StudentID)
-        {
+namespace ScheduleBot.Bot {
+    public partial class TelegramBot {
+        private ReplyKeyboardMarkup GetTermsKeyboardMarkup(ScheduleDbContext dbContext, string StudentID) {
             List<KeyboardButton[]> TermsKeyboardMarkup = new();
 
             int[] terms = dbContext.Progresses.Where(i => i.StudentID == StudentID).Select(i => i.Term).Distinct().OrderBy(i => i).ToArray();
-            for (int i = 0; i < terms.Length; i++)
+            for(int i = 0; i < terms.Length; i++)
                 TermsKeyboardMarkup.Add(new KeyboardButton[] { $"{terms[i]} {commands.Message["Semester"]}", i + 1 < terms.Length ? $"{terms[++i]} {commands.Message["Semester"]}" : "" });
 
             TermsKeyboardMarkup.Add(new KeyboardButton[] { commands.Message["Back"] });
@@ -20,18 +17,14 @@ namespace ScheduleBot.Bot
             return new(TermsKeyboardMarkup) { ResizeKeyboard = true };
         }
 
-        private ReplyKeyboardMarkup GetProfileKeyboardMarkup(TelegramUser user)
-        {
+        private ReplyKeyboardMarkup GetProfileKeyboardMarkup(TelegramUser user) {
             List<KeyboardButton[]> ProfileKeyboardMarkup = new();
 
-            if (user.IsOwner())
-            {
+            if(user.IsOwner()) {
                 ProfileKeyboardMarkup.AddRange(new[] {  new KeyboardButton[] { $"{commands.Message["GroupNumber"]}:\n{user.ScheduleProfile.Group}", $"{commands.Message["StudentIDNumber"]}:\n{user.ScheduleProfile.StudentID}" },
                                                         new KeyboardButton[] { commands.Message["GetProfileLink"] }
                                                      });
-            }
-            else
-            {
+            } else {
                 ProfileKeyboardMarkup.Add(new KeyboardButton[] { commands.Message["ResetProfileLink"] });
             }
 
@@ -43,22 +36,20 @@ namespace ScheduleBot.Bot
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }
 
-        private static ReplyKeyboardMarkup GetCorpsKeyboardMarkup()
-        {
+        private static ReplyKeyboardMarkup GetCorpsKeyboardMarkup() {
             List<KeyboardButton[]> ProfileKeyboardMarkup = new() {
                 new KeyboardButton[] { commands.Corps[0].text }
             };
 
-            for (int i = 0; i < 3; i++)
-            {
+            for(int i = 0; i < 3; i++) {
                 List<KeyboardButton> keyboardButtonsLine = new();
-                for (int j = 0; j < 5; j++)
+                for(int j = 0; j < 5; j++)
                     keyboardButtonsLine.Add(commands.Corps[1 + i * 5 + j].text);
 
                 ProfileKeyboardMarkup.Add(keyboardButtonsLine.ToArray());
             }
 
-            for (int i = 16; i < commands.Corps.Length; i++)
+            for(int i = 16; i < commands.Corps.Length; i++)
                 ProfileKeyboardMarkup.Add(new KeyboardButton[] { commands.Corps[i].text });
 
             ProfileKeyboardMarkup.AddRange(new[] { new KeyboardButton[] { commands.College.text }, new KeyboardButton[] { commands.Message["Back"] } });

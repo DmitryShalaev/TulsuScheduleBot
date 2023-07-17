@@ -1,11 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ScheduleBot.DB.Entity
-{
+namespace ScheduleBot.DB.Entity {
 
 #pragma warning disable CS8618
-    public class StudentIDLastUpdate
-    {
+    public class StudentIDLastUpdate {
         [Key]
         public string StudentID { get; set; }
 

@@ -2,11 +2,9 @@
 
 #nullable disable
 
-namespace ScheduleBot.Migrations
-{
+namespace ScheduleBot.Migrations {
     /// <inheritdoc />
-    public partial class IsAdmin : Migration
-    {
+    public partial class IsAdmin : Migration {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder) => migrationBuilder.AddColumn<bool>(
                 name: "IsAdmin",

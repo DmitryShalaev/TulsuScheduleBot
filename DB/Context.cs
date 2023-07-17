@@ -2,23 +2,19 @@
 
 using ScheduleBot.DB.Entity;
 
-namespace ScheduleBot.DB
-{
-    public class ScheduleDbContext : DbContext
-    {
+namespace ScheduleBot.DB {
+    public class ScheduleDbContext : DbContext {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("TelegramBotConnectionString"));
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            foreach (Entity.Class type in Enum.GetValues(typeof(Entity.Class)).Cast<Entity.Class>())
+        protected override void OnModelCreating(ModelBuilder modelBuilder) {
+            foreach(Entity.Class type in Enum.GetValues(typeof(Entity.Class)).Cast<Entity.Class>())
                 modelBuilder.Entity<ClassDTO>().HasData(new ClassDTO() { ID = type, Name = type.ToString() });
 
-            foreach (Entity.Mode type in Enum.GetValues(typeof(Entity.Mode)).Cast<Entity.Mode>())
+            foreach(Entity.Mode type in Enum.GetValues(typeof(Entity.Mode)).Cast<Entity.Mode>())
                 modelBuilder.Entity<ModeDTO>().HasData(new ModeDTO() { ID = type, Name = type.ToString() });
         }
 
-        public void CleanDB()
-        {
+        public void CleanDB() {
             Database.EnsureDeleted();
             Database.EnsureCreated();
             SaveChanges();

@@ -1,10 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ScheduleBot.DB.Entity
-{
+namespace ScheduleBot.DB.Entity {
 
-    public class ScheduleProfile
-    {
+    public class ScheduleProfile {
         public Guid ID { get; set; }
 
         [ForeignKey("TelegramUser")]

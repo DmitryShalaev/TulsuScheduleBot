@@ -4,18 +4,13 @@ using ScheduleBot.DB.Entity;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace ScheduleBot.Bot
-{
-    public partial class TelegramBot
-    {
-        private async Task CustomEdit(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args, Mode mode, string text)
-        {
+namespace ScheduleBot.Bot {
+    public partial class TelegramBot {
+        private async Task CustomEdit(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args, Mode mode, string text) {
             string[] tmp = args.Split('|');
             CustomDiscipline? discipline = dbContext.CustomDiscipline.FirstOrDefault(i => i.ID == uint.Parse(tmp[0]));
-            if (discipline is not null)
-            {
-                if (user.IsOwner())
-                {
+            if(discipline is not null) {
+                if(user.IsOwner()) {
                     user.Mode = mode;
                     user.TempData = $"{discipline.ID}";
 
@@ -27,7 +22,7 @@ namespace ScheduleBot.Bot
                 }
             }
 
-            if (DateOnly.TryParse(tmp[1], out DateOnly date))
+            if(DateOnly.TryParse(tmp[1], out DateOnly date))
                 await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
         }
     }

@@ -1,11 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ScheduleBot.DB.Entity
-{
+namespace ScheduleBot.DB.Entity {
 
 #pragma warning disable CS8618
-    public class CustomDiscipline : IEquatable<CustomDiscipline?>
-    {
+    public class CustomDiscipline : IEquatable<CustomDiscipline?> {
         public long ID { get; set; }
 
         public DateTime AddDate { get; set; } = DateTime.UtcNow;
@@ -27,8 +25,7 @@ namespace ScheduleBot.DB.Entity
 
         public CustomDiscipline() { }
 
-        public CustomDiscipline(ScheduleProfile scheduleProfile, DateOnly date)
-        {
+        public CustomDiscipline(ScheduleProfile scheduleProfile, DateOnly date) {
             ScheduleProfile = scheduleProfile;
             Date = date;
         }
@@ -39,8 +36,7 @@ namespace ScheduleBot.DB.Entity
         public static bool operator ==(CustomDiscipline? left, CustomDiscipline? right) => left?.Equals(right) ?? false;
         public static bool operator !=(CustomDiscipline? left, CustomDiscipline? right) => !(left == right);
 
-        public override int GetHashCode()
-        {
+        public override int GetHashCode() {
             int hash = 17;
 
             hash += Name?.GetHashCode() ?? 0;

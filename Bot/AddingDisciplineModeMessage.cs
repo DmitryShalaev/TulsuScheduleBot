@@ -5,21 +5,16 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace ScheduleBot.Bot
-{
-    public partial class TelegramBot
-    {
+namespace ScheduleBot.Bot {
+    public partial class TelegramBot {
 
-        private async Task SetStagesAddingDisciplineAsync(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, int messageId, string message, TelegramUser user)
-        {
+        private async Task SetStagesAddingDisciplineAsync(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, int messageId, string message, TelegramUser user) {
             CustomDiscipline customDiscipline = dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate).First();
 
             await DeleteTempMessage(user, messageId);
 
-            try
-            {
-                switch (customDiscipline.Counter)
-                {
+            try {
+                switch(customDiscipline.Counter) {
                     case 0:
                         customDiscipline.Name = message;
                         break;
@@ -41,17 +36,14 @@ namespace ScheduleBot.Bot
                     default:
                         break;
                 }
-            }
-            catch (Exception)
-            {
+            } catch(Exception) {
                 user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Ошибка! " + GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: CancelKeyboardMarkup)).MessageId;
                 return;
             }
 
             dbContext.SaveChanges();
 
-            switch (++customDiscipline.Counter)
-            {
+            switch(++customDiscipline.Counter) {
                 case 0:
                 case 1:
                 case 2:
@@ -74,8 +66,7 @@ namespace ScheduleBot.Bot
             dbContext.SaveChanges();
         }
 
-        private async Task SaveAddingDisciplineAsync(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, int? messageId, TelegramUser user, CustomDiscipline customDiscipline)
-        {
+        private async Task SaveAddingDisciplineAsync(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, int? messageId, TelegramUser user, CustomDiscipline customDiscipline) {
             await DeleteInitialMessage(botClient, chatId, user);
 
             customDiscipline.IsAdded = true;
@@ -87,38 +78,30 @@ namespace ScheduleBot.Bot
             await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, customDiscipline.Date, user.ScheduleProfile), replyMarkup: GetEditAdminInlineKeyboardButton(dbContext, customDiscipline.Date, user.ScheduleProfile));
         }
 
-        private static async Task DeleteInitialMessage(ITelegramBotClient botClient, ChatId chatId, TelegramUser user)
-        {
-            try
-            {
+        private static async Task DeleteInitialMessage(ITelegramBotClient botClient, ChatId chatId, TelegramUser user) {
+            try {
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: int.Parse(user.TempData!));
-            }
-            catch (Exception) { }
+            } catch(Exception) { }
 
             user.TempData = null;
         }
 
-        private string GetStagesAddingDiscipline(ScheduleDbContext dbContext, TelegramUser user, int? counter = null)
-        {
-            if (counter != null)
-                return commands.StagesOfAdding[(int)counter];
-
-            return commands.StagesOfAdding[dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate).First().Counter];
+        private string GetStagesAddingDiscipline(ScheduleDbContext dbContext, TelegramUser user, int? counter = null) {
+            return counter != null
+                ? commands.StagesOfAdding[(int)counter]
+                : commands.StagesOfAdding[dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate).First().Counter];
         }
 
-        public TimeOnly ParseTime(string timeString)
-        {
+        public TimeOnly ParseTime(string timeString) {
             string[] separators = { ":", ";", ".", ",", " " };
 
             string[] parts = timeString.Split(separators, StringSplitOptions.RemoveEmptyEntries);
 
-            if (parts.Length != 2)
-                throw new ArgumentException(timeString);
-
-            if (!int.TryParse(parts[0], out int hours) || !int.TryParse(parts[1], out int minutes))
-                throw new ArgumentException(timeString);
-
-            return new TimeOnly(hours, minutes);
+            return parts.Length != 2
+                ? throw new ArgumentException(timeString)
+                : !int.TryParse(parts[0], out int hours) || !int.TryParse(parts[1], out int minutes)
+                ? throw new ArgumentException(timeString)
+                : new TimeOnly(hours, minutes);
         }
     }
 }
