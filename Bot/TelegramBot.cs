@@ -759,72 +759,80 @@ namespace ScheduleBot.Bot {
         }
 
         private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken) {
+            string msg = Newtonsoft.Json.JsonConvert.SerializeObject(update) + "\n";
 #if DEBUG
-            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update) + "\n");
+            Console.WriteLine(msg);
 #endif
             Message? message = update.Message ?? update.EditedMessage ?? update.CallbackQuery?.Message;
 
-            using(ScheduleDbContext dbContext = new()) {
-                if(message is not null) {
-                    if(message.From is null) return;
+            try {
 
-                    TelegramUser? user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).Include(u => u.Notifications).FirstOrDefault(u => u.ChatID == message.Chat.Id);
+                using(ScheduleDbContext dbContext = new()) {
+                    if(message is not null) {
+                        if(message.From is null) return;
 
-                    if(user is null) {
-                        ScheduleProfile scheduleProfile = new();
-                        dbContext.ScheduleProfile.Add(scheduleProfile);
+                        TelegramUser? user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).Include(u => u.Notifications).FirstOrDefault(u => u.ChatID == message.Chat.Id);
 
-                        Notifications notifications = new();
-                        dbContext.Notifications.Add(notifications);
+                        if(user is null) {
+                            ScheduleProfile scheduleProfile = new();
+                            dbContext.ScheduleProfile.Add(scheduleProfile);
+
+                            Notifications notifications = new();
+                            dbContext.Notifications.Add(notifications);
+                            dbContext.SaveChanges();
+
+                            user = new() {
+                                ChatID = message.Chat.Id,
+                                Username = message.From.Username,
+                                FirstName = message.From.FirstName,
+                                LastName = message.From.LastName,
+                                ScheduleProfile = scheduleProfile,
+                                Notifications = notifications
+                            };
+
+                            dbContext.TelegramUsers.Add(user);
+
+                            notifications.TelegramUser = scheduleProfile.TelegramUser = user;
+
+                            dbContext.SaveChanges();
+                        }
+
+                        switch(update.Type) {
+                            case Telegram.Bot.Types.Enums.UpdateType.Message:
+                            case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
+                                if(message.Text is null) return;
+
+                                await commandManager.OnMessageAsync(dbContext, message.Chat, message.MessageId, message.Text, user);
+                                dbContext.MessageLog.Add(new() { Message = message.Text, TelegramUser = user });
+                                break;
+
+                            case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
+                                if(update.CallbackQuery?.Data is null || message.Text is null) return;
+
+                                await commandManager.OnCallbackAsync(dbContext, message.Chat, message.MessageId, update.CallbackQuery.Data, message.Text, user);
+                                dbContext.MessageLog.Add(new() { Message = update.CallbackQuery.Data, TelegramUser = user });
+                                break;
+                        }
+
+                        user.LastAppeal = user.ScheduleProfile.LastAppeal = DateTime.UtcNow;
+                        user.TodayRequests++;
+                        user.TotalRequests++;
+
                         dbContext.SaveChanges();
-
-                        user = new() {
-                            ChatID = message.Chat.Id,
-                            Username = message.From.Username,
-                            FirstName = message.From.FirstName,
-                            LastName = message.From.LastName,
-                            ScheduleProfile = scheduleProfile,
-                            Notifications = notifications
-                        };
-
-                        dbContext.TelegramUsers.Add(user);
-
-                        notifications.TelegramUser = scheduleProfile.TelegramUser = user;
-
-                        dbContext.SaveChanges();
-                    }
-
-                    switch(update.Type) {
-                        case Telegram.Bot.Types.Enums.UpdateType.Message:
-                        case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
-                            if(message.Text is null) return;
-
-                            await commandManager.OnMessageAsync(dbContext, message.Chat, message.MessageId, message.Text, user);
-                            dbContext.MessageLog.Add(new() { Message = message.Text, TelegramUser = user });
-                            break;
-
-                        case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
-                            if(update.CallbackQuery?.Data is null || message.Text is null) return;
-
-                            await commandManager.OnCallbackAsync(dbContext, message.Chat, message.MessageId, update.CallbackQuery.Data, message.Text, user);
-                            dbContext.MessageLog.Add(new() { Message = update.CallbackQuery.Data, TelegramUser = user });
-                            break;
-                    }
-
-                    user.LastAppeal = user.ScheduleProfile.LastAppeal = DateTime.UtcNow;
-                    user.TodayRequests++;
-                    user.TotalRequests++;
-
-                    dbContext.SaveChanges();
-                } else {
-                    if(update.Type == Telegram.Bot.Types.Enums.UpdateType.InlineQuery) {
-                        await InlineQuery(dbContext, botClient, update);
-                        return;
+                    } else {
+                        if(update.Type == Telegram.Bot.Types.Enums.UpdateType.InlineQuery) {
+                            await InlineQuery(dbContext, botClient, update);
+                            return;
+                        }
                     }
                 }
+            } catch(Telegram.Bot.Exceptions.ApiRequestException e) {
+                Console.Error.WriteLine($"{msg}\n{new('-', 25)}\n{e.Message}");
+            } catch(Exception e) {
+                throw new Exception($"{msg}\n{new('-', 25)}\n{e.Message}");
+            } finally {
+                GC.Collect();
             }
-
-            GC.Collect();
         }
 
         private Task HandleError(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken) => Task.CompletedTask;
