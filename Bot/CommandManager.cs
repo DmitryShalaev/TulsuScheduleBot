@@ -79,7 +79,7 @@ namespace ScheduleBot.Bot {
                 }
             }
 
-            foreach((Check, TryFunction) item in DefaultMessageCommands[(byte)user.Mode]) {
+            foreach((Check, TryFunction) item in DefaultMessageCommands[(byte)user.Mode] ?? new()) {
                 if(await CheckAsync(dbContext, chatId, item.Item1, user)) {
                     if(await item.Item2(dbContext, chatId, messageId, user, message))
                         return true;

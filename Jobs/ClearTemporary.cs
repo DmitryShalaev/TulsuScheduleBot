@@ -34,6 +34,8 @@ namespace ScheduleBot.Jobs {
                     dbContext.CompletedDisciplines : dbContext.CompletedDisciplines.Where(i => i.Date != null && i.Date.Value.AddDays(7) < date)
                 );
 
+                dbContext.MessageLog.RemoveRange(dbContext.MessageLog.Where(i => i.Date.AddMonths(1) < DateTime.UtcNow));
+
                 dbContext.SaveChanges();
             }
 
