@@ -27,12 +27,10 @@ namespace ScheduleBot.Jobs {
                     item.TodayRequests = 0;
 
                 var date = DateOnly.FromDateTime(DateTime.Now);
-                dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => i.Date.AddDays(7) < date));
+                dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => i.Date.AddMonths(1) < date));
 
-                dbContext.CompletedDisciplines.RemoveRange(
-                    date.Day == 1 && (date.Month == 2 || date.Month == 8) ?
-                    dbContext.CompletedDisciplines : dbContext.CompletedDisciplines.Where(i => i.Date != null && i.Date.Value.AddDays(7) < date)
-                );
+                if(date.Day == 1 && (date.Month == 2 || date.Month == 8))
+                    dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines);
 
                 dbContext.MessageLog.RemoveRange(dbContext.MessageLog.Where(i => i.Date.AddMonths(1) < DateTime.UtcNow));
 
