@@ -349,17 +349,18 @@ namespace ScheduleBot.Bot {
                 }
 
                 int _messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: CancelKeyboardMarkup)).MessageId;
-                bool flag = dbContext.GroupLastUpdate.Select(i => i.Group).Contains(args);
+                GroupLastUpdate? group = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == args);
 
-                if(flag || parser.GetDates(args) is not null) {
+                if(group is null && parser.UpdatingDisciplines(dbContext, args))
+                    group = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == args);
+
+                if(group is not null) {
                     user.Mode = Mode.Default;
-                    user.ScheduleProfile.Group = args;
+                    user.ScheduleProfile.GroupLastUpdate = group;
                     dbContext.SaveChanges();
 
                     await botClient.SendTextMessageAsync(chatId: chatId, text: $"Номер группы успешно изменен на {args} ", replyMarkup: GetProfileKeyboardMarkup(user));
 
-                    if(!flag)
-                        parser.UpdatingDisciplines(dbContext, args);
                 } else {
                     user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает или такой группы не существует", replyMarkup: CancelKeyboardMarkup)).MessageId;
                 }
@@ -379,18 +380,19 @@ namespace ScheduleBot.Bot {
 
                 int _messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: CancelKeyboardMarkup)).MessageId;
 
-                if(int.TryParse(args, out int studentID)) {
-                    bool flag = dbContext.StudentIDLastUpdate.Select(i => i.StudentID).Contains(args);
+                if(int.TryParse(args, out int id)) {
+                    StudentIDLastUpdate? studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args);
 
-                    if(flag || parser.GetProgress(args) is not null) {
+                    if(studentID is null && parser.UpdatingProgress(dbContext, args))
+                        studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args);
+
+                    if(studentID is not null) {
                         user.Mode = Mode.Default;
-                        user.ScheduleProfile.StudentID = studentID.ToString();
+                        user.ScheduleProfile.StudentIDLastUpdate = studentID;
                         dbContext.SaveChanges();
 
                         await botClient.SendTextMessageAsync(chatId: chatId, text: $"Номер зачётки успешно изменен на {args} ", replyMarkup: GetProfileKeyboardMarkup(user));
 
-                        if(!flag)
-                            parser.UpdatingProgress(dbContext, studentID.ToString());
                     } else {
                         user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает или указан неверный номер зачётки", replyMarkup: CancelKeyboardMarkup)).MessageId;
                     }
