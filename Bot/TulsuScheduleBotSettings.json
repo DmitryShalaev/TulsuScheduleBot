@@ -47,7 +47,10 @@
     "NotificationSettings": "Настройка уведомлений при изменении расписания:",
 
     "Corps": "Корпуса",
-    "Other": "Другое"
+    "Other": "Другое",
+
+    "TeachersWorkSchedule": "Расписание преподавателей",
+    "TeachersWorkScheduleBack": "Вернутся к своему расписанию"
   },
 
   "Callback": {

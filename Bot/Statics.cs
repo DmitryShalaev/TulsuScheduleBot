@@ -32,27 +32,27 @@ namespace ScheduleBot.Bot {
         #region ReplyKeyboardMarkup
         public static readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["Today"], commands.Message["Tomorrow"] },
-                            new KeyboardButton[] { commands.Message["ByDays"], commands.Message["ForAWeek"]},
-                            new KeyboardButton[] { commands.Message["Other"]}
+                            new KeyboardButton[] { commands.Message["ByDays"], commands.Message["ForAWeek"] },
+                            new KeyboardButton[] { commands.Message["Other"] }
                         }) { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup AdditionalKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["Profile"]},
+                            new KeyboardButton[] { commands.Message["Profile"] },
                             new KeyboardButton[] { commands.Message["Exam"], commands.Message["AcademicPerformance"] },
-                            new KeyboardButton[] { commands.Message["Corps"]},
-                            new KeyboardButton[] { commands.Message["Back"]}
+                            new KeyboardButton[] { commands.Message["Corps"], commands.Message["TeachersWorkSchedule"] },
+                            new KeyboardButton[] { commands.Message["Back"] }
                         }) { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup ExamKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["NextExam"], commands.Message["AllExams"]},
-                            new KeyboardButton[] { commands.Message["Back"]}
+                            new KeyboardButton[] { commands.Message["NextExam"], commands.Message["AllExams"] },
+                            new KeyboardButton[] { commands.Message["Back"] }
                         }) { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup DaysKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["Monday"], commands.Message["Tuesday"]},
-                            new KeyboardButton[] { commands.Message["Wednesday"], commands.Message["Thursday"]},
-                            new KeyboardButton[] { commands.Message["Friday"], commands.Message["Saturday"]},
-                            new KeyboardButton[] { commands.Message["Back"]}
+                            new KeyboardButton[] { commands.Message["Monday"], commands.Message["Tuesday"] },
+                            new KeyboardButton[] { commands.Message["Wednesday"], commands.Message["Thursday"] },
+                            new KeyboardButton[] { commands.Message["Friday"], commands.Message["Saturday"] },
+                            new KeyboardButton[] { commands.Message["Back"] }
                         }) { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup CancelKeyboardMarkup = new(commands.Message["Cancel"]) { ResizeKeyboard = true };
@@ -60,8 +60,12 @@ namespace ScheduleBot.Bot {
         private static readonly ReplyKeyboardMarkup ResetProfileLinkKeyboardMarkup = new(new KeyboardButton[] { commands.Message["Reset"], commands.Message["Cancel"] }) { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup WeekKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["ThisWeek"], commands.Message["NextWeek"]},
+                            new KeyboardButton[] { commands.Message["ThisWeek"], commands.Message["NextWeek"] },
                             new KeyboardButton[] { commands.Message["Back"] }
+                        }) { ResizeKeyboard = true };
+
+        private static readonly ReplyKeyboardMarkup TeachersWorkScheduleBackKeyboardMarkup = new(new[] {
+                            new KeyboardButton[] { commands.Message["TeachersWorkScheduleBack"] }
                         }) { ResizeKeyboard = true };
 
         private readonly ReplyKeyboardMarkup CorpsKeyboardMarkup = GetCorpsKeyboardMarkup();

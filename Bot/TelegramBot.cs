@@ -156,6 +156,14 @@ namespace ScheduleBot.Bot {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Profile"], replyMarkup: GetProfileKeyboardMarkup(user));
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["NotificationSettings"], replyMarkup: GetNotificationsInlineKeyboardButton(user));
             });
+            commandManager.AddMessageCommand(commands.Message["TeachersWorkScheduleBack"], Mode.TeachersWorkSchedule, async (dbContext, chatId, messageId, user, args) => {
+                await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["MainMenu"], replyMarkup: MainKeyboardMarkup);
+
+                user.Mode = Mode.Default;
+                user.TempData = null;
+
+                dbContext.SaveChanges();
+            });
 
             commandManager.AddMessageCommand(commands.Message["Today"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, MainKeyboardMarkup);
@@ -739,6 +747,29 @@ namespace ScheduleBot.Bot {
                     await botClient.SendVenueAsync(chatId: chatId, latitude: item.latitude, longitude: item.longitude, title: "", address: item.address, replyMarkup: CorpsKeyboardMarkup);
             });
             #endregion
+
+            #region TeachersWorkSchedule
+            commandManager.AddMessageCommand(commands.Message["TeachersWorkSchedule"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
+                user.Mode = Mode.TeachersWorkSchedule;
+                dbContext.SaveChanges();
+
+                await botClient.SendTextMessageAsync(chatId: chatId, text: "Введите фамилию интересующего вас преподавателя", replyMarkup: TeachersWorkScheduleBackKeyboardMarkup);
+
+                NGramSearch.Instance.PrecomputeNGrams(parser.GetTeachers() ?? throw new NullReferenceException("GetTeachers"), 2);
+
+                foreach(Tuple<string, double> item in NGramSearch.Instance.FindMatch(args))
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: $"{item.Item1} {item.Item2}");
+            });
+
+            commandManager.AddMessageCommand(Mode.TeachersWorkSchedule, async (dbContext, chatId, messageId, user, args) => {
+
+                foreach(Tuple<string, double> item in NGramSearch.Instance.FindMatch(args))
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: $"{item.Item1} {item.Item2}");
+
+                return true;
+            });
+            #endregion
+
             #endregion
 
             commandManager.TrimExcess();
