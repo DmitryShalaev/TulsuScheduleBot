@@ -92,7 +92,7 @@ namespace ScheduleBot.Bot {
                 : commands.StagesOfAdding[dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate).First().Counter];
         }
 
-        public TimeOnly ParseTime(string timeString) {
+        public static TimeOnly ParseTime(string timeString) {
             string[] separators = { ":", ";", ".", ",", " " };
 
             string[] parts = timeString.Split(separators, StringSplitOptions.RemoveEmptyEntries);

@@ -111,6 +111,9 @@ namespace ScheduleBot.Bot {
                 }
 
                 user.TempData = null;
+
+                await DeleteTempMessage(user, messageId);
+
                 dbContext.SaveChanges();
             });
             commandManager.AddMessageCommand(commands.Message["Cancel"], Mode.AddingDiscipline, async (dbContext, chatId, messageId, user, args) => {
@@ -168,6 +171,8 @@ namespace ScheduleBot.Bot {
 
                 user.Mode = Mode.Default;
                 user.TempData = null;
+
+                await DeleteTempMessage(user, messageId);
 
                 dbContext.SaveChanges();
             });
@@ -764,12 +769,14 @@ namespace ScheduleBot.Bot {
 
             commandManager.AddMessageCommand(commands.Message["TeachersWorkSchedule"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 user.Mode = Mode.TeachersWorkSchedule;
+
                 dbContext.SaveChanges();
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: "Введите ФИО преподавателя.", replyMarkup: TeachersWorkScheduleBackKeyboardMarkup);
             });
             commandManager.AddMessageCommand(commands.Message["CurrentTeacher"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
                 user.Mode = Mode.TeachersWorkSchedule;
+
                 dbContext.SaveChanges();
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: "Введите ФИО преподавателя.", replyMarkup: TeachersWorkScheduleBackKeyboardMarkup);
