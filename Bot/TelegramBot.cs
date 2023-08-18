@@ -339,13 +339,13 @@ namespace ScheduleBot.Bot {
                         await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, MainKeyboardMarkup);
                         await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
                     } catch(Exception) {
-                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"Команда распознана как дата, но не соответствует формату \"день месяц год\".\nНапример: \"1 мая 2023\", \"1 05 23\", \"1 5\", \"1\"", replyMarkup: MainKeyboardMarkup);
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["CommandRecognizedAsADate"], replyMarkup: MainKeyboardMarkup);
                     }
 
                     return true;
                 }
 
-                await botClient.SendTextMessageAsync(chatId: chatId, text: $"Команда не распознана пожалуйста используйте кнопки или укажите дату в формате \"день месяц год\".\nНапример: \"1 мая 2023\", \"1 05 23\", \"1 5\", \"1\"", replyMarkup: MainKeyboardMarkup);
+                await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["CommandNotRecognized"], replyMarkup: MainKeyboardMarkup);
 
                 return false;
             }, CommandManager.Check.group);
@@ -756,6 +756,12 @@ namespace ScheduleBot.Bot {
             #endregion
 
             #region TeachersWorkSchedule
+            commandManager.AddMessageCommand("/UpdateTeachers", Mode.Default, async (dbContext, chatId, messageId, user, args) => {
+                parser.UpdatingTeachers(dbContext);
+
+                await botClient.SendTextMessageAsync(chatId: chatId, text: "OK", replyMarkup: MainKeyboardMarkup);
+            }, CommandManager.Check.admin);
+
             commandManager.AddMessageCommand(commands.Message["TeachersWorkSchedule"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 user.Mode = Mode.TeachersWorkSchedule;
                 dbContext.SaveChanges();
@@ -881,13 +887,13 @@ namespace ScheduleBot.Bot {
                         await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
                         await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetTeacherWorkScheduleByDate(dbContext, date, user.TempData!));
                     } catch(Exception) {
-                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"Команда распознана как дата, но не соответствует формату \"день месяц год\".\nНапример: \"1 мая 2023\", \"1 05 23\", \"1 5\", \"1\"", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["CommandRecognizedAsADate"], replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
                     }
 
                     return true;
                 }
 
-                await botClient.SendTextMessageAsync(chatId: chatId, text: $"Команда не распознана пожалуйста используйте кнопки или укажите дату в формате \"день месяц год\".\nНапример: \"1 мая 2023\", \"1 05 23\", \"1 5\", \"1\"", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["CommandNotRecognized"], replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
 
                 return false;
             });

@@ -1,4 +1,5 @@
-﻿using ScheduleBot.DB;
+﻿using ScheduleBot.Bot;
+using ScheduleBot.DB;
 
 namespace ScheduleBot {
     public class NGramSearch {
@@ -32,9 +33,11 @@ namespace ScheduleBot {
         }
 
         public IEnumerable<string> FindMatch(string query, int n = 3, int count = 5) {
-            if(ngramsDict.Count == 0)
-                using(ScheduleDbContext dbContext = new())
+            if(ngramsDict.Count == 0) {
+                using(ScheduleDbContext dbContext = new()) {
                     PrecomputeNGrams(dbContext.TeacherLastUpdate.Select(i => i.Teacher).ToList(), n);
+                }
+            }
 
             query = query.ToLower().Trim();
 
