@@ -104,6 +104,20 @@ namespace ScheduleBot.Bot {
             await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {groupLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
+        private async Task TeacherWorkScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string teacher, IReplyMarkup? replyMarkup) {
+            DateTime teacherLastUpdate = dbContext.TeacherLastUpdate.First(i => i.Teacher == teacher).Update.ToLocalTime();
+            if((DateTime.Now - teacherLastUpdate).TotalMinutes > commands.Config.TeacherWorkScheduleUpdateTime) {
+                int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
+                if(!parser.UpdatingTeacherWorkSchedule(dbContext, teacher))
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
+
+                await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
+                teacherLastUpdate = dbContext.TeacherLastUpdate.First(i => i.Teacher == teacher).Update.ToLocalTime();
+            }
+
+            await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {teacherLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
+        }
+
         private async Task ProgressRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
             DateTime studentIDlastUpdate = dbContext.StudentIDLastUpdate.First(i => i.StudentID == studentID).Update.ToLocalTime();
             if((DateTime.Now - studentIDlastUpdate).TotalMinutes > commands.Config.StudentIDUpdateTime) {

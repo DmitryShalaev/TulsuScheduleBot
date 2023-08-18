@@ -97,6 +97,7 @@ namespace ScheduleBot {
                     else
                         groupLastUpdate.Update = DateTime.UtcNow;
 
+                    dbContext.Disciplines.RemoveRange(dbContext.Disciplines.Where(i => i.Group == group && i.Date < dates.Value.min && i.Date > dates.Value.max));
                     var _list = dbContext.Disciplines.Where(i => i.Group == group && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
 
                     IEnumerable<Discipline> except = disciplines.Except(_list);
@@ -131,7 +132,7 @@ namespace ScheduleBot {
             return false;
         }
 
-        public bool UpdatingTeachersWorkSchedule(ScheduleDbContext dbContext, string teacher) {
+        public bool UpdatingTeacherWorkSchedule(ScheduleDbContext dbContext, string teacher) {
             (DateOnly min, DateOnly max)? dates = GetDates(teacher);
             if(dates != null) {
 
@@ -144,6 +145,7 @@ namespace ScheduleBot {
                     else
                         teacherLastUpdate.Update = DateTime.UtcNow;
 
+                    dbContext.TeacherWorkSchedule.RemoveRange(dbContext.TeacherWorkSchedule.Where(i => i.Lecturer == teacher && i.Date < dates.Value.min && i.Date > dates.Value.max));
                     var _list = dbContext.TeacherWorkSchedule.Where(i => i.Lecturer == teacher && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
 
                     IEnumerable<TeacherWorkSchedule> except = teacherWorkSchedule.Except(_list);

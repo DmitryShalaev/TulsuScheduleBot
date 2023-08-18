@@ -21,6 +21,7 @@ namespace ScheduleBot.Bot {
         public struct ConfigStruct {
             public int GroupUpdateTime;
             public int StudentIDUpdateTime;
+            public int TeacherWorkScheduleUpdateTime;
 
         }
 
