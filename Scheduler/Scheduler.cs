@@ -41,7 +41,7 @@ namespace ScheduleBot {
             list = list.OrderBy(i => i.StartTime).ToList();
 
             int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-            string str = $"📌{date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
+            string str = $"📌 {date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
 
             if(list.Count == 0)
                 return str += "Ничего нет";
@@ -59,16 +59,17 @@ namespace ScheduleBot {
             var list = dbContext.TeacherWorkSchedule.ToList().Where(i => i.Lecturer == teacher && i.Date == date).ToList();
 
             int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-            string str = $"📌{date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n" +
-                $"👤{teacher}\n" +
-                $"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
+            string str = $"📌 {date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n" +
+                            $"👤 {teacher}\n" +
+                            $"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯";
 
             if(list.Count == 0)
-                return str += "Ничего нет";
+                return str += "\nНичего нет";
 
             foreach(TeacherWorkSchedule? item in list) {
-                str += $"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}\n" +
-                       $"📎 {item.Name} ({item.Type})\n{item.Groups}";
+                str += $"\n⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}\n" +
+                       $"📎 {item.Name} ({item.Type})\n" +
+                       $"{item.Groups}";
             }
 
             return str;
@@ -77,7 +78,8 @@ namespace ScheduleBot {
         public static string GetProgressByTerm(ScheduleDbContext dbContext, int term, string StudentID) {
             IOrderedQueryable<Progress> progresses = dbContext.Progresses.Where(i => i.StudentID == StudentID && i.Term == term).OrderBy(i => i.Discipline);
 
-            string str = $"📌 Семестр {term}\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
+            string str = $"📌 Семестр {term}\n" +
+                            $"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
 
             if(!progresses.Any())
                 return str += "В этом семестре нет проставленных баллов";

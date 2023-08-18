@@ -170,7 +170,6 @@ namespace ScheduleBot {
         }
 
         public bool UpdatingTeachers(ScheduleDbContext dbContext) {
-
             List<string>? teachers = GetTeachers();
 
             if(teachers != null) {

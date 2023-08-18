@@ -762,7 +762,7 @@ namespace ScheduleBot.Bot {
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: "Введите ФИО преподавателя.", replyMarkup: TeachersWorkScheduleBackKeyboardMarkup);
             });
-            commandManager.AddMessageCommand("Текущий преподаватель", Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
+            commandManager.AddMessageCommand(commands.Message["CurrentTeacher"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
                 user.Mode = Mode.TeachersWorkSchedule;
                 dbContext.SaveChanges();
 
@@ -805,7 +805,7 @@ namespace ScheduleBot.Bot {
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
 
-                await botClient.SendTextMessageAsync(chatId: chatId, text: $"Преподаватель {user.TempData} успешно выбран.", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData));
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{commands.Message["CurrentTeacher"]}: {user.TempData} выбран.", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData));
             });
 
             commandManager.AddMessageCommand(commands.Message["Back"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {

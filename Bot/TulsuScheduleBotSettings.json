@@ -51,7 +51,9 @@
     "Other": "Другое",
 
     "TeachersWorkSchedule": "Расписание преподавателей",
-    "TeachersWorkScheduleBack": "Вернутся к своему расписанию"
+    "TeachersWorkScheduleBack": "Вернутся к своему расписанию",
+
+    "CurrentTeacher": "Преподаватель"
   },
 
   "Callback": {

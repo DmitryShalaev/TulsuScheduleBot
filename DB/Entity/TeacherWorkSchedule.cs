@@ -37,8 +37,10 @@ namespace ScheduleBot.DB.Entity {
             foreach(JToken? item in json.Value<JToken>("GROUPS") ?? "") {
                 string? GROUP_P = item?.Value<string>("GROUP_P");
                 string? PRIM = item?.Value<string>("PRIM");
-                Groups += $"{GROUP_P}{$"{(string.IsNullOrWhiteSpace(PRIM) ? "" : $": {PRIM}")}"}\n";
+                Groups += $"{GROUP_P}{$"{(string.IsNullOrWhiteSpace(PRIM) ? "" : $": {PRIM}")}"}; ";
             }
+
+            Groups = Groups?[..^2];
 
             Lecturer = json.Value<string?>("PREP");
 
