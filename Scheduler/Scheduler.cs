@@ -18,6 +18,19 @@ namespace ScheduleBot {
             return schedules;
         }
 
+        public static List<(string, DateOnly)> GetTeacherWorkScheduleByWeak(ScheduleDbContext dbContext, int weeks, string teacher) {
+            var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
+
+            var schedules = new List<(string, DateOnly)>();
+
+            for(int i = 1; i < 7; i++) {
+                DateOnly tmp = dateOnly.AddDays(7 * weeks + i);
+                schedules.Add((GetTeacherWorkScheduleByDate(dbContext, tmp, teacher), tmp));
+            }
+
+            return schedules;
+        }
+
         public static string GetScheduleByDate(ScheduleDbContext dbContext, DateOnly date, ScheduleProfile profile, bool all = false) {
             var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID).ToList();
 
@@ -28,15 +41,35 @@ namespace ScheduleBot {
             list = list.OrderBy(i => i.StartTime).ToList();
 
             int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-            string str = $"📌{date.ToString("dd.MM.yy")} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
+            string str = $"📌 {date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
 
             if(list.Count == 0)
                 return str += "Ничего нет";
 
             foreach(Discipline? item in list) {
-                str += $"⏰ {item.StartTime.ToString("HH:mm")}-{item.EndTime.ToString("HH:mm")} | {item.LectureHall}\n" +
+                str += $"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}\n" +
                        $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}\n" +
                        $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n";
+            }
+
+            return str;
+        }
+
+        public static string GetTeacherWorkScheduleByDate(ScheduleDbContext dbContext, DateOnly date, string teacher) {
+            var list = dbContext.TeacherWorkSchedule.ToList().Where(i => i.Lecturer == teacher && i.Date == date).ToList();
+
+            int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+            string str = $"📌 {date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n" +
+                            $"👤 {teacher}\n" +
+                            $"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯";
+
+            if(list.Count == 0)
+                return str += "\nНичего нет";
+
+            foreach(TeacherWorkSchedule? item in list) {
+                str += $"\n⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}\n" +
+                       $"📎 {item.Name} ({item.Type})\n" +
+                       $"{item.Groups}";
             }
 
             return str;
@@ -45,7 +78,8 @@ namespace ScheduleBot {
         public static string GetProgressByTerm(ScheduleDbContext dbContext, int term, string StudentID) {
             IOrderedQueryable<Progress> progresses = dbContext.Progresses.Where(i => i.StudentID == StudentID && i.Term == term).OrderBy(i => i.Discipline);
 
-            string str = $"📌 Семестр {term}\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
+            string str = $"📌 Семестр {term}\n" +
+                            $"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
 
             if(!progresses.Any())
                 return str += "В этом семестре нет проставленных баллов";
@@ -69,6 +103,19 @@ namespace ScheduleBot {
             return list;
         }
 
+        public static List<(string, DateOnly)> GetTeacherWorkScheduleByDay(ScheduleDbContext dbContext, DayOfWeek dayOfWeek, string teacher) {
+            int weeks = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+            var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
+
+            var list = new List<(string, DateOnly)>();
+            for(int i = -1; i <= 1; i++) {
+                DateOnly tmp = dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek);
+                list.Add((GetTeacherWorkScheduleByDate(dbContext, tmp, teacher), tmp));
+            }
+
+            return list;
+        }
+
         public static List<string> GetExamse(ScheduleDbContext dbContext, ScheduleProfile profile, bool all) {
             var exams = new List<string>();
 
@@ -82,8 +129,8 @@ namespace ScheduleBot {
 
             static string Get(Discipline item) {
                 int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(item.Date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-                return $"📌{item.Date.ToString("dd.MM.yy")} - {char.ToUpper(item.Date.ToString("dddd")[0]) + item.Date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n" +
-                       $"⏰ {item.StartTime.ToString("HH:mm")}-{item.EndTime.ToString("HH:mm")} | {item.LectureHall}\n" +
+                return $"📌{item.Date:dd.MM.yy} - {char.ToUpper(item.Date.ToString("dddd")[0]) + item.Date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n" +
+                       $"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}\n" +
                        $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}\n" +
                        $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n";
             }

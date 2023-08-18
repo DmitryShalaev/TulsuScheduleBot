@@ -7,10 +7,10 @@ namespace ScheduleBot.DB {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("TelegramBotConnectionString"));
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
-            foreach(Entity.Class type in Enum.GetValues(typeof(Entity.Class)).Cast<Entity.Class>())
+            foreach(Class type in Enum.GetValues(typeof(Class)).Cast<Class>())
                 modelBuilder.Entity<ClassDTO>().HasData(new ClassDTO() { ID = type, Name = type.ToString() });
 
-            foreach(Entity.Mode type in Enum.GetValues(typeof(Entity.Mode)).Cast<Entity.Mode>())
+            foreach(Mode type in Enum.GetValues(typeof(Mode)).Cast<Mode>())
                 modelBuilder.Entity<ModeDTO>().HasData(new ModeDTO() { ID = type, Name = type.ToString() });
         }
 
@@ -33,5 +33,7 @@ namespace ScheduleBot.DB {
         public DbSet<StudentIDLastUpdate> StudentIDLastUpdate { get; set; }
         public DbSet<MessageLog> MessageLog { get; set; }
         public DbSet<Notifications> Notifications { get; set; }
+        public DbSet<TeacherWorkSchedule> TeacherWorkSchedule { get; set; }
+        public DbSet<TeacherLastUpdate> TeacherLastUpdate { get; set; }
     }
 }

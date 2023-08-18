@@ -1,7 +1,8 @@
 {
   "Config": {
     "GroupUpdateTime": "30",
-    "StudentIDUpdateTime": "30"
+    "StudentIDUpdateTime": "30",
+    "TeacherWorkScheduleUpdateTime" : "60"
   },
 
   "Message": {
@@ -47,7 +48,12 @@
     "NotificationSettings": "Настройка уведомлений при изменении расписания:",
 
     "Corps": "Корпуса",
-    "Other": "Другое"
+    "Other": "Другое",
+
+    "TeachersWorkSchedule": "Расписание преподавателей",
+    "TeachersWorkScheduleBack": "Вернутся к своему расписанию",
+
+    "CurrentTeacher": "Преподаватель"
   },
 
   "Callback": {

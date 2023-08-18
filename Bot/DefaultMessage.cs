@@ -56,5 +56,16 @@ namespace ScheduleBot.Bot {
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }
+
+        private static ReplyKeyboardMarkup GetTeacherWorkScheduleSelectedKeyboardMarkup(string teacher) {
+            List<KeyboardButton[]> KeyboardMarkup = new() {
+                new KeyboardButton[] { $"{commands.Message["CurrentTeacher"]}:\n{teacher}" },
+                new KeyboardButton[] { commands.Message["Today"], commands.Message["Tomorrow"] },
+                new KeyboardButton[] { commands.Message["ByDays"], commands.Message["ForAWeek"] },
+                new KeyboardButton[] { commands.Message["TeachersWorkScheduleBack"] }
+            };
+
+            return new(KeyboardMarkup) { ResizeKeyboard = true };
+        }
     }
 }

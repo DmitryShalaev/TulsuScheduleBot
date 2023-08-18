@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScheduleBot.DB;
@@ -11,13 +12,15 @@ using ScheduleBot.DB;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230817150625_addTeacher")]
+    partial class addTeacher
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.10")
+                .HasAnnotation("ProductVersion", "7.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -317,11 +320,6 @@ namespace ScheduleBot.Migrations
                         {
                             ID = (byte)12,
                             Name = "TeachersWorkSchedule"
-                        },
-                        new
-                        {
-                            ID = (byte)13,
-                            Name = "TeacherSelected"
                         });
                 });
 
@@ -477,8 +475,6 @@ namespace ScheduleBot.Migrations
 
                     b.HasIndex("Class");
 
-                    b.HasIndex("Lecturer");
-
                     b.ToTable("TeacherWorkSchedule");
                 });
 
@@ -628,13 +624,7 @@ namespace ScheduleBot.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ScheduleBot.DB.Entity.TeacherLastUpdate", "TeacherLastUpdate")
-                        .WithMany()
-                        .HasForeignKey("Lecturer");
-
                     b.Navigation("ClassDTO");
-
-                    b.Navigation("TeacherLastUpdate");
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.TelegramUser", b =>

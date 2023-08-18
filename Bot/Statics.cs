@@ -24,6 +24,9 @@ namespace ScheduleBot.Bot {
         [GeneratedRegex("^([A-z]+)[ ]([A-z]+)$")]
         private static partial Regex NotificationsCallbackRegex();
 
+        [GeneratedRegex("^([A-z]+)[|]([А-яЁё. ]+)$")]
+        private static partial Regex TeachersCallbackRegex();
+
         [GeneratedRegex("^\\d{1,2}([ ,.-](\\d{1,2}|\\w{3,8}))?([ ,.-](\\d{2}|\\d{4}))?$")]
         private static partial Regex DateRegex();
 
@@ -32,27 +35,27 @@ namespace ScheduleBot.Bot {
         #region ReplyKeyboardMarkup
         public static readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["Today"], commands.Message["Tomorrow"] },
-                            new KeyboardButton[] { commands.Message["ByDays"], commands.Message["ForAWeek"]},
-                            new KeyboardButton[] { commands.Message["Other"]}
+                            new KeyboardButton[] { commands.Message["ByDays"], commands.Message["ForAWeek"] },
+                            new KeyboardButton[] { commands.Message["Other"] }
                         }) { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup AdditionalKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["Profile"]},
+                            new KeyboardButton[] { commands.Message["Profile"] },
                             new KeyboardButton[] { commands.Message["Exam"], commands.Message["AcademicPerformance"] },
-                            new KeyboardButton[] { commands.Message["Corps"]},
-                            new KeyboardButton[] { commands.Message["Back"]}
+                            new KeyboardButton[] { commands.Message["Corps"], commands.Message["TeachersWorkSchedule"] },
+                            new KeyboardButton[] { commands.Message["Back"] }
                         }) { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup ExamKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["NextExam"], commands.Message["AllExams"]},
-                            new KeyboardButton[] { commands.Message["Back"]}
+                            new KeyboardButton[] { commands.Message["NextExam"], commands.Message["AllExams"] },
+                            new KeyboardButton[] { commands.Message["Back"] }
                         }) { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup DaysKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["Monday"], commands.Message["Tuesday"]},
-                            new KeyboardButton[] { commands.Message["Wednesday"], commands.Message["Thursday"]},
-                            new KeyboardButton[] { commands.Message["Friday"], commands.Message["Saturday"]},
-                            new KeyboardButton[] { commands.Message["Back"]}
+                            new KeyboardButton[] { commands.Message["Monday"], commands.Message["Tuesday"] },
+                            new KeyboardButton[] { commands.Message["Wednesday"], commands.Message["Thursday"] },
+                            new KeyboardButton[] { commands.Message["Friday"], commands.Message["Saturday"] },
+                            new KeyboardButton[] { commands.Message["Back"] }
                         }) { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup CancelKeyboardMarkup = new(commands.Message["Cancel"]) { ResizeKeyboard = true };
@@ -60,8 +63,12 @@ namespace ScheduleBot.Bot {
         private static readonly ReplyKeyboardMarkup ResetProfileLinkKeyboardMarkup = new(new KeyboardButton[] { commands.Message["Reset"], commands.Message["Cancel"] }) { ResizeKeyboard = true };
 
         private static readonly ReplyKeyboardMarkup WeekKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["ThisWeek"], commands.Message["NextWeek"]},
+                            new KeyboardButton[] { commands.Message["ThisWeek"], commands.Message["NextWeek"] },
                             new KeyboardButton[] { commands.Message["Back"] }
+                        }) { ResizeKeyboard = true };
+
+        private static readonly ReplyKeyboardMarkup TeachersWorkScheduleBackKeyboardMarkup = new(new[] {
+                            new KeyboardButton[] { commands.Message["TeachersWorkScheduleBack"] }
                         }) { ResizeKeyboard = true };
 
         private readonly ReplyKeyboardMarkup CorpsKeyboardMarkup = GetCorpsKeyboardMarkup();
@@ -95,6 +102,20 @@ namespace ScheduleBot.Bot {
             }
 
             await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {groupLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
+        }
+
+        private async Task TeacherWorkScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string teacher, IReplyMarkup? replyMarkup) {
+            DateTime teacherLastUpdate = dbContext.TeacherLastUpdate.First(i => i.Teacher == teacher).Update.ToLocalTime();
+            if((DateTime.Now - teacherLastUpdate).TotalMinutes > commands.Config.TeacherWorkScheduleUpdateTime) {
+                int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
+                if(!parser.UpdatingTeacherWorkSchedule(dbContext, teacher))
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
+
+                await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
+                teacherLastUpdate = dbContext.TeacherLastUpdate.First(i => i.Teacher == teacher).Update.ToLocalTime();
+            }
+
+            await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {teacherLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
         private async Task ProgressRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
