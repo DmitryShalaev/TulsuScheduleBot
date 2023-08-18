@@ -13,7 +13,7 @@ using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
 namespace ScheduleBot {
-    public class Parser {
+    public partial class Parser {
         private readonly HttpClientHandler clientHandler;
         private readonly System.Timers.Timer UpdatingDisciplinesTimer;
 
@@ -167,6 +167,27 @@ namespace ScheduleBot {
             return false;
         }
 
+        public bool UpdatingTeachers(ScheduleDbContext dbContext) {
+
+            List<string>? teachers = GetTeachers();
+
+            if(teachers != null) {
+                var _list = dbContext.TeacherLastUpdate.Select(i => i.Teacher).ToList();
+
+                IEnumerable<string> except = teachers.Except(_list);
+                if(except.Any()) {
+                    DateTime updDate = new DateTime(2000, 1, 1).ToUniversalTime();
+                    dbContext.TeacherLastUpdate.AddRange(except.Select(i => new TeacherLastUpdate() { Teacher = i, Update = updDate }));
+
+                    dbContext.SaveChanges();
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public List<Discipline>? GetDisciplines(string group) {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
@@ -239,6 +260,9 @@ namespace ScheduleBot {
             return null;
         }
 
+        [GeneratedRegex("^[А-ЯЁ][а-яё]+\\s*[А-ЯЁ](?:[а-яё\\.]+)?(?:\\s*[А-ЯЁ][а-яё]+)?(?:\\s[А-ЯЁ]\\\\.)?\\s*(?:\\s*[А-ЯЁ]\\.)?(?:\\s*[А-ЯЁ][а-яё]+)?$")]
+        private static partial Regex TeachersRegex();
+
         public List<string>? GetTeachers() {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
@@ -260,7 +284,7 @@ namespace ScheduleBot {
                     client.DefaultRequestHeaders.Add("Host", "tulsu.ru");
                     #endregion
 
-                    Regex regex = new("^[А-ЯЁ][а-яё]+(?:\\s*[А-ЯЁ][а-яё]+)?(?:\\s*[А-ЯЁ][а-яё]+)?(?:\\s[А-ЯЁ]\\.)?\\s*(?:\\s*[А-ЯЁ]\\.)?(?:\\s*[А-ЯЁ][а-яё]+)?$");
+                    Regex regex = TeachersRegex();
 
                     using(HttpResponseMessage response = client.GetAsync("https://tulsu.ru/schedule/queries/GetDictionaries.php").Result)
                         if(response.IsSuccessStatusCode) {

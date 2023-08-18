@@ -1,4 +1,6 @@
-﻿namespace ScheduleBot {
+﻿using ScheduleBot.DB;
+
+namespace ScheduleBot {
     public class NGramSearch {
         private static NGramSearch? instance;
         private readonly Dictionary<string, HashSet<string>> ngramsDict;
@@ -29,14 +31,19 @@
             return (double)intersection / union;
         }
 
-        public IEnumerable<Tuple<string, double>> FindMatch(string query) {
-            if(ngramsDict.Count == 0) {
-                throw new InvalidOperationException("NGrams are not precomputed yet.");
-            }
+        public IEnumerable<string> FindMatch(string query, int n = 3, int count = 5) {
+            if(ngramsDict.Count == 0)
+                using(ScheduleDbContext dbContext = new())
+                    PrecomputeNGrams(dbContext.TeacherLastUpdate.Select(i => i.Teacher).ToList(), n);
 
-            var queryNgrams = new HashSet<string>(GetNGrams(query.ToLower().Trim(), 2));
+            query = query.ToLower().Trim();
 
-            return ngramsDict.Select(i => new Tuple<string, double>(i.Key, Similarity(queryNgrams, i.Value))).Where(i => i.Item2 != 0).OrderByDescending(i => i.Item2).Take(5);
+            var queryNgrams = new HashSet<string>(GetNGrams(query, n));
+
+            IEnumerable<string> found = ngramsDict.Select(i => new Tuple<string, double>(i.Key, Similarity(queryNgrams, i.Value))).Where(i => i.Item2 != 0).OrderByDescending(i => i.Item2).Take(count).Select(i => i.Item1);
+
+            IEnumerable<string> contains = found.Where(i => i.ToLower().Contains(query));
+            return contains.Any() ? contains : found;
         }
     }
 }

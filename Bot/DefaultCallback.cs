@@ -28,7 +28,7 @@ namespace ScheduleBot.Bot {
                 editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "Пользовательские", callbackData: "!") });
 
                 foreach(CustomDiscipline? item in castom)
-                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} 🔧", callbackData: $"CustomEdit {item.ID}|{item.Date}"),
+                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime} {item.Lecturer?.Split(' ')[0]} 🔧", callbackData: $"CustomEdit {item.ID}|{item.Date}"),
                                             InlineKeyboardButton.WithCallbackData(text: $"🗑", callbackData: $"CustomDelete {item.ID}|{item.Date}"),});
             }
 
@@ -43,9 +43,9 @@ namespace ScheduleBot.Bot {
                 new[] { InlineKeyboardButton.WithCallbackData($"Название: {customDiscipline.Name}", $"CustomEditName {customDiscipline.ID}|{customDiscipline.Date}") },
                 new[] { InlineKeyboardButton.WithCallbackData($"Лектор: {customDiscipline.Lecturer}", $"CustomEditLecturer {customDiscipline.ID}|{customDiscipline.Date}") },
                 new[] { InlineKeyboardButton.WithCallbackData($"Тип: {customDiscipline.Type}", $"CustomEditType {customDiscipline.ID}|{customDiscipline.Date}"),
-                                InlineKeyboardButton.WithCallbackData($"Аудитория: {customDiscipline.LectureHall}", $"CustomEditLectureHall {customDiscipline.ID}|{customDiscipline.Date}") },
+                        InlineKeyboardButton.WithCallbackData($"Аудитория: {customDiscipline.LectureHall}", $"CustomEditLectureHall {customDiscipline.ID}|{customDiscipline.Date}") },
                 new[] { InlineKeyboardButton.WithCallbackData($"Время начала: {customDiscipline.StartTime}", $"CustomEditStartTime {customDiscipline.ID}|{customDiscipline.Date}") ,
-                                InlineKeyboardButton.WithCallbackData($"Время конца: {customDiscipline.EndTime}", $"CustomEditEndTime {customDiscipline.ID}|{customDiscipline.Date}") },
+                        InlineKeyboardButton.WithCallbackData($"Время конца: {customDiscipline.EndTime}", $"CustomEditEndTime {customDiscipline.ID}|{customDiscipline.Date}") },
 
                 new[] { InlineKeyboardButton.WithCallbackData(commands.Callback["CustomEditCancel"].text, $"{commands.Callback["CustomEditCancel"].callback} {customDiscipline.Date}") }
             };
@@ -58,7 +58,7 @@ namespace ScheduleBot.Bot {
 
             if(user.IsOwner())
                 editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: commands.Callback["All"].text, callbackData: $"{commands.Callback["All"].callback} {date}"),
-                                    InlineKeyboardButton.WithCallbackData(text: commands.Callback["Edit"].text, callbackData: $"{commands.Callback["Edit"].callback} {date}") });
+                                        InlineKeyboardButton.WithCallbackData(text: commands.Callback["Edit"].text, callbackData: $"{commands.Callback["Edit"].callback} {date}") });
             else
                 editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: commands.Callback["All"].text, callbackData: $"{commands.Callback["All"].callback} {date}") });
 
@@ -77,7 +77,7 @@ namespace ScheduleBot.Bot {
             else
                 buttons.Add(new[] { InlineKeyboardButton.WithCallbackData("Включить уведомления", "ToggleNotifications on") });
 
-            string via(int days) => days switch {
+            static string via(int days) => days switch {
                 1 => $"{days} день",
                 2 or 3 or 4 => $"{days} дня",
                 var _ when days > 4 => $"{days} дней",

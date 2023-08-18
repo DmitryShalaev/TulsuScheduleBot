@@ -24,6 +24,9 @@ namespace ScheduleBot.Bot {
         [GeneratedRegex("^([A-z]+)[ ]([A-z]+)$")]
         private static partial Regex NotificationsCallbackRegex();
 
+        [GeneratedRegex("^([A-z]+)[|]([А-яЁё. ]+)$")]
+        private static partial Regex TeachersCallbackRegex();
+
         [GeneratedRegex("^\\d{1,2}([ ,.-](\\d{1,2}|\\w{3,8}))?([ ,.-](\\d{2}|\\d{4}))?$")]
         private static partial Regex DateRegex();
 

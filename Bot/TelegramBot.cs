@@ -9,6 +9,7 @@ using ScheduleBot.DB.Entity;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleBot.Bot {
     public partial class TelegramBot {
@@ -55,6 +56,12 @@ namespace ScheduleBot.Bot {
                 }
 
                 match = NotificationsCallbackRegex().Match(message);
+                if(match.Success) {
+                    args = match.Groups[2].ToString();
+                    return $"{match.Groups[1]} {user.Mode}".ToLower();
+                }
+
+                match = TeachersCallbackRegex().Match(message);
                 if(match.Success) {
                     args = match.Groups[2].ToString();
                     return $"{match.Groups[1]} {user.Mode}".ToLower();
@@ -156,7 +163,7 @@ namespace ScheduleBot.Bot {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Profile"], replyMarkup: GetProfileKeyboardMarkup(user));
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["NotificationSettings"], replyMarkup: GetNotificationsInlineKeyboardButton(user));
             });
-            commandManager.AddMessageCommand(commands.Message["TeachersWorkScheduleBack"], Mode.TeachersWorkSchedule, async (dbContext, chatId, messageId, user, args) => {
+            commandManager.AddMessageCommand(commands.Message["TeachersWorkScheduleBack"], new[] { Mode.TeachersWorkSchedule, Mode.TeacherSelected }, async (dbContext, chatId, messageId, user, args) => {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["MainMenu"], replyMarkup: MainKeyboardMarkup);
 
                 user.Mode = Mode.Default;
@@ -753,21 +760,58 @@ namespace ScheduleBot.Bot {
                 user.Mode = Mode.TeachersWorkSchedule;
                 dbContext.SaveChanges();
 
-                await botClient.SendTextMessageAsync(chatId: chatId, text: "Введите фамилию интересующего вас преподавателя", replyMarkup: TeachersWorkScheduleBackKeyboardMarkup);
+                parser.UpdatingTeachers(dbContext);
 
-                NGramSearch.Instance.PrecomputeNGrams(parser.GetTeachers() ?? throw new NullReferenceException("GetTeachers"), 2);
+                await botClient.SendTextMessageAsync(chatId: chatId, text: "Введите ФИО интересующего вас преподавателя", replyMarkup: TeachersWorkScheduleBackKeyboardMarkup);
+            });
 
-                foreach(Tuple<string, double> item in NGramSearch.Instance.FindMatch(args))
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: $"{item.Item1} {item.Item2}");
+            commandManager.AddMessageCommand("Текущий преподаватель", Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
+                user.Mode = Mode.TeachersWorkSchedule;
+                dbContext.SaveChanges();
+
+                await botClient.SendTextMessageAsync(chatId: chatId, text: "Введите ФИО интересующего вас преподавателя", replyMarkup: TeachersWorkScheduleBackKeyboardMarkup);
             });
 
             commandManager.AddMessageCommand(Mode.TeachersWorkSchedule, async (dbContext, chatId, messageId, user, args) => {
+                IEnumerable<string> find = NGramSearch.Instance.FindMatch(args);
 
-                foreach(Tuple<string, double> item in NGramSearch.Instance.FindMatch(args))
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: $"{item.Item1} {item.Item2}");
+                if(find.Any()) {
+                    if(find.Count() > 1) {
+                        var buttons = new List<InlineKeyboardButton[]>();
+                        foreach(string item in find) {
+                            string callback = $"Select|{item}";
+
+                            buttons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: item, callbackData: callback[..Math.Min(callback.Length, 35)]) });
+                        }
+
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: "Выберите необходимого преподавателя.\nЕсли его нет уточните ФИО.", replyMarkup: new InlineKeyboardMarkup(buttons));
+                    } else {
+                        user.Mode = Mode.TeacherSelected;
+                        user.TempData = find.First();
+
+                        dbContext.SaveChanges();
+
+                        string teacher = find.First();
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"Преподаватель {teacher} успешно выбран.", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(teacher));
+                    }
+                } else {
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: "Введенный вами преподаватель не найден!", replyMarkup: TeachersWorkScheduleBackKeyboardMarkup);
+                }
 
                 return true;
             });
+
+            commandManager.AddCallbackCommand("Select", Mode.TeachersWorkSchedule, async (dbContext, chatId, messageId, user, message, args) => {
+                user.Mode = Mode.TeacherSelected;
+                user.TempData = dbContext.TeacherLastUpdate.First(i => i.Teacher.ToLower().StartsWith(args)).Teacher;
+
+                dbContext.SaveChanges();
+
+                await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
+
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"Преподаватель {user.TempData} успешно выбран.", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData));
+            });
+
             #endregion
 
             #endregion
