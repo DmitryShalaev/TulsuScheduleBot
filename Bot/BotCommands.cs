@@ -37,12 +37,12 @@ namespace ScheduleBot.Bot {
             using(StreamReader sr = new(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + @"/Bot/TulsuScheduleBotSettings.json")) {
                 var commands = JObject.Parse(sr.ReadToEnd());
 
-                Message = commands["Message"]?.ToObject<Dictionary<string, string>>() ?? throw new NullReferenceException("Message");
-                Callback = commands["Callback"]?.ToObject<Dictionary<string, CallbackStruct>>() ?? throw new NullReferenceException("Callback");
-                Corps = commands["Corps"]?.ToObject<CorpsStruct[]>() ?? throw new NullReferenceException("Corps");
-                StagesOfAdding = commands["StagesOfAdding"]?.ToObject<string[]>() ?? throw new NullReferenceException("StagesOfAdding");
-                College = commands["College"]?.ToObject<CollegeStruct>() ?? throw new NullReferenceException("College");
-                Config = commands["Config"]?.ToObject<ConfigStruct>() ?? throw new NullReferenceException("Config");
+                Message = commands[nameof(Message)]?.ToObject<Dictionary<string, string>>() ?? throw new NullReferenceException("Message");
+                Callback = commands[nameof(Callback)]?.ToObject<Dictionary<string, CallbackStruct>>() ?? throw new NullReferenceException("Callback");
+                Corps = commands[nameof(Corps)]?.ToObject<CorpsStruct[]>() ?? throw new NullReferenceException("Corps");
+                StagesOfAdding = commands[nameof(StagesOfAdding)]?.ToObject<string[]>() ?? throw new NullReferenceException("StagesOfAdding");
+                College = commands[nameof(College)]?.ToObject<CollegeStruct>() ?? throw new NullReferenceException("College");
+                Config = commands[nameof(Config)]?.ToObject<ConfigStruct>() ?? throw new NullReferenceException("Config");
 
                 Message.TrimExcess();
                 Callback.TrimExcess();

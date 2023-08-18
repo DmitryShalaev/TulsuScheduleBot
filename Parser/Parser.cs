@@ -20,6 +20,8 @@ namespace ScheduleBot {
         public delegate Task UpdatedDisciplines(ScheduleDbContext dbContext, List<(string Group, DateOnly Date)> values);
         private event UpdatedDisciplines Notify;
 
+        public static Parser? Instance { get; private set; }
+
         public Parser(BotCommands commands, UpdatedDisciplines updatedDisciplines) {
             Notify += updatedDisciplines;
 
@@ -37,8 +39,12 @@ namespace ScheduleBot {
 
             UpdatingDisciplinesTimer.Elapsed += UpdatingDisciplines;
 
+            Instance = this;
+
             UpdatingDisciplines(sender: null, e: null);
         }
+
+
 
         private void UpdatingDisciplines(object? sender = null, ElapsedEventArgs? e = null) {
             ScheduleDbContext dbContext = new();
