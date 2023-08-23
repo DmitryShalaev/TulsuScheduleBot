@@ -153,7 +153,11 @@ namespace ScheduleBot {
                     else
                         teacherLastUpdate.Update = DateTime.UtcNow;
 
-                    dbContext.TeacherWorkSchedule.RemoveRange(dbContext.TeacherWorkSchedule.Where(i => i.Lecturer == teacher && i.Date < dates.Value.min && i.Date > dates.Value.max));
+                    if(dbContext.TeacherWorkSchedule.Any(i => i.Lecturer == teacher && i.Date < dates.Value.min)) {
+                        dbContext.TeacherWorkSchedule.RemoveRange(dbContext.TeacherWorkSchedule.Where(i => i.Lecturer == teacher && i.Date < dates.Value.min));
+                        dbContext.SaveChanges();
+                    }
+
                     var _list = dbContext.TeacherWorkSchedule.Where(i => i.Lecturer == teacher && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
 
                     IEnumerable<TeacherWorkSchedule> except = teacherWorkSchedule.Except(_list);
