@@ -44,8 +44,6 @@ namespace ScheduleBot {
             UpdatingDisciplines(sender: null, e: null);
         }
 
-
-
         private void UpdatingDisciplines(object? sender = null, ElapsedEventArgs? e = null) {
             ScheduleDbContext dbContext = new();
 
@@ -103,7 +101,11 @@ namespace ScheduleBot {
                     else
                         groupLastUpdate.Update = DateTime.UtcNow;
 
-                    dbContext.Disciplines.RemoveRange(dbContext.Disciplines.Where(i => i.Group == group && i.Date < dates.Value.min && i.Date > dates.Value.max));
+                    if(dbContext.Disciplines.Any(i => i.Group == group && i.Date < dates.Value.min)) {
+                        dbContext.Disciplines.RemoveRange(dbContext.Disciplines.Where(i => i.Group == group && i.Date < dates.Value.min));
+                        dbContext.SaveChanges();
+                    }
+
                     var _list = dbContext.Disciplines.Where(i => i.Group == group && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
 
                     IEnumerable<Discipline> except = disciplines.Except(_list);
