@@ -79,8 +79,6 @@ namespace ScheduleBot.Bot {
                     user.Mode = Mode.GroupСhange;
 
                     user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Для начала работы с ботом необходимо указать номер учебной группы", replyMarkup: CancelKeyboardMarkup)).MessageId;
-
-                    dbContext.SaveChanges();
                 }
             });
             commandManager.AddMessageCommand("/SetProfile", Mode.Default, async (dbContext, chatId, messageId, user, args) => {
@@ -88,7 +86,7 @@ namespace ScheduleBot.Bot {
                     if(Guid.TryParse(args, out Guid profile)) {
                         if(profile != user.ScheduleProfileGuid && dbContext.ScheduleProfile.Any(i => i.ID == profile)) {
                             user.ScheduleProfileGuid = profile;
-                            dbContext.SaveChanges();
+
                             await botClient.SendTextMessageAsync(chatId: chatId, text: "Вы успешно сменили профиль", replyMarkup: MainKeyboardMarkup);
                         } else {
                             await botClient.SendTextMessageAsync(chatId: chatId, text: "Вы пытаетесь изменить свой профиль на текущий или на профиль, который не существует", replyMarkup: MainKeyboardMarkup);
@@ -113,8 +111,6 @@ namespace ScheduleBot.Bot {
                 user.TempData = null;
 
                 await DeleteTempMessage(user, messageId);
-
-                dbContext.SaveChanges();
             });
             commandManager.AddMessageCommand(commands.Message["Cancel"], Mode.AddingDiscipline, async (dbContext, chatId, messageId, user, args) => {
                 IOrderedQueryable<CustomDiscipline> tmp = dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate);
@@ -136,8 +132,6 @@ namespace ScheduleBot.Bot {
 
                 await DeleteTempMessage(user, messageId);
 
-                dbContext.SaveChanges();
-
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Profile"], replyMarkup: GetProfileKeyboardMarkup(user));
             });
             commandManager.AddMessageCommand(commands.Message["Cancel"], new[] { Mode.CustomEditName, Mode.CustomEditLecturer, Mode.CustomEditLectureHall, Mode.CustomEditType, Mode.CustomEditStartTime, Mode.CustomEditEndTime }, async (dbContext, chatId, messageId, user, args) => {
@@ -154,15 +148,11 @@ namespace ScheduleBot.Bot {
                 user.TempData = null;
 
                 await DeleteTempMessage(user, messageId);
-
-                dbContext.SaveChanges();
             });
             commandManager.AddMessageCommand(commands.Message["Cancel"], Mode.DaysNotifications, async (dbContext, chatId, messageId, user, args) => {
                 user.Mode = Mode.Default;
 
                 await DeleteTempMessage(user, messageId);
-
-                dbContext.SaveChanges();
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Profile"], replyMarkup: GetProfileKeyboardMarkup(user));
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["NotificationSettings"], replyMarkup: GetNotificationsInlineKeyboardButton(user));
@@ -174,8 +164,6 @@ namespace ScheduleBot.Bot {
                 user.TempData = null;
 
                 await DeleteTempMessage(user, messageId);
-
-                dbContext.SaveChanges();
             });
 
             foreach(Mode mode in Enum.GetValues(typeof(Mode)).Cast<Mode>()) {
@@ -190,8 +178,6 @@ namespace ScheduleBot.Bot {
                     user.Mode = Mode.Default;
 
                     await DeleteTempMessage(user);
-
-                    dbContext.SaveChanges();
                 });
             }
 
@@ -256,7 +242,6 @@ namespace ScheduleBot.Bot {
 
             commandManager.AddMessageCommand(commands.Message["Exam"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 user.TempData = commands.Message["Exam"];
-                dbContext.SaveChanges();
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Exam"], replyMarkup: ExamKeyboardMarkup);
             }, CommandManager.Check.group);
@@ -277,7 +262,6 @@ namespace ScheduleBot.Bot {
 
             commandManager.AddMessageCommand(commands.Message["AcademicPerformance"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 user.TempData = commands.Message["AcademicPerformance"];
-                dbContext.SaveChanges();
 
                 string StudentID = user.ScheduleProfile.StudentID!;
 
@@ -293,7 +277,7 @@ namespace ScheduleBot.Bot {
 
             commandManager.AddMessageCommand(commands.Message["Profile"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 user.TempData = commands.Message["Profile"];
-                dbContext.SaveChanges();
+
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Profile"], replyMarkup: GetProfileKeyboardMarkup(user));
             });
             commandManager.AddMessageCommand(commands.Message["GetProfileLink"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
@@ -308,7 +292,7 @@ namespace ScheduleBot.Bot {
             commandManager.AddMessageCommand(commands.Message["ResetProfileLink"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 if(!user.IsOwner()) {
                     user.Mode = Mode.ResetProfileLink;
-                    dbContext.SaveChanges();
+
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Вы точно уверены что хотите восстановить свой профиль?", replyMarkup: ResetProfileLinkKeyboardMarkup);
                 } else {
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Владельцу профиля нет смысла его восстанавливать!", replyMarkup: MainKeyboardMarkup);
@@ -326,8 +310,6 @@ namespace ScheduleBot.Bot {
                     user.ScheduleProfile = profile;
                 }
 
-                dbContext.SaveChanges();
-
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Profile"], replyMarkup: GetProfileKeyboardMarkup(user));
             });
 
@@ -336,8 +318,6 @@ namespace ScheduleBot.Bot {
                     user.Mode = Mode.GroupСhange;
 
                     user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Хотите сменить номер учебной группы? Если да, то напишите новый номер", replyMarkup: CancelKeyboardMarkup)).MessageId;
-
-                    dbContext.SaveChanges();
                 }
             });
             commandManager.AddMessageCommand(commands.Message["StudentIDNumber"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
@@ -345,8 +325,6 @@ namespace ScheduleBot.Bot {
                     user.Mode = Mode.StudentIDСhange;
 
                     user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Хотите сменить номер зачётки? Если да, то напишите новый номер", replyMarkup: CancelKeyboardMarkup)).MessageId;
-
-                    dbContext.SaveChanges();
                 }
             });
             commandManager.AddMessageCommand(commands.Message["Notifications"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
@@ -383,7 +361,7 @@ namespace ScheduleBot.Bot {
 
                 if(args.Length > 15) {
                     user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Номер группы не может содержать более 15 символов.", replyMarkup: CancelKeyboardMarkup)).MessageId;
-                    return false;
+                    return true;
                 }
 
                 int _messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: CancelKeyboardMarkup)).MessageId;
@@ -403,8 +381,6 @@ namespace ScheduleBot.Bot {
                     user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает или такой группы не существует", replyMarkup: CancelKeyboardMarkup)).MessageId;
                 }
 
-                dbContext.SaveChanges();
-
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: _messageId);
                 return true;
             });
@@ -413,7 +389,7 @@ namespace ScheduleBot.Bot {
 
                 if(args.Length > 10) {
                     user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Номер зачетки не может содержать более 10 символов.", replyMarkup: CancelKeyboardMarkup)).MessageId;
-                    return false;
+                    return true;
                 }
 
                 int _messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: CancelKeyboardMarkup)).MessageId;
@@ -437,8 +413,6 @@ namespace ScheduleBot.Bot {
                 } else {
                     user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Не удалось распознать введенный номер зачётной книжки", replyMarkup: CancelKeyboardMarkup)).MessageId;
                 }
-
-                dbContext.SaveChanges();
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: _messageId);
                 return true;
@@ -609,7 +583,6 @@ namespace ScheduleBot.Bot {
                         await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile));
                         user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user), replyMarkup: CancelKeyboardMarkup)).MessageId;
 
-                        dbContext.SaveChanges();
                     } else {
                         await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
                     }
@@ -637,7 +610,6 @@ namespace ScheduleBot.Bot {
 
                         dbContext.SaveChanges();
                         await botClient.EditMessageReplyMarkupAsync(chatId: chatId, messageId: messageId, replyMarkup: GetEditAdminInlineKeyboardButton(dbContext, discipline.Date, user.ScheduleProfile));
-
                         return;
                     }
                 }
@@ -752,8 +724,6 @@ namespace ScheduleBot.Bot {
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
                 user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Хотите изменить количество дней? Если да, то напишите новое", replyMarkup: CancelKeyboardMarkup)).MessageId;
-
-                dbContext.SaveChanges();
             });
             #endregion
 
@@ -788,16 +758,12 @@ namespace ScheduleBot.Bot {
             commandManager.AddMessageCommand(commands.Message["TeachersWorkSchedule"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 user.Mode = Mode.TeachersWorkSchedule;
 
-                dbContext.SaveChanges();
-
-                await botClient.SendTextMessageAsync(chatId: chatId, text: "Введите ФИО преподавателя.", replyMarkup: TeachersWorkScheduleBackKeyboardMarkup);
+                await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["EnterTeacherName"], replyMarkup: TeachersWorkScheduleBackKeyboardMarkup);
             });
             commandManager.AddMessageCommand(commands.Message["CurrentTeacher"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
                 user.Mode = Mode.TeachersWorkSchedule;
 
-                dbContext.SaveChanges();
-
-                await botClient.SendTextMessageAsync(chatId: chatId, text: "Введите ФИО преподавателя.", replyMarkup: TeachersWorkScheduleBackKeyboardMarkup);
+                await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["EnterTeacherName"], replyMarkup: TeachersWorkScheduleBackKeyboardMarkup);
             });
 
             commandManager.AddMessageCommand(Mode.TeachersWorkSchedule, async (dbContext, chatId, messageId, user, args) => {
@@ -815,11 +781,8 @@ namespace ScheduleBot.Bot {
                         await botClient.SendTextMessageAsync(chatId: chatId, text: "Выберите преподавателя.\nЕсли его нет уточните ФИО.", replyMarkup: new InlineKeyboardMarkup(buttons));
                     } else {
                         user.Mode = Mode.TeacherSelected;
-                        user.TempData = find.First();
+                        string teacher = user.TempData = find.First();
 
-                        dbContext.SaveChanges();
-
-                        string teacher = find.First();
                         await botClient.SendTextMessageAsync(chatId: chatId, text: $"Выбран {teacher}.", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(teacher));
                     }
                 } else {
@@ -830,13 +793,11 @@ namespace ScheduleBot.Bot {
             });
             commandManager.AddCallbackCommand("Select", Mode.TeachersWorkSchedule, async (dbContext, chatId, messageId, user, message, args) => {
                 user.Mode = Mode.TeacherSelected;
-                user.TempData = dbContext.TeacherLastUpdate.First(i => i.Teacher.ToLower().StartsWith(args)).Teacher;
-
-                dbContext.SaveChanges();
+                string teacher = user.TempData = dbContext.TeacherLastUpdate.First(i => i.Teacher.ToLower().StartsWith(args)).Teacher;
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
 
-                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{commands.Message["CurrentTeacher"]}: {user.TempData} выбран.", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData));
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{commands.Message["CurrentTeacher"]}: {teacher} выбран.", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(teacher));
             });
 
             commandManager.AddMessageCommand(commands.Message["Back"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
