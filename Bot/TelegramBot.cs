@@ -112,7 +112,7 @@ namespace ScheduleBot.Bot {
                 dbContext.Feedbacks.Add(new() { Message = args, TelegramUser = user });
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["ThanksForTheFeedback"], replyMarkup: MainKeyboardMarkup);
-                await DeleteTempMessage(user, messageId);
+                await DeleteTempMessage(user);
                 return true;
             });
 
@@ -969,10 +969,6 @@ namespace ScheduleBot.Bot {
                             notifications.TelegramUser = scheduleProfile.TelegramUser = user;
 
                             dbContext.SaveChanges();
-                        } else {
-                            user.Username = message.From.Username;
-                            user.FirstName = message.From.FirstName;
-                            user.LastName = message.From.LastName;
                         }
 
                         switch(update.Type) {
@@ -980,6 +976,10 @@ namespace ScheduleBot.Bot {
                             case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
                                 if(message.Text is null) return;
 
+                                user.Username = message.From.Username;
+                                user.FirstName = message.From.FirstName;
+                                user.LastName = message.From.LastName;
+                                
                                 await commandManager.OnMessageAsync(dbContext, message.Chat, message.MessageId, message.Text, user);
                                 dbContext.MessageLog.Add(new() { Message = message.Text, TelegramUser = user });
                                 break;
