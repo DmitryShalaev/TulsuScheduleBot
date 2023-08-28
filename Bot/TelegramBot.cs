@@ -109,6 +109,7 @@ namespace ScheduleBot.Bot {
             });
             commandManager.AddMessageCommand(Mode.Feedback, async (dbContext, chatId, messageId, user, args) => {
                 user.Mode = Mode.Default;
+                user.TempData = null;
 
                 dbContext.Feedbacks.Add(new() { Message = args, TelegramUser = user });
 
@@ -198,8 +199,6 @@ namespace ScheduleBot.Bot {
                 user.Mode = Mode.Default;
 
                 await DeleteTempMessage(user, messageId);
-
-                dbContext.SaveChanges();
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["MainMenu"], replyMarkup: MainKeyboardMarkup);
             });
