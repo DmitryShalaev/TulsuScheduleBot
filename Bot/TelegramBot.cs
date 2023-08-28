@@ -106,14 +106,11 @@ namespace ScheduleBot.Bot {
 
                 user.Mode = Mode.Feedback;
                 user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["FeedbackMessage"], replyMarkup: CancelKeyboardMarkup)).MessageId;
-
-                dbContext.SaveChanges();
             });
             commandManager.AddMessageCommand(Mode.Feedback, async (dbContext, chatId, messageId, user, args) => {
                 user.Mode = Mode.Default;
 
                 dbContext.Feedbacks.Add(new() { Message = args, TelegramUser = user });
-                dbContext.SaveChanges();
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["ThanksForTheFeedback"], replyMarkup: MainKeyboardMarkup);
                 return true;
