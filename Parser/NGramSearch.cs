@@ -1,5 +1,4 @@
-﻿using ScheduleBot.Bot;
-using ScheduleBot.DB;
+﻿using ScheduleBot.DB;
 
 namespace ScheduleBot {
     public class NGramSearch {

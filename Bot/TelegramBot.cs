@@ -112,6 +112,7 @@ namespace ScheduleBot.Bot {
                 dbContext.Feedbacks.Add(new() { Message = args, TelegramUser = user });
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["ThanksForTheFeedback"], replyMarkup: MainKeyboardMarkup);
+                await DeleteTempMessage(user, messageId);
                 return true;
             });
 
