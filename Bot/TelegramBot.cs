@@ -117,10 +117,11 @@ namespace ScheduleBot.Bot {
                 dbContext.SaveChanges();
             });
             commandManager.AddMessageCommand(commands.Message["Cancel"], Mode.AddingDiscipline, async (dbContext, chatId, messageId, user, args) => {
-                CustomDiscipline tmp = dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate).First();
+                IOrderedQueryable<CustomDiscipline> tmp = dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate);
+                CustomDiscipline first = tmp.First();
 
                 user.Mode = Mode.Default;
-                dbContext.CustomDiscipline.Remove(tmp);
+                dbContext.CustomDiscipline.RemoveRange(tmp);
 
                 await DeleteTempMessage(user, messageId);
                 await DeleteInitialMessage(botClient, chatId, user);
@@ -128,7 +129,7 @@ namespace ScheduleBot.Bot {
                 dbContext.SaveChanges();
 
                 await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, MainKeyboardMarkup);
-                await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, tmp.Date, user.ScheduleProfile, true), replyMarkup: GetEditAdminInlineKeyboardButton(dbContext, tmp.Date, user.ScheduleProfile));
+                await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, first.Date, user.ScheduleProfile, true), replyMarkup: GetEditAdminInlineKeyboardButton(dbContext, first.Date, user.ScheduleProfile));
             });
             commandManager.AddMessageCommand(commands.Message["Cancel"], new[] { Mode.GroupСhange, Mode.StudentIDСhange, Mode.ResetProfileLink }, async (dbContext, chatId, messageId, user, args) => {
                 user.Mode = Mode.Default;
@@ -183,7 +184,7 @@ namespace ScheduleBot.Bot {
                     await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["MainMenu"], replyMarkup: MainKeyboardMarkup);
 
                     if(user.Mode == Mode.AddingDiscipline)
-                        dbContext.CustomDiscipline.Remove(dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate).First());
+                        dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile));
 
                     user.TempData = null;
                     user.Mode = Mode.Default;
