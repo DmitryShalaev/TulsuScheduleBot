@@ -177,6 +177,23 @@ namespace ScheduleBot.Bot {
                 dbContext.SaveChanges();
             });
 
+            foreach(Mode mode in Enum.GetValues(typeof(Mode)).Cast<Mode>()) {
+                commandManager.AddMessageCommand("/restart", mode, async (dbContext, chatId, messageId, user, args) => {
+
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["MainMenu"], replyMarkup: MainKeyboardMarkup);
+
+                    if(user.Mode == Mode.AddingDiscipline)
+                        dbContext.CustomDiscipline.Remove(dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate).First());
+
+                    user.TempData = null;
+                    user.Mode = Mode.Default;
+
+                    await DeleteTempMessage(user);
+
+                    dbContext.SaveChanges();
+                });
+            }
+
             commandManager.AddMessageCommand(commands.Message["Today"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, MainKeyboardMarkup);
                 var date = DateOnly.FromDateTime(DateTime.Now);
@@ -1006,7 +1023,7 @@ namespace ScheduleBot.Bot {
 
         private Task HandleError(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken) => Task.CompletedTask;
 
-        private async Task DeleteTempMessage(TelegramUser user, int? messageId) {
+        private async Task DeleteTempMessage(TelegramUser user, int? messageId = null) {
             try {
                 if(user.RequestingMessageID is not null) {
                     await botClient.DeleteMessageAsync(chatId: user.ChatID, messageId: (int)user.RequestingMessageID);
