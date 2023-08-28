@@ -97,6 +97,24 @@ namespace ScheduleBot.Bot {
                 } catch(IndexOutOfRangeException) { }
             });
 
+            commandManager.AddMessageCommand("/feedback", Mode.Default, async (dbContext, chatId, messageId, user, args) => {
+                if(user.IsAdmin) {
+                    // TODO Admin;
+                }
+
+                user.Mode = Mode.Feedback;
+                user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["FeedbackMessage"], replyMarkup: CancelKeyboardMarkup)).MessageId;
+            });
+            commandManager.AddMessageCommand(Mode.Feedback, async (dbContext, chatId, messageId, user, args) => {
+                user.Mode = Mode.Default;
+                user.TempData = null;
+
+                dbContext.Feedbacks.Add(new() { Message = args, TelegramUser = user });
+
+                await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["ThanksForTheFeedback"], replyMarkup: MainKeyboardMarkup);
+                return true;
+            });
+
             commandManager.AddMessageCommand(new[] { commands.Message["Back"], commands.Message["Cancel"] }, Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 if(user.TempData == commands.Message["AcademicPerformance"] ||
                     user.TempData == commands.Message["Profile"] ||
@@ -164,6 +182,13 @@ namespace ScheduleBot.Bot {
                 user.TempData = null;
 
                 await DeleteTempMessage(user, messageId);
+            });
+            commandManager.AddMessageCommand(commands.Message["Cancel"], Mode.Feedback, async (dbContext, chatId, messageId, user, args) => {
+                user.Mode = Mode.Default;
+
+                await DeleteTempMessage(user, messageId);
+
+                await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["MainMenu"], replyMarkup: MainKeyboardMarkup);
             });
 
             foreach(Mode mode in Enum.GetValues(typeof(Mode)).Cast<Mode>()) {
@@ -943,6 +968,10 @@ namespace ScheduleBot.Bot {
                             notifications.TelegramUser = scheduleProfile.TelegramUser = user;
 
                             dbContext.SaveChanges();
+                        } else {
+                            user.Username = message.From.Username;
+                            user.FirstName = message.From.FirstName;
+                            user.LastName = message.From.LastName;
                         }
 
                         switch(update.Type) {
