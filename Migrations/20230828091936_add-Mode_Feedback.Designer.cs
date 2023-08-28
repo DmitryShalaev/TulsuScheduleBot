@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScheduleBot.DB;
@@ -11,9 +12,11 @@ using ScheduleBot.DB;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230828091936_add-Mode_Feedback")]
+    partial class addMode_Feedback
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,34 +202,6 @@ namespace ScheduleBot.Migrations
                     b.HasIndex("Class");
 
                     b.ToTable("Disciplines");
-                });
-
-            modelBuilder.Entity("ScheduleBot.DB.Entity.Feedback", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<long>("TelegramUserChatID")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("TelegramUserChatID");
-
-                    b.ToTable("Feedbacks");
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.GroupLastUpdate", b =>
@@ -610,17 +585,6 @@ namespace ScheduleBot.Migrations
                         .IsRequired();
 
                     b.Navigation("ClassDTO");
-                });
-
-            modelBuilder.Entity("ScheduleBot.DB.Entity.Feedback", b =>
-                {
-                    b.HasOne("ScheduleBot.DB.Entity.TelegramUser", "TelegramUser")
-                        .WithMany()
-                        .HasForeignKey("TelegramUserChatID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TelegramUser");
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.MessageLog", b =>

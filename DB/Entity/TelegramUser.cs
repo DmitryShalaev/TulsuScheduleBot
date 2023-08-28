@@ -64,7 +64,9 @@ namespace ScheduleBot.DB.Entity {
         DaysNotifications,
 
         TeachersWorkSchedule,
-        TeacherSelected
+        TeacherSelected,
+
+        Feedback
     }
 
     public class ModeDTO {

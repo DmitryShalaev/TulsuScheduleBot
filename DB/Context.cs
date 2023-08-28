@@ -35,5 +35,6 @@ namespace ScheduleBot.DB {
         public DbSet<Notifications> Notifications { get; set; }
         public DbSet<TeacherWorkSchedule> TeacherWorkSchedule { get; set; }
         public DbSet<TeacherLastUpdate> TeacherLastUpdate { get; set; }
+        public DbSet<Feedback> Feedbacks { get; set; }
     }
 }
