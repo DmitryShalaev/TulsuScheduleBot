@@ -18,7 +18,7 @@ namespace ScheduleBot.Bot {
                     CompletedDiscipline tmp = new(item, scheduleProfile.ID) { Date = null };
                     bool always = сompletedDisciplines.FirstOrDefault(i => i.Equals(tmp)) is not null;
 
-                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime.ToString()} {item.Lecturer?.Split(' ')[0]} {(always ? "🚫" : (сompletedDisciplines.Contains((CompletedDiscipline)item) ? "❌" : "✅"))}", callbackData: $"{(always ? "!" : $"DisciplineDay {item.ID}|{item.Date}")}"),
+                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime} {item.Lecturer?.Split(' ')[0]} {(always ? "🚫" : (сompletedDisciplines.Contains((CompletedDiscipline)item) ? "❌" : "✅"))}", callbackData: $"{(always ? "!" : $"DisciplineDay {item.ID}|{item.Date}")}"),
                                             InlineKeyboardButton.WithCallbackData(text: always ? "❌" : "✅", callbackData: $"DisciplineAlways {item.ID}|{item.Date}")});
                 }
             }
@@ -87,6 +87,17 @@ namespace ScheduleBot.Bot {
             buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"В период: {via(user.Notifications.Days)}", "DaysNotifications") });
 
             return new InlineKeyboardMarkup(buttons);
+        }
+
+        private static InlineKeyboardMarkup GetFeedbackInlineKeyboardButton(ScheduleDbContext dbContext, Feedback feedback) {
+            bool previous = dbContext.Feedbacks.Any(i => !i.IsCompleted && i.ID < feedback.ID);
+            bool next = dbContext.Feedbacks.Any(i => !i.IsCompleted && i.ID > feedback.ID); ;
+
+            return new InlineKeyboardMarkup(new List<InlineKeyboardButton[]> {
+                            new[] { InlineKeyboardButton.WithCallbackData(text: previous ? "⬅️":"❌", callbackData: $"FeedbackPrevious {feedback.ID}"),
+                                    InlineKeyboardButton.WithCallbackData(text: "✅", callbackData: $"FeedbackAccept {feedback.ID}"),
+                                    InlineKeyboardButton.WithCallbackData(text: next ? "➡️":"❌", callbackData: $"FeedbackNext {feedback.ID}") }
+                        });
         }
     }
 }

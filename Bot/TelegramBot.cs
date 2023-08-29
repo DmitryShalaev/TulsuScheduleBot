@@ -99,12 +99,49 @@ namespace ScheduleBot.Bot {
 
             commandManager.AddMessageCommand("/feedback", Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 if(user.IsAdmin) {
-                    // TODO Admin;
+                    Feedback? feedback = dbContext.Feedbacks.Include(i => i.TelegramUser).Where(i => !i.IsCompleted).OrderBy(i => i.Date).FirstOrDefault();
+
+                    if(feedback is not null) {
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: GetFeedbackMessage(feedback), replyMarkup: GetFeedbackInlineKeyboardButton(dbContext, feedback));
+                    } else {
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: MainKeyboardMarkup);
+                    }
+
+                    return;
                 }
 
                 user.Mode = Mode.Feedback;
                 user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["FeedbackMessage"], replyMarkup: CancelKeyboardMarkup)).MessageId;
             });
+            commandManager.AddCallbackCommand("FeedbackAccept", Mode.Default, async (dbContext, chatId, messageId, user, message, args) => {
+                Feedback? feedback = dbContext.Feedbacks.Include(i => i.TelegramUser).FirstOrDefault(i => i.ID == long.Parse(args));
+
+                if(feedback is not null) {
+                    feedback.IsCompleted = true;
+                    dbContext.SaveChanges();
+                }
+
+                feedback = dbContext.Feedbacks.Include(i => i.TelegramUser).Where(i => !i.IsCompleted).OrderBy(i => i.Date).FirstOrDefault();
+                if(feedback is not null) {
+                    await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: GetFeedbackMessage(feedback), replyMarkup: GetFeedbackInlineKeyboardButton(dbContext, feedback));
+                } else {
+                    await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: MainKeyboardMarkup);
+                }
+            }, CommandManager.Check.admin);
+            commandManager.AddCallbackCommand("FeedbackPrevious", Mode.Default, async (dbContext, chatId, messageId, user, message, args) => {
+                Feedback? feedback = dbContext.Feedbacks.Include(i => i.TelegramUser).Where(i => !i.IsCompleted && i.ID < long.Parse(args)).OrderByDescending(i => i.Date).FirstOrDefault();
+
+                if(feedback is not null)
+                    await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: GetFeedbackMessage(feedback), replyMarkup: GetFeedbackInlineKeyboardButton(dbContext, feedback));
+            }, CommandManager.Check.admin);
+            commandManager.AddCallbackCommand("FeedbackNext", Mode.Default, async (dbContext, chatId, messageId, user, message, args) => {
+                Feedback? feedback = dbContext.Feedbacks.Include(i => i.TelegramUser).Where(i => !i.IsCompleted && i.ID > long.Parse(args)).OrderBy(i => i.Date).FirstOrDefault();
+
+                if(feedback is not null)
+                    await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: GetFeedbackMessage(feedback), replyMarkup: GetFeedbackInlineKeyboardButton(dbContext, feedback));
+            }, CommandManager.Check.admin);
+
             commandManager.AddMessageCommand(Mode.Feedback, async (dbContext, chatId, messageId, user, args) => {
                 user.Mode = Mode.Default;
                 user.TempData = null;
@@ -113,6 +150,10 @@ namespace ScheduleBot.Bot {
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["ThanksForTheFeedback"], replyMarkup: MainKeyboardMarkup);
                 await DeleteTempMessage(user);
+
+                foreach(TelegramUser? item in dbContext.TelegramUsers.Where(i => i.IsAdmin))
+                    await botClient.SendTextMessageAsync(chatId: item.ChatID, text: $"Получен новый отзыв или предложение. От {user.FirstName}\n/feedback", disableNotification: true);
+
                 return true;
             });
 
@@ -979,7 +1020,7 @@ namespace ScheduleBot.Bot {
                                 user.Username = message.From.Username;
                                 user.FirstName = message.From.FirstName;
                                 user.LastName = message.From.LastName;
-                                
+
                                 await commandManager.OnMessageAsync(dbContext, message.Chat, message.MessageId, message.Text, user);
                                 dbContext.MessageLog.Add(new() { Message = message.Text, TelegramUser = user });
                                 break;
@@ -1026,6 +1067,12 @@ namespace ScheduleBot.Bot {
                     await botClient.DeleteMessageAsync(chatId: user.ChatID, messageId: (int)messageId);
 
             } catch(Exception) { }
+        }
+
+        private static string GetFeedbackMessage(Feedback feedback) {
+            return $"От: {feedback.TelegramUser.FirstName}{(string.IsNullOrWhiteSpace(feedback.TelegramUser.LastName) ? "" : $", {feedback.TelegramUser.LastName}")}{(string.IsNullOrWhiteSpace(feedback.TelegramUser.Username) ? "" : $", {feedback.TelegramUser.Username}")}\n" +
+                   $"Дата: {feedback.Date.ToLocalTime():dd.MM.yy HH:mm:ss}\n\n" +
+                   $"{feedback.Message}";
         }
     }
 }
