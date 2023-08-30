@@ -875,7 +875,7 @@ namespace ScheduleBot.Bot {
                         user.Mode = Mode.TeacherSelected;
                         string teacher = user.TempData = find.First();
 
-                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"Выбран {teacher}.", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(teacher));
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"{commands.Message["CurrentTeacher"]}: {teacher}", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(teacher));
                     }
                 } else {
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Преподаватель не найден!", replyMarkup: TeachersWorkScheduleBackKeyboardMarkup);
@@ -889,7 +889,7 @@ namespace ScheduleBot.Bot {
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
 
-                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{commands.Message["CurrentTeacher"]}: {teacher} выбран.", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(teacher));
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{commands.Message["CurrentTeacher"]}: {teacher}", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(teacher));
             });
 
             commandManager.AddMessageCommand(commands.Message["Back"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
@@ -897,14 +897,18 @@ namespace ScheduleBot.Bot {
             });
 
             commandManager.AddMessageCommand(commands.Message["Today"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
-                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                ReplyKeyboardMarkup teacherWorkSchedule = GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!);
+
+                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, teacherWorkSchedule);
                 var date = DateOnly.FromDateTime(DateTime.Now);
-                await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetTeacherWorkScheduleByDate(dbContext, date, user.TempData!), replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetTeacherWorkScheduleByDate(dbContext, date, user.TempData!), replyMarkup: teacherWorkSchedule);
             });
             commandManager.AddMessageCommand(commands.Message["Tomorrow"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
-                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                ReplyKeyboardMarkup teacherWorkSchedule = GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!);
+
+                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, teacherWorkSchedule);
                 var date = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
-                await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetTeacherWorkScheduleByDate(dbContext, date, user.TempData!), replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetTeacherWorkScheduleByDate(dbContext, date, user.TempData!), replyMarkup: teacherWorkSchedule);
             });
 
             commandManager.AddMessageCommand(commands.Message["ByDays"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
@@ -912,60 +916,62 @@ namespace ScheduleBot.Bot {
             });
 
             commandManager.AddMessageCommand(commands.Message["Monday"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
-                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, DaysKeyboardMarkup);
                 foreach((string, DateOnly) day in Scheduler.GetTeacherWorkScheduleByDay(dbContext, DayOfWeek.Monday, user.TempData!))
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: DaysKeyboardMarkup);
             });
             commandManager.AddMessageCommand(commands.Message["Tuesday"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
-                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, DaysKeyboardMarkup);
                 foreach((string, DateOnly) day in Scheduler.GetTeacherWorkScheduleByDay(dbContext, DayOfWeek.Tuesday, user.TempData!))
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: DaysKeyboardMarkup);
             });
             commandManager.AddMessageCommand(commands.Message["Wednesday"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
-                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, DaysKeyboardMarkup);
                 foreach((string, DateOnly) day in Scheduler.GetTeacherWorkScheduleByDay(dbContext, DayOfWeek.Wednesday, user.TempData!))
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: DaysKeyboardMarkup);
             });
             commandManager.AddMessageCommand(commands.Message["Thursday"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
-                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, DaysKeyboardMarkup);
                 foreach((string, DateOnly) day in Scheduler.GetTeacherWorkScheduleByDay(dbContext, DayOfWeek.Thursday, user.TempData!))
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: DaysKeyboardMarkup);
             });
             commandManager.AddMessageCommand(commands.Message["Friday"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
-                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, DaysKeyboardMarkup);
                 foreach((string, DateOnly) day in Scheduler.GetTeacherWorkScheduleByDay(dbContext, DayOfWeek.Friday, user.TempData!))
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: DaysKeyboardMarkup);
             });
             commandManager.AddMessageCommand(commands.Message["Saturday"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
-                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, DaysKeyboardMarkup);
                 foreach((string, DateOnly) day in Scheduler.GetTeacherWorkScheduleByDay(dbContext, DayOfWeek.Saturday, user.TempData!))
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: day.Item1, replyMarkup: DaysKeyboardMarkup);
             });
 
             commandManager.AddMessageCommand(commands.Message["ForAWeek"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["ForAWeek"], replyMarkup: WeekKeyboardMarkup);
             });
             commandManager.AddMessageCommand(commands.Message["ThisWeek"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
-                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, replyMarkup: WeekKeyboardMarkup);
                 foreach((string, DateOnly) item in Scheduler.GetTeacherWorkScheduleByWeak(dbContext, CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday) - 1, user.TempData!))
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: item.Item1, replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: item.Item1, replyMarkup: WeekKeyboardMarkup);
             });
             commandManager.AddMessageCommand(commands.Message["NextWeek"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
-                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, replyMarkup: WeekKeyboardMarkup);
                 foreach((string, DateOnly) item in Scheduler.GetTeacherWorkScheduleByWeak(dbContext, CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday), user.TempData!))
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: item.Item1, replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: item.Item1, replyMarkup: WeekKeyboardMarkup);
             });
 
             commandManager.AddMessageCommand(Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
                 if(DateRegex().IsMatch(args)) {
+                    ReplyKeyboardMarkup teacherWorkSchedule = GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!);
+
                     try {
                         DateOnly date = DateTime.TryParse(args, out DateTime _date)
                             ? DateOnly.FromDateTime(_date)
                             : DateOnly.FromDateTime(DateTime.Parse($"{args} {DateTime.Now.Month}"));
-                        await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                        await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, teacherWorkSchedule);
                         await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetTeacherWorkScheduleByDate(dbContext, date, user.TempData!));
                     } catch(Exception) {
-                        await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["CommandRecognizedAsADate"], replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["CommandRecognizedAsADate"], replyMarkup: teacherWorkSchedule);
                     }
 
                     return true;
