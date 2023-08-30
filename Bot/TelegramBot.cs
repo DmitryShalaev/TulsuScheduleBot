@@ -221,14 +221,6 @@ namespace ScheduleBot.Bot {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["Profile"], replyMarkup: GetProfileKeyboardMarkup(user));
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["NotificationSettings"], replyMarkup: GetNotificationsInlineKeyboardButton(user));
             });
-            commandManager.AddMessageCommand(commands.Message["TeachersWorkScheduleBack"], new[] { Mode.TeachersWorkSchedule, Mode.TeacherSelected }, async (dbContext, chatId, messageId, user, args) => {
-                await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["MainMenu"], replyMarkup: MainKeyboardMarkup);
-
-                user.Mode = Mode.Default;
-                user.TempData = null;
-
-                await DeleteTempMessage(user, messageId);
-            });
             commandManager.AddMessageCommand(commands.Message["Cancel"], Mode.Feedback, async (dbContext, chatId, messageId, user, args) => {
                 user.Mode = Mode.Default;
 
@@ -841,6 +833,15 @@ namespace ScheduleBot.Bot {
             #endregion
 
             #region TeachersWorkSchedule
+            commandManager.AddMessageCommand(commands.Message["TeachersWorkScheduleBack"], new[] { Mode.TeachersWorkSchedule, Mode.TeacherSelected }, async (dbContext, chatId, messageId, user, args) => {
+                await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["MainMenu"], replyMarkup: MainKeyboardMarkup);
+
+                user.Mode = Mode.Default;
+                user.TempData = null;
+
+                await DeleteTempMessage(user, messageId);
+            });
+
             commandManager.AddMessageCommand("/UpdateTeachers", Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 parser.UpdatingTeachers(dbContext);
 
@@ -870,7 +871,7 @@ namespace ScheduleBot.Bot {
                             buttons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: item, callbackData: callback[..Math.Min(callback.Length, 35)]) });
                         }
 
-                        await botClient.SendTextMessageAsync(chatId: chatId, text: "Выберите преподавателя.\nЕсли его нет уточните ФИО.", replyMarkup: new InlineKeyboardMarkup(buttons));
+                        user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Выберите преподавателя.\nЕсли его нет уточните ФИО.", replyMarkup: new InlineKeyboardMarkup(buttons))).MessageId;
                     } else {
                         user.Mode = Mode.TeacherSelected;
                         string teacher = user.TempData = find.First();
@@ -885,6 +886,8 @@ namespace ScheduleBot.Bot {
             });
             commandManager.AddCallbackCommand("Select", Mode.TeachersWorkSchedule, async (dbContext, chatId, messageId, user, message, args) => {
                 user.Mode = Mode.TeacherSelected;
+                user.RequestingMessageID = null;
+
                 string teacher = user.TempData = dbContext.TeacherLastUpdate.First(i => i.Teacher.ToLower().StartsWith(args)).Teacher;
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
