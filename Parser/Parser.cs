@@ -41,19 +41,18 @@ namespace ScheduleBot {
 
             Instance = this;
 
-            using(ScheduleDbContext dbContext = new())
-                UpdatingTeachers(dbContext);
+            Task.Run(() => {
+                using(ScheduleDbContext dbContext = new())
+                    UpdatingTeachers(dbContext);
 
-            UpdatingDisciplines(sender: null, e: null);
+                UpdatingDisciplines(sender: null, e: null);
+            });
         }
 
         private void UpdatingDisciplines(object? sender = null, ElapsedEventArgs? e = null) {
             using(ScheduleDbContext dbContext = new()) {
-                foreach(string? item in dbContext.ScheduleProfile.Where(i => (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= 7).Select(i => i.Group).Distinct().ToList()) {
-                    if(string.IsNullOrWhiteSpace(item)) continue;
-
+                foreach(string item in dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= 7).Select(i => i.Group!).Distinct().ToList()) 
                     UpdatingDisciplines(dbContext, group: item);
-                }
 
                 UpdatingDisciplinesTimer.Start();
             }
