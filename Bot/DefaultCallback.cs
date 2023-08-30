@@ -53,14 +53,19 @@ namespace ScheduleBot.Bot {
             return new InlineKeyboardMarkup(buttons);
         }
 
-        private InlineKeyboardMarkup GetInlineKeyboardButton(DateOnly date, TelegramUser user) {
+        private InlineKeyboardMarkup GetInlineKeyboardButton(DateOnly date, TelegramUser user, bool all) {
             var editButtons = new List<InlineKeyboardButton[]>();
 
-            if(user.IsOwner())
-                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: commands.Callback["All"].text, callbackData: $"{commands.Callback["All"].callback} {date}"),
-                                        InlineKeyboardButton.WithCallbackData(text: commands.Callback["Edit"].text, callbackData: $"{commands.Callback["Edit"].callback} {date}") });
-            else
+            if(user.IsOwner()) {
+                if(all) {
+                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: commands.Callback["All"].text, callbackData: $"{commands.Callback["All"].callback} {date}"),
+                                            InlineKeyboardButton.WithCallbackData(text: commands.Callback["Edit"].text, callbackData: $"{commands.Callback["Edit"].callback} {date}") });
+                } else {
+                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: commands.Callback["Edit"].text, callbackData: $"{commands.Callback["Edit"].callback} {date}") });
+                }
+            } else if(all) {
                 editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: commands.Callback["All"].text, callbackData: $"{commands.Callback["All"].callback} {date}") });
+            }
 
             return new InlineKeyboardMarkup(editButtons);
         }

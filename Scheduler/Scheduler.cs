@@ -5,10 +5,10 @@ using ScheduleBot.DB.Entity;
 
 namespace ScheduleBot {
     public static class Scheduler {
-        public static List<(string, DateOnly)> GetScheduleByWeak(ScheduleDbContext dbContext, int weeks, ScheduleProfile profile) {
+        public static List<((string, bool), DateOnly)> GetScheduleByWeak(ScheduleDbContext dbContext, int weeks, ScheduleProfile profile) {
             var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
 
-            var schedules = new List<(string, DateOnly)>();
+            var schedules = new List<((string, bool), DateOnly)>();
 
             for(int i = 1; i < 7; i++) {
                 DateOnly tmp = dateOnly.AddDays(7 * weeks + i);
@@ -31,10 +31,16 @@ namespace ScheduleBot {
             return schedules;
         }
 
-        public static string GetScheduleByDate(ScheduleDbContext dbContext, DateOnly date, ScheduleProfile profile, bool all = false) {
-            var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID).ToList();
+        public static (string, bool) GetScheduleByDate(ScheduleDbContext dbContext, DateOnly date, ScheduleProfile profile, bool all = false) {
+            var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID && (i.Date == null || i.Date == date)).ToList();
 
-            var list = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && i.Date == date && (all || !completedDisciplines.Contains((CompletedDiscipline)i))).ToList();
+            var list = dbContext.Disciplines.Where(i => i.Group == profile.Group && i.Date == date).ToList();
+
+            int count = list.Count;
+
+            list = list.Where(i => all || !completedDisciplines.Contains((CompletedDiscipline)i)).ToList();
+
+            bool flag = list.Count < count;
 
             list.AddRange(dbContext.CustomDiscipline.Where(i => i.IsAdded && i.ScheduleProfileGuid == profile.ID && i.Date == date).Select(i => new Discipline(i)));
 
@@ -44,7 +50,7 @@ namespace ScheduleBot {
             string str = $"📌 {date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
 
             if(list.Count == 0)
-                return str += "Ничего нет";
+                return (str += "Ничего нет", flag);
 
             foreach(Discipline? item in list) {
                 str += $"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}\n" +
@@ -52,7 +58,7 @@ namespace ScheduleBot {
                        $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n";
             }
 
-            return str;
+            return (str, flag);
         }
 
         public static string GetTeacherWorkScheduleByDate(ScheduleDbContext dbContext, DateOnly date, string teacher) {
@@ -90,11 +96,11 @@ namespace ScheduleBot {
             return str;
         }
 
-        public static List<(string, DateOnly)> GetScheduleByDay(ScheduleDbContext dbContext, DayOfWeek dayOfWeek, ScheduleProfile profile) {
+        public static List<((string, bool), DateOnly)> GetScheduleByDay(ScheduleDbContext dbContext, DayOfWeek dayOfWeek, ScheduleProfile profile) {
             int weeks = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
             var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
 
-            var list = new List<(string, DateOnly)>();
+            var list = new List<((string, bool), DateOnly)>();
             for(int i = -1; i <= 1; i++) {
                 DateOnly tmp = dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek);
                 list.Add((GetScheduleByDate(dbContext, tmp, profile), tmp));

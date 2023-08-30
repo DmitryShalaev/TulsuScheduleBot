@@ -22,8 +22,10 @@ namespace ScheduleBot.Bot {
                 }
             }
 
-            if(DateOnly.TryParse(tmp[1], out DateOnly date))
-                await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile), replyMarkup: GetInlineKeyboardButton(date, user));
+            if(DateOnly.TryParse(tmp[1], out DateOnly date)) {
+                (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile);
+                await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: schedule.Item1, replyMarkup: GetInlineKeyboardButton(date, user, schedule.Item2));
+            }
         }
     }
 }

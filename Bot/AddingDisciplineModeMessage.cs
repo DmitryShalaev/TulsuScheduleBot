@@ -75,7 +75,7 @@ namespace ScheduleBot.Bot {
             dbContext.SaveChanges();
 
             await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: MainKeyboardMarkup);
-            await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, customDiscipline.Date, user.ScheduleProfile), replyMarkup: GetEditAdminInlineKeyboardButton(dbContext, customDiscipline.Date, user.ScheduleProfile));
+            await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, customDiscipline.Date, user.ScheduleProfile).Item1, replyMarkup: GetEditAdminInlineKeyboardButton(dbContext, customDiscipline.Date, user.ScheduleProfile));
         }
 
         private static async Task DeleteInitialMessage(ITelegramBotClient botClient, ChatId chatId, TelegramUser user) {

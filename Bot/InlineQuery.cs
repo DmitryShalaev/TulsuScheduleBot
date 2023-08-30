@@ -46,7 +46,7 @@ namespace ScheduleBot.Bot {
                     parser.UpdatingDisciplines(dbContext, user.ScheduleProfile.Group);
 
                 await botClient.AnswerInlineQueryAsync(inlineQuery.Id, new[] {
-                    new InlineQueryResultArticle(date.ToString(), date.ToString(), new InputTextMessageContent(Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile))),
+                    new InlineQueryResultArticle(date.ToString(), date.ToString(), new InputTextMessageContent(Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile).Item1)),
                 }, cacheTime: 60, isPersonal: true);
             }
         }
