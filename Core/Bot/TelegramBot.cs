@@ -13,7 +13,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleBot.Bot {
     public partial class TelegramBot {
-        private readonly ITelegramBotClient botClient;
+        public readonly ITelegramBotClient botClient;
         private readonly CommandManager commandManager;
         private readonly Parser parser;
 
@@ -991,22 +991,6 @@ namespace ScheduleBot.Bot {
             commandManager.TrimExcess();
 
             Console.WriteLine("Запущен бот " + botClient.GetMeAsync().Result.FirstName + "\n");
-        }
-
-        public Task ReceiveAsync() {
-            return botClient.ReceiveAsync(
-                async (botClient, update, cancellationToken) => await UpdateAsync(botClient, update),
-                (botClient, update, cancellationToken) => Task.CompletedTask,
-                new ReceiverOptions {
-                    AllowedUpdates = { },
-#if DEBUG
-                    ThrowPendingUpdates = true
-#else
-                    ThrowPendingUpdates = false
-#endif
-                },
-                new CancellationTokenSource().Token
-            );
         }
 
         public async Task UpdateAsync(ITelegramBotClient botClient, Update update) {

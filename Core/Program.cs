@@ -9,15 +9,8 @@ namespace ScheduleBot {
 
         public static TelegramBot InitBot() {
             if(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotToken")) ||
-               string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotConnectionString"))
-#if !DEBUG
-                || string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBot_FromEmail")) ||
-                string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBot_ToEmail")) ||
-                string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBot_PassEmail"))
-#endif
-                            ) {
+               string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotConnectionString")))
                 throw new NullReferenceException("Environment Variable is null");
-            }
 
             using(ScheduleDbContext dbContext = new())
                 dbContext.Database.Migrate();
