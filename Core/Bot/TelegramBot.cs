@@ -991,29 +991,30 @@ namespace ScheduleBot.Bot {
             commandManager.TrimExcess();
 
             Console.WriteLine("Запущен бот " + botClient.GetMeAsync().Result.FirstName + "\n");
-
-            botClient.ReceiveAsync(
-                HandleUpdateAsync,
-                HandleError,
-            new ReceiverOptions {
-                AllowedUpdates = { },
-#if DEBUG
-                ThrowPendingUpdates = true
-#else
-                ThrowPendingUpdates = false
-#endif
-            },
-            new CancellationTokenSource().Token
-           ).Wait();
         }
 
-        private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken) {
+        public Task ReceiveAsync() {
+            return botClient.ReceiveAsync(
+                async (botClient, update, cancellationToken) => await UpdateAsync(botClient, update),
+                (botClient, update, cancellationToken) => Task.CompletedTask,
+                new ReceiverOptions {
+                    AllowedUpdates = { },
+#if DEBUG
+                    ThrowPendingUpdates = true
+#else
+                    ThrowPendingUpdates = false
+#endif
+                },
+                new CancellationTokenSource().Token
+            );
+        }
+
+        public async Task UpdateAsync(ITelegramBotClient botClient, Update update) {
             string msg = Newtonsoft.Json.JsonConvert.SerializeObject(update) + "\n";
 #if DEBUG
             Console.WriteLine(msg);
 #endif
             Message? message = update.Message ?? update.EditedMessage ?? update.CallbackQuery?.Message;
-
             try {
 
                 using(ScheduleDbContext dbContext = new()) {
@@ -1087,8 +1088,6 @@ namespace ScheduleBot.Bot {
                 GC.Collect();
             }
         }
-
-        private Task HandleError(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken) => Task.CompletedTask;
 
         private async Task DeleteTempMessage(TelegramUser user, int? messageId = null) {
             try {

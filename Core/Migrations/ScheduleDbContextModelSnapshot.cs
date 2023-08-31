@@ -33,7 +33,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Classes");
+                    b.ToTable("Classes", (string)null);
 
                     b.HasData(
                         new
@@ -101,7 +101,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasIndex("ScheduleProfileGuid");
 
-                    b.ToTable("CompletedDisciplines");
+                    b.ToTable("CompletedDisciplines", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.CustomDiscipline", b =>
@@ -149,7 +149,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasIndex("ScheduleProfileGuid");
 
-                    b.ToTable("CustomDiscipline");
+                    b.ToTable("CustomDiscipline", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.Discipline", b =>
@@ -198,7 +198,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasIndex("Class");
 
-                    b.ToTable("Disciplines");
+                    b.ToTable("Disciplines", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.Feedback", b =>
@@ -226,7 +226,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasIndex("TelegramUserChatID");
 
-                    b.ToTable("Feedbacks");
+                    b.ToTable("Feedbacks", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.GroupLastUpdate", b =>
@@ -239,7 +239,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasKey("Group");
 
-                    b.ToTable("GroupLastUpdate");
+                    b.ToTable("GroupLastUpdate", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.MessageLog", b =>
@@ -264,7 +264,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasIndex("TelegramUserChatID");
 
-                    b.ToTable("MessageLog");
+                    b.ToTable("MessageLog", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.ModeDTO", b =>
@@ -278,7 +278,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Modes");
+                    b.ToTable("Modes", (string)null);
 
                     b.HasData(
                         new
@@ -380,7 +380,7 @@ namespace ScheduleBot.Migrations
                     b.HasIndex("OwnerID")
                         .IsUnique();
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.Progress", b =>
@@ -410,7 +410,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Progresses");
+                    b.ToTable("Progresses", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.ScheduleProfile", b =>
@@ -439,7 +439,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasIndex("StudentID");
 
-                    b.ToTable("ScheduleProfile");
+                    b.ToTable("ScheduleProfile", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.StudentIDLastUpdate", b =>
@@ -452,7 +452,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasKey("StudentID");
 
-                    b.ToTable("StudentIDLastUpdate");
+                    b.ToTable("StudentIDLastUpdate", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.TeacherLastUpdate", b =>
@@ -465,7 +465,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasKey("Teacher");
 
-                    b.ToTable("TeacherLastUpdate");
+                    b.ToTable("TeacherLastUpdate", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.TeacherWorkSchedule", b =>
@@ -512,7 +512,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasIndex("Lecturer");
 
-                    b.ToTable("TeacherWorkSchedule");
+                    b.ToTable("TeacherWorkSchedule", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.TelegramUser", b =>
@@ -568,7 +568,7 @@ namespace ScheduleBot.Migrations
 
                     b.HasIndex("ScheduleProfileGuid");
 
-                    b.ToTable("TelegramUsers");
+                    b.ToTable("TelegramUsers", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.CompletedDiscipline", b =>

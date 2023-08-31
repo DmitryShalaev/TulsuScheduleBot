@@ -51,7 +51,7 @@ namespace ScheduleBot {
 
         private void UpdatingDisciplines(object? sender = null, ElapsedEventArgs? e = null) {
             using(ScheduleDbContext dbContext = new()) {
-                foreach(string item in dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= 7).Select(i => i.Group!).Distinct().ToList()) 
+                foreach(string item in dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= 7).Select(i => i.Group!).Distinct().ToList())
                     UpdatingDisciplines(dbContext, group: item);
 
                 UpdatingDisciplinesTimer.Start();
