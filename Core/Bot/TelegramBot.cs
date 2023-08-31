@@ -993,7 +993,7 @@ namespace ScheduleBot.Bot {
             Console.WriteLine("Запущен бот " + botClient.GetMeAsync().Result.FirstName + "\n");
         }
 
-        public async Task UpdateAsync(ITelegramBotClient botClient, Update update) {
+        public async Task UpdateAsync(Update update) {
             string msg = Newtonsoft.Json.JsonConvert.SerializeObject(update) + "\n";
 #if DEBUG
             Console.WriteLine(msg);
@@ -1059,7 +1059,7 @@ namespace ScheduleBot.Bot {
                         dbContext.SaveChanges();
                     } else {
                         if(update.Type == Telegram.Bot.Types.Enums.UpdateType.InlineQuery) {
-                            await InlineQuery(dbContext, botClient, update);
+                            await InlineQuery(dbContext, update);
                             return;
                         }
                     }
