@@ -7,7 +7,6 @@ using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
-using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -72,15 +71,27 @@ namespace ScheduleBot.Bot {
 
             #region Message
             #region Main
-            commandManager.AddMessageCommand("/start", Mode.Default, async (dbContext, chatId, messageId, user, args) => {
-                await botClient.SendTextMessageAsync(chatId: chatId, text: "👋", replyMarkup: MainKeyboardMarkup);
+            foreach(Mode mode in Enum.GetValues(typeof(Mode)).Cast<Mode>()) {
+                commandManager.AddMessageCommand("/start", mode, async (dbContext, chatId, messageId, user, args) => {
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: "👋", replyMarkup: MainKeyboardMarkup);
 
-                if(string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
-                    user.Mode = Mode.GroupСhange;
+                    if(string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
+                        user.Mode = Mode.GroupСhange;
 
-                    user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Для начала работы с ботом необходимо указать номер учебной группы", replyMarkup: CancelKeyboardMarkup)).MessageId;
-                }
-            });
+                        user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Для начала работы с ботом необходимо указать номер учебной группы", replyMarkup: CancelKeyboardMarkup)).MessageId;
+                        return;
+                    }
+
+                    if(user.Mode == Mode.AddingDiscipline)
+                        dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile));
+
+                    user.TempData = null;
+                    user.Mode = Mode.Default;
+
+                    await DeleteTempMessage(user);
+                });
+            }
+
             commandManager.AddMessageCommand("/SetProfile", Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 try {
                     if(Guid.TryParse(args, out Guid profile)) {
@@ -228,21 +239,6 @@ namespace ScheduleBot.Bot {
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["MainMenu"], replyMarkup: MainKeyboardMarkup);
             });
-
-            foreach(Mode mode in Enum.GetValues(typeof(Mode)).Cast<Mode>()) {
-                commandManager.AddMessageCommand("/restart", mode, async (dbContext, chatId, messageId, user, args) => {
-
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["MainMenu"], replyMarkup: MainKeyboardMarkup);
-
-                    if(user.Mode == Mode.AddingDiscipline)
-                        dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile));
-
-                    user.TempData = null;
-                    user.Mode = Mode.Default;
-
-                    await DeleteTempMessage(user);
-                });
-            }
 
             commandManager.AddMessageCommand(commands.Message["Today"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, MainKeyboardMarkup);
