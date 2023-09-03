@@ -12,7 +12,7 @@ namespace ScheduleBot.Bot {
 
             IOrderedQueryable<Discipline> disciplines = dbContext.Disciplines.Where(i => i.Group == scheduleProfile.Group && i.Date == date).OrderBy(i => i.StartTime);
             if(disciplines.Any()) {
-                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "В этот день", callbackData: "!"), InlineKeyboardButton.WithCallbackData(text: "Всегда", callbackData: "!") });
+                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "В этот день", callbackData: "!"), InlineKeyboardButton.WithCallbackData(text: "Семестр", callbackData: "!") });
 
                 foreach(Discipline? item in disciplines) {
                     CompletedDiscipline tmp = new(item, scheduleProfile.ID) { Date = null };
