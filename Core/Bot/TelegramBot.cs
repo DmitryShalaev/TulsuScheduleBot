@@ -78,7 +78,7 @@ namespace ScheduleBot.Bot {
                     if(string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
                         user.Mode = Mode.GroupСhange;
 
-                        user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Для начала работы с ботом необходимо указать номер учебной группы", replyMarkup: CancelKeyboardMarkup)).MessageId;
+                        user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Для начала работы с ботом укажите номер учебной группы.", replyMarkup: CancelKeyboardMarkup)).MessageId;
                         return;
                     }
 
