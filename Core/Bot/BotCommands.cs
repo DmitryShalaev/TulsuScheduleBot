@@ -32,6 +32,8 @@ namespace ScheduleBot.Bot {
         public CollegeStruct College { get; private set; }
         public ConfigStruct Config { get; private set; }
 
+        private static BotCommands? Instance;
+
         public BotCommands() {
 
             using(StreamReader sr = new(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + @"/Bot/TulsuScheduleBotSettings.json")) {
@@ -48,5 +50,7 @@ namespace ScheduleBot.Bot {
                 Callback.TrimExcess();
             }
         }
+
+        public static BotCommands GetInstance() => Instance ??= new BotCommands();
     }
 }

@@ -22,7 +22,7 @@ namespace ScheduleBot {
 
         public static Parser? Instance { get; private set; }
 
-        public Parser(BotCommands commands, UpdatedDisciplines updatedDisciplines) {
+        public Parser(UpdatedDisciplines updatedDisciplines) {
             Notify += updatedDisciplines;
 
             clientHandler = new() {
@@ -33,7 +33,7 @@ namespace ScheduleBot {
             };
 
             UpdatingDisciplinesTimer = new() {
-                Interval = commands.Config.GroupUpdateTime * 60 * 1000, //Minutes Seconds Milliseconds
+                Interval = BotCommands.GetInstance().Config.GroupUpdateTime * 60 * 1000, //Minutes Seconds Milliseconds
                 AutoReset = false
             };
 

@@ -19,7 +19,7 @@ namespace ScheduleBot.Bot {
         public TelegramBot() {
             botClient = new TelegramBotClient(Environment.GetEnvironmentVariable("TelegramBotToken")!);
 
-            parser = new(commands, UpdatedDisciplinesAsync);
+            parser = new(UpdatedDisciplinesAsync);
 
             commandManager = new(this, (string message, TelegramUser user, out string args) => {
                 args = "";

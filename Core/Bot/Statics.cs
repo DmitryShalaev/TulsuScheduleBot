@@ -30,7 +30,7 @@ namespace ScheduleBot.Bot {
         [GeneratedRegex("^\\d{1,2}([ ,.-](\\d{1,2}|\\w{3,8}))?([ ,.-](\\d{2}|\\d{4}))?$")]
         private static partial Regex DateRegex();
 
-        public static readonly BotCommands commands = new();
+        public static readonly BotCommands commands = BotCommands.GetInstance();
 
         #region ReplyKeyboardMarkup
         public static readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
@@ -91,8 +91,8 @@ namespace ScheduleBot.Bot {
         public async Task StudentIdErrorUser(ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Попросите владельца профиля указать номер зачетной книжки в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
 
         private async Task ScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string group, IReplyMarkup? replyMarkup) {
-            DateTime groupLastUpdate = dbContext.GroupLastUpdate.First(i => i.Group == group).Update.ToLocalTime();
-            if((DateTime.Now - groupLastUpdate).TotalMinutes > commands.Config.GroupUpdateTime) {
+            var groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group)?.Update.ToLocalTime();
+            if(groupLastUpdate is null || (DateTime.Now - groupLastUpdate)?.TotalMinutes > commands.Config.GroupUpdateTime) {
                 int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
                 if(!parser.UpdatingDisciplines(dbContext, group))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
@@ -105,8 +105,8 @@ namespace ScheduleBot.Bot {
         }
 
         private async Task TeacherWorkScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string teacher, IReplyMarkup? replyMarkup) {
-            DateTime teacherLastUpdate = dbContext.TeacherLastUpdate.First(i => i.Teacher == teacher).Update.ToLocalTime();
-            if((DateTime.Now - teacherLastUpdate).TotalMinutes > commands.Config.TeacherWorkScheduleUpdateTime) {
+            var teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher)?.Update.ToLocalTime();
+            if(teacherLastUpdate is null || (DateTime.Now - teacherLastUpdate)?.TotalMinutes > commands.Config.TeacherWorkScheduleUpdateTime) {
                 int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
                 if(!parser.UpdatingTeacherWorkSchedule(dbContext, teacher))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
@@ -119,8 +119,8 @@ namespace ScheduleBot.Bot {
         }
 
         private async Task ProgressRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
-            DateTime studentIDlastUpdate = dbContext.StudentIDLastUpdate.First(i => i.StudentID == studentID).Update.ToLocalTime();
-            if((DateTime.Now - studentIDlastUpdate).TotalMinutes > commands.Config.StudentIDUpdateTime) {
+            var studentIDlastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID)?.Update.ToLocalTime();
+            if(studentIDlastUpdate is null || (DateTime.Now - studentIDlastUpdate)?.TotalMinutes > commands.Config.StudentIDUpdateTime) {
                 int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
                 if(!parser.UpdatingProgress(dbContext, studentID))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
