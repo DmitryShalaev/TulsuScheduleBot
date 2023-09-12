@@ -25,7 +25,7 @@ jobs:
     - name: Stop ScheduleBot Service
       uses: garygrossgarten/github-action-ssh@release
       with:
-        command: service --user ScheduleBot stop
+        command: systemctl --user stop ScheduleBot
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
         passphrase: ${{ secrets.PASSPHRASE }}
@@ -47,7 +47,7 @@ jobs:
     - name: Start ScheduleBot Service
       uses: garygrossgarten/github-action-ssh@release
       with:
-        command: service --user ScheduleBot start
+        command: systemctl --user start ScheduleBot
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
         passphrase: ${{ secrets.PASSPHRASE }}
