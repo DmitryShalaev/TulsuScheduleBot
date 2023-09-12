@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Timers;
@@ -223,6 +224,8 @@ namespace ScheduleBot {
                     client.DefaultRequestHeaders.Add("Connection", "keep-alive");
                     client.DefaultRequestHeaders.Add("Host", "tulsu.ru");
 
+                    client.Timeout = TimeSpan.FromSeconds(10);
+
                     #endregion
 
                     using(var content = new StringContent($"search_field=GROUP_P&search_value={group}", Encoding.UTF8, "application/x-www-form-urlencoded"))
@@ -258,6 +261,8 @@ namespace ScheduleBot {
                     client.DefaultRequestHeaders.Add("Sec-Fetch-Site", "same-origin");
                     client.DefaultRequestHeaders.Add("Connection", "keep-alive");
                     client.DefaultRequestHeaders.Add("Host", "tulsu.ru");
+
+                    client.Timeout = TimeSpan.FromSeconds(10);
 
                     #endregion
 
@@ -297,6 +302,9 @@ namespace ScheduleBot {
                     client.DefaultRequestHeaders.Add("Sec-Fetch-Site", "same-origin");
                     client.DefaultRequestHeaders.Add("Connection", "keep-alive");
                     client.DefaultRequestHeaders.Add("Host", "tulsu.ru");
+
+                    client.Timeout = TimeSpan.FromSeconds(10);
+
                     #endregion
 
                     Regex regex = TeachersRegex();
@@ -333,6 +341,9 @@ namespace ScheduleBot {
                     client.DefaultRequestHeaders.Add("Sec-Fetch-Site", "same-origin");
                     client.DefaultRequestHeaders.Add("Connection", "keep-alive");
                     client.DefaultRequestHeaders.Add("Host", "tulsu.ru");
+
+                    client.Timeout = TimeSpan.FromSeconds(10);
+
                     #endregion
 
                     using(var content = new StringContent($"search_value={group}", Encoding.UTF8, "application/x-www-form-urlencoded"))
@@ -370,6 +381,9 @@ namespace ScheduleBot {
                     client.DefaultRequestHeaders.Add("Sec-Fetch-Site", "same-origin");
                     client.DefaultRequestHeaders.Add("Connection", "keep-alive");
                     client.DefaultRequestHeaders.Add("Host", "tulsu.ru");
+
+                    client.Timeout = TimeSpan.FromSeconds(10);
+
                     #endregion
 
                     using(var content = new StringContent($"SEARCH={studentID}", Encoding.UTF8, "application/x-www-form-urlencoded"))
