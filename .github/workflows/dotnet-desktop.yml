@@ -22,10 +22,10 @@ jobs:
     - name: DotNet Publish
       run: dotnet publish ./LongPolling/LongPolling.csproj --os linux -c Release
       
-    - name: Stop schedule Service
+    - name: Stop ScheduleBot Service
       uses: garygrossgarten/github-action-ssh@release
       with:
-        command: service schedule stop
+        command: service --user ScheduleBot stop
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
         passphrase: ${{ secrets.PASSPHRASE }}
@@ -44,10 +44,10 @@ jobs:
       env:
         ASPNETCORE_ENVIRONMENT: Production
 
-    - name: Start schedule Service
+    - name: Start ScheduleBot Service
       uses: garygrossgarten/github-action-ssh@release
       with:
-        command: service schedule start
+        command: service --user ScheduleBot start
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
         passphrase: ${{ secrets.PASSPHRASE }}
