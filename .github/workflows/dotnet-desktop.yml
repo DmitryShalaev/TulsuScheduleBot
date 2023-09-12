@@ -27,6 +27,7 @@ jobs:
       with:
         command: systemctl --user stop ScheduleBot
         host: ${{ secrets.REMOTE_HOST }}
+        port: 10022
         username: ${{ secrets.REMOTE_USER }}
         passphrase: ${{ secrets.PASSPHRASE }}
         privateKey: ${{ secrets.REMOTE_SSH_KEY }}
@@ -49,6 +50,7 @@ jobs:
       with:
         command: systemctl --user start ScheduleBot
         host: ${{ secrets.REMOTE_HOST }}
+        port: 10022
         username: ${{ secrets.REMOTE_USER }}
         passphrase: ${{ secrets.PASSPHRASE }}
         privateKey: ${{ secrets.REMOTE_SSH_KEY }}
