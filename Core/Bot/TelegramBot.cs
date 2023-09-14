@@ -432,7 +432,7 @@ namespace ScheduleBot.Bot {
                 int _messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: CancelKeyboardMarkup)).MessageId;
                 GroupLastUpdate? group = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == args);
 
-                if(group is null && parser.UpdatingDisciplines(dbContext, args))
+                if(group is null && parser.UpdatingDisciplines(dbContext, args, 0))
                     group = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == args);
 
                 if(group is not null) {
@@ -462,7 +462,7 @@ namespace ScheduleBot.Bot {
                 if(int.TryParse(args, out int id)) {
                     StudentIDLastUpdate? studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args);
 
-                    if(studentID is null && parser.UpdatingProgress(dbContext, args))
+                    if(studentID is null && parser.UpdatingProgress(dbContext, args, 0))
                         studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args);
 
                     if(studentID is not null) {
@@ -990,7 +990,7 @@ namespace ScheduleBot.Bot {
         }
 
         public async Task UpdateAsync(Update update) {
-            string msg = Newtonsoft.Json.JsonConvert.SerializeObject(update) + "\n";
+            string msg = Newtonsoft.Json.JsonConvert.SerializeObject(update) + "\n" + $"{Thread.CurrentThread.ManagedThreadId}\n\n";
 #if DEBUG
             Console.WriteLine(msg);
 #endif

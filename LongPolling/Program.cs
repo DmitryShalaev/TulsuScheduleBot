@@ -27,7 +27,10 @@ namespace LongPolling {
                 TelegramBot bot = Core.InitBot();
 
                 bot.botClient.ReceiveAsync(
-                    async (botClient, update, cancellationToken) => await bot.UpdateAsync(update),
+                    (botClient, update, cancellationToken) => {
+                        new Thread(bot.UpdateAsync(update).Wait).Start();
+                        return Task.CompletedTask;
+                    },
                     (botClient, update, cancellationToken) => Task.CompletedTask,
                     new ReceiverOptions {
                         AllowedUpdates = { },

@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Timers;
@@ -53,20 +52,30 @@ namespace ScheduleBot {
         private void UpdatingDisciplines(object? sender = null, ElapsedEventArgs? e = null) {
             using(ScheduleDbContext dbContext = new()) {
                 foreach(string item in dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= 7).Select(i => i.Group!).Distinct().ToList())
-                    UpdatingDisciplines(dbContext, group: item);
+                    UpdatingDisciplines(dbContext, group: item, updateAttemptTime: 0);
 
                 UpdatingDisciplinesTimer.Start();
             }
         }
 
-        public bool UpdatingProgress(ScheduleDbContext dbContext, string studentID) {
+        public bool UpdatingProgress(ScheduleDbContext dbContext, string studentID, int updateAttemptTime) {
+            StudentIDLastUpdate? studentIDLastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID);
+            if(studentIDLastUpdate is null) {
+                studentIDLastUpdate = new() { StudentID = studentID, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
+                dbContext.StudentIDLastUpdate.Add(studentIDLastUpdate);
+
+                dbContext.SaveChanges();
+            } else {
+                if((DateTime.Now - studentIDLastUpdate.UpdateAttempt.ToLocalTime()).TotalMinutes > updateAttemptTime)
+                    studentIDLastUpdate.UpdateAttempt = DateTime.UtcNow;
+                else
+                    return false;
+            }
+
             List<Progress>? progress = GetProgress(studentID);
             if(progress != null) {
-                StudentIDLastUpdate? studentIDLastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID);
-                if(studentIDLastUpdate is null)
-                    dbContext.StudentIDLastUpdate.Add(new() { StudentID = studentID, Update = DateTime.UtcNow });
-                else
-                    studentIDLastUpdate.Update = DateTime.UtcNow;
+
+                studentIDLastUpdate!.Update = DateTime.UtcNow;
 
                 var _list = dbContext.Progresses.Where(i => i.StudentID == studentID).ToList();
 
@@ -90,7 +99,20 @@ namespace ScheduleBot {
             return false;
         }
 
-        public bool UpdatingDisciplines(ScheduleDbContext dbContext, string group) {
+        public bool UpdatingDisciplines(ScheduleDbContext dbContext, string group, int updateAttemptTime) {
+            GroupLastUpdate? groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group);
+            if(groupLastUpdate is null) {
+                groupLastUpdate = new() { Group = group, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
+                dbContext.GroupLastUpdate.Add(groupLastUpdate);
+
+                dbContext.SaveChanges();
+            } else {
+                if((DateTime.Now - groupLastUpdate.UpdateAttempt.ToLocalTime()).TotalMinutes > updateAttemptTime)
+                    groupLastUpdate.UpdateAttempt = DateTime.UtcNow;
+                else
+                    return false;
+            }
+
             (DateOnly min, DateOnly max)? dates = GetDates(group);
             if(dates != null) {
 
@@ -98,11 +120,7 @@ namespace ScheduleBot {
                 if(disciplines != null) {
                     List<Discipline> updatedDisciplines = new();
 
-                    GroupLastUpdate? groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group);
-                    if(groupLastUpdate is null)
-                        dbContext.GroupLastUpdate.Add(new() { Group = group, Update = DateTime.UtcNow });
-                    else
-                        groupLastUpdate.Update = DateTime.UtcNow;
+                    groupLastUpdate.Update = DateTime.UtcNow;
 
                     if(dbContext.Disciplines.Any(i => i.Group == group && i.Date < dates.Value.min)) {
                         dbContext.Disciplines.RemoveRange(dbContext.Disciplines.Where(i => i.Group == group && i.Date < dates.Value.min));
@@ -143,18 +161,28 @@ namespace ScheduleBot {
             return false;
         }
 
-        public bool UpdatingTeacherWorkSchedule(ScheduleDbContext dbContext, string teacher) {
+        public bool UpdatingTeacherWorkSchedule(ScheduleDbContext dbContext, string teacher, int updateAttemptTime) {
+            TeacherLastUpdate? teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher);
+            if(teacherLastUpdate is null) {
+                teacherLastUpdate = new() { Teacher = teacher, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
+                dbContext.TeacherLastUpdate.Add(teacherLastUpdate);
+
+                dbContext.SaveChanges();
+            } else {
+                if((DateTime.Now - teacherLastUpdate.UpdateAttempt.ToLocalTime()).TotalMinutes > updateAttemptTime)
+                    teacherLastUpdate.UpdateAttempt = DateTime.UtcNow;
+                else
+                    return false;
+            }
+
             (DateOnly min, DateOnly max)? dates = GetDates(teacher);
             if(dates != null) {
 
                 List<TeacherWorkSchedule>? teacherWorkSchedule = GetTeachersWorkSchedule(teacher);
 
                 if(teacherWorkSchedule != null) {
-                    TeacherLastUpdate? teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher);
-                    if(teacherLastUpdate is null)
-                        dbContext.TeacherLastUpdate.Add(new() { Teacher = teacher, Update = DateTime.UtcNow });
-                    else
-                        teacherLastUpdate.Update = DateTime.UtcNow;
+
+                    teacherLastUpdate!.Update = DateTime.UtcNow;
 
                     if(dbContext.TeacherWorkSchedule.Any(i => i.Lecturer == teacher && i.Date < dates.Value.min)) {
                         dbContext.TeacherWorkSchedule.RemoveRange(dbContext.TeacherWorkSchedule.Where(i => i.Lecturer == teacher && i.Date < dates.Value.min));

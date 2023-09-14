@@ -8,5 +8,7 @@ namespace ScheduleBot.DB.Entity {
         public string StudentID { get; set; }
 
         public DateTime Update { get; set; }
+
+        public DateTime UpdateAttempt { get; set; }
     }
 }

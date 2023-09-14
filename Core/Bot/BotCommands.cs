@@ -22,7 +22,7 @@ namespace ScheduleBot.Bot {
             public int GroupUpdateTime;
             public int StudentIDUpdateTime;
             public int TeacherWorkScheduleUpdateTime;
-
+            public int UpdateAttemptTime;
         }
 
         public Dictionary<string, string> Message { get; private set; }

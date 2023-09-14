@@ -2,7 +2,9 @@
   "Config": {
     "GroupUpdateTime": "30",
     "StudentIDUpdateTime": "30",
-    "TeacherWorkScheduleUpdateTime" : "60"
+    "TeacherWorkScheduleUpdateTime": "60",
+
+    "UpdateAttemptTime": 5
   },
 
   "Message": {
