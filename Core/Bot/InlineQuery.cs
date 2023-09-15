@@ -43,7 +43,7 @@ namespace ScheduleBot.Bot {
 
             if(user is not null && !string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
                 if((DateTime.Now - dbContext.GroupLastUpdate.Single(i => i.Group == user.ScheduleProfile.Group).Update.ToLocalTime()).TotalMinutes > commands.Config.GroupUpdateTime)
-                    parser.UpdatingDisciplines(dbContext, user.ScheduleProfile.Group, commands.Config.UpdateAttemptTime);
+                    await parser.UpdatingDisciplines(dbContext, user.ScheduleProfile.Group, commands.Config.UpdateAttemptTime);
 
                 await botClient.AnswerInlineQueryAsync(inlineQuery.Id, new[] {
                     new InlineQueryResultArticle(date.ToString(), date.ToString(), new InputTextMessageContent(Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile).Item1)),
