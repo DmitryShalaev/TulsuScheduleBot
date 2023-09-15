@@ -95,7 +95,7 @@ namespace ScheduleBot.Bot {
 
             if(groupLastUpdate is null || (DateTime.Now - groupLastUpdate)?.TotalMinutes > commands.Config.GroupUpdateTime) {
                 int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
-                if(!parser.UpdatingDisciplines(dbContext, group, commands.Config.UpdateAttemptTime))
+                if(!await parser.UpdatingDisciplines(dbContext, group, commands.Config.UpdateAttemptTime))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
@@ -110,7 +110,7 @@ namespace ScheduleBot.Bot {
             DateTime? teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher)?.Update.ToLocalTime();
             if(teacherLastUpdate is null || (DateTime.Now - teacherLastUpdate)?.TotalMinutes > commands.Config.TeacherWorkScheduleUpdateTime) {
                 int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
-                if(!parser.UpdatingTeacherWorkSchedule(dbContext, teacher, commands.Config.UpdateAttemptTime))
+                if(!await parser.UpdatingTeacherWorkSchedule(dbContext, teacher, commands.Config.UpdateAttemptTime))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
@@ -125,7 +125,7 @@ namespace ScheduleBot.Bot {
             DateTime? studentIDlastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID)?.Update.ToLocalTime();
             if(studentIDlastUpdate is null || (DateTime.Now - studentIDlastUpdate)?.TotalMinutes > commands.Config.StudentIDUpdateTime) {
                 int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
-                if(!parser.UpdatingProgress(dbContext, studentID, commands.Config.UpdateAttemptTime))
+                if(!await parser.UpdatingProgress(dbContext, studentID, commands.Config.UpdateAttemptTime))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);

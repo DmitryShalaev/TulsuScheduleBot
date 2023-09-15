@@ -432,7 +432,7 @@ namespace ScheduleBot.Bot {
                 int _messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: CancelKeyboardMarkup)).MessageId;
                 GroupLastUpdate? group = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == args);
 
-                if(group is null && parser.UpdatingDisciplines(dbContext, args, 0))
+                if(group is null && await parser.UpdatingDisciplines(dbContext, args, 0))
                     group = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == args);
 
                 if(group is not null) {
@@ -462,7 +462,7 @@ namespace ScheduleBot.Bot {
                 if(int.TryParse(args, out int id)) {
                     StudentIDLastUpdate? studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args);
 
-                    if(studentID is null && parser.UpdatingProgress(dbContext, args, 0))
+                    if(studentID is null && await parser.UpdatingProgress(dbContext, args, 0))
                         studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args);
 
                     if(studentID is not null) {
@@ -838,12 +838,6 @@ namespace ScheduleBot.Bot {
                 await DeleteTempMessage(user, messageId);
             });
 
-            commandManager.AddMessageCommand("/UpdateTeachers", Mode.Default, async (dbContext, chatId, messageId, user, args) => {
-                parser.UpdatingTeachers(dbContext);
-
-                await botClient.SendTextMessageAsync(chatId: chatId, text: "OK", replyMarkup: MainKeyboardMarkup);
-            }, CommandManager.Check.admin);
-
             commandManager.AddMessageCommand(commands.Message["TeachersWorkSchedule"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 user.Mode = Mode.TeachersWorkSchedule;
 
@@ -990,13 +984,12 @@ namespace ScheduleBot.Bot {
         }
 
         public async Task UpdateAsync(Update update) {
-            string msg = Newtonsoft.Json.JsonConvert.SerializeObject(update) + "\n" + $"{Thread.CurrentThread.ManagedThreadId}\n\n";
+            string msg = Newtonsoft.Json.JsonConvert.SerializeObject(update) + "\n";
 #if DEBUG
             Console.WriteLine(msg);
 #endif
             Message? message = update.Message ?? update.EditedMessage ?? update.CallbackQuery?.Message;
             try {
-
                 using(ScheduleDbContext dbContext = new()) {
                     if(message is not null) {
                         if(message.From is null) return;

@@ -41,24 +41,26 @@ namespace ScheduleBot {
 
             Instance = this;
 
-            Task.Run(() => {
+            Task.Run(async () => {
                 using(ScheduleDbContext dbContext = new())
-                    UpdatingTeachers(dbContext);
-
-                UpdatingDisciplines(sender: null, e: null);
+                    await UpdatingTeachers(dbContext);
             });
+
+            UpdatingDisciplines(sender: null, e: null);
         }
 
         private void UpdatingDisciplines(object? sender = null, ElapsedEventArgs? e = null) {
-            using(ScheduleDbContext dbContext = new()) {
-                foreach(string item in dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= 7).Select(i => i.Group!).Distinct().ToList())
-                    UpdatingDisciplines(dbContext, group: item, updateAttemptTime: 0);
+            Task.Run(async () => {
+                using(ScheduleDbContext dbContext = new()) {
+                    foreach(string item in dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= 7).Select(i => i.Group!).Distinct().ToList())
+                        await UpdatingDisciplines(dbContext, group: item, updateAttemptTime: 0);
 
-                UpdatingDisciplinesTimer.Start();
-            }
+                    UpdatingDisciplinesTimer.Start();
+                }
+            });
         }
 
-        public bool UpdatingProgress(ScheduleDbContext dbContext, string studentID, int updateAttemptTime) {
+        public async Task<bool> UpdatingProgress(ScheduleDbContext dbContext, string studentID, int updateAttemptTime) {
             StudentIDLastUpdate? studentIDLastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID);
             if(studentIDLastUpdate is null) {
                 studentIDLastUpdate = new() { StudentID = studentID, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
@@ -72,7 +74,7 @@ namespace ScheduleBot {
                     return false;
             }
 
-            List<Progress>? progress = GetProgress(studentID);
+            List<Progress>? progress = await GetProgress(studentID);
             if(progress != null) {
 
                 studentIDLastUpdate!.Update = DateTime.UtcNow;
@@ -99,7 +101,7 @@ namespace ScheduleBot {
             return false;
         }
 
-        public bool UpdatingDisciplines(ScheduleDbContext dbContext, string group, int updateAttemptTime) {
+        public async Task<bool> UpdatingDisciplines(ScheduleDbContext dbContext, string group, int updateAttemptTime) {
             GroupLastUpdate? groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group);
             if(groupLastUpdate is null) {
                 groupLastUpdate = new() { Group = group, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
@@ -113,10 +115,10 @@ namespace ScheduleBot {
                     return false;
             }
 
-            (DateOnly min, DateOnly max)? dates = GetDates(group);
+            (DateOnly min, DateOnly max)? dates = await GetDates(group);
             if(dates != null) {
 
-                List<Discipline>? disciplines = GetDisciplines(group);
+                List<Discipline>? disciplines = await GetDisciplines(group);
                 if(disciplines != null) {
                     List<Discipline> updatedDisciplines = new();
 
@@ -161,7 +163,7 @@ namespace ScheduleBot {
             return false;
         }
 
-        public bool UpdatingTeacherWorkSchedule(ScheduleDbContext dbContext, string teacher, int updateAttemptTime) {
+        public async Task<bool> UpdatingTeacherWorkSchedule(ScheduleDbContext dbContext, string teacher, int updateAttemptTime) {
             TeacherLastUpdate? teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher);
             if(teacherLastUpdate is null) {
                 teacherLastUpdate = new() { Teacher = teacher, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
@@ -175,10 +177,10 @@ namespace ScheduleBot {
                     return false;
             }
 
-            (DateOnly min, DateOnly max)? dates = GetDates(teacher);
+            (DateOnly min, DateOnly max)? dates = await GetDates(teacher);
             if(dates != null) {
 
-                List<TeacherWorkSchedule>? teacherWorkSchedule = GetTeachersWorkSchedule(teacher);
+                List<TeacherWorkSchedule>? teacherWorkSchedule = await GetTeachersWorkSchedule(teacher);
 
                 if(teacherWorkSchedule != null) {
 
@@ -212,8 +214,8 @@ namespace ScheduleBot {
             return false;
         }
 
-        public bool UpdatingTeachers(ScheduleDbContext dbContext) {
-            List<string>? teachers = GetTeachers();
+        public async Task<bool> UpdatingTeachers(ScheduleDbContext dbContext) {
+            List<string>? teachers = await GetTeachers();
 
             if(teachers != null) {
                 var _list = dbContext.TeacherLastUpdate.Select(i => i.Teacher).ToList();
@@ -232,7 +234,7 @@ namespace ScheduleBot {
             return false;
         }
 
-        public List<Discipline>? GetDisciplines(string group) {
+        public async Task<List<Discipline>?> GetDisciplines(string group) {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
                     #region RequestHeaders
@@ -257,9 +259,9 @@ namespace ScheduleBot {
                     #endregion
 
                     using(var content = new StringContent($"search_field=GROUP_P&search_value={group}", Encoding.UTF8, "application/x-www-form-urlencoded"))
-                    using(HttpResponseMessage response = client.PostAsync("https://tulsu.ru/schedule/queries/GetSchedule.php", content).Result)
+                    using(HttpResponseMessage response = await client.PostAsync("https://tulsu.ru/schedule/queries/GetSchedule.php", content))
                         if(response.IsSuccessStatusCode) {
-                            var jObject = JArray.Parse(response.Content.ReadAsStringAsync().Result);
+                            var jObject = JArray.Parse(await response.Content.ReadAsStringAsync());
                             return jObject.Count == 0 ? throw new Exception() : jObject.Select(j => new Discipline(j, group)).ToList();
                         }
                 }
@@ -270,7 +272,7 @@ namespace ScheduleBot {
             return null;
         }
 
-        public List<TeacherWorkSchedule>? GetTeachersWorkSchedule(string fio) {
+        public async Task<List<TeacherWorkSchedule>?> GetTeachersWorkSchedule(string fio) {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
                     #region RequestHeaders
@@ -295,9 +297,9 @@ namespace ScheduleBot {
                     #endregion
 
                     using(var content = new StringContent($"search_field=PREP&search_value={fio}", Encoding.UTF8, "application/x-www-form-urlencoded"))
-                    using(HttpResponseMessage response = client.PostAsync("https://tulsu.ru/schedule/queries/GetSchedule.php", content).Result)
+                    using(HttpResponseMessage response = await client.PostAsync("https://tulsu.ru/schedule/queries/GetSchedule.php", content))
                         if(response.IsSuccessStatusCode) {
-                            var jObject = JArray.Parse(response.Content.ReadAsStringAsync().Result);
+                            var jObject = JArray.Parse(await response.Content.ReadAsStringAsync());
                             return jObject.Count == 0 ? throw new Exception() : jObject.Select(j => new TeacherWorkSchedule(j)).ToList();
                         }
                 }
@@ -311,7 +313,7 @@ namespace ScheduleBot {
         [GeneratedRegex("^[А-ЯЁ][а-яё]+\\s*[А-ЯЁ](?:[а-яё\\.]+)?(?:\\s*[А-ЯЁ][а-яё]+)?(?:\\s[А-ЯЁ]\\\\.)?\\s*(?:\\s*[А-ЯЁ]\\.)?(?:\\s*[А-ЯЁ][а-яё]+)?$")]
         private static partial Regex TeachersRegex();
 
-        public List<string>? GetTeachers() {
+        public async Task<List<string>?> GetTeachers() {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
                     #region RequestHeaders
@@ -337,9 +339,9 @@ namespace ScheduleBot {
 
                     Regex regex = TeachersRegex();
 
-                    using(HttpResponseMessage response = client.GetAsync("https://tulsu.ru/schedule/queries/GetDictionaries.php").Result)
+                    using(HttpResponseMessage response = await client.GetAsync("https://tulsu.ru/schedule/queries/GetDictionaries.php"))
                         if(response.IsSuccessStatusCode) {
-                            var jObject = JArray.Parse(response.Content.ReadAsStringAsync().Result);
+                            var jObject = JArray.Parse(await response.Content.ReadAsStringAsync());
                             return jObject.Count == 0 ? throw new Exception() : jObject?.Where(i => regex.IsMatch(i.Value<string>("value") ?? "")).Select(j => j.Value<string>("value")?.Trim() ?? "").ToList();
                         }
                 }
@@ -350,7 +352,7 @@ namespace ScheduleBot {
             return null;
         }
 
-        public (DateOnly min, DateOnly max)? GetDates(string group) {
+        public async Task<(DateOnly min, DateOnly max)?> GetDates(string group) {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
                     #region RequestHeaders
@@ -375,9 +377,9 @@ namespace ScheduleBot {
                     #endregion
 
                     using(var content = new StringContent($"search_value={group}", Encoding.UTF8, "application/x-www-form-urlencoded"))
-                    using(HttpResponseMessage response = client.PostAsync("https://tulsu.ru/schedule/queries/GetDates.php", content).Result)
+                    using(HttpResponseMessage response = await client.PostAsync("https://tulsu.ru/schedule/queries/GetDates.php", content))
                         if(response.IsSuccessStatusCode) {
-                            var jObject = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+                            var jObject = JObject.Parse(await response.Content.ReadAsStringAsync());
 
                             return (DateOnly.Parse(jObject.Value<string>("MIN_DATE") ?? throw new NullReferenceException("MIN_DATE")),
                                     DateOnly.Parse(jObject.Value<string>("MAX_DATE") ?? throw new NullReferenceException("MAX_DATE")));
@@ -390,7 +392,7 @@ namespace ScheduleBot {
             return null;
         }
 
-        public List<Progress>? GetProgress(string studentID) {
+        public async Task<List<Progress>?> GetProgress(string studentID) {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
                     #region RequestHeaders
@@ -415,9 +417,9 @@ namespace ScheduleBot {
                     #endregion
 
                     using(var content = new StringContent($"SEARCH={studentID}", Encoding.UTF8, "application/x-www-form-urlencoded"))
-                    using(HttpResponseMessage response = client.PostAsync("https://tulsu.ru/progress/queries/GetMarks.php", content).Result)
+                    using(HttpResponseMessage response = await client.PostAsync("https://tulsu.ru/progress/queries/GetMarks.php", content))
                         if(response.IsSuccessStatusCode) {
-                            JArray jObject = JObject.Parse(response.Content.ReadAsStringAsync().Result).Value<JArray>("data") ?? throw new Exception();
+                            JArray jObject = JObject.Parse(await response.Content.ReadAsStringAsync()).Value<JArray>("data") ?? throw new Exception();
                             return jObject.Count == 0
                                 ? throw new Exception()
                                 : jObject.Select(j => new Progress(j, studentID)).Where(i => i.Mark != null).ToList();
