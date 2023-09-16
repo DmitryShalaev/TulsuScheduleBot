@@ -35,9 +35,9 @@ namespace ScheduleBot {
             Task.Run(async () => {
                 using(ScheduleDbContext dbContext = new())
                     await UpdatingTeachers(dbContext);
-
-                await UpdatingDisciplinesJob.StartAsync();
             });
+
+            UpdatingDisciplinesJob.StartAsync().Wait();
         }
 
         public async Task<bool> UpdatingProgress(ScheduleDbContext dbContext, string studentID, int updateAttemptTime) {
@@ -46,14 +46,14 @@ namespace ScheduleBot {
                 studentIDLastUpdate = new() { StudentID = studentID, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
                 dbContext.StudentIDLastUpdate.Add(studentIDLastUpdate);
 
+                await dbContext.SaveChangesAsync();
+
             } else {
                 if((DateTime.Now - studentIDLastUpdate.UpdateAttempt.ToLocalTime()).TotalMinutes > updateAttemptTime)
                     studentIDLastUpdate.UpdateAttempt = DateTime.UtcNow;
                 else
                     return false;
             }
-
-            await dbContext.SaveChangesAsync();
 
             List<Progress>? progress = await GetProgress(studentID);
             if(progress is not null) {
@@ -98,14 +98,12 @@ namespace ScheduleBot {
             }
 
             (DateOnly min, DateOnly max)? dates = await GetDates(group);
-            await Console.Out.WriteLineAsync(dates.ToString());
-            if (dates is not null) {
+            ;
+            if(dates is not null) {
 
                 List<Discipline>? disciplines = await GetDisciplines(group);
-                await Console.Out.WriteLineAsync(group);
-                await Console.Out.WriteLineAsync(disciplines?.Count.ToString());
-                await Console.Out.WriteLineAsync((disciplines is not null).ToString());
-                if (disciplines is not null) {
+
+                if(disciplines is not null) {
                     List<Discipline> updatedDisciplines = new();
 
                     groupLastUpdate.Update = DateTime.UtcNow;
@@ -155,14 +153,14 @@ namespace ScheduleBot {
                 teacherLastUpdate = new() { Teacher = teacher, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
                 dbContext.TeacherLastUpdate.Add(teacherLastUpdate);
 
+                await dbContext.SaveChangesAsync();
+
             } else {
                 if((DateTime.Now - teacherLastUpdate.UpdateAttempt.ToLocalTime()).TotalMinutes > updateAttemptTime)
                     teacherLastUpdate.UpdateAttempt = DateTime.UtcNow;
                 else
                     return false;
             }
-
-            await dbContext.SaveChangesAsync();
 
             (DateOnly min, DateOnly max)? dates = await GetDates(teacher);
             if(dates is not null) {
