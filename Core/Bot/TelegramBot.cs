@@ -20,11 +20,14 @@ namespace ScheduleBot.Bot {
         public readonly ITelegramBotClient botClient;
         private readonly CommandManager commandManager;
         private readonly Parser parser;
+        private readonly UserActivityTracker activityTracker;
 
         public TelegramBot() {
             botClient = new TelegramBotClient(Environment.GetEnvironmentVariable("TelegramBotToken")!);
 
             parser = new(UpdatedDisciplinesAsync);
+
+            activityTracker = new UserActivityTracker();
 
             commandManager = new(this, (string message, TelegramUser user, out string args) => {
                 args = "";
@@ -248,7 +251,7 @@ namespace ScheduleBot.Bot {
             commandManager.AddMessageCommand(commands.Message["Today"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, MainKeyboardMarkup);
                 var date = DateOnly.FromDateTime(DateTime.Now);
-               
+
                 (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile);
                 await botClient.SendTextMessageAsync(chatId: chatId, text: schedule.Item1, replyMarkup: GetInlineKeyboardButton(date, user, schedule.Item2));
             }, CommandManager.Check.group);
@@ -994,6 +997,11 @@ namespace ScheduleBot.Bot {
             Console.WriteLine(msg);
 #endif
             Message? message = update.Message ?? update.EditedMessage ?? update.CallbackQuery?.Message;
+
+            if(message is not null && !activityTracker.IsAllowed(message.Chat.Id)) {
+                await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "Вы слишком часто отправляете сообщения!!!");
+                return;
+            }
 
             try {
                 using(ScheduleDbContext dbContext = new()) {

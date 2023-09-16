@@ -15,14 +15,14 @@ namespace WebHook {
 
             WebApplication app = builder.Build();
 
-            CultureInfo ci = new("ru-RU");
-            ci.NumberFormat.NumberDecimalSeparator = ".";
-            ci.NumberFormat.CurrencyDecimalSeparator = ".";
+            CultureInfo cultureInfo = new("ru-RU");
+            cultureInfo.NumberFormat.NumberDecimalSeparator = ".";
+            cultureInfo.NumberFormat.CurrencyDecimalSeparator = ".";
 
             app.UseRequestLocalization(new RequestLocalizationOptions {
-                DefaultRequestCulture = new RequestCulture(ci),
-                SupportedCultures = new List<CultureInfo> { ci },
-                SupportedUICultures = new List<CultureInfo> { ci }
+                DefaultRequestCulture = new RequestCulture(cultureInfo),
+                SupportedCultures = new List<CultureInfo> { cultureInfo },
+                SupportedUICultures = new List<CultureInfo> { cultureInfo }
             });
 
             app.UseHttpsRedirection();
