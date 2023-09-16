@@ -19,7 +19,7 @@ namespace LongPolling {
                 new ReceiverOptions {
                     AllowedUpdates = { },
 #if DEBUG
-                        ThrowPendingUpdates = true
+                    ThrowPendingUpdates = true
 #else
                     ThrowPendingUpdates = false
 #endif

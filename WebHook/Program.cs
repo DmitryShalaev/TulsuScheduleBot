@@ -8,9 +8,11 @@ namespace WebHook {
     public class Program {
         public static void Main(string[] args) {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+            builder.Logging.SetMinimumLevel(LogLevel.Warning);
 
             builder.Services.AddControllers().AddNewtonsoftJson();
 
+            _ = Core.GetInstance();
             builder.Services.AddScoped(p => Core.GetInstance());
 
             WebApplication app = builder.Build();
