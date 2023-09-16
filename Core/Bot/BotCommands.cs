@@ -19,7 +19,7 @@ namespace ScheduleBot.Bot {
             public CorpsStruct[] corps;
         }
         public struct ConfigStruct {
-            public int GroupUpdateTime;
+            public int DisciplineUpdateTime;
             public int StudentIDUpdateTime;
             public int TeacherWorkScheduleUpdateTime;
             public int UpdateAttemptTime;

@@ -93,7 +93,7 @@ namespace ScheduleBot.Bot {
         private async Task ScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string group, IReplyMarkup? replyMarkup) {
             DateTime? groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group)?.Update.ToLocalTime();
 
-            if(groupLastUpdate is null || (DateTime.Now - groupLastUpdate)?.TotalMinutes > commands.Config.GroupUpdateTime) {
+            if(groupLastUpdate is null || (DateTime.Now - groupLastUpdate)?.TotalMinutes > commands.Config.DisciplineUpdateTime) {
                 int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
                 if(!await parser.UpdatingDisciplines(dbContext, group, commands.Config.UpdateAttemptTime))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");

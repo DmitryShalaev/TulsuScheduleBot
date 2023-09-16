@@ -14,7 +14,7 @@ namespace ScheduleBot.Jobs {
 
             ITrigger trigger = TriggerBuilder.Create().WithIdentity("UpdatingDisciplinesJobTrigger", "group1")
             .WithSimpleSchedule(x => x
-                .WithIntervalInMinutes(BotCommands.GetInstance().Config.GroupUpdateTime)
+                .WithIntervalInMinutes(BotCommands.GetInstance().Config.DisciplineUpdateTime)
                 .RepeatForever())
             .Build();
 
