@@ -89,7 +89,7 @@ namespace ScheduleBot {
                 dbContext.GroupLastUpdate.Add(groupLastUpdate);
 
             } else {
-                if((DateTime.Now - groupLastUpdate.UpdateAttempt.ToLocalTime()).TotalMinutes > updateAttemptTime)
+                if((DateTime.Now - groupLastUpdate.UpdateAttempt.ToLocalTime()).TotalMinutes >= updateAttemptTime)
                     groupLastUpdate.UpdateAttempt = DateTime.UtcNow;
                 else
                     return false;
@@ -99,7 +99,7 @@ namespace ScheduleBot {
 
             dates ??= await GetDates(group);
 
-            if(dates != null) {
+            if(dates is not null) {
 
                 List<Discipline>? disciplines = await GetDisciplines(group);
                 if(disciplines != null) {
@@ -162,7 +162,7 @@ namespace ScheduleBot {
             dbContext.SaveChanges();
 
             (DateOnly min, DateOnly max)? dates = await GetDates(teacher);
-            if(dates != null) {
+            if(dates is not null) {
 
                 List<TeacherWorkSchedule>? teacherWorkSchedule = await GetTeachersWorkSchedule(teacher);
 
@@ -201,7 +201,7 @@ namespace ScheduleBot {
         public async Task<bool> UpdatingTeachers(ScheduleDbContext dbContext) {
             List<string>? teachers = await GetTeachers();
 
-            if(teachers != null) {
+            if(teachers is not null) {
                 var _list = dbContext.TeacherLastUpdate.Select(i => i.Teacher).ToList();
 
                 IEnumerable<string> except = teachers.Except(_list);
