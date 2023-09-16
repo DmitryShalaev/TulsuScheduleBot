@@ -21,7 +21,7 @@ namespace WebHook.Controllers {
 
                 await Console.Out.WriteLineAsync(e.Message);
             }
-    }
+        }
 
         [HttpGet]
         public string Get() => "Telegram bot was started";

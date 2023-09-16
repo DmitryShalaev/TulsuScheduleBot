@@ -2,7 +2,6 @@
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Timers;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using ScheduleBot.Bot;
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
+using ScheduleBot.Jobs;
 
 namespace ScheduleBot {
     public partial class Parser {
@@ -37,26 +37,13 @@ namespace ScheduleBot {
                 AutoReset = false
             };
 
-            UpdatingDisciplinesTimer.Elapsed += UpdatingDisciplines;
-
             Instance = this;
 
             Task.Run(async () => {
                 using(ScheduleDbContext dbContext = new())
                     await UpdatingTeachers(dbContext);
-            });
 
-            UpdatingDisciplines(sender: null, e: null);
-        }
-
-        private void UpdatingDisciplines(object? sender = null, ElapsedEventArgs? e = null) {
-            Task.Run(async () => {
-                using(ScheduleDbContext dbContext = new()) {
-                    foreach(string item in dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= 7).Select(i => i.Group!).Distinct().ToList())
-                        await UpdatingDisciplines(dbContext, group: item, updateAttemptTime: 0);
-
-                    UpdatingDisciplinesTimer.Start();
-                }
+                await UpdatingDisciplinesJob.StartAsync();
             });
         }
 
