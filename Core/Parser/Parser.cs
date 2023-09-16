@@ -87,7 +87,9 @@ namespace ScheduleBot {
             if(groupLastUpdate is null) {
                 groupLastUpdate = new() { Group = group, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
                 dbContext.GroupLastUpdate.Add(groupLastUpdate);
+
                 await dbContext.SaveChangesAsync();
+
             } else {
                 if((DateTime.Now - groupLastUpdate.UpdateAttempt.ToLocalTime()).TotalMinutes >= updateAttemptTime)
                     groupLastUpdate.UpdateAttempt = DateTime.UtcNow;
@@ -95,14 +97,13 @@ namespace ScheduleBot {
                     return false;
             }
 
-
-
             (DateOnly min, DateOnly max)? dates = await GetDates(group);
-
-            if(dates is not null) {
+            await Console.Out.WriteLineAsync(dates.ToString());
+            if (dates is not null) {
 
                 List<Discipline>? disciplines = await GetDisciplines(group);
-                if(disciplines is not null) {
+                await Console.Out.WriteLineAsync(disciplines?.Count.ToString());
+                if (disciplines is not null) {
                     List<Discipline> updatedDisciplines = new();
 
                     groupLastUpdate.Update = DateTime.UtcNow;
