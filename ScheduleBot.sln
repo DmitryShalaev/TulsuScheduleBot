@@ -12,6 +12,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LongPolling", "LongPolling\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{37F9B13D-33C4-4C27-A3E6-B319BC9BEECA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHook", "WebHook\WebHook.csproj", "{CE1BC521-967D-4092-9315-D646DE01E3AA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{37F9B13D-33C4-4C27-A3E6-B319BC9BEECA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37F9B13D-33C4-4C27-A3E6-B319BC9BEECA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{37F9B13D-33C4-4C27-A3E6-B319BC9BEECA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE1BC521-967D-4092-9315-D646DE01E3AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE1BC521-967D-4092-9315-D646DE01E3AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE1BC521-967D-4092-9315-D646DE01E3AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE1BC521-967D-4092-9315-D646DE01E3AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

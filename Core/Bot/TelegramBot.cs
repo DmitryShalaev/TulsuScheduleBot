@@ -10,6 +10,11 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
+#if !DEBUG
+using System.Net.Mail;
+using System.Net;
+#endif
+
 namespace ScheduleBot.Bot {
     public partial class TelegramBot {
         public readonly ITelegramBotClient botClient;
@@ -243,7 +248,7 @@ namespace ScheduleBot.Bot {
             commandManager.AddMessageCommand(commands.Message["Today"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, MainKeyboardMarkup);
                 var date = DateOnly.FromDateTime(DateTime.Now);
-
+               
                 (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile);
                 await botClient.SendTextMessageAsync(chatId: chatId, text: schedule.Item1, replyMarkup: GetInlineKeyboardButton(date, user, schedule.Item2));
             }, CommandManager.Check.group);
@@ -989,6 +994,7 @@ namespace ScheduleBot.Bot {
             Console.WriteLine(msg);
 #endif
             Message? message = update.Message ?? update.EditedMessage ?? update.CallbackQuery?.Message;
+
             try {
                 using(ScheduleDbContext dbContext = new()) {
                     if(message is not null) {
@@ -1056,7 +1062,21 @@ namespace ScheduleBot.Bot {
             } catch(Telegram.Bot.Exceptions.ApiRequestException e) {
                 Console.Error.WriteLine($"{msg}\n{new('-', 25)}\n{e.Message}");
             } catch(Exception e) {
-                throw new Exception($"{msg}\n{new('-', 25)}\n{e.Message}");
+                Console.WriteLine(e);
+#if !DEBUG
+                MailAddress from = new(Environment.GetEnvironmentVariable("TelegramBot_FromEmail") ?? "", "Error");
+                MailAddress to = new(Environment.GetEnvironmentVariable("TelegramBot_ToEmail") ?? "");
+                MailMessage mailMessage = new(from, to) {
+                    Subject = "Error",
+                    Body = e.ToString()
+                };
+
+                SmtpClient smtp = new("smtp.yandex.ru", 25) {
+                    Credentials = new NetworkCredential(Environment.GetEnvironmentVariable("TelegramBot_FromEmail"), Environment.GetEnvironmentVariable("TelegramBot_PassEmail")),
+                    EnableSsl = true
+                };
+                smtp.SendMailAsync(mailMessage).Wait();
+#endif
             } finally {
                 GC.Collect();
             }
