@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 using Newtonsoft.Json.Linq;
 
-using ScheduleBot.Bot;
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 using ScheduleBot.Jobs;
@@ -15,7 +14,6 @@ using ScheduleBot.Jobs;
 namespace ScheduleBot {
     public partial class Parser {
         private readonly HttpClientHandler clientHandler;
-        private readonly System.Timers.Timer UpdatingDisciplinesTimer;
 
         public delegate Task UpdatedDisciplines(ScheduleDbContext dbContext, List<(string Group, DateOnly Date)> values);
         private event UpdatedDisciplines Notify;
@@ -30,11 +28,6 @@ namespace ScheduleBot {
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip | DecompressionMethods.None,
 
                 //Proxy = new WebProxy("127.0.0.1:8888"),
-            };
-
-            UpdatingDisciplinesTimer = new() {
-                Interval = BotCommands.GetInstance().Config.GroupUpdateTime * 60 * 1000, //Minutes Seconds Milliseconds
-                AutoReset = false
             };
 
             Instance = this;
