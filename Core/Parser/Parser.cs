@@ -46,13 +46,14 @@ namespace ScheduleBot {
                 studentIDLastUpdate = new() { StudentID = studentID, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
                 dbContext.StudentIDLastUpdate.Add(studentIDLastUpdate);
 
-                dbContext.SaveChanges();
             } else {
                 if((DateTime.Now - studentIDLastUpdate.UpdateAttempt.ToLocalTime()).TotalMinutes > updateAttemptTime)
                     studentIDLastUpdate.UpdateAttempt = DateTime.UtcNow;
                 else
                     return false;
             }
+
+            dbContext.SaveChanges();
 
             List<Progress>? progress = await GetProgress(studentID);
             if(progress != null) {
@@ -81,13 +82,12 @@ namespace ScheduleBot {
             return false;
         }
 
-        public async Task<bool> UpdatingDisciplines(ScheduleDbContext dbContext, string group, int updateAttemptTime) {
+        public async Task<bool> UpdatingDisciplines(ScheduleDbContext dbContext, string group, int updateAttemptTime, (DateOnly min, DateOnly max)? dates = null) {
             GroupLastUpdate? groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group);
             if(groupLastUpdate is null) {
                 groupLastUpdate = new() { Group = group, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
                 dbContext.GroupLastUpdate.Add(groupLastUpdate);
 
-                dbContext.SaveChanges();
             } else {
                 if((DateTime.Now - groupLastUpdate.UpdateAttempt.ToLocalTime()).TotalMinutes > updateAttemptTime)
                     groupLastUpdate.UpdateAttempt = DateTime.UtcNow;
@@ -95,7 +95,10 @@ namespace ScheduleBot {
                     return false;
             }
 
-            (DateOnly min, DateOnly max)? dates = await GetDates(group);
+            dbContext.SaveChanges();
+
+            dates ??= await GetDates(group);
+
             if(dates != null) {
 
                 List<Discipline>? disciplines = await GetDisciplines(group);
@@ -149,13 +152,14 @@ namespace ScheduleBot {
                 teacherLastUpdate = new() { Teacher = teacher, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
                 dbContext.TeacherLastUpdate.Add(teacherLastUpdate);
 
-                dbContext.SaveChanges();
             } else {
                 if((DateTime.Now - teacherLastUpdate.UpdateAttempt.ToLocalTime()).TotalMinutes > updateAttemptTime)
                     teacherLastUpdate.UpdateAttempt = DateTime.UtcNow;
                 else
                     return false;
             }
+
+            dbContext.SaveChanges();
 
             (DateOnly min, DateOnly max)? dates = await GetDates(teacher);
             if(dates != null) {
