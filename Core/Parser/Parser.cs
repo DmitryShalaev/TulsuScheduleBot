@@ -102,7 +102,9 @@ namespace ScheduleBot {
             if (dates is not null) {
 
                 List<Discipline>? disciplines = await GetDisciplines(group);
+                await Console.Out.WriteLineAsync(group);
                 await Console.Out.WriteLineAsync(disciplines?.Count.ToString());
+                await Console.Out.WriteLineAsync((disciplines is not null).ToString());
                 if (disciplines is not null) {
                     List<Discipline> updatedDisciplines = new();
 
