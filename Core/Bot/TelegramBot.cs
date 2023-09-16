@@ -137,7 +137,7 @@ namespace ScheduleBot.Bot {
 
                 if(feedback is not null) {
                     feedback.IsCompleted = true;
-                    dbContext.SaveChanges();
+                    await dbContext.SaveChangesAsync();
                 }
 
                 feedback = dbContext.Feedbacks.Include(i => i.TelegramUser).Where(i => !i.IsCompleted).OrderBy(i => i.Date).FirstOrDefault();
@@ -201,7 +201,7 @@ namespace ScheduleBot.Bot {
                 await DeleteTempMessage(user, messageId);
                 await DeleteInitialMessage(botClient, chatId, user);
 
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync();
 
                 await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, MainKeyboardMarkup);
 
@@ -446,7 +446,7 @@ namespace ScheduleBot.Bot {
                 if(group is not null) {
                     user.Mode = Mode.Default;
                     user.ScheduleProfile.GroupLastUpdate = group;
-                    dbContext.SaveChanges();
+                    await dbContext.SaveChangesAsync();
 
                     await botClient.SendTextMessageAsync(chatId: chatId, text: $"Номер группы успешно изменен на {args} ", replyMarkup: GetProfileKeyboardMarkup(user));
 
@@ -476,7 +476,7 @@ namespace ScheduleBot.Bot {
                     if(studentID is not null) {
                         user.Mode = Mode.Default;
                         user.ScheduleProfile.StudentIDLastUpdate = studentID;
-                        dbContext.SaveChanges();
+                        await dbContext.SaveChangesAsync();
 
                         await botClient.SendTextMessageAsync(chatId: chatId, text: $"Номер зачётки успешно изменен на {args} ", replyMarkup: GetProfileKeyboardMarkup(user));
 
@@ -506,7 +506,7 @@ namespace ScheduleBot.Bot {
 
                     await DeleteTempMessage(user, messageId);
 
-                    dbContext.SaveChanges();
+                    await dbContext.SaveChangesAsync();
 
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Название предмета успешно изменено.", replyMarkup: MainKeyboardMarkup);
                     await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, discipline.Date, user.ScheduleProfile, true).Item1, replyMarkup: GetCustomEditAdminInlineKeyboardButton(discipline));
@@ -524,7 +524,7 @@ namespace ScheduleBot.Bot {
 
                     await DeleteTempMessage(user, messageId);
 
-                    dbContext.SaveChanges();
+                    await dbContext.SaveChangesAsync();
 
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Лектор успешно изменен.", replyMarkup: MainKeyboardMarkup);
                     await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, discipline.Date, user.ScheduleProfile, true).Item1, replyMarkup: GetCustomEditAdminInlineKeyboardButton(discipline));
@@ -542,7 +542,7 @@ namespace ScheduleBot.Bot {
 
                     await DeleteTempMessage(user, messageId);
 
-                    dbContext.SaveChanges();
+                    await dbContext.SaveChangesAsync();
 
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Тип предмета успешно изменен.", replyMarkup: MainKeyboardMarkup);
                     await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, discipline.Date, user.ScheduleProfile, true).Item1, replyMarkup: GetCustomEditAdminInlineKeyboardButton(discipline));
@@ -560,7 +560,7 @@ namespace ScheduleBot.Bot {
 
                     await DeleteTempMessage(user, messageId);
 
-                    dbContext.SaveChanges();
+                    await dbContext.SaveChangesAsync();
 
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Аудитория успешно изменена.", replyMarkup: MainKeyboardMarkup);
                     await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, discipline.Date, user.ScheduleProfile, true).Item1, replyMarkup: GetCustomEditAdminInlineKeyboardButton(discipline));
@@ -578,7 +578,7 @@ namespace ScheduleBot.Bot {
 
                         await DeleteTempMessage(user, messageId);
 
-                        dbContext.SaveChanges();
+                        await dbContext.SaveChangesAsync();
 
                         await botClient.SendTextMessageAsync(chatId: chatId, text: "Время начала успешно изменено.", replyMarkup: MainKeyboardMarkup);
                         await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, discipline.Date, user.ScheduleProfile, true).Item1, replyMarkup: GetCustomEditAdminInlineKeyboardButton(discipline));
@@ -599,7 +599,7 @@ namespace ScheduleBot.Bot {
 
                         await DeleteTempMessage(user, messageId);
 
-                        dbContext.SaveChanges();
+                        await dbContext.SaveChangesAsync();
 
                         await botClient.SendTextMessageAsync(chatId: chatId, text: "Время конца успешно изменено.", replyMarkup: MainKeyboardMarkup);
                         await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, discipline.Date, user.ScheduleProfile, true).Item1, replyMarkup: GetCustomEditAdminInlineKeyboardButton(discipline));
@@ -618,7 +618,7 @@ namespace ScheduleBot.Bot {
 
                     await DeleteTempMessage(user, messageId);
 
-                    dbContext.SaveChanges();
+                    await dbContext.SaveChangesAsync();
 
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Количество дней успешно изменено.", replyMarkup: GetProfileKeyboardMarkup(user));
                     await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["NotificationSettings"], replyMarkup: GetNotificationsInlineKeyboardButton(user));
@@ -655,7 +655,7 @@ namespace ScheduleBot.Bot {
                         user.Mode = Mode.AddingDiscipline;
                         user.TempData = $"{messageId}";
                         dbContext.CustomDiscipline.Add(new(user.ScheduleProfile, date));
-                        dbContext.SaveChanges();
+                        await dbContext.SaveChangesAsync();
 
                         await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile).Item1);
                         user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user), replyMarkup: CancelKeyboardMarkup)).MessageId;
@@ -686,7 +686,7 @@ namespace ScheduleBot.Bot {
                         else
                             dbContext.CompletedDisciplines.Add(dayTmp);
 
-                        dbContext.SaveChanges();
+                        await dbContext.SaveChangesAsync();
                         await botClient.EditMessageReplyMarkupAsync(chatId: chatId, messageId: messageId, replyMarkup: GetEditAdminInlineKeyboardButton(dbContext, discipline.Date, user.ScheduleProfile));
                         return;
                     }
@@ -714,7 +714,7 @@ namespace ScheduleBot.Bot {
                             dbContext.CompletedDisciplines.Add(alwaysTmp);
                         }
 
-                        dbContext.SaveChanges();
+                        await dbContext.SaveChangesAsync();
                         await botClient.EditMessageReplyMarkupAsync(chatId: chatId, messageId: messageId, replyMarkup: GetEditAdminInlineKeyboardButton(dbContext, discipline.Date, user.ScheduleProfile));
                         return;
                     }
@@ -732,7 +732,7 @@ namespace ScheduleBot.Bot {
                 if(customDiscipline is not null) {
                     if(user.IsOwner()) {
                         dbContext.CustomDiscipline.Remove(customDiscipline);
-                        dbContext.SaveChanges();
+                        await dbContext.SaveChangesAsync();
 
                         await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, customDiscipline.Date, user.ScheduleProfile).Item1, replyMarkup: GetEditAdminInlineKeyboardButton(dbContext, customDiscipline.Date, user.ScheduleProfile));
                         return;
@@ -803,7 +803,7 @@ namespace ScheduleBot.Bot {
                         break;
                 }
 
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync();
 
                 await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: commands.Message["NotificationSettings"], replyMarkup: GetNotificationsInlineKeyboardButton(user));
             });
@@ -818,7 +818,7 @@ namespace ScheduleBot.Bot {
             #region Corps
             commandManager.AddMessageCommand(commands.Message["Corps"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 user.TempData = commands.Message["Corps"];
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync();
                 await botClient.SendTextMessageAsync(chatId: chatId, text: "Выберите корпус, и я покажу где он на карте", replyMarkup: CorpsKeyboardMarkup);
             });
 
@@ -1016,7 +1016,7 @@ namespace ScheduleBot.Bot {
 
                             Notifications notifications = new();
                             dbContext.Notifications.Add(notifications);
-                            dbContext.SaveChanges();
+                            await dbContext.SaveChangesAsync();
 
                             user = new() {
                                 ChatID = message.Chat.Id,
@@ -1031,7 +1031,7 @@ namespace ScheduleBot.Bot {
 
                             notifications.TelegramUser = scheduleProfile.TelegramUser = user;
 
-                            dbContext.SaveChanges();
+                            await dbContext.SaveChangesAsync();
                         }
 
                         switch(update.Type) {
@@ -1059,7 +1059,7 @@ namespace ScheduleBot.Bot {
                         user.TodayRequests++;
                         user.TotalRequests++;
 
-                        dbContext.SaveChanges();
+                        await dbContext.SaveChangesAsync();
                     } else {
                         if(update.Type == Telegram.Bot.Types.Enums.UpdateType.InlineQuery) {
                             await InlineQuery(dbContext, update);

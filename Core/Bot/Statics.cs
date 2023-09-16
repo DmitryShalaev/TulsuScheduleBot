@@ -76,7 +76,7 @@ namespace ScheduleBot.Bot {
 
         public async Task GroupErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
             user.Mode = Mode.GroupСhange;
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             await botClient.SendTextMessageAsync(chatId: chatId, text: $"Для того, чтобы узнать расписание, необходимо указать номер группы.", replyMarkup: CancelKeyboardMarkup);
         }
@@ -84,7 +84,7 @@ namespace ScheduleBot.Bot {
 
         public async Task StudentIdErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
             user.Mode = Mode.StudentIDСhange;
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             await botClient.SendTextMessageAsync(chatId: chatId, text: $"Для того, чтобы узнать успеваемость, необходимо указать номер зачетной книжки.", replyMarkup: CancelKeyboardMarkup);
         }

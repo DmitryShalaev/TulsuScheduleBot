@@ -17,7 +17,7 @@ namespace ScheduleBot.Bot {
                     await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
                     user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: text, replyMarkup: CancelKeyboardMarkup)).MessageId;
 
-                    dbContext.SaveChanges();
+                    await dbContext.SaveChangesAsync();
                     return;
                 }
             }

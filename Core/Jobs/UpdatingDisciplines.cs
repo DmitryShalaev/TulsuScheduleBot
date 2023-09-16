@@ -31,7 +31,7 @@ namespace ScheduleBot.Jobs {
                     dates = await Parser.Instance!.GetDates(group);
 
                 foreach(string item in dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= 7).Select(i => i.Group!).Distinct().ToList())
-                    await Parser.Instance!.UpdatingDisciplines(dbContext, group: item, updateAttemptTime: 0, dates: dates);
+                    await Parser.Instance!.UpdatingDisciplines(dbContext, group: item, updateAttemptTime: 0);
             }
         }
     }

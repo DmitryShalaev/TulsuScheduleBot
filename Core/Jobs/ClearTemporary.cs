@@ -21,7 +21,7 @@ namespace ScheduleBot.Jobs {
             await scheduler.ScheduleJob(job, trigger);
         }
 
-        Task IJob.Execute(IJobExecutionContext context) {
+        async Task IJob.Execute(IJobExecutionContext context) {
             using(ScheduleDbContext dbContext = new()) {
                 foreach(DB.Entity.TelegramUser item in dbContext.TelegramUsers)
                     item.TodayRequests = 0;
@@ -36,10 +36,8 @@ namespace ScheduleBot.Jobs {
 
                 Parser.Instance?.UpdatingTeachers(dbContext);
 
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync();
             }
-
-            return Task.CompletedTask;
         }
     }
 }

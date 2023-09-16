@@ -53,10 +53,10 @@ namespace ScheduleBot {
                     return false;
             }
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             List<Progress>? progress = await GetProgress(studentID);
-            if(progress != null) {
+            if(progress is not null) {
 
                 studentIDLastUpdate!.Update = DateTime.UtcNow;
 
@@ -66,7 +66,7 @@ namespace ScheduleBot {
                 if(except.Any()) {
                     dbContext.Progresses.AddRange(except);
 
-                    dbContext.SaveChanges();
+                    await dbContext.SaveChangesAsync();
                     _list = dbContext.Progresses.Where(i => i.StudentID == studentID).ToList();
                 }
 
@@ -74,7 +74,7 @@ namespace ScheduleBot {
                 if(except.Any())
                     dbContext.Progresses.RemoveRange(except);
 
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync();
 
                 return true;
             }
@@ -82,7 +82,7 @@ namespace ScheduleBot {
             return false;
         }
 
-        public async Task<bool> UpdatingDisciplines(ScheduleDbContext dbContext, string group, int updateAttemptTime, (DateOnly min, DateOnly max)? dates = null) {
+        public async Task<bool> UpdatingDisciplines(ScheduleDbContext dbContext, string group, int updateAttemptTime) {
             GroupLastUpdate? groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group);
             if(groupLastUpdate is null) {
                 groupLastUpdate = new() { Group = group, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
@@ -95,21 +95,21 @@ namespace ScheduleBot {
                     return false;
             }
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
-            dates ??= await GetDates(group);
+            (DateOnly min, DateOnly max)? dates = await GetDates(group);
 
             if(dates is not null) {
 
                 List<Discipline>? disciplines = await GetDisciplines(group);
-                if(disciplines != null) {
+                if(disciplines is not null) {
                     List<Discipline> updatedDisciplines = new();
 
                     groupLastUpdate.Update = DateTime.UtcNow;
 
                     if(dbContext.Disciplines.Any(i => i.Group == group && i.Date < dates.Value.min)) {
                         dbContext.Disciplines.RemoveRange(dbContext.Disciplines.Where(i => i.Group == group && i.Date < dates.Value.min));
-                        dbContext.SaveChanges();
+                        await dbContext.SaveChangesAsync();
                     }
 
                     var _list = dbContext.Disciplines.Where(i => i.Group == group && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
@@ -121,7 +121,7 @@ namespace ScheduleBot {
                         if(_list.Any())
                             updatedDisciplines.AddRange(except);
 
-                        dbContext.SaveChanges();
+                        await dbContext.SaveChangesAsync();
                         _list = dbContext.Disciplines.Where(i => i.Group == group && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
                     }
 
@@ -132,7 +132,7 @@ namespace ScheduleBot {
                         updatedDisciplines.AddRange(except);
                     }
 
-                    dbContext.SaveChanges();
+                    await dbContext.SaveChangesAsync();
 
                     if(updatedDisciplines.Any()) {
                         var date = DateOnly.FromDateTime(DateTime.Now);
@@ -159,20 +159,20 @@ namespace ScheduleBot {
                     return false;
             }
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             (DateOnly min, DateOnly max)? dates = await GetDates(teacher);
             if(dates is not null) {
 
                 List<TeacherWorkSchedule>? teacherWorkSchedule = await GetTeachersWorkSchedule(teacher);
 
-                if(teacherWorkSchedule != null) {
+                if(teacherWorkSchedule is not null) {
 
                     teacherLastUpdate!.Update = DateTime.UtcNow;
 
                     if(dbContext.TeacherWorkSchedule.Any(i => i.Lecturer == teacher && i.Date < dates.Value.min)) {
                         dbContext.TeacherWorkSchedule.RemoveRange(dbContext.TeacherWorkSchedule.Where(i => i.Lecturer == teacher && i.Date < dates.Value.min));
-                        dbContext.SaveChanges();
+                        await dbContext.SaveChangesAsync();
                     }
 
                     var _list = dbContext.TeacherWorkSchedule.Where(i => i.Lecturer == teacher && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
@@ -181,7 +181,7 @@ namespace ScheduleBot {
                     if(except.Any()) {
                         dbContext.TeacherWorkSchedule.AddRange(except);
 
-                        dbContext.SaveChanges();
+                        await dbContext.SaveChangesAsync();
                         _list = dbContext.TeacherWorkSchedule.Where(i => i.Lecturer == teacher && i.Date >= dates.Value.min && i.Date <= dates.Value.max).ToList();
                     }
 
@@ -189,7 +189,7 @@ namespace ScheduleBot {
                     if(except.Any())
                         dbContext.TeacherWorkSchedule.RemoveRange(except);
 
-                    dbContext.SaveChanges();
+                    await dbContext.SaveChangesAsync();
 
                     return true;
                 }
@@ -209,7 +209,7 @@ namespace ScheduleBot {
                     DateTime updDate = new DateTime(2000, 1, 1).ToUniversalTime();
                     dbContext.TeacherLastUpdate.AddRange(except.Select(i => new TeacherLastUpdate() { Teacher = i, Update = updDate }));
 
-                    dbContext.SaveChanges();
+                    await dbContext.SaveChangesAsync();
 
                     return true;
                 }

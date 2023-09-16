@@ -41,7 +41,7 @@ namespace ScheduleBot.Bot {
                 return;
             }
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             switch(++customDiscipline.Counter) {
                 case 0:
@@ -63,7 +63,7 @@ namespace ScheduleBot.Bot {
                     break;
             }
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
         }
 
         private async Task SaveAddingDisciplineAsync(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, int? messageId, TelegramUser user, CustomDiscipline customDiscipline) {
@@ -72,7 +72,7 @@ namespace ScheduleBot.Bot {
             customDiscipline.IsAdded = true;
             user.Mode = Mode.Default;
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: MainKeyboardMarkup);
             await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, customDiscipline.Date, user.ScheduleProfile).Item1, replyMarkup: GetEditAdminInlineKeyboardButton(dbContext, customDiscipline.Date, user.ScheduleProfile));
