@@ -24,16 +24,16 @@ namespace ScheduleBot.Jobs {
 
         async Task IJob.Execute(IJobExecutionContext context) {
             using(ScheduleDbContext dbContext = new()) {
-                //(DateOnly min, DateOnly max)? dates = null;
+                (DateOnly min, DateOnly max)? dates = null;
 
-                //string? group = dbContext.GroupLastUpdate.FirstOrDefault()?.Group;
-                //if(group is not null)
-                //    dates = await Parser.Instance!.GetDates(group);
+                string? group = dbContext.GroupLastUpdate.FirstOrDefault()?.Group;
+                if(group is not null)
+                    dates = await Parser.Instance!.GetDates(group);
 
                 Parser parser = Parser.Instance!;
 
                 foreach(string item in dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= 7).Select(i => i.Group!).Distinct().ToList())
-                    await parser.UpdatingDisciplines(dbContext, group: item, updateAttemptTime: 0);
+                    await parser.UpdatingDisciplines(dbContext, group: item, updateAttemptTime: 0, dates: dates);
             }
         }
     }
