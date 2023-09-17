@@ -2,22 +2,13 @@ using System.Globalization;
 
 using Microsoft.AspNetCore.Localization;
 
-using Newtonsoft.Json;
-
-using ScheduleBot;
-using ScheduleBot.Bot;
-
-using Telegram.Bot.Types;
-
 namespace WebHook {
     public class Program {
-        private static readonly TelegramBot _bot = Core.GetInstance();
-
         public static void Main(string[] args) {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
             builder.Logging.SetMinimumLevel(LogLevel.Warning);
 
-            builder.Services.AddAuthorization();
+            builder.Services.AddControllers().AddNewtonsoftJson();
 
             WebApplication app = builder.Build();
 
@@ -33,19 +24,7 @@ namespace WebHook {
 
             app.UseAuthorization();
 
-            app.MapPost("/", async (HttpContext context) => {
-                try {
-                    using StreamReader streamReader = new(context.Request.Body);
-                    string str = await streamReader.ReadToEndAsync();
-
-                    await _bot.UpdateAsync(JsonConvert.DeserializeObject<Update>(str)!);
-
-                } catch(Exception e) {
-                    await Console.Out.WriteLineAsync(e.Message);
-                }
-            });
-
-            app.MapGet("/", () => "Telegram bot was started");
+            app.MapControllers();
 
             app.Run();
         }

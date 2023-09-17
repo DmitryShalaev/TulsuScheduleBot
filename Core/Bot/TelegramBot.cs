@@ -1067,10 +1067,8 @@ namespace ScheduleBot.Bot {
                         }
                     }
                 }
-            } catch(Telegram.Bot.Exceptions.ApiRequestException e) {
-                Console.Error.WriteLine($"{msg}\n{new('-', 25)}\n{e.Message}");
             } catch(Exception e) {
-                Console.WriteLine(e);
+                Console.Error.WriteLine($"{msg}\n{new('-', 25)}\n{e.Message}");
 #if !DEBUG
                 MailAddress from = new(Environment.GetEnvironmentVariable("TelegramBot_FromEmail") ?? "", "Error");
                 MailAddress to = new(Environment.GetEnvironmentVariable("TelegramBot_ToEmail") ?? "");
