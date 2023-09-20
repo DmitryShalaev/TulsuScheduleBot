@@ -403,11 +403,14 @@ namespace ScheduleBot.Bot {
             });
 
             commandManager.AddMessageCommand(Mode.Default, async (dbContext, chatId, messageId, user, args) => {
-                if(DateRegex().IsMatch(args)) {
+                Match match = DateRegex().Match(args);
+                if(match.Success) {
+                    DateTime now = DateTime.Now;
+                    string sDate = $"{match.Groups[1].Value} " +
+                                   $"{(string.IsNullOrWhiteSpace(match.Groups[3].Value) ? now.Month : match.Groups[3].Value)} " +
+                                   $"{(string.IsNullOrWhiteSpace(match.Groups[5].Value) ? now.Year : match.Groups[5].Value)}";
                     try {
-                        DateOnly date = DateTime.TryParse(args, out DateTime _date)
-                            ? DateOnly.FromDateTime(_date)
-                            : DateOnly.FromDateTime(DateTime.Parse($"{args} {DateTime.Now.Month}"));
+                        var date = DateOnly.Parse(sDate);
                         await ScheduleRelevance(dbContext, botClient, chatId, user.ScheduleProfile.Group!, MainKeyboardMarkup);
 
                         (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user.ScheduleProfile);
@@ -962,13 +965,18 @@ namespace ScheduleBot.Bot {
             });
 
             commandManager.AddMessageCommand(Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {
-                if(DateRegex().IsMatch(args)) {
+                Match match = DateRegex().Match(args);
+                if(match.Success) {
+                    DateTime now = DateTime.Now;
+                    string sDate = $"{match.Groups[1].Value} " +
+                                   $"{(string.IsNullOrWhiteSpace(match.Groups[3].Value) ? now.Month : match.Groups[3].Value)} " +
+                                   $"{(string.IsNullOrWhiteSpace(match.Groups[5].Value) ? now.Year : match.Groups[5].Value)}";
+
                     ReplyKeyboardMarkup teacherWorkSchedule = GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!);
 
                     try {
-                        DateOnly date = DateTime.TryParse(args, out DateTime _date)
-                            ? DateOnly.FromDateTime(_date)
-                            : DateOnly.FromDateTime(DateTime.Parse($"{args} {DateTime.Now.Month}"));
+                        var date = DateOnly.Parse(sDate);
+
                         await TeacherWorkScheduleRelevance(dbContext, botClient, chatId, user.TempData!, teacherWorkSchedule);
                         await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetTeacherWorkScheduleByDate(dbContext, date, user.TempData!));
                     } catch(Exception) {
