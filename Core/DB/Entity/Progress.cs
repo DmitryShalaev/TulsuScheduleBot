@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+using Newtonsoft.Json.Linq;
 
 namespace ScheduleBot.DB.Entity {
 
@@ -11,7 +13,9 @@ namespace ScheduleBot.DB.Entity {
         public int? Mark { get; set; }
         public int Term { get; set; }
 
+        [ForeignKey("StudentIDLastUpdate")]
         public string StudentID { get; set; }
+        public StudentIDLastUpdate StudentIDLastUpdate { get; set; }
 
         public Progress() { }
 

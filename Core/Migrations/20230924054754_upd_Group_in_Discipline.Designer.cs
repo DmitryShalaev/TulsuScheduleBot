@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScheduleBot.DB;
@@ -11,9 +12,11 @@ using ScheduleBot.DB;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230924054754_upd_Group_in_Discipline")]
+    partial class upd_Group_in_Discipline
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -197,8 +200,6 @@ namespace ScheduleBot.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("Class");
-
-                    b.HasIndex("Date");
 
                     b.HasIndex("Group");
 
@@ -416,8 +417,6 @@ namespace ScheduleBot.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("StudentID");
 
                     b.ToTable("Progresses");
                 });
@@ -664,17 +663,6 @@ namespace ScheduleBot.Migrations
                         .HasForeignKey("ScheduleBot.DB.Entity.Notifications", "OwnerID");
 
                     b.Navigation("TelegramUser");
-                });
-
-            modelBuilder.Entity("ScheduleBot.DB.Entity.Progress", b =>
-                {
-                    b.HasOne("ScheduleBot.DB.Entity.StudentIDLastUpdate", "StudentIDLastUpdate")
-                        .WithMany()
-                        .HasForeignKey("StudentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("StudentIDLastUpdate");
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.ScheduleProfile", b =>

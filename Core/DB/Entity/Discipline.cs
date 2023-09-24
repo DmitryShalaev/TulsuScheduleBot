@@ -1,10 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
+using Microsoft.EntityFrameworkCore;
+
 using Newtonsoft.Json.Linq;
 
 namespace ScheduleBot.DB.Entity {
 
 #pragma warning disable CS8618
+    [Index(nameof(Date))]
     public class Discipline : IEquatable<Discipline?> {
         public long ID { get; set; }
 
@@ -12,10 +15,15 @@ namespace ScheduleBot.DB.Entity {
         public string? Lecturer { get; set; } = null;
         public string LectureHall { get; set; }
         public string? Subgroup { get; set; } = null;
+
         public DateOnly Date { get; set; }
+
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
+
+        [ForeignKey("GroupLastUpdate")]
         public string Group { get; set; }
+        public GroupLastUpdate GroupLastUpdate { get; set; }
 
         public string Type { get; set; }
 

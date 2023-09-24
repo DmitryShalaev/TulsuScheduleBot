@@ -51,6 +51,7 @@ namespace ScheduleBot {
                 else
                     return false;
             }
+
             await dbContext.SaveChangesAsync();
 
             List<Progress>? progress = await GetProgress(studentID);
@@ -95,7 +96,7 @@ namespace ScheduleBot {
             await dbContext.SaveChangesAsync();
 
             dates ??= await GetDates(group);
-            
+
             if(dates is not null) {
 
                 List<Discipline>? disciplines = await GetDisciplines(group);
