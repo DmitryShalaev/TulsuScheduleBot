@@ -5,9 +5,7 @@ namespace ScheduleBot.DB.Entity {
     public class ScheduleProfile {
         public Guid ID { get; set; }
 
-        [ForeignKey("TelegramUser")]
-        public long? OwnerID { get; set; }
-        public TelegramUser? TelegramUser { get; set; }
+        public long OwnerID { get; set; }
 
         [ForeignKey("GroupLastUpdate")]
         public string? Group { get; set; }

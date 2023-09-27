@@ -9,7 +9,7 @@ namespace ScheduleBot.DB.Entity {
         public int Days { get; set; } = 7;
 
         [ForeignKey("TelegramUser")]
-        public long? OwnerID { get; set; }
+        public long OwnerID { get; set; }
         public TelegramUser? TelegramUser { get; set; }
     }
 }

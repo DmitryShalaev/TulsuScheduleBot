@@ -376,7 +376,7 @@ namespace ScheduleBot.Bot {
                 if(profile is not null) {
                     user.ScheduleProfile = profile;
                 } else {
-                    profile = new() { TelegramUser = user };
+                    profile = new() { OwnerID = user.ChatID };
                     dbContext.ScheduleProfile.Add(profile);
                     user.ScheduleProfile = profile;
                 }
@@ -1019,25 +1019,17 @@ namespace ScheduleBot.Bot {
                         TelegramUser? user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).Include(u => u.Notifications).FirstOrDefault(u => u.ChatID == message.Chat.Id);
 
                         if(user is null) {
-                            ScheduleProfile scheduleProfile = new();
-                            dbContext.ScheduleProfile.Add(scheduleProfile);
-
-                            Notifications notifications = new();
-                            dbContext.Notifications.Add(notifications);
-                            await dbContext.SaveChangesAsync();
-
+                    
                             user = new() {
                                 ChatID = message.Chat.Id,
                                 Username = message.From.Username,
                                 FirstName = message.From.FirstName,
                                 LastName = message.From.LastName,
-                                ScheduleProfile = scheduleProfile,
-                                Notifications = notifications
+                                ScheduleProfile = new() { OwnerID  = message.Chat.Id },
+                                Notifications = new() { OwnerID = message.Chat.Id }
                             };
 
                             dbContext.TelegramUsers.Add(user);
-
-                            notifications.TelegramUser = scheduleProfile.TelegramUser = user;
 
                             await dbContext.SaveChangesAsync();
                         }
