@@ -441,10 +441,10 @@ namespace ScheduleBot.Bot {
                 }
 
                 int _messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: CancelKeyboardMarkup)).MessageId;
-                GroupLastUpdate? group = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == args);
+                GroupLastUpdate? group = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == args && i.Update != DateTime.MinValue);
 
                 if(group is null && await parser.UpdatingDisciplines(dbContext, args, 0))
-                    group = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == args);
+                    group = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == args && i.Update != DateTime.MinValue);
 
                 if(group is not null) {
                     user.Mode = Mode.Default;
@@ -471,10 +471,10 @@ namespace ScheduleBot.Bot {
                 int _messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: CancelKeyboardMarkup)).MessageId;
 
                 if(int.TryParse(args, out int id)) {
-                    StudentIDLastUpdate? studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args);
+                    StudentIDLastUpdate? studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args && i.Update != DateTime.MinValue);
 
                     if(studentID is null && await parser.UpdatingProgress(dbContext, args, 0))
-                        studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args);
+                        studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args && i.Update != DateTime.MinValue);
 
                     if(studentID is not null) {
                         user.Mode = Mode.Default;
