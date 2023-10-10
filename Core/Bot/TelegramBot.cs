@@ -1019,13 +1019,13 @@ namespace ScheduleBot.Bot {
                         TelegramUser? user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).Include(u => u.Notifications).FirstOrDefault(u => u.ChatID == message.Chat.Id);
 
                         if(user is null) {
-                    
+
                             user = new() {
                                 ChatID = message.Chat.Id,
                                 Username = message.From.Username,
                                 FirstName = message.From.FirstName,
                                 LastName = message.From.LastName,
-                                ScheduleProfile = new() { OwnerID  = message.Chat.Id },
+                                ScheduleProfile = new() { OwnerID = message.Chat.Id },
                                 Notifications = new() { OwnerID = message.Chat.Id }
                             };
 
