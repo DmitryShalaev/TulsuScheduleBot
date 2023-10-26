@@ -2,9 +2,13 @@ using System.Globalization;
 
 using Microsoft.AspNetCore.Localization;
 
+using ScheduleBot;
+
 namespace WebHook {
     public class Program {
         public static void Main(string[] args) {
+            Core.GetInstance();
+
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
             builder.Logging.SetMinimumLevel(LogLevel.Warning);
 
