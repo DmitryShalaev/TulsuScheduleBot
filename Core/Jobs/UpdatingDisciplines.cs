@@ -13,7 +13,7 @@ namespace ScheduleBot.Jobs {
             IJobDetail job = JobBuilder.Create<UpdatingDisciplinesJob>().WithIdentity("UpdatingDisciplinesJob", "group1").Build();
 
             ITrigger trigger = TriggerBuilder.Create().WithIdentity("UpdatingDisciplinesJobTrigger", "group1")
-            .StartAt(DateTimeOffset.Now.AddMinutes(5)).WithSimpleSchedule(x => x
+            .WithSimpleSchedule(x => x
                 .WithIntervalInMinutes(BotCommands.GetInstance().Config.DisciplineUpdateTime)
                 .RepeatForever())
             .Build();
