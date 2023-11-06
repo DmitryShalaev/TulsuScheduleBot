@@ -44,7 +44,7 @@ namespace ScheduleBot.DB.Entity {
 
             Lecturer = json.Value<string?>("PREP");
 
-            Class = (Class)Enum.Parse(typeof(Class), json.Value<string>("CLASS") ?? "other");
+            Class = (Class)Enum.Parse(typeof(Class), (json.Value<string>("CLASS") ?? "other").Replace("default", "def"));
 
             string[] times = (json.Value<string>("TIME_Z") ?? throw new NullReferenceException("TIME_Z")).Split('-');
             StartTime = TimeOnly.Parse(times[0]);
@@ -55,7 +55,7 @@ namespace ScheduleBot.DB.Entity {
 
         public Discipline(CustomDiscipline discipline) {
             Name = discipline.Name ?? throw new NullReferenceException("Name");
-            Class = Entity.Class.other;
+            Class = Class.other;
             Lecturer = discipline.Lecturer;
             LectureHall = discipline.LectureHall ?? throw new NullReferenceException("LectureHall");
             StartTime = discipline.StartTime ?? throw new NullReferenceException("StartTime");
@@ -95,7 +95,8 @@ namespace ScheduleBot.DB.Entity {
         practice,
         lecture,
         other,
-        custom
+        custom,
+        def
     }
 
     public class ClassDTO {

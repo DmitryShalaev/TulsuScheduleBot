@@ -108,6 +108,7 @@ namespace ScheduleBot.Bot {
 
         private async Task TeacherWorkScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string teacher, IReplyMarkup? replyMarkup) {
             DateTime? teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher)?.Update.ToLocalTime();
+
             if(teacherLastUpdate is null || (DateTime.Now - teacherLastUpdate)?.TotalMinutes > commands.Config.TeacherWorkScheduleUpdateTime) {
                 int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
                 if(!await parser.UpdatingTeacherWorkSchedule(dbContext, teacher, commands.Config.UpdateAttemptTime))

@@ -44,7 +44,7 @@ namespace ScheduleBot.DB.Entity {
 
             Lecturer = json.Value<string?>("PREP");
 
-            Class = (Class)Enum.Parse(typeof(Class), json.Value<string>("CLASS") ?? "other");
+            Class = (Class)Enum.Parse(typeof(Class), (json.Value<string>("CLASS") ?? "other").Replace("default", "def"));
 
             string[] times = (json.Value<string>("TIME_Z") ?? throw new NullReferenceException("TIME_Z")).Split('-');
             StartTime = TimeOnly.Parse(times[0]);
