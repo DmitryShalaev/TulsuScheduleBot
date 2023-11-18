@@ -22,6 +22,7 @@ namespace ScheduleBot.Bot {
             public int DisciplineUpdateTime;
             public int StudentIDUpdateTime;
             public int TeacherWorkScheduleUpdateTime;
+            public int DisciplineUpdateDays;
             public int UpdateAttemptTime;
         }
 

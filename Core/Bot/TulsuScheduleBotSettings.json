@@ -2,7 +2,10 @@
   "Config": {
     "DisciplineUpdateTime": "30",
     "StudentIDUpdateTime": "30",
+
     "TeacherWorkScheduleUpdateTime": "60",
+
+    "DisciplineUpdateDays": 7,
 
     "UpdateAttemptTime": 5
   },
