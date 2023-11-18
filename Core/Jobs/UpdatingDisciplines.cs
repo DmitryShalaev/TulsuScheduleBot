@@ -19,7 +19,7 @@ namespace ScheduleBot.Jobs {
                 BotCommands.ConfigStruct config = BotCommands.GetInstance().Config;
 
                 foreach(string item in dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= config.DisciplineUpdateDays).Select(i => i.Group!).Distinct().ToList())
-                    await parser.UpdatingDisciplines(dbContext, group: item, updateAttemptTime: config.DisciplineUpdateTime - 1, dates: dates);
+                    await parser.UpdatingDisciplines(dbContext, group: item, updateAttemptTime: 0, dates: dates);
             }
 
             ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
