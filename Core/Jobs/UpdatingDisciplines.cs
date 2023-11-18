@@ -17,11 +17,12 @@ namespace ScheduleBot.Jobs {
         public static async Task StartAsync() {
             using(ScheduleDbContext dbContext = new()) {
                 string? group = dbContext.GroupLastUpdate.FirstOrDefault()?.Group;
-                if(group is not null)
+                if(group is not null) {
                     dates = await parser.GetDates(group);
 
-                foreach(string item in dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= config.DisciplineUpdateDays).Select(i => i.Group!).Distinct().ToList())
-                    await parser.UpdatingDisciplines(dbContext, group: item, updateAttemptTime: 0, dates: dates);
+                    foreach(string item in dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= config.DisciplineUpdateDays).Select(i => i.Group!).Distinct().ToList())
+                        await parser.UpdatingDisciplines(dbContext, group: item, updateAttemptTime: 0, dates: dates);
+                }
             }
 
             dateTime = DateTime.Now;
@@ -59,6 +60,8 @@ namespace ScheduleBot.Jobs {
                         .Build();
 
                     await context.Scheduler.RescheduleJob(oldTrigger.Key, newTrigger);
+
+                    return;
                 }
 
                 int DisciplineUpdateDays = BotCommands.GetInstance().Config.DisciplineUpdateDays;
