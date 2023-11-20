@@ -126,7 +126,7 @@ namespace ScheduleBot {
             var exams = new List<string>();
 
             var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID).ToList();
-            IOrderedEnumerable<Discipline> disciplines = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && i.Class == Class.def && DateTime.Parse($"{i.Date} {i.EndTime}") >= DateTime.Now && !completedDisciplines.Contains((CompletedDiscipline)i)).OrderBy(i => i.Date);
+            IOrderedEnumerable<Discipline> disciplines = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && (i.Class == Class.def || i.Class == Class.other) && DateTime.Parse($"{i.Date} {i.EndTime}") >= DateTime.Now && !completedDisciplines.Contains((CompletedDiscipline)i)).OrderBy(i => i.Date);
 
             if(!disciplines.Any()) {
                 exams.Add("Ничего нет");
