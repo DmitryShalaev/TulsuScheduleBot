@@ -71,8 +71,6 @@ namespace ScheduleBot.Jobs {
                 string group = dbContext.GroupLastUpdate.Where(i => tmp.Contains(i.Group)).OrderBy(i => i.Update).First().Group;
 
                 await parser.UpdatingDisciplines(dbContext, group: group, updateAttemptTime: 1, dates: dates);
-
-                Console.WriteLine($"UpdatingDisciplines: {group} {DateTime.Now}");
             }
         }
 
@@ -80,8 +78,6 @@ namespace ScheduleBot.Jobs {
             using(ScheduleDbContext dbContext = new()) {
                 int tmp = dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= config.DisciplineUpdateDays).Select(i => i.Group!).Distinct().Count();
                 int sec = (int)Math.Floor((config.DisciplineUpdateTime - 1.0) * 60.0 / (tmp == 0 ? 1.0 : tmp));
-
-                Console.WriteLine($"GetUpdateInterval: {sec} {DateTime.Now}");
 
                 return sec;
             }
