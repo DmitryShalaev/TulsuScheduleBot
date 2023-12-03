@@ -1,7 +1,7 @@
 ﻿namespace ScheduleBot.Bot {
     public class UserActivityTracker {
         private readonly Dictionary<long, Queue<DateTime>> userMessageQueue = new();
-        private readonly int maxMessagesPerSecond = 2;
+        private readonly int maxMessagesPerSecond = 3;
 
         public bool IsAllowed(long userId) {
             if(!userMessageQueue.ContainsKey(userId))
