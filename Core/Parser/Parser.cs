@@ -292,7 +292,7 @@ namespace ScheduleBot {
             return null;
         }
 
-        [GeneratedRegex("^[А-ЯЁ][а-яё]+\\s*[А-ЯЁ](?:[а-яё\\.]+)?(?:\\s*[А-ЯЁ][а-яё]+)?(?:\\s[А-ЯЁ]\\\\.)?\\s*(?:\\s*[А-ЯЁ]\\.)?(?:\\s*[А-ЯЁ][а-яё]+)?$")]
+        [GeneratedRegex("^[А-ЯЁ][а-яё]+\\s*[А-ЯЁ](?:[а-яё.]+)?(?:\\s[А-ЯЁа-яё.]+)*$")]
         private static partial Regex TeachersRegex();
 
         public async Task<List<string>?> GetTeachers() {
