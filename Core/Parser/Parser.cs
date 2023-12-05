@@ -208,9 +208,17 @@ namespace ScheduleBot {
                     dbContext.TeacherLastUpdate.AddRange(except.Select(i => new TeacherLastUpdate() { Teacher = i, Update = updDate }));
 
                     await dbContext.SaveChangesAsync();
-
-                    return true;
+                    _list = dbContext.TeacherLastUpdate.Select(i => i.Teacher).ToList();
                 }
+
+                except = _list.Except(teachers);
+
+                if(except.Any())
+                    dbContext.TeacherLastUpdate.RemoveRange(dbContext.TeacherLastUpdate.Where(i => except.Contains(i.Teacher)));
+
+                await dbContext.SaveChangesAsync();
+
+                return true;
             }
 
             return false;
