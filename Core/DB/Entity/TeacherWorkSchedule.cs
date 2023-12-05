@@ -42,7 +42,7 @@ namespace ScheduleBot.DB.Entity {
 
             Groups = Groups?[..^2];
 
-            Lecturer = json.Value<string?>("PREP");
+            Lecturer = json.Value<string?>("PREP") ?? throw new NullReferenceException("PREP");
 
             Class = (Class)Enum.Parse(typeof(Class), (json.Value<string>("CLASS") ?? "other").Replace("default", "def"));
 

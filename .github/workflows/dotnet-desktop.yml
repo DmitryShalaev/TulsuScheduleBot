@@ -20,7 +20,7 @@ jobs:
       run: dotnet restore
     
     - name: DotNet Publish
-      run: dotnet publish ./WebHook/WebHook.csproj --os linux -c Release
+      run: dotnet publish ./WebHook/WebHook.csproj --os linux -c Release --self-contained
       
     - name: Stop ScheduleBot Service
       uses: garygrossgarten/github-action-ssh@release
