@@ -3,6 +3,8 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using HtmlAgilityPack;
+
 using Microsoft.EntityFrameworkCore;
 
 using Newtonsoft.Json.Linq;
@@ -158,6 +160,8 @@ namespace ScheduleBot {
             }
 
             await dbContext.SaveChangesAsync();
+
+            await UpdatingTeacherInfo(dbContext, teacher);
 
             (DateOnly min, DateOnly max)? dates = await GetDates(teacher);
             if(dates is not null) {
@@ -329,11 +333,12 @@ namespace ScheduleBot {
 
                     Regex regex = TeachersRegex();
 
-                    using(HttpResponseMessage response = await client.GetAsync("https://tulsu.ru/schedule/queries/GetDictionaries.php"))
+                    using(HttpResponseMessage response = await client.GetAsync("https://tulsu.ru/schedule/queries/GetDictionaries.php")) {
                         if(response.IsSuccessStatusCode) {
                             var jObject = JArray.Parse(await response.Content.ReadAsStringAsync());
                             return jObject.Count == 0 ? throw new Exception() : jObject?.Where(i => regex.IsMatch(i.Value<string>("value") ?? "")).Select(j => j.Value<string>("value")?.Trim() ?? "").ToList();
                         }
+                    }
                 }
             } catch(Exception) {
                 return null;
@@ -421,5 +426,63 @@ namespace ScheduleBot {
 
             return null;
         }
+
+        public async Task<string?> GetTeacherInfo(string teacher) {
+            try {
+                using(var client = new HttpClient(clientHandler, false)) {
+                    #region RequestHeaders
+                    client.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
+                    client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
+                    client.DefaultRequestHeaders.Add("Accept-Language", "ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7");
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0");
+
+                    client.DefaultRequestHeaders.Add("sec-ch-ua", "\"Microsoft Edge\";v=\"119\", \"Chromium\";v=\"119\", \"Not?A_Brand\";v=\"24\"");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua-mobile", "?0");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua-platform", "\"Windows\"");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-Dest", "document");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-Mode", "navigate");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-Site", "none");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-User", "?1");
+                    client.DefaultRequestHeaders.Add("Upgrade-Insecure-Requests", "1");
+                    client.DefaultRequestHeaders.Add("Connection", "keep-alive");
+                    client.DefaultRequestHeaders.Add("Host", "tulsu.ru");
+
+                    client.Timeout = TimeSpan.FromSeconds(10);
+
+                    #endregion
+
+                    using(HttpResponseMessage response = await client.GetAsync($"https://tulsu.ru/polytech/search?text={teacher}&accurate=on")) {
+                        if(response.IsSuccessStatusCode) {
+                            var html = new HtmlDocument();
+                            html.LoadHtml(await response.Content.ReadAsStringAsync());
+
+                            HtmlNodeCollection? nodes = html.DocumentNode.SelectNodes($"//a[contains(@href, 'https://tulsu.ru/employees/')]");
+
+                            if(nodes is not null) {
+                                return nodes.First().GetAttributeValue("href", ""); ;
+                            }
+                        }
+                    }
+                }
+            } catch(Exception) {
+                return null;
+            }
+
+            return null;
+        }
+
+        public async Task UpdatingTeacherInfo(ScheduleDbContext dbContext, string teacher) {
+            TeacherLastUpdate? teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher);
+            if(teacherLastUpdate is not null) {
+
+                string? info = await GetTeacherInfo(teacher);
+
+                if(info is not null)
+                    teacherLastUpdate.LinkProfile = info;
+
+                await dbContext.SaveChangesAsync();
+            }
+        }
     }
 }
+

@@ -2,14 +2,11 @@
 
 #nullable disable
 
-namespace ScheduleBot.Migrations
-{
+namespace ScheduleBot.Migrations {
     /// <inheritdoc />
-    public partial class upd_TeacherWorkScheduleTeacherLastUpdate : Migration
-    {
+    public partial class upd_TeacherWorkScheduleTeacherLastUpdate : Migration {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
+        protected override void Up(MigrationBuilder migrationBuilder) {
             migrationBuilder.DropForeignKey(
                 name: "FK_TeacherWorkSchedule_TeacherLastUpdate_Lecturer",
                 table: "TeacherWorkSchedule");
@@ -34,8 +31,7 @@ namespace ScheduleBot.Migrations
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+        protected override void Down(MigrationBuilder migrationBuilder) {
             migrationBuilder.DropForeignKey(
                 name: "FK_TeacherWorkSchedule_TeacherLastUpdate_Lecturer",
                 table: "TeacherWorkSchedule");

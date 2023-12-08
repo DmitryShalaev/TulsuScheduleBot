@@ -12,7 +12,11 @@ namespace ScheduleBot.DB.Entity {
         public long ID { get; set; }
 
         public string Name { get; set; }
-        public string? Lecturer { get; set; } = null;
+
+        [ForeignKey("TeacherLastUpdate")]
+        public string? Lecturer { get; set; }
+        public TeacherLastUpdate TeacherLastUpdate { get; set; }
+
         public string LectureHall { get; set; }
         public string? Subgroup { get; set; } = null;
 

@@ -875,9 +875,14 @@ namespace ScheduleBot.Bot {
                         user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Выберите преподавателя.\nЕсли его нет уточните ФИО.", replyMarkup: new InlineKeyboardMarkup(buttons))).MessageId;
                     } else {
                         user.Mode = Mode.TeacherSelected;
-                        string teacher = user.TempData = find.First();
+                        string teacherName = user.TempData = find.First();
 
-                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"{commands.Message["CurrentTeacher"]}: {teacher}", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(teacher));
+                        TeacherLastUpdate teacher = dbContext.TeacherLastUpdate.First(i => i.Teacher == teacherName);
+
+                        if(string.IsNullOrWhiteSpace(teacher.LinkProfile))
+                            await parser.UpdatingTeacherInfo(dbContext, teacherName);
+
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"{commands.Message["CurrentTeacher"]}: [{teacherName}]({teacher.LinkProfile})", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(teacherName), parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
                     }
                 } else {
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "Преподаватель не найден!", replyMarkup: TeachersWorkScheduleBackKeyboardMarkup);
@@ -889,11 +894,16 @@ namespace ScheduleBot.Bot {
                 user.Mode = Mode.TeacherSelected;
                 user.RequestingMessageID = null;
 
-                string teacher = user.TempData = dbContext.TeacherLastUpdate.First(i => i.Teacher.ToLower().StartsWith(args)).Teacher;
+                TeacherLastUpdate teacher = dbContext.TeacherLastUpdate.First(i => i.Teacher.ToLower().StartsWith(args));
+
+                string teacherName = user.TempData = teacher.Teacher;
+
+                if(string.IsNullOrWhiteSpace(teacher.LinkProfile))
+                    await parser.UpdatingTeacherInfo(dbContext, teacherName);
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
 
-                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{commands.Message["CurrentTeacher"]}: {teacher}", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(teacher));
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{commands.Message["CurrentTeacher"]}: [{teacherName}]({teacher.LinkProfile})", replyMarkup: GetTeacherWorkScheduleSelectedKeyboardMarkup(teacherName), parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
             });
 
             commandManager.AddMessageCommand(commands.Message["Back"], Mode.TeacherSelected, async (dbContext, chatId, messageId, user, args) => {

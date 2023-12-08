@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScheduleBot.DB;
@@ -11,9 +12,11 @@ using ScheduleBot.DB;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231208193131_upd_Lecturer-Discipline")]
+    partial class Upd_LecturerDiscipline
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -466,9 +469,6 @@ namespace ScheduleBot.Migrations
             modelBuilder.Entity("ScheduleBot.DB.Entity.TeacherLastUpdate", b =>
                 {
                     b.Property<string>("Teacher")
-                        .HasColumnType("text");
-
-                    b.Property<string>("LinkProfile")
                         .HasColumnType("text");
 
                     b.Property<DateTime>("Update")

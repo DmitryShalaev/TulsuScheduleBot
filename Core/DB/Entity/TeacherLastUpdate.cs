@@ -7,6 +7,8 @@ namespace ScheduleBot.DB.Entity {
         [Key]
         public string Teacher { get; set; }
 
+        public string? LinkProfile { get; set; }
+
         public DateTime Update { get; set; }
 
         public DateTime UpdateAttempt { get; set; }
