@@ -34,12 +34,22 @@ namespace ScheduleBot {
 
             Instance = this;
 
-            Task.Run(async () => {
-                using(ScheduleDbContext dbContext = new())
-                    await UpdatingTeachers(dbContext);
-            });
+            Task.Run(GetTeachersData);
 
             UpdatingDisciplinesJob.StartAsync().Wait();
+        }
+
+        public async Task GetTeachersData() {
+            using(ScheduleDbContext dbContext = new()) {
+                await UpdatingTeachers(dbContext);
+
+                var teachers = dbContext.Disciplines.Include(i => i.TeacherLastUpdate).Where(i => i.Lecturer != null && string.IsNullOrEmpty(i.TeacherLastUpdate.LinkProfile)).Select(i => i.Lecturer!).Distinct().ToList();
+                foreach(string item in teachers) {
+                    await UpdatingTeacherInfo(dbContext, item);
+                    await Console.Out.WriteLineAsync(item);
+                    await Task.Delay(TimeSpan.FromSeconds(30));
+                }
+            }
         }
 
         public async Task<bool> UpdatingProgress(ScheduleDbContext dbContext, string studentID, int updateAttemptTime) {

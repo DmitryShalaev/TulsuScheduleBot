@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
 
+using Microsoft.EntityFrameworkCore;
+
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
@@ -31,10 +33,10 @@ namespace ScheduleBot {
             return schedules;
         }
 
-        public static (string, bool) GetScheduleByDate(ScheduleDbContext dbContext, DateOnly date, ScheduleProfile profile, bool all = false) {
+        public static (string, bool) GetScheduleByDate(ScheduleDbContext dbContext, DateOnly date, ScheduleProfile profile, bool all = false, bool link = true) {
             var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID && (i.Date == null || i.Date == date)).ToList();
 
-            var list = dbContext.Disciplines.Where(i => i.Group == profile.Group && i.Date == date).ToList();
+            var list = dbContext.Disciplines.Include(i => i.TeacherLastUpdate).Where(i => i.Group == profile.Group && i.Date == date).ToList();
 
             int count = list.Count;
 
@@ -55,7 +57,8 @@ namespace ScheduleBot {
             foreach(Discipline? item in list) {
                 str += $"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}\n" +
                        $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}\n" +
-                       $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n";
+                       (link ? $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ [{item.Lecturer}]({item.TeacherLastUpdate.LinkProfile})\n" : "")}\n" :
+                               $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n");
             }
 
             return (str, flag);
