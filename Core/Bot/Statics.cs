@@ -13,7 +13,7 @@ namespace ScheduleBot.Bot {
         private static partial Regex DefaultMessageRegex();
         [GeneratedRegex("^([0-9]+)[ ]([а-я]+)$")]
         private static partial Regex TermsMessageRegex();
-        [GeneratedRegex("(^[А-я]+[ ]?[а-я]*):")]
+        [GeneratedRegex("(^[А-я]+[а-я ]*):")]
         private static partial Regex GroupOrStudentIDMessageRegex();
         [GeneratedRegex("(^/[A-z]+)[ ]?([A-z0-9-]*)$")]
         private static partial Regex CommandMessageRegex();

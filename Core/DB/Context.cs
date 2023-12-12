@@ -32,7 +32,7 @@ namespace ScheduleBot.DB {
         public DbSet<GroupLastUpdate> GroupLastUpdate { get; set; }
         public DbSet<StudentIDLastUpdate> StudentIDLastUpdate { get; set; }
         public DbSet<MessageLog> MessageLog { get; set; }
-        public DbSet<Notifications> Notifications { get; set; }
+        public DbSet<Settings> Settings { get; set; }
         public DbSet<TeacherWorkSchedule> TeacherWorkSchedule { get; set; }
         public DbSet<TeacherLastUpdate> TeacherLastUpdate { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }

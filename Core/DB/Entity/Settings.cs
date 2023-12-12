@@ -2,10 +2,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ScheduleBot.DB.Entity {
-    public class Notifications {
-        public bool IsEnabled { get; set; } = false;
+    public class Settings {
+        public bool NotificationEnabled { get; set; } = false;
+        public int NotificationDays { get; set; } = 7;
 
-        public int Days { get; set; } = 7;
+        public bool TeacherLincsEnabled { get; set; } = true;
 
         [Key]
         [ForeignKey("TelegramUser")]

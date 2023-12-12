@@ -29,7 +29,18 @@ namespace ScheduleBot.Bot {
             }
 
             ProfileKeyboardMarkup.AddRange(new[] {
+                new KeyboardButton[] { commands.Message["Settings"] },
+                new KeyboardButton[] { commands.Message["Back"] }
+            });
+
+            return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
+        }
+
+        private ReplyKeyboardMarkup GetSettingsKeyboardMarkup(TelegramUser user) {
+            List<KeyboardButton[]> ProfileKeyboardMarkup = new(new[] {
+
                 new KeyboardButton[] { commands.Message["Notifications"] },
+                new KeyboardButton[] { $"{commands.Message["TeacherLincsEnabled"]}: {(user.Settings.TeacherLincsEnabled ? "вкл" : "выкл")}" },
                 new KeyboardButton[] { commands.Message["Back"] }
             });
 

@@ -17,7 +17,7 @@ namespace ScheduleBot.Bot {
     public partial class TelegramBot {
 
         private async Task UpdatedDisciplinesAsync(ScheduleDbContext dbContext, List<(string Group, DateOnly Date)> values) {
-            var telegramUsers = dbContext.TelegramUsers.Include(u => u.Notifications).Where(u => u.Notifications.IsEnabled).Include(u => u.ScheduleProfile).Select(u => new ExtendedTelegramUser(u)).ToList();
+            var telegramUsers = dbContext.TelegramUsers.Include(u => u.Settings).Where(u => u.Settings.NotificationEnabled).Include(u => u.ScheduleProfile).Select(u => new ExtendedTelegramUser(u)).ToList();
 
             foreach((string Group, DateOnly Date) in values) {
                 int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(Date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
@@ -25,7 +25,7 @@ namespace ScheduleBot.Bot {
 
                 double days = (DateTime.Parse(Date.ToString()) - DateTime.Now.Date).TotalDays;
 
-                foreach(ExtendedTelegramUser? user in telegramUsers.Where(i => i.ScheduleProfile.Group == Group && days <= i.Notifications.Days)) {
+                foreach(ExtendedTelegramUser? user in telegramUsers.Where(i => i.ScheduleProfile.Group == Group && days <= i.Settings.NotificationDays)) {
                     if(!user.Flag) {
                         await botClient.SendTextMessageAsync(chatId: user.ChatID, text: commands.Message["NotificationMessage"], disableNotification: true);
                         user.Flag = true;

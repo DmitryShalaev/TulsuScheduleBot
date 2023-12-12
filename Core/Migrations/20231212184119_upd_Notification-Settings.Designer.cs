@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScheduleBot.DB;
@@ -11,9 +12,11 @@ using ScheduleBot.DB;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231212184119_upd_Notification-Settings")]
+    partial class upd_NotificationSettings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -439,15 +442,12 @@ namespace ScheduleBot.Migrations
                     b.Property<int>("NotificationDays")
                         .HasColumnType("integer");
 
-                    b.Property<bool>("NotificationEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("TeacherLincsEnabled")
+                    b.Property<bool>("NotificationIsEnabled")
                         .HasColumnType("boolean");
 
                     b.HasKey("OwnerID");
 
-                    b.ToTable("Settings");
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.StudentIDLastUpdate", b =>
@@ -690,7 +690,7 @@ namespace ScheduleBot.Migrations
             modelBuilder.Entity("ScheduleBot.DB.Entity.Settings", b =>
                 {
                     b.HasOne("ScheduleBot.DB.Entity.TelegramUser", "TelegramUser")
-                        .WithOne("Settings")
+                        .WithOne("Notifications")
                         .HasForeignKey("ScheduleBot.DB.Entity.Settings", "OwnerID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -738,7 +738,7 @@ namespace ScheduleBot.Migrations
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.TelegramUser", b =>
                 {
-                    b.Navigation("Settings")
+                    b.Navigation("Notifications")
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

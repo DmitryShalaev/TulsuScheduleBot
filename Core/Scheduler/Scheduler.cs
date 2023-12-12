@@ -7,14 +7,14 @@ using ScheduleBot.DB.Entity;
 
 namespace ScheduleBot {
     public static class Scheduler {
-        public static List<((string, bool), DateOnly)> GetScheduleByWeak(ScheduleDbContext dbContext, int weeks, ScheduleProfile profile) {
+        public static List<((string, bool), DateOnly)> GetScheduleByWeak(ScheduleDbContext dbContext, int weeks, TelegramUser user) {
             var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
 
             var schedules = new List<((string, bool), DateOnly)>();
 
             for(int i = 1; i < 7; i++) {
                 DateOnly tmp = dateOnly.AddDays(7 * weeks + i);
-                schedules.Add((GetScheduleByDate(dbContext, tmp, profile), tmp));
+                schedules.Add((GetScheduleByDate(dbContext, tmp, user), tmp));
             }
 
             return schedules;
@@ -33,7 +33,11 @@ namespace ScheduleBot {
             return schedules;
         }
 
-        public static (string, bool) GetScheduleByDate(ScheduleDbContext dbContext, DateOnly date, ScheduleProfile profile, bool all = false, bool link = true) {
+        public static (string, bool) GetScheduleByDate(ScheduleDbContext dbContext, DateOnly date, TelegramUser user, bool all = false, bool link = true) {
+            ScheduleProfile profile = user.ScheduleProfile;
+
+            link &= user.Settings.TeacherLincsEnabled;
+
             var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID && (i.Date == null || i.Date == date)).ToList();
 
             var list = dbContext.Disciplines.Include(i => i.TeacherLastUpdate).Where(i => i.Group == profile.Group && i.Date == date).ToList();
@@ -99,14 +103,14 @@ namespace ScheduleBot {
             return str;
         }
 
-        public static List<((string, bool), DateOnly)> GetScheduleByDay(ScheduleDbContext dbContext, DayOfWeek dayOfWeek, ScheduleProfile profile) {
+        public static List<((string, bool), DateOnly)> GetScheduleByDay(ScheduleDbContext dbContext, DayOfWeek dayOfWeek, TelegramUser user) {
             int weeks = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
             var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
 
             var list = new List<((string, bool), DateOnly)>();
             for(int i = -1; i <= 1; i++) {
                 DateOnly tmp = dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek);
-                list.Add((GetScheduleByDate(dbContext, tmp, profile), tmp));
+                list.Add((GetScheduleByDate(dbContext, tmp, user), tmp));
             }
 
             return list;

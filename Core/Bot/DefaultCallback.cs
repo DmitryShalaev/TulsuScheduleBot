@@ -77,7 +77,7 @@ namespace ScheduleBot.Bot {
         private InlineKeyboardMarkup GetNotificationsInlineKeyboardButton(TelegramUser user) {
             var buttons = new List<InlineKeyboardButton[]>();
 
-            if(user.Notifications.IsEnabled)
+            if(user.Settings.NotificationEnabled)
                 buttons.Add(new[] { InlineKeyboardButton.WithCallbackData("Выключить уведомления", "ToggleNotifications off") });
             else
                 buttons.Add(new[] { InlineKeyboardButton.WithCallbackData("Включить уведомления", "ToggleNotifications on") });
@@ -89,7 +89,7 @@ namespace ScheduleBot.Bot {
                 _ => "",
             };
 
-            buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"В период: {via(user.Notifications.Days)}", "DaysNotifications") });
+            buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"В период: {via(user.Settings.NotificationDays)}", "DaysNotifications") });
 
             return new InlineKeyboardMarkup(buttons);
         }

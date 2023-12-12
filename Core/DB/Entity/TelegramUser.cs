@@ -24,7 +24,7 @@ namespace ScheduleBot.DB.Entity {
         public Guid ScheduleProfileGuid { get; set; }
         public ScheduleProfile ScheduleProfile { get; set; }
 
-        public Notifications Notifications { get; set; }
+        public Settings Settings { get; set; }
 
         [ForeignKey("ModeDTO")]
         public Mode Mode { get; set; } = Mode.Default;
@@ -43,7 +43,7 @@ namespace ScheduleBot.DB.Entity {
         public TelegramUser(TelegramUser telegramUser) {
             ChatID = telegramUser.ChatID;
             ScheduleProfile = telegramUser.ScheduleProfile;
-            Notifications = telegramUser.Notifications;
+            Settings = telegramUser.Settings;
         }
     }
 

@@ -23,6 +23,9 @@
     "GroupNumber": "Номер группы",
     "StudentIDNumber": "Номер зачетки",
 
+    "Settings": "Настройки",
+    "TeacherLincsEnabled": "Ссылки на преподавателей",
+
     "Exam": "Экзамены",
     "NextExam": "Ближайший экзамен",
     "AllExams": "Все экзамены",
