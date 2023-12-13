@@ -43,7 +43,7 @@ namespace ScheduleBot {
             using(ScheduleDbContext dbContext = new()) {
                 await UpdatingTeachers(dbContext);
 
-                var teachers = dbContext.Disciplines.Include(i => i.TeacherLastUpdate).Where(i => i.Lecturer != null && i.TeacherLastUpdate != null && string.IsNullOrEmpty(i.TeacherLastUpdate!.LinkProfile)).Select(i => i.Lecturer!).Distinct().ToList();
+                var teachers = dbContext.Disciplines.Include(i => i.TeacherLastUpdate).Where(i => i.Lecturer != null && string.IsNullOrEmpty(i.TeacherLastUpdate.LinkProfile)).Select(i => i.Lecturer!).Distinct().ToList();
                 foreach(string item in teachers) {
                     await UpdatingTeacherInfo(dbContext, item);
                     await Task.Delay(TimeSpan.FromSeconds(30));
@@ -126,6 +126,15 @@ namespace ScheduleBot {
 
                     IEnumerable<Discipline> except = disciplines.Except(_list);
                     if(except.Any()) {
+                        foreach(var item in except) {
+                            dbContext.Disciplines.Add(item);
+                            try {
+                                await dbContext.SaveChangesAsync();
+                            } catch(Exception e) {
+
+                                throw;
+                            }
+                        }
                         dbContext.Disciplines.AddRange(except);
 
                         if(_list.Any())
@@ -313,7 +322,7 @@ namespace ScheduleBot {
             return null;
         }
 
-        [GeneratedRegex("^[А-ЯЁ ][а-яё ]+\\s*[А-ЯЁ ](?:[а-яё. ]+)?(?:\\s[А-ЯЁа-яё. ]+)*$")]
+        [GeneratedRegex("^[А-ЯЁ][а-яё]+\\s*[А-ЯЁ](?:[а-яё.]+)?(?:\\s[А-ЯЁа-яё.]+)*$")]
         private static partial Regex TeachersRegex();
 
         public async Task<List<string>?> GetTeachers() {
@@ -345,7 +354,7 @@ namespace ScheduleBot {
                     using(HttpResponseMessage response = await client.GetAsync("https://tulsu.ru/schedule/queries/GetDictionaries.php")) {
                         if(response.IsSuccessStatusCode) {
                             var jObject = JArray.Parse(await response.Content.ReadAsStringAsync());
-                            return jObject.Count == 0 ? throw new Exception() : jObject?.Where(i => regex.IsMatch(i.Value<string>("value") ?? "")).Select(j => j.Value<string>("value")?.Trim() ?? "").ToList();
+                            return jObject.Count == 0 ? throw new Exception() : jObject?.Where(i => regex.IsMatch(i.Value<string>("value")?.Trim() ?? "")).Select(j => j.Value<string>("value")?.Trim() ?? "").ToList();
                         }
                     }
                 }

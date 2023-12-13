@@ -15,7 +15,7 @@ namespace ScheduleBot.DB.Entity {
 
         [ForeignKey("TeacherLastUpdate")]
         public string? Lecturer { get; set; }
-        public TeacherLastUpdate? TeacherLastUpdate { get; set; }
+        public TeacherLastUpdate TeacherLastUpdate { get; set; }
 
         public string LectureHall { get; set; }
         public string? Subgroup { get; set; } = null;
@@ -46,7 +46,7 @@ namespace ScheduleBot.DB.Entity {
             string? _subgroup = json.Value<JToken>("GROUPS")?[0]?.Value<string>("PRIM");
             Subgroup = string.IsNullOrWhiteSpace(_subgroup) ? null : _subgroup;
 
-            Lecturer = json.Value<string?>("PREP");
+            Lecturer = json.Value<string?>("PREP")?.Trim();
 
             Class = (Class)Enum.Parse(typeof(Class), (json.Value<string>("CLASS") ?? "other").Replace("default", "def"));
 
