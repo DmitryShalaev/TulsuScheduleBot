@@ -15,7 +15,7 @@ namespace ScheduleBot.DB.Entity {
 
         [ForeignKey("TeacherLastUpdate")]
         public string? Lecturer { get; set; }
-        public TeacherLastUpdate TeacherLastUpdate { get; set; }
+        public TeacherLastUpdate? TeacherLastUpdate { get; set; }
 
         public string LectureHall { get; set; }
         public string? Subgroup { get; set; } = null;

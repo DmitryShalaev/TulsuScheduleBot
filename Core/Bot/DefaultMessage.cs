@@ -38,7 +38,6 @@ namespace ScheduleBot.Bot {
 
         private ReplyKeyboardMarkup GetSettingsKeyboardMarkup(TelegramUser user) {
             List<KeyboardButton[]> ProfileKeyboardMarkup = new(new[] {
-
                 new KeyboardButton[] { commands.Message["Notifications"] },
                 new KeyboardButton[] { $"{commands.Message["TeacherLincsEnabled"]}: {(user.Settings.TeacherLincsEnabled ? "вкл" : "выкл")}" },
                 new KeyboardButton[] { commands.Message["Back"] }
