@@ -126,15 +126,6 @@ namespace ScheduleBot {
 
                     IEnumerable<Discipline> except = disciplines.Except(_list);
                     if(except.Any()) {
-                        foreach(var item in except) {
-                            dbContext.Disciplines.Add(item);
-                            try {
-                                await dbContext.SaveChangesAsync();
-                            } catch(Exception e) {
-
-                                throw;
-                            }
-                        }
                         dbContext.Disciplines.AddRange(except);
 
                         if(_list.Any())

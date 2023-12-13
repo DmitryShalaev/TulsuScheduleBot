@@ -60,7 +60,7 @@ namespace ScheduleBot.DB.Entity {
         public Discipline(CustomDiscipline discipline) {
             Name = discipline.Name ?? throw new NullReferenceException("Name");
             Class = Class.other;
-            Lecturer = discipline.Lecturer;
+            Lecturer = discipline.Lecturer?.Trim();
             LectureHall = discipline.LectureHall ?? throw new NullReferenceException("LectureHall");
             StartTime = discipline.StartTime ?? throw new NullReferenceException("StartTime");
             EndTime = discipline.EndTime ?? throw new NullReferenceException("EndTime");
