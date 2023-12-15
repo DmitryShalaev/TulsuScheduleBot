@@ -81,8 +81,39 @@ namespace ScheduleBot.Bot {
             #region Message
             #region Main
             foreach(Mode mode in Enum.GetValues(typeof(Mode)).Cast<Mode>()) {
+                commandManager.AddMessageCommand("/feedback", mode, async (dbContext, chatId, messageId, user, args) => {
+                    if(user.Mode == Mode.AddingDiscipline)
+                        dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile));
+
+                    user.TempData = null;
+                    await DeleteTempMessage(user);
+
+                    if(user.IsAdmin) {
+                        Feedback? feedback = dbContext.Feedbacks.Include(i => i.TelegramUser).Where(i => !i.IsCompleted).OrderBy(i => i.Date).FirstOrDefault();
+
+                        if(feedback is not null) {
+                            await botClient.SendTextMessageAsync(chatId: chatId, text: GetFeedbackMessage(feedback), replyMarkup: GetFeedbackInlineKeyboardButton(dbContext, feedback));
+                        } else {
+                            await botClient.SendTextMessageAsync(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: MainKeyboardMarkup);
+                        }
+
+                        return;
+                    }
+
+                    user.Mode = Mode.Feedback;
+                    user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["FeedbackMessage"], replyMarkup: CancelKeyboardMarkup)).MessageId;
+                });
+
                 commandManager.AddMessageCommand("/start", mode, async (dbContext, chatId, messageId, user, args) => {
                     await botClient.SendTextMessageAsync(chatId: chatId, text: "👋", replyMarkup: MainKeyboardMarkup);
+
+                    user.TempData = null;
+                    user.Mode = Mode.Default;
+
+                    await DeleteTempMessage(user);
+
+                    if(user.Mode == Mode.AddingDiscipline)
+                        dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile));
 
                     if(string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
                         user.Mode = Mode.GroupСhange;
@@ -90,14 +121,6 @@ namespace ScheduleBot.Bot {
                         user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Для начала работы с ботом укажите номер учебной группы.", replyMarkup: CancelKeyboardMarkup)).MessageId;
                         return;
                     }
-
-                    if(user.Mode == Mode.AddingDiscipline)
-                        dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile));
-
-                    user.TempData = null;
-                    user.Mode = Mode.Default;
-
-                    await DeleteTempMessage(user);
                 });
             }
 
@@ -117,22 +140,6 @@ namespace ScheduleBot.Bot {
                 } catch(IndexOutOfRangeException) { }
             });
 
-            commandManager.AddMessageCommand("/feedback", Mode.Default, async (dbContext, chatId, messageId, user, args) => {
-                if(user.IsAdmin) {
-                    Feedback? feedback = dbContext.Feedbacks.Include(i => i.TelegramUser).Where(i => !i.IsCompleted).OrderBy(i => i.Date).FirstOrDefault();
-
-                    if(feedback is not null) {
-                        await botClient.SendTextMessageAsync(chatId: chatId, text: GetFeedbackMessage(feedback), replyMarkup: GetFeedbackInlineKeyboardButton(dbContext, feedback));
-                    } else {
-                        await botClient.SendTextMessageAsync(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: MainKeyboardMarkup);
-                    }
-
-                    return;
-                }
-
-                user.Mode = Mode.Feedback;
-                user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["FeedbackMessage"], replyMarkup: CancelKeyboardMarkup)).MessageId;
-            });
             commandManager.AddCallbackCommand("FeedbackAccept", Mode.Default, async (dbContext, chatId, messageId, user, message, args) => {
                 Feedback? feedback = dbContext.Feedbacks.Include(i => i.TelegramUser).FirstOrDefault(i => i.ID == long.Parse(args));
 
