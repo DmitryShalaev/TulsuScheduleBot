@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace ScheduleBot.Bot {
-    public class BotCommands {
+namespace Core.Bot.Commands {
+    public class UserCommands {
         public struct CallbackStruct {
             public string text;
             public string callback;
@@ -12,6 +12,7 @@ namespace ScheduleBot.Bot {
             public float longitude;
             public string title;
             public string address;
+            public string? map;
         }
         public struct CollegeStruct {
             public string text;
@@ -33,10 +34,10 @@ namespace ScheduleBot.Bot {
         public CollegeStruct College { get; private set; }
         public ConfigStruct Config { get; private set; }
 
-        private static BotCommands? Instance;
+        private static UserCommands? instance;
+        public static UserCommands Instance => instance ??= new UserCommands();
 
-        public BotCommands() {
-
+        public UserCommands() {
             using(StreamReader sr = new(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + @"/Bot/TulsuScheduleBotSettings.json")) {
                 var commands = JObject.Parse(sr.ReadToEnd());
 
@@ -51,7 +52,5 @@ namespace ScheduleBot.Bot {
                 Callback.TrimExcess();
             }
         }
-
-        public static BotCommands GetInstance() => Instance ??= new BotCommands();
     }
 }

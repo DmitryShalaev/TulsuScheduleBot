@@ -3,6 +3,8 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using Core.Bot;
+
 using HtmlAgilityPack;
 
 using Microsoft.EntityFrameworkCore;
@@ -17,14 +19,11 @@ namespace ScheduleBot {
     public partial class Parser {
         private readonly HttpClientHandler clientHandler;
 
-        public delegate Task UpdatedDisciplines(ScheduleDbContext dbContext, List<(string Group, DateOnly Date)> values);
-        private event UpdatedDisciplines Notify;
+        private static Parser? instance;
 
-        public static Parser? Instance { get; private set; }
+        public static Parser Instance => instance ??= new Parser();
 
-        public Parser(UpdatedDisciplines updatedDisciplines) {
-            Notify += updatedDisciplines;
-
+        private Parser() {
             clientHandler = new() {
                 AllowAutoRedirect = false,
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip | DecompressionMethods.None,
@@ -32,11 +31,9 @@ namespace ScheduleBot {
                 //Proxy = new WebProxy("127.0.0.1:8888"),
             };
 
-            Instance = this;
-
             Task.Run(GetTeachersData);
 
-            UpdatingDisciplinesJob.StartAsync().Wait();
+            UpdatingDisciplinesJob.StartAsync(this).Wait();
         }
 
         public async Task GetTeachersData() {
@@ -146,7 +143,7 @@ namespace ScheduleBot {
 
                     if(updatedDisciplines.Any()) {
                         var date = DateOnly.FromDateTime(DateTime.Now);
-                        Notify.Invoke(dbContext, updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList()).Wait();
+                        Notifications.UpdatedDisciplinesAsync(dbContext, updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList()).Wait();
                     }
 
                     return true;

@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
+using ScheduleBot;
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
@@ -7,30 +8,34 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace ScheduleBot.Bot {
-    public partial class TelegramBot {
+namespace Core.Bot {
+    public static partial class Statics {
         [GeneratedRegex("^[А-я]+[ ]?[а-я]*$")]
-        private static partial Regex DefaultMessageRegex();
+        public static partial Regex DefaultMessageRegex();
         [GeneratedRegex("^([0-9]+)[ ]([а-я]+)$")]
-        private static partial Regex TermsMessageRegex();
+        public static partial Regex TermsMessageRegex();
         [GeneratedRegex("(^[А-я]+[а-я ]*):")]
-        private static partial Regex GroupOrStudentIDMessageRegex();
+        public static partial Regex GroupOrStudentIDMessageRegex();
         [GeneratedRegex("(^/[A-z]+)[ ]?([A-z0-9-]*)$")]
-        private static partial Regex CommandMessageRegex();
+        public static partial Regex CommandMessageRegex();
 
         [GeneratedRegex("^([A-z]+)[ ]([0-9.:]+[|0-9.:]*)$")]
-        private static partial Regex DisciplineCallbackRegex();
+        public static partial Regex DisciplineCallbackRegex();
 
         [GeneratedRegex("^([A-z]+)[ ]([A-z]+)$")]
-        private static partial Regex NotificationsCallbackRegex();
+        public static partial Regex NotificationsCallbackRegex();
 
         [GeneratedRegex("^([A-z]+)[|]([А-яЁё. ]+)$")]
-        private static partial Regex TeachersCallbackRegex();
+        public static partial Regex TeachersCallbackRegex();
 
         [GeneratedRegex("^(\\d{1,2})([ ,.-](\\d{1,2}|\\w{3,8}))?([ ,.-](\\d{2}|\\d{4}))?$")]
-        private static partial Regex DateRegex();
+        public static partial Regex DateRegex();
 
-        public static readonly BotCommands commands = BotCommands.GetInstance();
+        private static readonly Commands.UserCommands commands = Commands.UserCommands.Instance;
+
+        private static readonly Parser parser = Parser.Instance;
+
+        private static readonly TelegramBotClient botClient = TelegramBot.Instance.botClient;
 
         #region ReplyKeyboardMarkup
         public static readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
@@ -39,58 +44,81 @@ namespace ScheduleBot.Bot {
                             new KeyboardButton[] { commands.Message["Other"] }
                         }) { ResizeKeyboard = true };
 
-        private static readonly ReplyKeyboardMarkup AdditionalKeyboardMarkup = new(new[] {
+        public static readonly ReplyKeyboardMarkup AdditionalKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["Profile"] },
                             new KeyboardButton[] { commands.Message["Exam"], commands.Message["AcademicPerformance"] },
                             new KeyboardButton[] { commands.Message["Corps"], commands.Message["TeachersWorkSchedule"] },
                             new KeyboardButton[] { commands.Message["Back"] }
                         }) { ResizeKeyboard = true };
 
-        private static readonly ReplyKeyboardMarkup ExamKeyboardMarkup = new(new[] {
+        public static readonly ReplyKeyboardMarkup ExamKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["NextExam"], commands.Message["AllExams"] },
                             new KeyboardButton[] { commands.Message["Back"] }
                         }) { ResizeKeyboard = true };
 
-        private static readonly ReplyKeyboardMarkup DaysKeyboardMarkup = new(new[] {
+        public static readonly ReplyKeyboardMarkup DaysKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["Monday"], commands.Message["Tuesday"] },
                             new KeyboardButton[] { commands.Message["Wednesday"], commands.Message["Thursday"] },
                             new KeyboardButton[] { commands.Message["Friday"], commands.Message["Saturday"] },
                             new KeyboardButton[] { commands.Message["Back"] }
                         }) { ResizeKeyboard = true };
 
-        private static readonly ReplyKeyboardMarkup CancelKeyboardMarkup = new(commands.Message["Cancel"]) { ResizeKeyboard = true };
+        public static readonly ReplyKeyboardMarkup CancelKeyboardMarkup = new(commands.Message["Cancel"]) { ResizeKeyboard = true };
 
-        private static readonly ReplyKeyboardMarkup ResetProfileLinkKeyboardMarkup = new(new KeyboardButton[] { commands.Message["Reset"], commands.Message["Cancel"] }) { ResizeKeyboard = true };
+        public static readonly ReplyKeyboardMarkup ResetProfileLinkKeyboardMarkup = new(new KeyboardButton[] { commands.Message["Reset"], commands.Message["Cancel"] }) { ResizeKeyboard = true };
 
-        private static readonly ReplyKeyboardMarkup WeekKeyboardMarkup = new(new[] {
+        public static readonly ReplyKeyboardMarkup WeekKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["ThisWeek"], commands.Message["NextWeek"] },
                             new KeyboardButton[] { commands.Message["Back"] }
                         }) { ResizeKeyboard = true };
 
-        private static readonly ReplyKeyboardMarkup TeachersWorkScheduleBackKeyboardMarkup = new(new[] {
+        public static readonly ReplyKeyboardMarkup TeachersWorkScheduleBackKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["TeachersWorkScheduleBack"] }
                         }) { ResizeKeyboard = true };
 
-        private readonly ReplyKeyboardMarkup CorpsKeyboardMarkup = GetCorpsKeyboardMarkup();
+        #region Corps
+        public static readonly ReplyKeyboardMarkup CorpsKeyboardMarkup = GetCorpsKeyboardMarkup();
+
+        private static ReplyKeyboardMarkup GetCorpsKeyboardMarkup() {
+            List<KeyboardButton[]> ProfileKeyboardMarkup = new() {
+                new KeyboardButton[] { commands.Corps[0].text }
+            };
+
+            for(int i = 0; i < 3; i++) {
+                List<KeyboardButton> keyboardButtonsLine = new();
+                for(int j = 0; j < 5; j++)
+                    keyboardButtonsLine.Add(commands.Corps[1 + i * 5 + j].text);
+
+                ProfileKeyboardMarkup.Add(keyboardButtonsLine.ToArray());
+            }
+
+            for(int i = 16; i < commands.Corps.Length; i++)
+                ProfileKeyboardMarkup.Add(new KeyboardButton[] { commands.Corps[i].text });
+
+            ProfileKeyboardMarkup.AddRange(new[] { new KeyboardButton[] { commands.College.text }, new KeyboardButton[] { commands.Message["Back"] } });
+
+            return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
+        }
+        #endregion
         #endregion
 
-        public async Task GroupErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
+        public static async Task GroupErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
             user.Mode = Mode.GroupСhange;
             await dbContext.SaveChangesAsync();
 
             await botClient.SendTextMessageAsync(chatId: chatId, text: $"Для того, чтобы узнать расписание, необходимо указать номер группы.", replyMarkup: CancelKeyboardMarkup);
         }
-        public async Task GroupErrorUser(ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Попросите владельца профиля указать номер группы в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
+        public static async Task GroupErrorUser(ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Попросите владельца профиля указать номер группы в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
 
-        public async Task StudentIdErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
+        public static async Task StudentIdErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
             user.Mode = Mode.StudentIDСhange;
             await dbContext.SaveChangesAsync();
 
             await botClient.SendTextMessageAsync(chatId: chatId, text: $"Для того, чтобы узнать успеваемость, необходимо указать номер зачетной книжки.", replyMarkup: CancelKeyboardMarkup);
         }
-        public async Task StudentIdErrorUser(ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Попросите владельца профиля указать номер зачетной книжки в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
+        public static async Task StudentIdErrorUser(ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Попросите владельца профиля указать номер зачетной книжки в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
 
-        private async Task ScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string group, IReplyMarkup? replyMarkup) {
+        public static async Task ScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string group, IReplyMarkup? replyMarkup) {
             DateTime? groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group)?.Update.ToLocalTime();
 
             if(groupLastUpdate is null || (DateTime.Now - groupLastUpdate)?.TotalMinutes > commands.Config.DisciplineUpdateTime) {
@@ -106,7 +134,7 @@ namespace ScheduleBot.Bot {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {groupLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
-        private async Task TeacherWorkScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string teacher, IReplyMarkup? replyMarkup) {
+        public static async Task TeacherWorkScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string teacher, IReplyMarkup? replyMarkup) {
             DateTime? teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher)?.Update.ToLocalTime();
 
             if(teacherLastUpdate is null || (DateTime.Now - teacherLastUpdate)?.TotalMinutes > commands.Config.TeacherWorkScheduleUpdateTime) {
@@ -122,7 +150,7 @@ namespace ScheduleBot.Bot {
                 await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {teacherLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
-        private async Task ProgressRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
+        public static async Task ProgressRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
             DateTime? studentIDlastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID)?.Update.ToLocalTime();
             if(studentIDlastUpdate is null || (DateTime.Now - studentIDlastUpdate)?.TotalMinutes > commands.Config.StudentIDUpdateTime) {
                 int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
@@ -135,6 +163,25 @@ namespace ScheduleBot.Bot {
 
             if(send && studentIDlastUpdate is not null)
                 await botClient.SendTextMessageAsync(chatId: chatId, text: $"Успеваемость актуально на {studentIDlastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
+        }
+
+        public static async Task DeleteTempMessage(TelegramUser user, int? messageId = null) {
+            try {
+                if(user.RequestingMessageID is not null) {
+                    await botClient.DeleteMessageAsync(chatId: user.ChatID, messageId: (int)user.RequestingMessageID);
+                    user.RequestingMessageID = null;
+                }
+
+                if(messageId is not null)
+                    await botClient.DeleteMessageAsync(chatId: user.ChatID, messageId: (int)messageId);
+
+            } catch(Exception) { }
+        }
+
+        public static string GetFeedbackMessage(Feedback feedback) {
+            return $"От: {feedback.TelegramUser.FirstName}{(string.IsNullOrWhiteSpace(feedback.TelegramUser.LastName) ? "" : $", {feedback.TelegramUser.LastName}")}{(string.IsNullOrWhiteSpace(feedback.TelegramUser.Username) ? "" : $", {feedback.TelegramUser.Username}")}\n" +
+                   $"Дата: {feedback.Date.ToLocalTime():dd.MM.yy HH:mm:ss}\n\n" +
+                   $"{feedback.Message}";
         }
     }
 }

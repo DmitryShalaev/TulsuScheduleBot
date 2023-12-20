@@ -8,15 +8,16 @@ using ScheduleBot.DB.Entity;
 using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace ScheduleBot.Bot {
+namespace Core.Bot {
     public class ExtendedTelegramUser : TelegramUser {
         public ExtendedTelegramUser(TelegramUser telegramUser) : base(telegramUser) { }
         public bool Flag { get; set; } = false;
     }
 
-    public partial class TelegramBot {
+    public static class Notifications {
+        private static readonly ITelegramBotClient botClient = TelegramBot.Instance.botClient;
 
-        private async Task UpdatedDisciplinesAsync(ScheduleDbContext dbContext, List<(string Group, DateOnly Date)> values) {
+        public static async Task UpdatedDisciplinesAsync(ScheduleDbContext dbContext, List<(string Group, DateOnly Date)> values) {
             var telegramUsers = dbContext.TelegramUsers.Include(u => u.Settings).Where(u => u.Settings.NotificationEnabled).Include(u => u.ScheduleProfile).Select(u => new ExtendedTelegramUser(u)).ToList();
 
             foreach((string Group, DateOnly Date) in values) {
@@ -27,12 +28,12 @@ namespace ScheduleBot.Bot {
 
                 foreach(ExtendedTelegramUser? user in telegramUsers.Where(i => i.ScheduleProfile.Group == Group && days <= i.Settings.NotificationDays)) {
                     if(!user.Flag) {
-                        await botClient.SendTextMessageAsync(chatId: user.ChatID, text: commands.Message["NotificationMessage"], disableNotification: true);
+                        await botClient.SendTextMessageAsync(chatId: user.ChatID, text: Commands.UserCommands.Instance.Message["NotificationMessage"], disableNotification: true);
                         user.Flag = true;
                     }
 
                     await botClient.SendTextMessageAsync(chatId: user.ChatID, text: str,
-                            replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: commands.Callback["All"].text, callbackData: $"{commands.Callback["All"].callback} {Date}")),
+                            replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: Commands.UserCommands.Instance.Callback["All"].text, callbackData: $"{Commands.UserCommands.Instance.Callback["All"].callback} {Date}")),
                             disableNotification: true);
                 }
             }

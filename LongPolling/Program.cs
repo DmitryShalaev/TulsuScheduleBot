@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 
-using ScheduleBot;
-using ScheduleBot.Bot;
+using Core.Bot;
 
 using Telegram.Bot;
 using Telegram.Bot.Polling;
@@ -11,7 +10,7 @@ namespace LongPolling {
         static void Main() {
             CultureInfo.CurrentCulture = CultureInfo.CreateSpecificCulture("ru-RU");
 
-            TelegramBot bot = Core.GetInstance();
+            TelegramBot bot = TelegramBot.Instance;
 
             bot.botClient.ReceiveAsync(
                 (botClient, update, cancellationToken) => bot.UpdateAsync(update),

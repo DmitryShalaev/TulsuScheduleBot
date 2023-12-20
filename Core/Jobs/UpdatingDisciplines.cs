@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Core.Bot.Commands;
+
+using Microsoft.EntityFrameworkCore;
 
 using Quartz;
 using Quartz.Impl;
 
-using ScheduleBot.Bot;
 using ScheduleBot.DB;
 
 namespace ScheduleBot.Jobs {
@@ -11,10 +12,9 @@ namespace ScheduleBot.Jobs {
         private static (DateOnly min, DateOnly max)? dates = null;
         private static DateTime dateTime = DateTime.Now;
 
-        private static readonly Parser parser = Parser.Instance!;
-        private static readonly BotCommands.ConfigStruct config = BotCommands.GetInstance().Config;
+        private static readonly UserCommands.ConfigStruct config = UserCommands.Instance.Config;
 
-        public static async Task StartAsync() {
+        public static async Task StartAsync(Parser parser) {
             using(ScheduleDbContext dbContext = new()) {
                 string? group = dbContext.GroupLastUpdate.FirstOrDefault()?.Group;
                 if(group is not null) {
@@ -49,7 +49,7 @@ namespace ScheduleBot.Jobs {
 
                     string? _group = dbContext.GroupLastUpdate.FirstOrDefault()?.Group;
                     if(_group is not null)
-                        dates = await parser.GetDates(_group);
+                        dates = await Parser.Instance.GetDates(_group);
 
                     ITrigger oldTrigger = context.Trigger;
                     ITrigger newTrigger = TriggerBuilder.Create()
@@ -64,13 +64,13 @@ namespace ScheduleBot.Jobs {
                     return;
                 }
 
-                int DisciplineUpdateDays = BotCommands.GetInstance().Config.DisciplineUpdateDays;
+                int DisciplineUpdateDays = UserCommands.Instance.Config.DisciplineUpdateDays;
 
                 IQueryable<string> tmp = dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= DisciplineUpdateDays).Select(i => i.Group!).Distinct();
 
                 string group = dbContext.GroupLastUpdate.Where(i => tmp.Contains(i.Group)).OrderBy(i => i.Update).First().Group;
 
-                await parser.UpdatingDisciplines(dbContext, group: group, updateAttemptTime: 1, dates: dates);
+                await Parser.Instance.UpdatingDisciplines(dbContext, group: group, updateAttemptTime: 1, dates: dates);
             }
         }
 

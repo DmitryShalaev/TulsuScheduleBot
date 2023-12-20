@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
+using Core.Bot;
 
-using ScheduleBot;
+using Microsoft.AspNetCore.Mvc;
 
 using Telegram.Bot.Types;
 
@@ -11,7 +11,7 @@ namespace WebHook.Controllers {
     public class BotController : ControllerBase {
 
         [HttpPost]
-        public async Task PostAsync(Update update) => await Core.GetInstance().UpdateAsync(update);
+        public async Task PostAsync(Update update) => await TelegramBot.Instance.UpdateAsync(update);
 
         [HttpGet]
         public string Get() => "Telegram bot was started";

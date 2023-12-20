@@ -1,10 +1,12 @@
-﻿using ScheduleBot.DB;
+﻿using Core.Bot.Interfaces;
+
+using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
 using Telegram.Bot.Types;
 
-namespace ScheduleBot.Bot {
-    public class CommandManager {
+namespace Core.Bot.Commands {
+    public class Manager {
         public enum Check : byte {
             none,
             group,
@@ -15,58 +17,73 @@ namespace ScheduleBot.Bot {
         public delegate Task MessageFunction(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args);
         public delegate Task CallbackFunction(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args);
 
-        public delegate Task<bool> TryFunction(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args);
-
         public delegate string GetCommand(string message, TelegramUser user, out string args);
 
         private readonly Dictionary<string, (Check, MessageFunction)> MessageCommands;
         private readonly Dictionary<string, (Check, CallbackFunction)> CallbackCommands;
 
-        private readonly List<(Check, TryFunction)>[] DefaultMessageCommands;
+        private readonly (Check, MessageFunction)[] DefaultMessageCommands;
 
-        private readonly TelegramBot telegramBot;
         private readonly GetCommand getMessageCommand;
         private readonly GetCommand getCallbackCommand;
 
-        public CommandManager(TelegramBot telegramBot, GetCommand getMessageCommand, GetCommand getCallbackCommand) {
-            this.telegramBot = telegramBot;
+        public Manager(GetCommand getMessageCommand, GetCommand getCallbackCommand) {
             this.getMessageCommand = getMessageCommand;
             this.getCallbackCommand = getCallbackCommand;
 
             MessageCommands = new();
             CallbackCommands = new();
 
-            DefaultMessageCommands = new List<(Check, TryFunction)>[Enum.GetValues(typeof(Mode)).Length];
+            DefaultMessageCommands = new (Check, MessageFunction)[Enum.GetValues(typeof(Mode)).Length];
         }
 
-        public void AddMessageCommand(Mode mode, TryFunction function, Check check = Check.none) {
-            if(DefaultMessageCommands[(byte)mode] is null)
-                DefaultMessageCommands[(byte)mode] = new() { (check, function) };
-            else
-                DefaultMessageCommands[(byte)mode].Add((check, function));
+        public void InitMessageCommands() {
+            IEnumerable<Type> types = AppDomain
+                .CurrentDomain
+                .GetAssemblies()
+                .SelectMany(assembly => assembly.GetTypes())
+                .Where(type => typeof(IMessageCommand).IsAssignableFrom(type))
+                .Where(type => type.IsClass);
+
+            foreach(Type? type in types) {
+                if(Activator.CreateInstance(type) is IMessageCommand messageCommand) {
+
+                    if(messageCommand.Commands is null) {
+                        foreach(Mode mode in messageCommand.Modes)
+                            DefaultMessageCommands[(byte)mode] = (messageCommand.Check, messageCommand.Execute);
+
+                        continue;
+                    }
+
+                    foreach(string command in messageCommand.Commands!) {
+                        foreach(Mode mode in messageCommand.Modes) {
+                            MessageCommands.Add($"{command} {mode}".ToLower(), (messageCommand.Check, messageCommand.Execute));
+                        }
+                    }
+                }
+            }
+
+            MessageCommands.TrimExcess();
+        }
+
+        public void InitCallbackCommands() {
+            IEnumerable<Type> types = AppDomain
+                .CurrentDomain
+                .GetAssemblies()
+                .SelectMany(assembly => assembly.GetTypes())
+                .Where(type => typeof(ICallbackCommand).IsAssignableFrom(type))
+                .Where(type => type.IsClass);
+
+            foreach(Type? type in types) {
+                if(Activator.CreateInstance(type) is ICallbackCommand callbackCommand) {
+                    CallbackCommands.Add($"{callbackCommand.Command} {callbackCommand.Mode}".ToLower(), (callbackCommand.Check, callbackCommand.Execute));
+                }
+            }
+
+            CallbackCommands.TrimExcess();
         }
 
         public void AddMessageCommand(string command, Mode mode, MessageFunction function, Check check = Check.none) => MessageCommands.Add($"{command} {mode}".ToLower(), (check, function));
-
-        public void AddMessageCommand(string[] commands, Mode mode, MessageFunction function, Check check = Check.none) {
-            foreach(string command in commands)
-                AddMessageCommand(command, mode, function, check);
-        }
-
-        public void AddMessageCommand(string[] commands, Mode[] modes, MessageFunction function, Check check = Check.none) {
-            foreach(string command in commands)
-                foreach(Mode mode in modes)
-                    AddMessageCommand(command, mode, function, check);
-        }
-
-        public void AddMessageCommand(string command, Mode[] modes, MessageFunction function, Check check = Check.none) {
-            foreach(Mode mode in modes)
-                AddMessageCommand(command, mode, function, check);
-        }
-
-        public void AddCallbackCommand(string command, Mode mode, CallbackFunction function, Check check = Check.none) {
-            CallbackCommands.Add($"{command} {mode}".ToLower(), (check, function)); ;
-        }
 
         public async Task<bool> OnMessageAsync(ScheduleDbContext dbContext, ChatId chatId, int messageId, string message, TelegramUser user) {
             if(MessageCommands.TryGetValue(getMessageCommand(message.ToLower(), user, out string? args), out (Check, MessageFunction) func)) {
@@ -79,11 +96,8 @@ namespace ScheduleBot.Bot {
                 }
             }
 
-            foreach((Check, TryFunction) item in DefaultMessageCommands[(byte)user.Mode] ?? new()) {
-                if(await CheckAsync(dbContext, chatId, item.Item1, user)) {
-                    if(await item.Item2(dbContext, chatId, messageId, user, message))
-                        return true;
-                }
+            if(await CheckAsync(dbContext, chatId, DefaultMessageCommands[(byte)user.Mode].Item1, user)) {
+                await DefaultMessageCommands[(byte)user.Mode].Item2(dbContext, chatId, messageId, user, message);
             }
 
             return false;
@@ -100,14 +114,14 @@ namespace ScheduleBot.Bot {
             return false;
         }
 
-        private async Task<bool> CheckAsync(ScheduleDbContext dbContext, ChatId chatId, Check check, TelegramUser user) {
+        private static async Task<bool> CheckAsync(ScheduleDbContext dbContext, ChatId chatId, Check check, TelegramUser user) {
             switch(check) {
                 case Check.group:
                     if(string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
                         if(user.IsOwner())
-                            await telegramBot.GroupErrorAdmin(dbContext, chatId, user);
+                            await Statics.GroupErrorAdmin(dbContext, chatId, user);
                         else
-                            await telegramBot.GroupErrorUser(chatId);
+                            await Statics.GroupErrorUser(chatId);
                         return false;
                     }
 
@@ -116,9 +130,9 @@ namespace ScheduleBot.Bot {
                 case Check.studentId:
                     if(string.IsNullOrWhiteSpace(user.ScheduleProfile.StudentID)) {
                         if(user.IsOwner())
-                            await telegramBot.StudentIdErrorAdmin(dbContext, chatId, user);
+                            await Statics.StudentIdErrorAdmin(dbContext, chatId, user);
                         else
-                            await telegramBot.StudentIdErrorUser(chatId);
+                            await Statics.StudentIdErrorUser(chatId);
                         return false;
                     }
 
@@ -134,9 +148,6 @@ namespace ScheduleBot.Bot {
         public void TrimExcess() {
             MessageCommands.TrimExcess();
             CallbackCommands.TrimExcess();
-
-            foreach(List<(Check, TryFunction)> item in DefaultMessageCommands)
-                item?.TrimExcess();
         }
     }
 }

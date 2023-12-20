@@ -34,7 +34,7 @@ namespace ScheduleBot.Jobs {
 
                 dbContext.MessageLog.RemoveRange(dbContext.MessageLog.Where(i => i.Date.AddMonths(1) < DateTime.UtcNow));
 
-                Parser.Instance?.GetTeachersData();
+                await Parser.Instance.GetTeachersData();
 
                 await dbContext.SaveChangesAsync();
             }

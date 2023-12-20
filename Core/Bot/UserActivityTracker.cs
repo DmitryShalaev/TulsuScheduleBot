@@ -1,4 +1,4 @@
-﻿namespace ScheduleBot.Bot {
+﻿namespace Core.Bot {
     public class UserActivityTracker {
         private readonly Dictionary<long, Queue<DateTime>> userMessageQueue = new();
         private readonly int maxMessagesPerSecond = 3;
