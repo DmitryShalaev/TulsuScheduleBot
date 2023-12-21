@@ -31,8 +31,6 @@ namespace ScheduleBot {
             };
 
             Task.Run(GetTeachersData);
-
-
         }
 
         public async Task GetTeachersData() {

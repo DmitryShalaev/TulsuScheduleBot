@@ -2,9 +2,11 @@
 
 namespace Core.Jobs {
     public static class Job {
-        public static void Init() {
-            UpdatingDisciplinesJob.StartAsync().Wait();
-            ClearTemporaryJob.StartAsync().Wait();
+        public static async Task InitAsync() {
+            await Task.Delay(TimeSpan.FromSeconds(30));
+
+            await UpdatingDisciplinesJob.StartAsync();
+            await ClearTemporaryJob.StartAsync();
         }
     }
 }

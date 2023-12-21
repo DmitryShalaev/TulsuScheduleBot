@@ -12,8 +12,6 @@ namespace LongPolling {
 
             TelegramBot bot = TelegramBot.Instance;
 
-            Core.Jobs.Job.Init();
-
             bot.botClient.ReceiveAsync(
                 (botClient, update, cancellationToken) => bot.UpdateAsync(update),
                 (botClient, update, cancellationToken) => Task.CompletedTask,

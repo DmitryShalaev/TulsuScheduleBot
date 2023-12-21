@@ -30,6 +30,8 @@ namespace Core.Bot {
         private TelegramBot() {
             botClient = new TelegramBotClient(Environment.GetEnvironmentVariable("TelegramBotToken")!);
 
+            Task.Run(Jobs.Job.InitAsync);
+
             activityTracker = new UserActivityTracker();
 
             commandManager = new((string message, TelegramUser user, out string args) => {
