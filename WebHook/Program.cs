@@ -26,6 +26,9 @@ namespace WebHook {
 
             app.MapControllers();
 
+
+            Core.Jobs.Job.Init();
+
             app.Run();
         }
     }

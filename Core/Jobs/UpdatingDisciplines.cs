@@ -14,14 +14,16 @@ namespace ScheduleBot.Jobs {
 
         private static readonly UserCommands.ConfigStruct config = UserCommands.Instance.Config;
 
-        public static async Task StartAsync(Parser parser) {
+        public static async Task StartAsync() {
             using(ScheduleDbContext dbContext = new()) {
+                Parser instance = Parser.Instance;
+
                 string? group = dbContext.GroupLastUpdate.FirstOrDefault()?.Group;
                 if(group is not null) {
-                    dates = await parser.GetDates(group);
+                    dates = await instance.GetDates(group);
 
                     foreach(string item in dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= config.DisciplineUpdateDays).Select(i => i.Group!).Distinct().ToList())
-                        await parser.UpdatingDisciplines(dbContext, group: item, updateAttemptTime: 0, dates: dates);
+                        await instance.UpdatingDisciplines(dbContext, group: item, updateAttemptTime: 0, dates: dates);
                 }
             }
 
@@ -44,12 +46,16 @@ namespace ScheduleBot.Jobs {
 
         async Task IJob.Execute(IJobExecutionContext context) {
             using(ScheduleDbContext dbContext = new()) {
+                Parser instance = Parser.Instance;
+
                 if(dates is null || (DateTime.Now - dateTime).Minutes >= config.DisciplineUpdateTime) {
                     dateTime = DateTime.Now;
 
                     string? _group = dbContext.GroupLastUpdate.FirstOrDefault()?.Group;
-                    if(_group is not null)
-                        dates = await Parser.Instance.GetDates(_group);
+                    if(_group is not null) {
+
+                        dates = await instance.GetDates(_group);
+                    }
 
                     ITrigger oldTrigger = context.Trigger;
                     ITrigger newTrigger = TriggerBuilder.Create()
@@ -70,7 +76,7 @@ namespace ScheduleBot.Jobs {
 
                 string group = dbContext.GroupLastUpdate.Where(i => tmp.Contains(i.Group)).OrderBy(i => i.Update).First().Group;
 
-                await Parser.Instance.UpdatingDisciplines(dbContext, group: group, updateAttemptTime: 1, dates: dates);
+                await instance.UpdatingDisciplines(dbContext, group: group, updateAttemptTime: 1, dates: dates);
             }
         }
 

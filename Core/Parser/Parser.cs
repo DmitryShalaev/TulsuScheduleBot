@@ -13,7 +13,6 @@ using Newtonsoft.Json.Linq;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
-using ScheduleBot.Jobs;
 
 namespace ScheduleBot {
     public partial class Parser {
@@ -33,7 +32,7 @@ namespace ScheduleBot {
 
             Task.Run(GetTeachersData);
 
-            UpdatingDisciplinesJob.StartAsync(this).Wait();
+
         }
 
         public async Task GetTeachersData() {
