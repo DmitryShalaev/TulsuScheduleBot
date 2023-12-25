@@ -27,7 +27,7 @@ namespace Core.Bot.Commands.Student.Callback {
                     dbContext.CustomDiscipline.Add(new(user.ScheduleProfile, date));
                     await dbContext.SaveChangesAsync();
 
-                    await BotClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user).Item1);
+                    await BotClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user).Item1, parseMode: ParseMode.Markdown);
                     user.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: AddingDisciplineMode.GetStagesAddingDiscipline(dbContext, user), replyMarkup: Statics.CancelKeyboardMarkup, parseMode: ParseMode.Markdown)).MessageId;
 
                 } else {
