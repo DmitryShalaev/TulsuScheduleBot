@@ -1,9 +1,10 @@
-﻿using ScheduleBot.DB;
+﻿using Core.Bot.Interfaces;
+
+using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Core.Bot.Interfaces;
 namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message {
     internal class DaysNotifications : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;

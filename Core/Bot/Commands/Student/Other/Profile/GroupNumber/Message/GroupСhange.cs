@@ -1,10 +1,11 @@
-﻿using ScheduleBot;
+﻿using Core.Bot.Interfaces;
+
+using ScheduleBot;
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Core.Bot.Interfaces;
 namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
     internal class GroupСhange : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;

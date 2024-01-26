@@ -86,7 +86,7 @@ namespace ScheduleBot {
             return false;
         }
 
-        public async Task<bool> UpdatingDisciplines(ScheduleDbContext dbContext, string group, int updateAttemptTime, (DateOnly min, DateOnly max)? dates = null) {
+        public async Task<bool> UpdatingDisciplines(ScheduleDbContext dbContext, string group, int updateAttemptTime) {
             GroupLastUpdate? groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group);
             if(groupLastUpdate is null) {
                 groupLastUpdate = new() { Group = group, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
@@ -100,7 +100,7 @@ namespace ScheduleBot {
 
             await dbContext.SaveChangesAsync();
 
-            dates ??= await GetDates(group);
+            (DateOnly min, DateOnly max)? dates = await GetDates(group);
 
             if(dates is not null) {
 

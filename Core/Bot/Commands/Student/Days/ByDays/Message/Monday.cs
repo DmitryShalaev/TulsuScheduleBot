@@ -1,11 +1,12 @@
-﻿using ScheduleBot;
+﻿using Core.Bot.Interfaces;
+
+using ScheduleBot;
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Core.Bot.Interfaces;
 namespace Core.Bot.Commands.Student.Days.ByDays.Message {
     internal class Monday : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;

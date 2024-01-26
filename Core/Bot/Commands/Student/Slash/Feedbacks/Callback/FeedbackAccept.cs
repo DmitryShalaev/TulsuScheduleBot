@@ -1,12 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Core.Bot.Commands;
+using Core.Bot.Interfaces;
+
+using Microsoft.EntityFrameworkCore;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Core.Bot.Interfaces;
-using Core.Bot.Commands;
 namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Callback {
     public class FeedbackAccept : ICallbackCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;

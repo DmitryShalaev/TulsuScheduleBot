@@ -1,10 +1,11 @@
-﻿using ScheduleBot.DB;
+﻿using Core.Bot.Commands;
+using Core.Bot.Interfaces;
+
+using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Core.Bot.Interfaces;
-using Core.Bot.Commands;
 namespace Core.Bot.New.Commands.Student.Slash.SetProfile.Message {
     public class SetProfile : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;

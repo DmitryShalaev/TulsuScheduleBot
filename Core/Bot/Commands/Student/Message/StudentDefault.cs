@@ -1,5 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 
+using Core.Bot.Interfaces;
+
 using ScheduleBot;
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
@@ -7,7 +9,6 @@ using ScheduleBot.DB.Entity;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Core.Bot.Interfaces;
 namespace Core.Bot.Commands.Student.Message {
     internal class StudentDefault : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;

@@ -1,9 +1,10 @@
-﻿using ScheduleBot.DB;
+﻿using Core.Bot.Interfaces;
+
+using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Core.Bot.Interfaces;
 namespace Core.Bot.Commands.Student.Custom.Callback {
     public class CustomEditLectureHall : ICallbackCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
