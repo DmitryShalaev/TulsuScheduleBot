@@ -1,13 +1,15 @@
 {
   "Config": {
-    "DisciplineUpdateTime": "30",
-    "StudentIDUpdateTime": "30",
+    "DisciplineUpdateTime": "30", //Minutes
+    "StudentIDUpdateTime": "30", //Minutes
 
-    "TeacherWorkScheduleUpdateTime": "60",
+    "TeacherWorkScheduleUpdateTime": "60", //Minutes
 
     "DisciplineUpdateDays": 7,
 
-    "UpdateAttemptTime": 5
+    "UpdateAttemptTime": 5, //Minutes
+
+    "MaxDaysNotifications": 14
   },
 
   "Message": {

@@ -17,6 +17,16 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             try {
+                int _days = Math.Abs(int.Parse(args));
+
+                int maxDaysNotifications = UserCommands.Instance.Config.MaxDaysNotifications;
+
+                if(!user.IsAdmin && _days > maxDaysNotifications) {
+                    await BotClient.SendTextMessageAsync(chatId: chatId, text: $"Максимальное количество дней: {maxDaysNotifications}", replyMarkup: Statics.CancelKeyboardMarkup);
+
+                    return;
+                }
+
                 user.Settings.NotificationDays = Math.Abs(int.Parse(args));
                 user.Mode = Mode.Default;
 

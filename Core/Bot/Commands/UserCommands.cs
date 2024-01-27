@@ -25,6 +25,7 @@ namespace Core.Bot.Commands {
             public int TeacherWorkScheduleUpdateTime;
             public int DisciplineUpdateDays;
             public int UpdateAttemptTime;
+            public int MaxDaysNotifications;
         }
 
         public Dictionary<string, string> Message { get; private set; }
