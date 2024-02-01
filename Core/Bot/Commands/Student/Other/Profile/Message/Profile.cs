@@ -16,7 +16,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            user.TempData = UserCommands.Instance.Message["Profile"];
+            user.TelegramUserTmp.TmpData = UserCommands.Instance.Message["Profile"];
 
             await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["Profile"], replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user));
         }

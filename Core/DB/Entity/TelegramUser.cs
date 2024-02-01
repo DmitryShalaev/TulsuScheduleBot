@@ -11,9 +11,6 @@ namespace ScheduleBot.DB.Entity {
         public string? LastName { get; set; }
         public string? Username { get; set; }
 
-        public string? TempData { get; set; }
-        public int? RequestingMessageID { get; set; }
-
         public DateTime LastAppeal { get; set; } = DateTime.UtcNow;
         public long TotalRequests { get; set; } = 0;
         public long TodayRequests { get; set; } = 0;
@@ -26,9 +23,7 @@ namespace ScheduleBot.DB.Entity {
 
         public Settings Settings { get; set; }
 
-        [ForeignKey("ModeDTO")]
-        public Mode Mode { get; set; } = Mode.Default;
-        public ModeDTO ModeDTO { get; set; }
+        public TelegramUserTmp TelegramUserTmp { get; set; }
 
         public override bool Equals(object? obj) => Equals(obj as TelegramUser);
         public bool Equals(TelegramUser? user) => user is not null && ChatID == user.ChatID;
@@ -44,6 +39,7 @@ namespace ScheduleBot.DB.Entity {
             ChatID = telegramUser.ChatID;
             ScheduleProfile = telegramUser.ScheduleProfile;
             Settings = telegramUser.Settings;
+            TelegramUserTmp = telegramUser.TelegramUserTmp;
         }
     }
 

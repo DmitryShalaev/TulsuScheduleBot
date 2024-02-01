@@ -19,8 +19,8 @@ namespace Core.Bot.Commands.Teachers.Back.Message {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["MainMenu"], replyMarkup: Statics.MainKeyboardMarkup);
 
-            user.Mode = Mode.Default;
-            user.TempData = null;
+            user.TelegramUserTmp.Mode = Mode.Default;
+            user.TelegramUserTmp.TmpData = null;
 
             await Statics.DeleteTempMessage(user, messageId);
         }

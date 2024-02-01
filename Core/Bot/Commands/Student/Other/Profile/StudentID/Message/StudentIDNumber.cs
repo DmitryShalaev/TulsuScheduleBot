@@ -17,9 +17,9 @@ namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             if(user.IsOwner()) {
-                user.Mode = Mode.StudentIDСhange;
+                user.TelegramUserTmp.Mode = Mode.StudentIDСhange;
 
-                user.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Хотите сменить номер зачётки? Если да, то напишите новый номер", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Хотите сменить номер зачётки? Если да, то напишите новый номер", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
             }
         }
     }

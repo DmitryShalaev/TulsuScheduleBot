@@ -19,12 +19,12 @@ namespace Core.Bot.Commands.Teachers.Back.Callback {
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
-            user.Mode = Mode.TeacherSelected;
-            user.RequestingMessageID = null;
+            user.TelegramUserTmp.Mode = Mode.TeacherSelected;
+            user.TelegramUserTmp.RequestingMessageID = null;
 
             TeacherLastUpdate teacher = dbContext.TeacherLastUpdate.First(i => i.Teacher.ToLower().StartsWith(args));
 
-            string teacherName = user.TempData = teacher.Teacher;
+            string teacherName = user.TelegramUserTmp.TmpData = teacher.Teacher;
 
             if(string.IsNullOrWhiteSpace(teacher.LinkProfile))
                 await Parser.Instance.UpdatingTeacherInfo(dbContext, teacherName);

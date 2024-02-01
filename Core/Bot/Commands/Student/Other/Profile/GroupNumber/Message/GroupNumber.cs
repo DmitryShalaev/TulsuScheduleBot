@@ -17,9 +17,9 @@ namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             if(user.IsOwner()) {
-                user.Mode = Mode.GroupСhange;
+                user.TelegramUserTmp.Mode = Mode.GroupСhange;
 
-                user.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Хотите сменить номер учебной группы? Если да, то напишите новый номер", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Хотите сменить номер учебной группы? Если да, то напишите новый номер", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
             }
         }
     }

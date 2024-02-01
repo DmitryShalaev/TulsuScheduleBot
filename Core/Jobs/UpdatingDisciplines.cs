@@ -62,7 +62,7 @@ namespace ScheduleBot.Jobs {
 
                 IQueryable<string> tmp = dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= DisciplineUpdateDays).Select(i => i.Group!).Distinct();
 
-                string group = dbContext.GroupLastUpdate.Where(i => tmp.Contains(i.Group)).OrderBy(i => i.Update).First().Group;
+                string group = dbContext.GroupLastUpdate.Where(i => tmp.Contains(i.Group)).OrderBy(i => i.UpdateAttempt).First().Group;
 
                 await instance.UpdatingDisciplines(dbContext, group: group, updateAttemptTime: 0);
             }

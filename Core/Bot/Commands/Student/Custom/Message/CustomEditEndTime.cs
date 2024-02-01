@@ -19,12 +19,12 @@ namespace Core.Bot.Commands.Student.Custom.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            if(!string.IsNullOrWhiteSpace(user.TempData)) {
-                CustomDiscipline discipline = dbContext.CustomDiscipline.Single(i => i.ID == uint.Parse(user.TempData));
+            if(!string.IsNullOrWhiteSpace(user.TelegramUserTmp.TmpData)) {
+                CustomDiscipline discipline = dbContext.CustomDiscipline.Single(i => i.ID == uint.Parse(user.TelegramUserTmp.TmpData));
                 try {
                     discipline.EndTime = AddingDisciplineMode.ParseTime(args);
-                    user.Mode = Mode.Default;
-                    user.TempData = null;
+                    user.TelegramUserTmp.Mode = Mode.Default;
+                    user.TelegramUserTmp.TmpData = null;
 
                     await Statics.DeleteTempMessage(user, messageId);
 

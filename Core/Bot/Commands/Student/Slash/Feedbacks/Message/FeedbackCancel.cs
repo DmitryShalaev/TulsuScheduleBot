@@ -17,7 +17,7 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            user.Mode = Mode.Default;
+            user.TelegramUserTmp.Mode = Mode.Default;
 
             await Statics.DeleteTempMessage(user, messageId);
 

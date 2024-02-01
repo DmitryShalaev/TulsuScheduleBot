@@ -16,7 +16,7 @@ namespace Core.Bot.Commands.Student.Other.Exam.Message {
         public Manager.Check Check => Manager.Check.group;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            user.TempData = UserCommands.Instance.Message["Exam"];
+            user.TelegramUserTmp.TmpData = UserCommands.Instance.Message["Exam"];
 
             await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["Exam"], replyMarkup: Statics.ExamKeyboardMarkup);
         }

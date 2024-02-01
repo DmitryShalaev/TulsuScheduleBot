@@ -17,22 +17,22 @@ namespace Core.Bot.Commands.Student.Back_Cancel.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            if(user.TempData == UserCommands.Instance.Message["AcademicPerformance"] ||
-                        user.TempData == UserCommands.Instance.Message["Profile"] ||
-                        user.TempData == UserCommands.Instance.Message["Corps"] ||
-                        user.TempData == UserCommands.Instance.Message["Exam"]
+            if(user.TelegramUserTmp.TmpData == UserCommands.Instance.Message["AcademicPerformance"] ||
+                        user.TelegramUserTmp.TmpData == UserCommands.Instance.Message["Profile"] ||
+                        user.TelegramUserTmp.TmpData == UserCommands.Instance.Message["Corps"] ||
+                        user.TelegramUserTmp.TmpData == UserCommands.Instance.Message["Exam"]
                         ) {
 
                 await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["Other"], replyMarkup: Statics.AdditionalKeyboardMarkup);
 
-            } else if(user.TempData == UserCommands.Instance.Message["Settings"]) {
+            } else if(user.TelegramUserTmp.TmpData == UserCommands.Instance.Message["Settings"]) {
                 await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["Profile"], replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user));
 
             } else {
                 await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["MainMenu"], replyMarkup: Statics.MainKeyboardMarkup);
             }
 
-            user.TempData = null;
+            user.TelegramUserTmp.TmpData = null;
 
             await Statics.DeleteTempMessage(user, messageId);
         }

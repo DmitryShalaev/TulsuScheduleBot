@@ -17,7 +17,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Message {
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             if(!user.IsOwner()) {
-                user.Mode = Mode.ResetProfileLink;
+                user.TelegramUserTmp.Mode = Mode.ResetProfileLink;
 
                 await BotClient.SendTextMessageAsync(chatId: chatId, text: "Вы точно уверены что хотите восстановить свой профиль?", replyMarkup: Statics.ResetProfileLinkKeyboardMarkup);
             } else {

@@ -103,7 +103,7 @@ namespace Core.Bot {
         #endregion
 
         public static async Task GroupErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
-            user.Mode = Mode.GroupСhange;
+            user.TelegramUserTmp.Mode = Mode.GroupСhange;
             await dbContext.SaveChangesAsync();
 
             await botClient.SendTextMessageAsync(chatId: chatId, text: $"Для того, чтобы узнать расписание, необходимо указать номер группы.", replyMarkup: CancelKeyboardMarkup);
@@ -111,7 +111,7 @@ namespace Core.Bot {
         public static async Task GroupErrorUser(ChatId chatId) => await botClient.SendTextMessageAsync(chatId: chatId, text: $"Попросите владельца профиля указать номер группы в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
 
         public static async Task StudentIdErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
-            user.Mode = Mode.StudentIDСhange;
+            user.TelegramUserTmp.Mode = Mode.StudentIDСhange;
             await dbContext.SaveChangesAsync();
 
             await botClient.SendTextMessageAsync(chatId: chatId, text: $"Для того, чтобы узнать успеваемость, необходимо указать номер зачетной книжки.", replyMarkup: CancelKeyboardMarkup);
@@ -167,9 +167,9 @@ namespace Core.Bot {
 
         public static async Task DeleteTempMessage(TelegramUser user, int? messageId = null) {
             try {
-                if(user.RequestingMessageID is not null) {
-                    await botClient.DeleteMessageAsync(chatId: user.ChatID, messageId: (int)user.RequestingMessageID);
-                    user.RequestingMessageID = null;
+                if(user.TelegramUserTmp.RequestingMessageID is not null) {
+                    await botClient.DeleteMessageAsync(chatId: user.ChatID, messageId: (int)user.TelegramUserTmp.RequestingMessageID);
+                    user.TelegramUserTmp.RequestingMessageID = null;
                 }
 
                 if(messageId is not null)

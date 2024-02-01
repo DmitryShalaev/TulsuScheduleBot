@@ -28,6 +28,9 @@ namespace Core.Bot {
         private readonly Manager commandManager;
 
         private TelegramBot() {
+            using(ScheduleDbContext dbContext = new())
+                dbContext.Database.Migrate();
+
             botClient = new TelegramBotClient(Environment.GetEnvironmentVariable("TelegramBotToken")!);
 
             Task.Run(Jobs.Job.InitAsync);
@@ -38,25 +41,25 @@ namespace Core.Bot {
                 args = "";
 
                 if(Statics.DefaultMessageRegex().IsMatch(message))
-                    return $"{message} {user.Mode}".ToLower();
+                    return $"{message} {user.TelegramUserTmp.Mode}".ToLower();
 
                 Match match = Statics.TermsMessageRegex().Match(message);
                 if(match.Success) {
                     args = match.Groups[1].ToString();
-                    return $"{match.Groups[2]} {user.Mode}".ToLower();
+                    return $"{match.Groups[2]} {user.TelegramUserTmp.Mode}".ToLower();
                 }
 
                 match = Statics.GroupOrStudentIDMessageRegex().Match(message);
                 if(match.Success)
-                    return $"{match.Groups[1]} {user.Mode}".ToLower();
+                    return $"{match.Groups[1]} {user.TelegramUserTmp.Mode}".ToLower();
 
                 match = Statics.CommandMessageRegex().Match(message);
                 if(match.Success) {
                     args = match.Groups[2].ToString();
-                    return $"{match.Groups[1]} {user.Mode}".ToLower();
+                    return $"{match.Groups[1]} {user.TelegramUserTmp.Mode}".ToLower();
                 }
 
-                return $"{message} {user.Mode}".ToLower();
+                return $"{message} {user.TelegramUserTmp.Mode}".ToLower();
 
             }, (string message, TelegramUser user, out string args) => {
                 args = "";
@@ -64,22 +67,22 @@ namespace Core.Bot {
                 Match match = Statics.DisciplineCallbackRegex().Match(message);
                 if(match.Success) {
                     args = match.Groups[2].ToString();
-                    return $"{match.Groups[1]} {user.Mode}".ToLower();
+                    return $"{match.Groups[1]} {user.TelegramUserTmp.Mode}".ToLower();
                 }
 
                 match = Statics.NotificationsCallbackRegex().Match(message);
                 if(match.Success) {
                     args = match.Groups[2].ToString();
-                    return $"{match.Groups[1]} {user.Mode}".ToLower();
+                    return $"{match.Groups[1]} {user.TelegramUserTmp.Mode}".ToLower();
                 }
 
                 match = Statics.TeachersCallbackRegex().Match(message);
                 if(match.Success) {
                     args = match.Groups[2].ToString();
-                    return $"{match.Groups[1]} {user.Mode}".ToLower();
+                    return $"{match.Groups[1]} {user.TelegramUserTmp.Mode}".ToLower();
                 }
 
-                return $"{message} {user.Mode}".ToLower();
+                return $"{message} {user.TelegramUserTmp.Mode}".ToLower();
             });
 
             commandManager.InitMessageCommands();
@@ -87,7 +90,7 @@ namespace Core.Bot {
 
             #region Corps
             commandManager.AddMessageCommand(UserCommands.Instance.Message["Corps"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
-                user.TempData = UserCommands.Instance.Message["Corps"];
+                user.TelegramUserTmp.TmpData = UserCommands.Instance.Message["Corps"];
                 await dbContext.SaveChangesAsync();
                 await botClient.SendTextMessageAsync(chatId: chatId, text: "Выберите корпус, и я покажу где он на карте", replyMarkup: Statics.CorpsKeyboardMarkup);
             });
@@ -129,7 +132,7 @@ namespace Core.Bot {
                     if(message is not null) {
                         if(message.From is null) return;
 
-                        TelegramUser? user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).Include(u => u.Settings).FirstOrDefault(u => u.ChatID == message.Chat.Id);
+                        TelegramUser? user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).Include(u => u.Settings).Include(u => u.TelegramUserTmp).FirstOrDefault(u => u.ChatID == message.Chat.Id);
 
                         if(user is null) {
 
@@ -139,7 +142,8 @@ namespace Core.Bot {
                                 FirstName = message.From.FirstName,
                                 LastName = message.From.LastName,
                                 ScheduleProfile = new() { OwnerID = message.Chat.Id },
-                                Settings = new() { OwnerID = message.Chat.Id }
+                                Settings = new() { OwnerID = message.Chat.Id },
+                                TelegramUserTmp = new() { OwnerID = message.Chat.Id }
                             };
 
                             dbContext.TelegramUsers.Add(user);

@@ -20,8 +20,8 @@ namespace Core.Bot.Commands.Teachers.Days.ForAWeek.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            await Statics.TeacherWorkScheduleRelevance(dbContext, BotClient, chatId, user.TempData!, replyMarkup: Statics.WeekKeyboardMarkup);
-            foreach((string, DateOnly) item in Scheduler.GetTeacherWorkScheduleByWeak(dbContext, CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday) - 1, user.TempData!))
+            await Statics.TeacherWorkScheduleRelevance(dbContext, BotClient, chatId, user.TelegramUserTmp.TmpData!, replyMarkup: Statics.WeekKeyboardMarkup);
+            foreach((string, DateOnly) item in Scheduler.GetTeacherWorkScheduleByWeak(dbContext, CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday) - 1, user.TelegramUserTmp.TmpData!))
                 await BotClient.SendTextMessageAsync(chatId: chatId, text: item.Item1, replyMarkup: Statics.WeekKeyboardMarkup);
         }
     }

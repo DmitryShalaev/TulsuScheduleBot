@@ -28,13 +28,13 @@ namespace Core.Bot.Commands.Teachers.Message {
                                $"{(string.IsNullOrWhiteSpace(match.Groups[3].Value) ? now.Month : match.Groups[3].Value)} " +
                                $"{(string.IsNullOrWhiteSpace(match.Groups[5].Value) ? now.Year : match.Groups[5].Value)}";
 
-                ReplyKeyboardMarkup teacherWorkSchedule = DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!);
+                ReplyKeyboardMarkup teacherWorkSchedule = DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TelegramUserTmp.TmpData!);
 
                 try {
                     var date = DateOnly.Parse(sDate);
 
-                    await Statics.TeacherWorkScheduleRelevance(dbContext, BotClient, chatId, user.TempData!, teacherWorkSchedule);
-                    await BotClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetTeacherWorkScheduleByDate(dbContext, date, user.TempData!));
+                    await Statics.TeacherWorkScheduleRelevance(dbContext, BotClient, chatId, user.TelegramUserTmp.TmpData!, teacherWorkSchedule);
+                    await BotClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetTeacherWorkScheduleByDate(dbContext, date, user.TelegramUserTmp.TmpData!));
                 } catch(Exception) {
                     await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["CommandRecognizedAsADate"], replyMarkup: teacherWorkSchedule);
                 }
@@ -42,7 +42,7 @@ namespace Core.Bot.Commands.Teachers.Message {
                 return;
             }
 
-            await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["CommandNotRecognized"], replyMarkup: DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TempData!));
+            await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["CommandNotRecognized"], replyMarkup: DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TelegramUserTmp.TmpData!));
 
         }
     }

@@ -21,7 +21,7 @@ namespace Core.Bot.Commands.AddingDiscipline.Message {
             IOrderedQueryable<CustomDiscipline> tmp = dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate);
             CustomDiscipline first = tmp.First();
 
-            user.Mode = Mode.Default;
+            user.TelegramUserTmp.Mode = Mode.Default;
             dbContext.CustomDiscipline.RemoveRange(tmp);
 
             await Statics.DeleteTempMessage(user, messageId);

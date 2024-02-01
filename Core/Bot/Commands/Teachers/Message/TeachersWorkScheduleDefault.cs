@@ -30,10 +30,10 @@ namespace Core.Bot.Commands.Teachers.Message {
                         buttons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: item, callbackData: callback[..Math.Min(callback.Length, 35)]) });
                     }
 
-                    user.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Выберите преподавателя.\nЕсли его нет уточните ФИО.", replyMarkup: new InlineKeyboardMarkup(buttons))).MessageId;
+                    user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Выберите преподавателя.\nЕсли его нет уточните ФИО.", replyMarkup: new InlineKeyboardMarkup(buttons))).MessageId;
                 } else {
-                    user.Mode = Mode.TeacherSelected;
-                    string teacherName = user.TempData = find.First();
+                    user.TelegramUserTmp.Mode = Mode.TeacherSelected;
+                    string teacherName = user.TelegramUserTmp.TmpData = find.First();
 
                     TeacherLastUpdate teacher = dbContext.TeacherLastUpdate.First(i => i.Teacher == teacherName);
 

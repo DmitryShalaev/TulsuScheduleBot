@@ -20,17 +20,17 @@ namespace Core.Bot.Commands.Student.Custom.Message {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["MainMenu"], replyMarkup: Statics.MainKeyboardMarkup);
 
-            if(!string.IsNullOrWhiteSpace(user.TempData)) {
+            if(!string.IsNullOrWhiteSpace(user.TelegramUserTmp.TmpData)) {
                 if(user.IsOwner()) {
-                    CustomDiscipline discipline = dbContext.CustomDiscipline.Single(i => i.ID == uint.Parse(user.TempData));
+                    CustomDiscipline discipline = dbContext.CustomDiscipline.Single(i => i.ID == uint.Parse(user.TelegramUserTmp.TmpData));
 
                     (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, discipline.Date, user, all: true);
                     await BotClient.SendTextMessageAsync(chatId: chatId, text: schedule.Item1, replyMarkup: DefaultCallback.GetCustomEditAdminInlineKeyboardButton(discipline), parseMode: ParseMode.Markdown);
                 }
             }
 
-            user.Mode = Mode.Default;
-            user.TempData = null;
+            user.TelegramUserTmp.Mode = Mode.Default;
+            user.TelegramUserTmp.TmpData = null;
 
             await Statics.DeleteTempMessage(user, messageId);
         }

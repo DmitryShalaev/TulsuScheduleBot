@@ -17,10 +17,10 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Callbac
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
-            user.Mode = Mode.DaysNotifications;
+            user.TelegramUserTmp.Mode = Mode.DaysNotifications;
 
             await BotClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
-            user.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Хотите изменить количество дней? Если да, то напишите новое", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+            user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Хотите изменить количество дней? Если да, то напишите новое", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
         }
     }
 }

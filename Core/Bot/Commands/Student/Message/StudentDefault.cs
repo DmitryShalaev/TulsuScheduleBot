@@ -20,7 +20,7 @@ namespace Core.Bot.Commands.Student.Message {
         public Manager.Check Check => Manager.Check.group;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            user.TempData = null;
+            user.TelegramUserTmp.TmpData = null;
 
             Match match = Statics.DateRegex().Match(args);
             if(match.Success) {

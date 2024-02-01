@@ -96,8 +96,8 @@ namespace Core.Bot.Commands {
                 }
             }
 
-            if(await CheckAsync(dbContext, chatId, DefaultMessageCommands[(byte)user.Mode].Item1, user)) {
-                await DefaultMessageCommands[(byte)user.Mode].Item2(dbContext, chatId, messageId, user, message);
+            if(await CheckAsync(dbContext, chatId, DefaultMessageCommands[(byte)user.TelegramUserTmp.Mode].Item1, user)) {
+                await DefaultMessageCommands[(byte)user.TelegramUserTmp.Mode].Item2(dbContext, chatId, messageId, user, message);
             }
 
             return false;

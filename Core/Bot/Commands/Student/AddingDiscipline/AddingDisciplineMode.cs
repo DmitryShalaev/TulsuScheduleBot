@@ -38,7 +38,7 @@ namespace Core.Bot.Commands.AddingDiscipline {
                         break;
                 }
             } catch(Exception) {
-                user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Ошибка! " + GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                user.TelegramUserTmp.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Ошибка! " + GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
                 return;
             }
 
@@ -50,12 +50,12 @@ namespace Core.Bot.Commands.AddingDiscipline {
                 case 2:
                 case 3:
                 case 4:
-                    user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                    user.TelegramUserTmp.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
                     break;
 
                 case 5:
                     TimeOnly? endTime = customDiscipline.StartTime?.AddMinutes(95);
-                    user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter),
+                    user.TelegramUserTmp.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter),
                             replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: endTime?.ToString() ?? "endTime Error", callbackData: $"{UserCommands.Instance.Callback["SetEndTime"].callback} {endTime}")))).MessageId;
                     break;
 
@@ -71,7 +71,7 @@ namespace Core.Bot.Commands.AddingDiscipline {
             await DeleteInitialMessage(botClient, chatId, user);
 
             customDiscipline.IsAdded = true;
-            user.Mode = Mode.Default;
+            user.TelegramUserTmp.Mode = Mode.Default;
 
             await dbContext.SaveChangesAsync();
 
@@ -81,10 +81,10 @@ namespace Core.Bot.Commands.AddingDiscipline {
 
         public static async Task DeleteInitialMessage(ITelegramBotClient botClient, ChatId chatId, TelegramUser user) {
             try {
-                await botClient.DeleteMessageAsync(chatId: chatId, messageId: int.Parse(user.TempData!));
+                await botClient.DeleteMessageAsync(chatId: chatId, messageId: int.Parse(user.TelegramUserTmp.TmpData!));
             } catch(Exception) { }
 
-            user.TempData = null;
+            user.TelegramUserTmp.TmpData = null;
         }
 
         public static string GetStagesAddingDiscipline(ScheduleDbContext dbContext, TelegramUser user, int? counter = null) {

@@ -28,7 +28,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message
                 }
 
                 user.Settings.NotificationDays = Math.Abs(int.Parse(args));
-                user.Mode = Mode.Default;
+                user.TelegramUserTmp.Mode = Mode.Default;
 
                 await Statics.DeleteTempMessage(user, messageId);
 

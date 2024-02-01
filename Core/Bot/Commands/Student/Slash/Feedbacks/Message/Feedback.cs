@@ -19,10 +19,10 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            if(user.Mode == Mode.AddingDiscipline)
+            if(user.TelegramUserTmp.Mode == Mode.AddingDiscipline)
                 dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile));
 
-            user.TempData = null;
+            user.TelegramUserTmp.TmpData = null;
             await Statics.DeleteTempMessage(user);
 
             if(user.IsAdmin) {
@@ -37,8 +37,8 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Message {
                 return;
             }
 
-            user.Mode = Mode.Feedback;
-            user.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["FeedbackMessage"], replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+            user.TelegramUserTmp.Mode = Mode.Feedback;
+            user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["FeedbackMessage"], replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
         }
     }
 }

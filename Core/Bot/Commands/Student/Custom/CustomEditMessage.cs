@@ -12,11 +12,11 @@ namespace Core.Bot.Commands.Student.Custom {
             CustomDiscipline? discipline = dbContext.CustomDiscipline.FirstOrDefault(i => i.ID == uint.Parse(tmp[0]));
             if(discipline is not null) {
                 if(user.IsOwner()) {
-                    user.Mode = mode;
-                    user.TempData = $"{discipline.ID}";
+                    user.TelegramUserTmp.Mode = mode;
+                    user.TelegramUserTmp.TmpData = $"{discipline.ID}";
 
                     await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
-                    user.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: text, replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                    user.TelegramUserTmp.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: text, replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
 
                     await dbContext.SaveChangesAsync();
                     return;

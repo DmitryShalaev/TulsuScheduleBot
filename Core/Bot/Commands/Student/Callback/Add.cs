@@ -22,13 +22,13 @@ namespace Core.Bot.Commands.Student.Callback {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
             if(DateOnly.TryParse(args, out DateOnly date)) {
                 if(user.IsOwner()) {
-                    user.Mode = Mode.AddingDiscipline;
-                    user.TempData = $"{messageId}";
+                    user.TelegramUserTmp.Mode = Mode.AddingDiscipline;
+                    user.TelegramUserTmp.TmpData = $"{messageId}";
                     dbContext.CustomDiscipline.Add(new(user.ScheduleProfile, date));
                     await dbContext.SaveChangesAsync();
 
                     await BotClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user).Item1, parseMode: ParseMode.Markdown);
-                    user.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: AddingDisciplineMode.GetStagesAddingDiscipline(dbContext, user), replyMarkup: Statics.CancelKeyboardMarkup, parseMode: ParseMode.Markdown)).MessageId;
+                    user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: AddingDisciplineMode.GetStagesAddingDiscipline(dbContext, user), replyMarkup: Statics.CancelKeyboardMarkup, parseMode: ParseMode.Markdown)).MessageId;
 
                 } else {
                     (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user);
