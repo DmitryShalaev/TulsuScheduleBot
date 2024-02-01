@@ -144,10 +144,5 @@ namespace Core.Bot.Commands {
 
             return true;
         }
-
-        public void TrimExcess() {
-            MessageCommands.TrimExcess();
-            CallbackCommands.TrimExcess();
-        }
     }
 }
