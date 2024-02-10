@@ -7,26 +7,32 @@ using ScheduleBot.DB.Entity;
 
 namespace ScheduleBot {
     public static class Scheduler {
-        public static List<((string, bool), DateOnly)> GetScheduleByWeak(ScheduleDbContext dbContext, int weeks, TelegramUser user) {
-            var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
+
+        private static DateOnly GetFirstDayOfWeek(DateOnly currentDate) {
+            int diff = (7 + (currentDate.DayOfWeek - DayOfWeek.Monday)) % 7;
+            return currentDate.AddDays(-1 * diff);
+        }
+
+        public static List<((string, bool), DateOnly)> GetScheduleByWeak(ScheduleDbContext dbContext, bool next, TelegramUser user) {
+            DateOnly firstDayOfWeek = GetFirstDayOfWeek(DateOnly.FromDateTime(!next ? DateTime.Now : DateTime.Now.AddDays(7)));
 
             var schedules = new List<((string, bool), DateOnly)>();
 
-            for(int i = 1; i < 7; i++) {
-                DateOnly tmp = dateOnly.AddDays(7 * weeks + i);
+            for(int i = 0; i < 7; i++) {
+                DateOnly tmp = firstDayOfWeek.AddDays(i);
                 schedules.Add((GetScheduleByDate(dbContext, tmp, user), tmp));
             }
 
             return schedules;
         }
 
-        public static List<(string, DateOnly)> GetTeacherWorkScheduleByWeak(ScheduleDbContext dbContext, int weeks, string teacher) {
-            var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
+        public static List<(string, DateOnly)> GetTeacherWorkScheduleByWeak(ScheduleDbContext dbContext, bool next, string teacher) {
+            DateOnly firstDayOfWeek = GetFirstDayOfWeek(DateOnly.FromDateTime(!next ? DateTime.Now : DateTime.Now.AddDays(7)));
 
             var schedules = new List<(string, DateOnly)>();
 
-            for(int i = 1; i < 7; i++) {
-                DateOnly tmp = dateOnly.AddDays(7 * weeks + i);
+            for(int i = 0; i < 7; i++) {
+                DateOnly tmp = firstDayOfWeek.AddDays(i);
                 schedules.Add((GetTeacherWorkScheduleByDate(dbContext, tmp, teacher), tmp));
             }
 
