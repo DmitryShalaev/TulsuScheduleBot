@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace ScheduleBot.DB.Entity {
 #pragma warning disable CS8618
 
-    public class TelegramUserTmp {
+    public class TelegramUsersTmp {
         [Key]
         [ForeignKey("TelegramUser")]
         public long OwnerID { get; set; }

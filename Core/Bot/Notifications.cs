@@ -33,7 +33,7 @@ namespace Core.Bot {
                     }
 
                     await botClient.SendTextMessageAsync(chatId: user.ChatID, text: str,
-                            replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: Commands.UserCommands.Instance.Callback["All"].text, callbackData: $"{Commands.UserCommands.Instance.Callback["All"].callback} {Date}")),
+                            replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: Commands.UserCommands.Instance.Callback["All"].text, callbackData: $"NotificationsAll {Date}")),
                             disableNotification: true);
                 }
             }

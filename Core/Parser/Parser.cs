@@ -134,13 +134,15 @@ namespace ScheduleBot {
                         dbContext.Disciplines.RemoveRange(except);
 
                         updatedDisciplines.AddRange(except);
+
+                        dbContext.DeletedDisciplines.AddRange(except.Select(i => new DeletedDisciplines(i)));
                     }
 
                     await dbContext.SaveChangesAsync();
 
                     if(updatedDisciplines.Any()) {
                         var date = DateOnly.FromDateTime(DateTime.Now);
-                        Notifications.UpdatedDisciplinesAsync(dbContext, updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList()).Wait();
+                        await Notifications.UpdatedDisciplinesAsync(dbContext, updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList());
                     }
 
                     return true;

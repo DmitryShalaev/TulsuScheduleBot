@@ -68,6 +68,38 @@ namespace ScheduleBot.DB.Entity {
             Type = discipline.Type ?? throw new NullReferenceException("Type");
         }
 
+        public Discipline(Discipline discipline) {
+            Name = discipline.Name;
+            Lecturer = discipline.Lecturer;
+            TeacherLastUpdate = discipline.TeacherLastUpdate;
+            LectureHall = discipline.LectureHall;
+            Subgroup = discipline.Subgroup;
+            Date = discipline.Date;
+            StartTime = discipline.StartTime;
+            EndTime = discipline.EndTime;
+            Group = discipline.Group;
+            GroupLastUpdate = discipline.GroupLastUpdate;
+            Type = discipline.Type;
+            Class = discipline.Class;
+            ClassDTO = discipline.ClassDTO;
+        }
+
+        public Discipline(DeletedDisciplines discipline) {
+            Name = discipline.Name;
+            Lecturer = discipline.Lecturer;
+            TeacherLastUpdate = discipline.TeacherLastUpdate;
+            LectureHall = discipline.LectureHall;
+            Subgroup = discipline.Subgroup;
+            Date = discipline.Date;
+            StartTime = discipline.StartTime;
+            EndTime = discipline.EndTime;
+            Group = discipline.Group;
+            GroupLastUpdate = discipline.GroupLastUpdate;
+            Type = discipline.Type;
+            Class = discipline.Class;
+            ClassDTO = discipline.ClassDTO;
+        }
+
         public override bool Equals(object? obj) => Equals(obj as Discipline);
         public bool Equals(Discipline? discipline) => discipline is not null && Name == discipline.Name && Lecturer == discipline.Lecturer && Subgroup == discipline.Subgroup && Date.Equals(discipline.Date) && StartTime.Equals(discipline.StartTime) && EndTime.Equals(discipline.EndTime) && Class == discipline.Class && Group == discipline.Group;
 

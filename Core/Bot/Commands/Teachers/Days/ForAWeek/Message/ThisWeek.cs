@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-using Core.Bot.Interfaces;
+﻿using Core.Bot.Interfaces;
 
 using ScheduleBot;
 using ScheduleBot.DB;

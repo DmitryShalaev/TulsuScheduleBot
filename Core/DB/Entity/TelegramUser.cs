@@ -23,7 +23,7 @@ namespace ScheduleBot.DB.Entity {
 
         public Settings Settings { get; set; }
 
-        public TelegramUserTmp TelegramUserTmp { get; set; }
+        public TelegramUsersTmp TelegramUserTmp { get; set; }
 
         public override bool Equals(object? obj) => Equals(obj as TelegramUser);
         public bool Equals(TelegramUser? user) => user is not null && ChatID == user.ChatID;

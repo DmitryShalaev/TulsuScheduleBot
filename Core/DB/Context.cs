@@ -22,6 +22,7 @@ namespace ScheduleBot.DB {
 
 #pragma warning disable CS8618
         public DbSet<Discipline> Disciplines { get; set; }
+        public DbSet<DeletedDisciplines> DeletedDisciplines { get; set; }
         public DbSet<Progress> Progresses { get; set; }
         public DbSet<CompletedDiscipline> CompletedDisciplines { get; set; }
         public DbSet<CustomDiscipline> CustomDiscipline { get; set; }
@@ -33,7 +34,7 @@ namespace ScheduleBot.DB {
         public DbSet<StudentIDLastUpdate> StudentIDLastUpdate { get; set; }
         public DbSet<MessageLog> MessageLog { get; set; }
         public DbSet<Settings> Settings { get; set; }
-        public DbSet<TelegramUserTmp> TelegramUserTmp { get; set; }
+        public DbSet<TelegramUsersTmp> TelegramUsersTmp { get; set; }
         public DbSet<TeacherWorkSchedule> TeacherWorkSchedule { get; set; }
         public DbSet<TeacherLastUpdate> TeacherLastUpdate { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
