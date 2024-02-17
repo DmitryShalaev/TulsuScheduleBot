@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Core.DB.Entity;
+
+using Microsoft.EntityFrameworkCore;
 
 using ScheduleBot.DB.Entity;
 
@@ -38,5 +40,6 @@ namespace ScheduleBot.DB {
         public DbSet<TeacherWorkSchedule> TeacherWorkSchedule { get; set; }
         public DbSet<TeacherLastUpdate> TeacherLastUpdate { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
+        public DbSet<IntersectionOfSubgroups> IntersectionOfSubgroups { get; set; }
     }
 }

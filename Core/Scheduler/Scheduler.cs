@@ -66,7 +66,7 @@ namespace ScheduleBot {
 
             foreach(Discipline? item in list) {
                 str += $"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}\n" +
-                       $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}\n" +
+                       $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : (!string.IsNullOrWhiteSpace(item.IntersectionMark) ? item.IntersectionMark : ""))}\n" +
                        (link ? $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ [{item.Lecturer}]({item.TeacherLastUpdate?.LinkProfile})\n" : "")}\n" :
                                $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n");
             }

@@ -194,7 +194,7 @@ namespace Core.Bot {
                     }
                 }
             } catch(Exception e) {
-                Console.Error.WriteLine($"{msg}\n{new('-', 25)}\n{e.Message}");
+                await Console.Out.WriteLineAsync($"{msg}\n{new('-', 25)}\n{e.Message}");
 #if !DEBUG
                 MailAddress from = new(Environment.GetEnvironmentVariable("TelegramBot_FromEmail") ?? "", "Error");
                 MailAddress to = new(Environment.GetEnvironmentVariable("TelegramBot_ToEmail") ?? "");

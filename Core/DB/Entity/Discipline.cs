@@ -19,6 +19,7 @@ namespace ScheduleBot.DB.Entity {
 
         public string LectureHall { get; set; }
         public string? Subgroup { get; set; } = null;
+        public string? IntersectionMark { get; set; } = null;
 
         public DateOnly Date { get; set; }
 

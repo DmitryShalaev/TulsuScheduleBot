@@ -4,6 +4,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 using Core.Bot;
+using Core.Bot.Commands;
+using Core.DB.Entity;
 
 using HtmlAgilityPack;
 
@@ -145,11 +147,32 @@ namespace ScheduleBot {
                         await Notifications.UpdatedDisciplinesAsync(dbContext, updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList());
                     }
 
+                    await IntersectionOfSubgroups(dbContext, group);
+
                     return true;
                 }
             }
 
             return false;
+        }
+
+        public async Task IntersectionOfSubgroups(ScheduleDbContext dbContext, string group) {
+            IntersectionOfSubgroups? intersection = dbContext.IntersectionOfSubgroups.SingleOrDefault(i => i.Group == group);
+
+            if(intersection is not null) {
+                await UpdatingDisciplines(dbContext, intersection.IntersectionWith, UserCommands.Instance.Config.DisciplineUpdateTime);
+
+                dbContext.Disciplines.Where(d => (d.Group == group || d.Group == intersection.IntersectionWith) && d.Class == intersection.Class)
+                                     .ToList()
+                                     .GroupBy(d => new { d.Name, d.Lecturer, d.LectureHall, d.Date, d.StartTime, d.EndTime })
+                                     .Where(g => g.Count() > 1)
+                                     .SelectMany(g => g)
+                                     .Where(i => i.Group == group)
+                                     .ToList()
+                                     .ForEach(d => d.IntersectionMark = intersection.Mark);
+
+                await dbContext.SaveChangesAsync();
+            }
         }
 
         public async Task<bool> UpdatingTeacherWorkSchedule(ScheduleDbContext dbContext, string teacher, int updateAttemptTime) {

@@ -18,8 +18,8 @@ namespace WebHook {
 
             app.UseRequestLocalization(new RequestLocalizationOptions {
                 DefaultRequestCulture = new RequestCulture(cultureInfo),
-                SupportedCultures = new List<CultureInfo> { cultureInfo },
-                SupportedUICultures = new List<CultureInfo> { cultureInfo }
+                SupportedCultures = [cultureInfo],
+                SupportedUICultures = [cultureInfo]
             });
 
             app.UseAuthorization();

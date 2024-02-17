@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScheduleBot.DB;
@@ -11,9 +12,11 @@ using ScheduleBot.DB;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240217124843_add_IntersectionOfSubgroups")]
+    partial class add_IntersectionOfSubgroups
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -27,9 +30,6 @@ namespace ScheduleBot.Migrations
                     b.Property<string>("Group")
                         .HasColumnType("text");
 
-                    b.Property<byte>("Class")
-                        .HasColumnType("smallint");
-
                     b.Property<string>("IntersectionWith")
                         .IsRequired()
                         .HasColumnType("text");
@@ -39,8 +39,6 @@ namespace ScheduleBot.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Group");
-
-                    b.HasIndex("Class");
 
                     b.HasIndex("IntersectionWith")
                         .IsUnique();
@@ -679,17 +677,6 @@ namespace ScheduleBot.Migrations
                     b.HasIndex("Mode");
 
                     b.ToTable("TelegramUsersTmp");
-                });
-
-            modelBuilder.Entity("Core.DB.Entity.IntersectionOfSubgroups", b =>
-                {
-                    b.HasOne("ScheduleBot.DB.Entity.ClassDTO", "ClassDTO")
-                        .WithMany()
-                        .HasForeignKey("Class")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ClassDTO");
                 });
 
             modelBuilder.Entity("ScheduleBot.DB.Entity.CompletedDiscipline", b =>
