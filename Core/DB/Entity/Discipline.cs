@@ -123,7 +123,7 @@ namespace ScheduleBot.DB.Entity {
             return hash.GetHashCode();
         }
 
-        public static explicit operator CompletedDiscipline(Discipline discipline) => new() { Name = discipline.Name, Class = discipline.Class, Lecturer = discipline.Lecturer, Subgroup = discipline.Subgroup, Date = discipline.Date };
+        public static explicit operator CompletedDiscipline(Discipline discipline) => new() { Name = discipline.Name, Class = discipline.Class, Lecturer = discipline.Lecturer, Subgroup = discipline.Subgroup, Date = discipline.Date, IntersectionMark = discipline.IntersectionMark};
     }
 
     public enum Class : byte {

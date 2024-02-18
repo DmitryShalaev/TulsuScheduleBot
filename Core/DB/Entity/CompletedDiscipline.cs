@@ -9,6 +9,7 @@ namespace ScheduleBot.DB.Entity {
         public string Name { get; set; }
         public string? Lecturer { get; set; }
         public string? Subgroup { get; set; }
+        public string? IntersectionMark { get; set; }
 
         public DateOnly? Date { get; set; } = null;
 
@@ -21,7 +22,7 @@ namespace ScheduleBot.DB.Entity {
         public ClassDTO ClassDTO { get; set; }
 
         public override bool Equals(object? obj) => Equals(obj as CompletedDiscipline);
-        public bool Equals(CompletedDiscipline? discipline) => discipline is not null && Name == discipline.Name && Class == discipline.Class && Lecturer == discipline.Lecturer && Subgroup == discipline.Subgroup && (Date == null || Date.Equals(discipline.Date));
+        public bool Equals(CompletedDiscipline? discipline) => discipline is not null && Name == discipline.Name && Class == discipline.Class && Lecturer == discipline.Lecturer && Subgroup == discipline.Subgroup && (Date == null || Date.Equals(discipline.Date)) && IntersectionMark == discipline.IntersectionMark;
 
         public static bool operator ==(CompletedDiscipline? left, CompletedDiscipline? right) => left?.Equals(right) ?? false;
         public static bool operator !=(CompletedDiscipline? left, CompletedDiscipline? right) => !(left == right);
@@ -48,6 +49,7 @@ namespace ScheduleBot.DB.Entity {
             Subgroup = discipline.Subgroup;
             Date = discipline.Date;
             ScheduleProfileGuid = scheduleProfileGuid;
+            IntersectionMark = discipline.IntersectionMark;
         }
     }
 }

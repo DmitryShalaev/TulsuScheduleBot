@@ -30,7 +30,7 @@ namespace Core.Bot.Commands.Student.Callback {
                     if(alwaysCompletedDisciplines is not null) {
                         dbContext.CompletedDisciplines.Remove(alwaysCompletedDisciplines);
                     } else {
-                        dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid && i.Date != null && i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup));
+                        dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid && i.Date != null && i.Name == discipline.Name && i.Lecturer == discipline.Lecturer && i.Class == discipline.Class && i.Subgroup == discipline.Subgroup && i.IntersectionMark == discipline.IntersectionMark));
                         dbContext.CompletedDisciplines.Add(alwaysTmp);
                     }
 
