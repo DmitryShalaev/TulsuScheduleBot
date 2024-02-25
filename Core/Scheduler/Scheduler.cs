@@ -152,7 +152,7 @@ namespace ScheduleBot {
 
             var list = new List<((string, bool), DateOnly)>();
             for(int i = -1; i <= 1; i++) {
-                DateOnly tmp = dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek);
+                DateOnly tmp = dateOnly.AddDays(7 * (weeks + i) + ((byte)dayOfWeek - 1));
                 list.Add((GetScheduleByDate(dbContext, tmp, user), tmp));
             }
 
@@ -165,7 +165,7 @@ namespace ScheduleBot {
 
             var list = new List<(string, DateOnly)>();
             for(int i = -1; i <= 1; i++) {
-                DateOnly tmp = dateOnly.AddDays(7 * (weeks + i) + (byte)dayOfWeek);
+                DateOnly tmp = dateOnly.AddDays(7 * (weeks + i) + ((byte)dayOfWeek - 1));
                 list.Add((GetTeacherWorkScheduleByDate(dbContext, tmp, teacher), tmp));
             }
 
