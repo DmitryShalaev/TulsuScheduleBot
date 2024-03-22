@@ -13,7 +13,7 @@ namespace ScheduleBot.Jobs {
 
             ITrigger trigger = TriggerBuilder.Create().WithIdentity("ClearTemporaryJobTrigger", "group1")
             .StartNow()
-            .WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(0,20))
+            .WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(0, 0))
             .Build();
 
             await scheduler.Start();
@@ -40,8 +40,6 @@ namespace ScheduleBot.Jobs {
                 await dbContext.SaveChangesAsync();
 
                 await Parser.Instance.GetTeachersData();
-
-                await dbContext.SaveChangesAsync();
             }
         }
     }
