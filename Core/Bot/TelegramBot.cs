@@ -200,7 +200,7 @@ namespace Core.Bot {
                 MailAddress to = new(Environment.GetEnvironmentVariable("TelegramBot_ToEmail") ?? "");
                 MailMessage mailMessage = new(from, to) {
                     Subject = "Error",
-                    Body = e.ToString()
+                    Body = e.Message
                 };
 
                 SmtpClient smtp = new("smtp.yandex.ru", 25) {

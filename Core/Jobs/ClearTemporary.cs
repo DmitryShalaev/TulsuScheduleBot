@@ -12,9 +12,8 @@ namespace ScheduleBot.Jobs {
             IJobDetail job = JobBuilder.Create<ClearTemporaryJob>().WithIdentity("ClearTemporaryJob", "group1").Build();
 
             ITrigger trigger = TriggerBuilder.Create().WithIdentity("ClearTemporaryJobTrigger", "group1")
-            .StartAt(DateBuilder.TomorrowAt(0, 0, 0)).WithSimpleSchedule(x => x
-                .WithIntervalInHours(24)
-                .RepeatForever())
+            .StartNow()
+            .WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(0, 0))
             .Build();
 
             await scheduler.Start();
@@ -23,6 +22,8 @@ namespace ScheduleBot.Jobs {
 
         async Task IJob.Execute(IJobExecutionContext context) {
             using(ScheduleDbContext dbContext = new()) {
+                Console.WriteLine($"ClearTemporaryJob: {DateTime.Now}");
+
                 foreach(DB.Entity.TelegramUser item in dbContext.TelegramUsers)
                     item.TodayRequests = 0;
 
