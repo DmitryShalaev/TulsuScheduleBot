@@ -13,7 +13,7 @@ namespace ScheduleBot.Jobs {
 
             ITrigger trigger = TriggerBuilder.Create().WithIdentity("ClearTemporaryJobTrigger", "group1")
             .StartNow()
-            .WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(0,20))
+            .WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(0, 0))
             .Build();
 
             await scheduler.Start();
@@ -22,8 +22,6 @@ namespace ScheduleBot.Jobs {
 
         async Task IJob.Execute(IJobExecutionContext context) {
             using(ScheduleDbContext dbContext = new()) {
-                Console.WriteLine($"ClearTemporaryJob: {DateTime.Now}");
-
                 foreach(DB.Entity.TelegramUser item in dbContext.TelegramUsers)
                     item.TodayRequests = 0;
 
@@ -40,8 +38,6 @@ namespace ScheduleBot.Jobs {
                 await dbContext.SaveChangesAsync();
 
                 await Parser.Instance.GetTeachersData();
-
-                await dbContext.SaveChangesAsync();
             }
         }
     }
