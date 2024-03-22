@@ -42,7 +42,7 @@ namespace ScheduleBot {
                 var teachers = dbContext.Disciplines.Include(i => i.TeacherLastUpdate).Where(i => i.Lecturer != null && string.IsNullOrEmpty(i.TeacherLastUpdate.LinkProfile)).Select(i => i.Lecturer!).Distinct().ToList();
                 foreach(string item in teachers) {
                     await UpdatingTeacherInfo(dbContext, item);
-                    await Task.Delay(TimeSpan.FromSeconds(30));
+                    await Task.Delay(TimeSpan.FromSeconds(10));
                 }
             }
         }

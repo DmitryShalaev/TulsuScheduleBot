@@ -13,7 +13,7 @@ namespace ScheduleBot.Jobs {
 
             ITrigger trigger = TriggerBuilder.Create().WithIdentity("ClearTemporaryJobTrigger", "group1")
             .StartNow()
-            .WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(0, 0))
+            .WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(0,20))
             .Build();
 
             await scheduler.Start();
@@ -36,6 +36,8 @@ namespace ScheduleBot.Jobs {
                     dbContext.CompletedDisciplines.RemoveRange(dbContext.CompletedDisciplines);
 
                 dbContext.MessageLog.RemoveRange(dbContext.MessageLog.Where(i => i.Date.AddMonths(1) < DateTime.UtcNow));
+
+                await dbContext.SaveChangesAsync();
 
                 await Parser.Instance.GetTeachersData();
 
