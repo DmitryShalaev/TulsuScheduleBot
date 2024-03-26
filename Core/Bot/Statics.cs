@@ -122,47 +122,56 @@ namespace Core.Bot {
             DateTime? groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group)?.Update.ToLocalTime();
 
             if(groupLastUpdate is null || (DateTime.Now - groupLastUpdate)?.TotalMinutes > commands.Config.DisciplineUpdateTime) {
-                int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
+                int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["WeNeedToWait"])).MessageId;
                 if(!await parser.UpdatingDisciplines(dbContext, group, commands.Config.UpdateAttemptTime))
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
                 groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group)?.Update.ToLocalTime();
             }
 
-            if(groupLastUpdate is not null)
-                await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {groupLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
+            if(groupLastUpdate is not null) {
+                string marking = (DateTime.Now - groupLastUpdate).Value > TimeSpan.FromMinutes(commands.Config.DisciplineUpdateTime * 2) ? "‼️‼️" : "";
+
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{marking}{commands.Message["ScheduleIsRelevantOn"]} {groupLastUpdate:dd.MM HH:mm}{marking}", replyMarkup: replyMarkup);
+            }
         }
 
         public static async Task TeacherWorkScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string teacher, IReplyMarkup? replyMarkup) {
             DateTime? teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher)?.Update.ToLocalTime();
 
             if(teacherLastUpdate is null || (DateTime.Now - teacherLastUpdate)?.TotalMinutes > commands.Config.TeacherWorkScheduleUpdateTime) {
-                int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
+                int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["WeNeedToWait"])).MessageId;
                 if(!await parser.UpdatingTeacherWorkSchedule(dbContext, teacher, commands.Config.UpdateAttemptTime))
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
                 teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher)?.Update.ToLocalTime();
             }
 
-            if(teacherLastUpdate is not null)
-                await botClient.SendTextMessageAsync(chatId: chatId, text: $"Расписание актуально на {teacherLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
+            if(teacherLastUpdate is not null) {
+                string marking = (DateTime.Now - teacherLastUpdate).Value > TimeSpan.FromMinutes(commands.Config.TeacherWorkScheduleUpdateTime * 2) ? "‼️‼️" : "";
+
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{marking}{commands.Message["ScheduleIsRelevantOn"]} {teacherLastUpdate:dd.MM HH:mm}{marking}", replyMarkup: replyMarkup);
+            }
         }
 
         public static async Task ProgressRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
             DateTime? studentIDlastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID)?.Update.ToLocalTime();
             if(studentIDlastUpdate is null || (DateTime.Now - studentIDlastUpdate)?.TotalMinutes > commands.Config.StudentIDUpdateTime) {
-                int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...")).MessageId;
+                int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["WeNeedToWait"])).MessageId;
                 if(!await parser.UpdatingProgress(dbContext, studentID, commands.Config.UpdateAttemptTime))
-                    await botClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает!");
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
 
                 await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
                 studentIDlastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID)?.Update.ToLocalTime();
             }
 
-            if(send && studentIDlastUpdate is not null)
-                await botClient.SendTextMessageAsync(chatId: chatId, text: $"Успеваемость актуально на {studentIDlastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
+            if(send && studentIDlastUpdate is not null) {
+                string marking = (DateTime.Now - studentIDlastUpdate).Value > TimeSpan.FromMinutes(commands.Config.StudentIDUpdateTime * 2) ? "‼️‼️" : "";
+
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{marking}{commands.Message["AcademicPerformanceIsRelevantOn"]} {studentIDlastUpdate:dd.MM HH:mm}{marking}", replyMarkup: replyMarkup);
+            }
         }
 
         public static async Task DeleteTempMessage(TelegramUser user, int? messageId = null) {

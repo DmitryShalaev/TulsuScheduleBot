@@ -24,7 +24,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
                 return;
             }
 
-            int _messageId = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+            int _messageId = (await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["WeNeedToWait"], replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
             GroupLastUpdate? group = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == args && i.Update != DateTime.MinValue);
 
             if(group is null && await Parser.Instance.UpdatingDisciplines(dbContext, args, 0))
@@ -38,7 +38,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
                 await BotClient.SendTextMessageAsync(chatId: chatId, text: $"Номер группы успешно изменен на {args} ", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user));
 
             } else {
-                user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает или такой группы не существует", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["IsNoSuchGroup"], replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
             }
 
             await BotClient.DeleteMessageAsync(chatId: chatId, messageId: _messageId);

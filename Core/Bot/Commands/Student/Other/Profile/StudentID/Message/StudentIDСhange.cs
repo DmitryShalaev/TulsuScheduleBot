@@ -24,7 +24,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
                 return;
             }
 
-            int _messageId = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Нужно подождать...", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+            int _messageId = (await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["WeNeedToWait"], replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
 
             if(int.TryParse(args, out int id)) {
                 StudentIDLastUpdate? studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args && i.Update != DateTime.MinValue);
@@ -40,7 +40,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
                     await BotClient.SendTextMessageAsync(chatId: chatId, text: $"Номер зачётки успешно изменен на {args} ", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user));
 
                 } else {
-                    user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Сайт ТулГУ не отвечает или указан неверный номер зачётки", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                    user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["InvalidStudentIDNumber"], replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
                 }
             } else {
                 user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Не удалось распознать введенный номер зачётной книжки", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
