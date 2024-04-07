@@ -5,7 +5,7 @@ namespace ScheduleBot {
         private static NGramSearch? instance;
         private readonly Dictionary<string, HashSet<string>> ngramsDict;
 
-        private NGramSearch() => ngramsDict = new Dictionary<string, HashSet<string>>();
+        private NGramSearch() => ngramsDict = [];
 
         public static NGramSearch Instance => instance ??= new NGramSearch();
 

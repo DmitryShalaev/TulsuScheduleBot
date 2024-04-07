@@ -1,6 +1,6 @@
 ﻿namespace Core.Bot {
     public class UserActivityTracker {
-        private readonly Dictionary<long, Queue<DateTime>> userMessageQueue = new();
+        private readonly Dictionary<long, Queue<DateTime>> userMessageQueue = [];
         private readonly int maxMessagesPerSecond = 3;
 
         public bool IsAllowed(long userId) {

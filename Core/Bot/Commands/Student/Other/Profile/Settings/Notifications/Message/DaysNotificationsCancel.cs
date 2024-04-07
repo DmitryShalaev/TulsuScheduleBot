@@ -9,9 +9,9 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message
     internal class DaysNotificationsCancel : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string>? Commands => new() { UserCommands.Instance.Message["Cancel"] };
+        public List<string>? Commands => [UserCommands.Instance.Message["Cancel"]];
 
-        public List<Mode> Modes => new() { Mode.DaysNotifications };
+        public List<Mode> Modes => [Mode.DaysNotifications];
 
         public Manager.Check Check => Manager.Check.none;
 

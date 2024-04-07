@@ -141,7 +141,7 @@ namespace Core.Bot {
                     if(message is not null) {
                         if(message.From is null) return;
 
-                        TelegramUser? user = dbContext.TelegramUsers.Include(u => u.ScheduleProfile).Include(u => u.Settings).Include(u => u.TelegramUserTmp).FirstOrDefault(u => u.ChatID == message.Chat.Id);
+                        TelegramUser? user = await dbContext.TelegramUsers.Include(u => u.ScheduleProfile).Include(u => u.Settings).Include(u => u.TelegramUserTmp).FirstOrDefaultAsync(u => u.ChatID == message.Chat.Id);
 
                         if(user is null) {
 
@@ -160,14 +160,16 @@ namespace Core.Bot {
                             await dbContext.SaveChangesAsync();
                         }
 
+                        user.LastAppeal = user.ScheduleProfile.LastAppeal = DateTime.UtcNow;
+                        user.TodayRequests++;
+                        user.TotalRequests++;
+
+                        await dbContext.SaveChangesAsync();
+
                         switch(update.Type) {
                             case UpdateType.Message:
                             case UpdateType.EditedMessage:
                                 if(message.Text is null) return;
-
-                                user.Username = message.From.Username;
-                                user.FirstName = message.From.FirstName;
-                                user.LastName = message.From.LastName;
 
                                 await commandManager.OnMessageAsync(dbContext, message.Chat, message.MessageId, message.Text, user);
                                 dbContext.MessageLog.Add(new() { Message = message.Text, TelegramUser = user });
@@ -180,12 +182,6 @@ namespace Core.Bot {
                                 dbContext.MessageLog.Add(new() { Message = update.CallbackQuery.Data, TelegramUser = user });
                                 break;
                         }
-
-                        user.LastAppeal = user.ScheduleProfile.LastAppeal = DateTime.UtcNow;
-                        user.TodayRequests++;
-                        user.TotalRequests++;
-
-                        await dbContext.SaveChangesAsync();
                     } else {
                         if(update.Type == UpdateType.InlineQuery) {
                             await InlineQueryMessage.InlineQuery(dbContext, update);

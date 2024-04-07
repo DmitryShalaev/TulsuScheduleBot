@@ -9,9 +9,9 @@ namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
     internal class GroupNumber : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string>? Commands => new() { UserCommands.Instance.Message["GroupNumber"] };
+        public List<string>? Commands => [UserCommands.Instance.Message["GroupNumber"]];
 
-        public List<Mode> Modes => new() { Mode.Default };
+        public List<Mode> Modes => [Mode.Default];
 
         public Manager.Check Check => Manager.Check.none;
 

@@ -13,7 +13,7 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Message {
 
         public List<string>? Commands => null;
 
-        public List<Mode> Modes => new() { Mode.Feedback };
+        public List<Mode> Modes => [Mode.Feedback];
 
         public Manager.Check Check => Manager.Check.none;
 

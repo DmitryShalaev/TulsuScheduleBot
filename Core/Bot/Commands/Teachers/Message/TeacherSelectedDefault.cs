@@ -16,7 +16,7 @@ namespace Core.Bot.Commands.Teachers.Message {
 
         public List<string>? Commands => null;
 
-        public List<Mode> Modes => new() { Mode.TeacherSelected };
+        public List<Mode> Modes => [Mode.TeacherSelected];
 
         public Manager.Check Check => Manager.Check.none;
 

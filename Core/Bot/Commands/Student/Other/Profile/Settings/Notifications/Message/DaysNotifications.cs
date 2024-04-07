@@ -11,7 +11,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message
 
         public List<string>? Commands => null;
 
-        public List<Mode> Modes => new() { Mode.DaysNotifications };
+        public List<Mode> Modes => [Mode.DaysNotifications];
 
         public Manager.Check Check => Manager.Check.none;
 

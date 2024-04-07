@@ -9,9 +9,9 @@ namespace Core.Bot.Commands.Student.Other.Profile.Message {
     internal class ProfileCancel : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string>? Commands => new() { UserCommands.Instance.Message["Cancel"] };
+        public List<string>? Commands => [UserCommands.Instance.Message["Cancel"]];
 
-        public List<Mode> Modes => new() { Mode.GroupСhange, Mode.StudentIDСhange, Mode.ResetProfileLink };
+        public List<Mode> Modes => [Mode.GroupСhange, Mode.StudentIDСhange, Mode.ResetProfileLink];
 
         public Manager.Check Check => Manager.Check.none;
 

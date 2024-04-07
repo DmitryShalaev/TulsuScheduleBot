@@ -10,9 +10,9 @@ namespace Core.Bot.Commands.Teachers.Days.ByDays.Message {
     internal class TeachersThursday : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string>? Commands => new() { UserCommands.Instance.Message["Thursday"] };
+        public List<string>? Commands => [UserCommands.Instance.Message["Thursday"]];
 
-        public List<Mode> Modes => new() { Mode.TeacherSelected };
+        public List<Mode> Modes => [Mode.TeacherSelected];
 
         public Manager.Check Check => Manager.Check.none;
 

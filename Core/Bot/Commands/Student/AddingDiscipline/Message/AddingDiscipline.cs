@@ -11,7 +11,7 @@ namespace Core.Bot.Commands.AddingDiscipline.Message {
 
         public List<string>? Commands => null;
 
-        public List<Mode> Modes => new() { Mode.AddingDiscipline };
+        public List<Mode> Modes => [Mode.AddingDiscipline];
 
         public Manager.Check Check => Manager.Check.none;
 

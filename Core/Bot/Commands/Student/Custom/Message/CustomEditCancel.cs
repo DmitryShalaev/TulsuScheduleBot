@@ -11,9 +11,9 @@ namespace Core.Bot.Commands.Student.Custom.Message {
     internal class CustomEditCancel : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string>? Commands => new() { UserCommands.Instance.Message["Cancel"] };
+        public List<string>? Commands => [UserCommands.Instance.Message["Cancel"]];
 
-        public List<Mode> Modes => new() { Mode.CustomEditName, Mode.CustomEditLecturer, Mode.CustomEditLectureHall, Mode.CustomEditType, Mode.CustomEditStartTime, Mode.CustomEditEndTime };
+        public List<Mode> Modes => [Mode.CustomEditName, Mode.CustomEditLecturer, Mode.CustomEditLectureHall, Mode.CustomEditType, Mode.CustomEditStartTime, Mode.CustomEditEndTime];
 
         public Manager.Check Check => Manager.Check.none;
 

@@ -10,9 +10,9 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Message {
     public class FeedbackCancel : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string>? Commands => new() { UserCommands.Instance.Message["Cancel"] };
+        public List<string>? Commands => [UserCommands.Instance.Message["Cancel"]];
 
-        public List<Mode> Modes => new() { Mode.Feedback };
+        public List<Mode> Modes => [Mode.Feedback];
 
         public Manager.Check Check => Manager.Check.none;
 

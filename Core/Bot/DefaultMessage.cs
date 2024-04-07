@@ -8,7 +8,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 namespace Core.Bot {
     public static class DefaultMessage {
         public static ReplyKeyboardMarkup GetTermsKeyboardMarkup(ScheduleDbContext dbContext, string StudentID) {
-            List<KeyboardButton[]> TermsKeyboardMarkup = new();
+            List<KeyboardButton[]> TermsKeyboardMarkup = [];
 
             int[] terms = dbContext.Progresses.Where(i => i.StudentID == StudentID).Select(i => i.Term).Distinct().OrderBy(i => i).ToArray();
             for(int i = 0; i < terms.Length; i++)
@@ -20,7 +20,7 @@ namespace Core.Bot {
         }
 
         public static ReplyKeyboardMarkup GetProfileKeyboardMarkup(TelegramUser user) {
-            List<KeyboardButton[]> ProfileKeyboardMarkup = new();
+            List<KeyboardButton[]> ProfileKeyboardMarkup = [];
 
             if(user.IsOwner()) {
                 ProfileKeyboardMarkup.AddRange(new[] {  new KeyboardButton[] { $"{UserCommands.Instance.Message["GroupNumber"]}:\n{user.ScheduleProfile.Group}", $"{UserCommands.Instance.Message["StudentIDNumber"]}:\n{user.ScheduleProfile.StudentID}" },
@@ -49,12 +49,12 @@ namespace Core.Bot {
         }
 
         public static ReplyKeyboardMarkup GetCorpsKeyboardMarkup() {
-            List<KeyboardButton[]> ProfileKeyboardMarkup = new() {
+            List<KeyboardButton[]> ProfileKeyboardMarkup = [
                 new KeyboardButton[] { UserCommands.Instance.Corps[0].text }
-            };
+            ];
 
             for(int i = 0; i < 3; i++) {
-                List<KeyboardButton> keyboardButtonsLine = new();
+                List<KeyboardButton> keyboardButtonsLine = [];
                 for(int j = 0; j < 5; j++)
                     keyboardButtonsLine.Add(UserCommands.Instance.Corps[1 + i * 5 + j].text);
 
@@ -70,12 +70,12 @@ namespace Core.Bot {
         }
 
         public static ReplyKeyboardMarkup GetTeacherWorkScheduleSelectedKeyboardMarkup(string teacher) {
-            List<KeyboardButton[]> KeyboardMarkup = new() {
+            List<KeyboardButton[]> KeyboardMarkup = [
                 new KeyboardButton[] { $"{UserCommands.Instance.Message["CurrentTeacher"]}:\n{teacher}" },
                 new KeyboardButton[] { UserCommands.Instance.Message["Today"], UserCommands.Instance.Message["Tomorrow"] },
                 new KeyboardButton[] { UserCommands.Instance.Message["ByDays"], UserCommands.Instance.Message["ForAWeek"] },
                 new KeyboardButton[] { UserCommands.Instance.Message["TeachersWorkScheduleBack"] }
-            };
+            ];
 
             return new(KeyboardMarkup) { ResizeKeyboard = true };
         }

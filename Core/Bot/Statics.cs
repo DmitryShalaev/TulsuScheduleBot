@@ -80,12 +80,12 @@ namespace Core.Bot {
         public static readonly ReplyKeyboardMarkup CorpsKeyboardMarkup = GetCorpsKeyboardMarkup();
 
         private static ReplyKeyboardMarkup GetCorpsKeyboardMarkup() {
-            List<KeyboardButton[]> ProfileKeyboardMarkup = new() {
+            List<KeyboardButton[]> ProfileKeyboardMarkup = [
                 new KeyboardButton[] { commands.Corps[0].text }
-            };
+            ];
 
             for(int i = 0; i < 3; i++) {
-                List<KeyboardButton> keyboardButtonsLine = new();
+                List<KeyboardButton> keyboardButtonsLine = [];
                 for(int j = 0; j < 5; j++)
                     keyboardButtonsLine.Add(commands.Corps[1 + i * 5 + j].text);
 

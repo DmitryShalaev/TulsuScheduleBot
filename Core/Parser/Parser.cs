@@ -109,7 +109,7 @@ namespace ScheduleBot {
                 List<Discipline>? disciplines = await GetDisciplines(group);
 
                 if(disciplines is not null) {
-                    List<Discipline> updatedDisciplines = new();
+                    List<Discipline> updatedDisciplines = [];
 
                     groupLastUpdate.Update = DateTime.UtcNow;
 

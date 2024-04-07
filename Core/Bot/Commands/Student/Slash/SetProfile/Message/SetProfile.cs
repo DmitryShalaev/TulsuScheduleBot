@@ -10,9 +10,9 @@ namespace Core.Bot.New.Commands.Student.Slash.SetProfile.Message {
     public class SetProfile : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string> Commands => new() { "/SetProfile" };
+        public List<string> Commands => ["/SetProfile"];
 
-        public List<Mode> Modes => new() { Mode.Default };
+        public List<Mode> Modes => [Mode.Default];
 
         public Manager.Check Check => Manager.Check.none;
 

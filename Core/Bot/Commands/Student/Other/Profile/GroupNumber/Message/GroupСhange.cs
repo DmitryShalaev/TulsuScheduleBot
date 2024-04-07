@@ -12,7 +12,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
 
         public List<string>? Commands => null;
 
-        public List<Mode> Modes => new() { Mode.GroupСhange };
+        public List<Mode> Modes => [Mode.GroupСhange];
 
         public Manager.Check Check => Manager.Check.none;
 

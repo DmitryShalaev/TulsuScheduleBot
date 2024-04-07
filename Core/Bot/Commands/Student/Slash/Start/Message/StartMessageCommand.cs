@@ -10,7 +10,7 @@ namespace Core.Bot.New.Commands.Student.Slash.Start.Message {
     public class StartMessageCommand : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string> Commands => new() { "/start" };
+        public List<string> Commands => ["/start"];
 
         public List<Mode> Modes => Enum.GetValues(typeof(Mode)).Cast<Mode>().ToList();
 

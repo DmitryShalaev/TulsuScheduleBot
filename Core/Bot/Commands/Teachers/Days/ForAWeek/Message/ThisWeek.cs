@@ -11,9 +11,9 @@ namespace Core.Bot.Commands.Teachers.Days.ForAWeek.Message {
     internal class TeachersThisWeek : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string>? Commands => new() { UserCommands.Instance.Message["ThisWeek"] };
+        public List<string>? Commands => [UserCommands.Instance.Message["ThisWeek"]];
 
-        public List<Mode> Modes => new() { Mode.TeacherSelected };
+        public List<Mode> Modes => [Mode.TeacherSelected];
 
         public Manager.Check Check => Manager.Check.none;
 

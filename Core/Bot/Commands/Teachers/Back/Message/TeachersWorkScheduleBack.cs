@@ -10,9 +10,9 @@ namespace Core.Bot.Commands.Teachers.Back.Message {
     public class TeachersWorkScheduleBack : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string>? Commands => new() { UserCommands.Instance.Message["TeachersWorkScheduleBack"] };
+        public List<string>? Commands => [UserCommands.Instance.Message["TeachersWorkScheduleBack"]];
 
-        public List<Mode> Modes => new() { Mode.TeachersWorkSchedule, Mode.TeacherSelected };
+        public List<Mode> Modes => [Mode.TeachersWorkSchedule, Mode.TeacherSelected];
 
         public Manager.Check Check => Manager.Check.none;
 

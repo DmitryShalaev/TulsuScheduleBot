@@ -11,9 +11,9 @@ namespace Core.Bot.Commands.AddingDiscipline.Message {
     internal class AddingDisciplineCancel : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string>? Commands => new() { UserCommands.Instance.Message["Cancel"] };
+        public List<string>? Commands => [UserCommands.Instance.Message["Cancel"]];
 
-        public List<Mode> Modes => new() { Mode.AddingDiscipline };
+        public List<Mode> Modes => [Mode.AddingDiscipline];
 
         public Manager.Check Check => Manager.Check.none;
 

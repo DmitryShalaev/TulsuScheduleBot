@@ -12,7 +12,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
 
         public List<string>? Commands => null;
 
-        public List<Mode> Modes => new() { Mode.StudentIDСhange };
+        public List<Mode> Modes => [Mode.StudentIDСhange];
 
         public Manager.Check Check => Manager.Check.none;
 

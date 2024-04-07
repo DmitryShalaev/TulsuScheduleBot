@@ -15,7 +15,7 @@ namespace Core.Bot.Commands.Student.Message {
 
         public List<string>? Commands => null;
 
-        public List<Mode> Modes => new() { Mode.Default };
+        public List<Mode> Modes => [Mode.Default];
 
         public Manager.Check Check => Manager.Check.group;
 

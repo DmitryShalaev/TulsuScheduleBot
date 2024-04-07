@@ -9,9 +9,9 @@ namespace Core.Bot.Commands.Student.Days.ForAWeek.Message {
     internal class ForAWeek : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string>? Commands => new() { UserCommands.Instance.Message["ForAWeek"] };
+        public List<string>? Commands => [UserCommands.Instance.Message["ForAWeek"]];
 
-        public List<Mode> Modes => new() { Mode.Default };
+        public List<Mode> Modes => [Mode.Default];
 
         public Manager.Check Check => Manager.Check.group;
 

@@ -13,7 +13,7 @@ namespace Core.Bot.Commands.Student.Custom.Message {
 
         public List<string>? Commands => null;
 
-        public List<Mode> Modes => new() { Mode.CustomEditName };
+        public List<Mode> Modes => [Mode.CustomEditName];
 
         public Manager.Check Check => Manager.Check.none;
 

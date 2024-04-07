@@ -10,9 +10,9 @@ namespace Core.Bot.Commands.Student.Other.Exam.Message {
     internal class AllExams : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string>? Commands => new() { UserCommands.Instance.Message["AllExams"] };
+        public List<string>? Commands => [UserCommands.Instance.Message["AllExams"]];
 
-        public List<Mode> Modes => new() { Mode.Default };
+        public List<Mode> Modes => [Mode.Default];
 
         public Manager.Check Check => Manager.Check.group;
 

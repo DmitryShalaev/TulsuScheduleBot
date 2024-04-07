@@ -11,7 +11,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Message {
 
         public List<string>? Commands => null;
 
-        public List<Mode> Modes => new() { Mode.ResetProfileLink };
+        public List<Mode> Modes => [Mode.ResetProfileLink];
 
         public Manager.Check Check => Manager.Check.none;
 

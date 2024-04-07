@@ -14,7 +14,7 @@ namespace Core.Bot.Commands.Teachers.Message {
 
         public List<string>? Commands => null;
 
-        public List<Mode> Modes => new() { Mode.TeachersWorkSchedule };
+        public List<Mode> Modes => [Mode.TeachersWorkSchedule];
 
         public Manager.Check Check => Manager.Check.none;
 

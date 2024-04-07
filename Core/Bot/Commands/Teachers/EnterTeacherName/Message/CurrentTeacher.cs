@@ -11,9 +11,9 @@ namespace Core.Bot.Commands.Teachers.EnterTeacherName.Message {
     public class CurrentTeacher : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string>? Commands => new() { UserCommands.Instance.Message["CurrentTeacher"] };
+        public List<string>? Commands => [UserCommands.Instance.Message["CurrentTeacher"]];
 
-        public List<Mode> Modes => new() { Mode.TeacherSelected };
+        public List<Mode> Modes => [Mode.TeacherSelected];
 
         public Manager.Check Check => Manager.Check.none;
 

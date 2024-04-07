@@ -13,7 +13,7 @@ namespace Core.Bot.Commands.Student.Custom.Message {
 
         public List<string>? Commands => null;
 
-        public List<Mode> Modes => new() { Mode.CustomEditLectureHall };
+        public List<Mode> Modes => [Mode.CustomEditLectureHall];
 
         public Manager.Check Check => Manager.Check.none;
 

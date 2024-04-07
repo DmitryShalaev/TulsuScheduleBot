@@ -14,7 +14,7 @@ namespace Core.Bot.Commands.Student.Custom.Message {
 
         public List<string>? Commands => null;
 
-        public List<Mode> Modes => new() { Mode.CustomEditEndTime };
+        public List<Mode> Modes => [Mode.CustomEditEndTime];
 
         public Manager.Check Check => Manager.Check.none;
 

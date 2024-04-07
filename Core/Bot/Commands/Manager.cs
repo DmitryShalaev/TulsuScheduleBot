@@ -31,8 +31,8 @@ namespace Core.Bot.Commands {
             this.getMessageCommand = getMessageCommand;
             this.getCallbackCommand = getCallbackCommand;
 
-            MessageCommands = new();
-            CallbackCommands = new();
+            MessageCommands = [];
+            CallbackCommands = [];
 
             DefaultMessageCommands = new (Check, MessageFunction)[Enum.GetValues(typeof(Mode)).Length];
         }

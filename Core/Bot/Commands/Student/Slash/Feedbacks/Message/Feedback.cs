@@ -12,7 +12,7 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Message {
     public class Feedback : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string> Commands => new() { "/feedback" };
+        public List<string> Commands => ["/feedback"];
 
         public List<Mode> Modes => Enum.GetValues(typeof(Mode)).Cast<Mode>().ToList();
 

@@ -9,9 +9,9 @@ namespace Core.Bot.Commands.Student.Days.ByDays.Message {
     internal class ByDays : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string>? Commands => new() { UserCommands.Instance.Message["ByDays"] };
+        public List<string>? Commands => [UserCommands.Instance.Message["ByDays"]];
 
-        public List<Mode> Modes => new() { Mode.Default };
+        public List<Mode> Modes => [Mode.Default];
 
         public Manager.Check Check => Manager.Check.group;
 
