@@ -21,6 +21,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
 
             if(args.Length > 15) {
                 user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Номер группы не может содержать более 15 символов.", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                await dbContext.SaveChangesAsync();
                 return;
             }
 
@@ -39,6 +40,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
 
             } else {
                 user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["IsNoSuchGroup"], replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                await dbContext.SaveChangesAsync();
             }
 
             await BotClient.DeleteMessageAsync(chatId: chatId, messageId: _messageId);

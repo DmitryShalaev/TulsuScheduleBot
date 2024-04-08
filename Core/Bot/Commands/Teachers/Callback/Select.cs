@@ -25,6 +25,7 @@ namespace Core.Bot.Commands.Teachers.Back.Callback {
             TeacherLastUpdate teacher = dbContext.TeacherLastUpdate.First(i => i.Teacher.ToLower().StartsWith(args));
 
             string teacherName = user.TelegramUserTmp.TmpData = teacher.Teacher;
+            await dbContext.SaveChangesAsync();
 
             if(string.IsNullOrWhiteSpace(teacher.LinkProfile))
                 await Parser.Instance.UpdatingTeacherInfo(dbContext, teacherName);

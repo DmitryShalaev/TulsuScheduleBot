@@ -19,20 +19,21 @@ namespace Core.Bot.New.Commands.Student.Slash.Start.Message {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             await BotClient.SendTextMessageAsync(chatId: chatId, text: "👋", replyMarkup: Statics.MainKeyboardMarkup);
 
-            user.TelegramUserTmp.TmpData = null;
-            user.TelegramUserTmp.Mode = Mode.Default;
+            if(user.TelegramUserTmp.Mode == Mode.AddingDiscipline)
+                dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile));
 
             await Statics.DeleteTempMessage(user);
 
-            if(user.TelegramUserTmp.Mode == Mode.AddingDiscipline)
-                dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile));
+            user.TelegramUserTmp.TmpData = null;
+            user.TelegramUserTmp.Mode = Mode.Default;
 
             if(string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
                 user.TelegramUserTmp.Mode = Mode.GroupСhange;
 
                 user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Для начала работы с ботом укажите номер учебной группы.", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
-                return;
             }
+
+            await dbContext.SaveChangesAsync();
         }
     }
 }

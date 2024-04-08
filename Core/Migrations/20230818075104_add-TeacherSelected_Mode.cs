@@ -9,8 +9,8 @@ namespace ScheduleBot.Migrations {
         protected override void Up(MigrationBuilder migrationBuilder) {
             migrationBuilder.InsertData(
                 table: "Modes",
-                columns: new[] { "ID", "Name" },
-                values: new object[] { (byte)13, "TeacherSelected" });
+                columns: ["ID", "Name"],
+                values: [(byte)13, "TeacherSelected"]);
         }
 
         /// <inheritdoc />

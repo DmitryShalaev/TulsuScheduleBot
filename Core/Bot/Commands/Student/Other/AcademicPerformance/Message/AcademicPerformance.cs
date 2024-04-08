@@ -21,6 +21,8 @@ namespace Core.Bot.Commands.Student.AcademicPerformance.Message {
             string StudentID = user.ScheduleProfile.StudentID!;
 
             await Statics.ProgressRelevance(dbContext, BotClient, chatId, StudentID, null, false);
+            await dbContext.SaveChangesAsync();
+
             await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["AcademicPerformance"], replyMarkup: DefaultMessage.GetTermsKeyboardMarkup(dbContext, StudentID));
         }
     }

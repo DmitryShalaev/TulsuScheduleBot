@@ -17,8 +17,8 @@ namespace ScheduleBot.Migrations {
         protected override void Down(MigrationBuilder migrationBuilder) {
             migrationBuilder.InsertData(
                 table: "Modes",
-                columns: new[] { "ID", "Name" },
-                values: new object[] { (byte)15, "Settings" });
+                columns: ["ID", "Name"],
+                values: [(byte)15, "Settings"]);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
 using Core.Bot.Commands;
 using Core.Bot.New.Commands.Student;
@@ -163,7 +163,6 @@ namespace Core.Bot {
                         user.LastAppeal = user.ScheduleProfile.LastAppeal = DateTime.UtcNow;
                         user.TodayRequests++;
                         user.TotalRequests++;
-
                         await dbContext.SaveChangesAsync();
 
                         switch(update.Type) {
@@ -182,6 +181,9 @@ namespace Core.Bot {
                                 dbContext.MessageLog.Add(new() { Message = update.CallbackQuery.Data, TelegramUser = user });
                                 break;
                         }
+
+                        await dbContext.SaveChangesAsync();
+
                     } else {
                         if(update.Type == UpdateType.InlineQuery) {
                             await InlineQueryMessage.InlineQuery(dbContext, update);

@@ -20,6 +20,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
                 user.TelegramUserTmp.Mode = Mode.StudentIDСhange;
 
                 user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Хотите сменить номер зачётки? Если да, то напишите новый номер", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                await dbContext.SaveChangesAsync();
             }
         }
     }

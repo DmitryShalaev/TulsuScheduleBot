@@ -19,6 +19,8 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.TeacherLincs.Message 
             user.Settings.TeacherLincsEnabled = !user.Settings.TeacherLincsEnabled;
 
             user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["Settings"], replyMarkup: DefaultMessage.GetSettingsKeyboardMarkup(user))).MessageId;
+
+            await dbContext.SaveChangesAsync();
         }
     }
 }

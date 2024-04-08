@@ -212,7 +212,7 @@ namespace ScheduleBot.Migrations {
 
             migrationBuilder.InsertData(
                 table: "Classes",
-                columns: new[] { "ID", "Name" },
+                columns: ["ID", "Name"],
                 values: new object[,]
                 {
                     { (byte)0, "all" },
@@ -225,7 +225,7 @@ namespace ScheduleBot.Migrations {
 
             migrationBuilder.InsertData(
                 table: "Modes",
-                columns: new[] { "ID", "Name" },
+                columns: ["ID", "Name"],
                 values: new object[,]
                 {
                     { (byte)0, "Default" },

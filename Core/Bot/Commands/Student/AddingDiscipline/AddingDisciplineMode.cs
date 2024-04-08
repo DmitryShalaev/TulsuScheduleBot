@@ -94,7 +94,7 @@ namespace Core.Bot.Commands.AddingDiscipline {
         }
 
         public static TimeOnly ParseTime(string timeString) {
-            string[] separators = { ":", ";", ".", ",", " " };
+            string[] separators = [":", ";", ".", ",", " "];
 
             string[] parts = timeString.Split(separators, StringSplitOptions.RemoveEmptyEntries);
 

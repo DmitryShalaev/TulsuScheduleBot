@@ -39,6 +39,8 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Message {
 
             user.TelegramUserTmp.Mode = Mode.Feedback;
             user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["FeedbackMessage"], replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+
+            await dbContext.SaveChangesAsync();
         }
     }
 }

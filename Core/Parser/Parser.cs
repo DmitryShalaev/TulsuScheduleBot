@@ -124,7 +124,7 @@ namespace ScheduleBot {
                     if(except.Any()) {
                         dbContext.Disciplines.AddRange(except);
 
-                        if(_list.Any())
+                        if(_list.Count != 0)
                             updatedDisciplines.AddRange(except);
 
                         await dbContext.SaveChangesAsync();
@@ -142,7 +142,7 @@ namespace ScheduleBot {
 
                     await dbContext.SaveChangesAsync();
 
-                    if(updatedDisciplines.Any()) {
+                    if(updatedDisciplines.Count != 0) {
                         var date = DateOnly.FromDateTime(DateTime.Now);
                         await Notifications.UpdatedDisciplinesAsync(dbContext, updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList());
                     }

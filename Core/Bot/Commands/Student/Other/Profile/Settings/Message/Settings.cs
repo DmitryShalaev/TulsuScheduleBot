@@ -19,6 +19,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Message {
             user.TelegramUserTmp.TmpData = UserCommands.Instance.Message["Settings"];
 
             user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["Settings"], replyMarkup: DefaultMessage.GetSettingsKeyboardMarkup(user))).MessageId;
+            await dbContext.SaveChangesAsync();
         }
     }
 }

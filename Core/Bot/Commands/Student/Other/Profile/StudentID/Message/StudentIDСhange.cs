@@ -21,6 +21,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
 
             if(args.Length > 10) {
                 user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Номер зачетки не может содержать более 10 символов.", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                await dbContext.SaveChangesAsync();
                 return;
             }
 
@@ -41,9 +42,11 @@ namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
 
                 } else {
                     user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["InvalidStudentIDNumber"], replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                    await dbContext.SaveChangesAsync();
                 }
             } else {
                 user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Не удалось распознать введенный номер зачётной книжки", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                await dbContext.SaveChangesAsync();
             }
 
             await BotClient.DeleteMessageAsync(chatId: chatId, messageId: _messageId);

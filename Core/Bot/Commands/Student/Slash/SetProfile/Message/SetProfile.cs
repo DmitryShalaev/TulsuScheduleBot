@@ -21,6 +21,7 @@ namespace Core.Bot.New.Commands.Student.Slash.SetProfile.Message {
                 if(Guid.TryParse(args, out Guid profile)) {
                     if(profile != user.ScheduleProfileGuid && dbContext.ScheduleProfile.Any(i => i.ID == profile)) {
                         user.ScheduleProfileGuid = profile;
+                        await dbContext.SaveChangesAsync();
 
                         await BotClient.SendTextMessageAsync(chatId: chatId, text: "Вы успешно сменили профиль", replyMarkup: Statics.MainKeyboardMarkup);
                     } else {

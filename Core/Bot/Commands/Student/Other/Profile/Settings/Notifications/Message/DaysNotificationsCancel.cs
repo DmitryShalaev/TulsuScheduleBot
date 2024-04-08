@@ -19,6 +19,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message
             user.TelegramUserTmp.Mode = Mode.Default;
 
             await Statics.DeleteTempMessage(user, messageId);
+            await dbContext.SaveChangesAsync();
 
             await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["Settings"], replyMarkup: DefaultMessage.GetSettingsKeyboardMarkup(user));
             await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["NotificationSettings"], replyMarkup: DefaultCallback.GetNotificationsInlineKeyboardButton(user));

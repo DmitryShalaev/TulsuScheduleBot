@@ -27,7 +27,7 @@ namespace Core.Bot.Commands.Teachers.Message {
                     foreach(string item in find) {
                         string callback = $"Select|{item}";
 
-                        buttons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: item, callbackData: callback[..Math.Min(callback.Length, 35)]) });
+                        buttons.Add([InlineKeyboardButton.WithCallbackData(text: item, callbackData: callback[..Math.Min(callback.Length, 35)])]);
                     }
 
                     user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Выберите преподавателя.\nЕсли его нет уточните ФИО.", replyMarkup: new InlineKeyboardMarkup(buttons))).MessageId;
@@ -42,6 +42,8 @@ namespace Core.Bot.Commands.Teachers.Message {
 
                     await BotClient.SendTextMessageAsync(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentTeacher"]}: [{teacherName}]({teacher.LinkProfile})", replyMarkup: DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(teacherName), parseMode: ParseMode.Markdown);
                 }
+
+                await dbContext.SaveChangesAsync();
             } else {
                 await BotClient.SendTextMessageAsync(chatId: chatId, text: "Преподаватель не найден!", replyMarkup: Statics.TeachersWorkScheduleBackKeyboardMarkup);
             }

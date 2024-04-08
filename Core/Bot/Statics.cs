@@ -40,27 +40,27 @@ namespace Core.Bot {
         #region ReplyKeyboardMarkup
         public static readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["Today"], commands.Message["Tomorrow"] },
-                            new KeyboardButton[] { commands.Message["ByDays"], commands.Message["ForAWeek"] },
-                            new KeyboardButton[] { commands.Message["Other"] }
+                            [commands.Message["ByDays"], commands.Message["ForAWeek"]],
+                            [commands.Message["Other"]]
                         }) { ResizeKeyboard = true };
 
         public static readonly ReplyKeyboardMarkup AdditionalKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["Profile"] },
-                            new KeyboardButton[] { commands.Message["Exam"], commands.Message["AcademicPerformance"] },
-                            new KeyboardButton[] { commands.Message["Corps"], commands.Message["TeachersWorkSchedule"] },
-                            new KeyboardButton[] { commands.Message["Back"] }
+                            [commands.Message["Exam"], commands.Message["AcademicPerformance"]],
+                            [commands.Message["Corps"], commands.Message["TeachersWorkSchedule"]],
+                            [commands.Message["Back"]]
                         }) { ResizeKeyboard = true };
 
         public static readonly ReplyKeyboardMarkup ExamKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["NextExam"], commands.Message["AllExams"] },
-                            new KeyboardButton[] { commands.Message["Back"] }
+                            [commands.Message["Back"]]
                         }) { ResizeKeyboard = true };
 
         public static readonly ReplyKeyboardMarkup DaysKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["Monday"], commands.Message["Tuesday"] },
-                            new KeyboardButton[] { commands.Message["Wednesday"], commands.Message["Thursday"] },
-                            new KeyboardButton[] { commands.Message["Friday"], commands.Message["Saturday"] },
-                            new KeyboardButton[] { commands.Message["Back"] }
+                            [commands.Message["Wednesday"], commands.Message["Thursday"]],
+                            [commands.Message["Friday"], commands.Message["Saturday"]],
+                            [commands.Message["Back"]]
                         }) { ResizeKeyboard = true };
 
         public static readonly ReplyKeyboardMarkup CancelKeyboardMarkup = new(commands.Message["Cancel"]) { ResizeKeyboard = true };
@@ -69,7 +69,7 @@ namespace Core.Bot {
 
         public static readonly ReplyKeyboardMarkup WeekKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["ThisWeek"], commands.Message["NextWeek"] },
-                            new KeyboardButton[] { commands.Message["Back"] }
+                            [commands.Message["Back"]]
                         }) { ResizeKeyboard = true };
 
         public static readonly ReplyKeyboardMarkup TeachersWorkScheduleBackKeyboardMarkup = new(new[] {
@@ -81,7 +81,7 @@ namespace Core.Bot {
 
         private static ReplyKeyboardMarkup GetCorpsKeyboardMarkup() {
             List<KeyboardButton[]> ProfileKeyboardMarkup = [
-                new KeyboardButton[] { commands.Corps[0].text }
+                [commands.Corps[0].text]
             ];
 
             for(int i = 0; i < 3; i++) {
@@ -93,9 +93,9 @@ namespace Core.Bot {
             }
 
             for(int i = 16; i < commands.Corps.Length; i++)
-                ProfileKeyboardMarkup.Add(new KeyboardButton[] { commands.Corps[i].text });
+                ProfileKeyboardMarkup.Add([commands.Corps[i].text]);
 
-            ProfileKeyboardMarkup.AddRange(new[] { new KeyboardButton[] { commands.College.text }, new KeyboardButton[] { commands.Message["Back"] } });
+            ProfileKeyboardMarkup.AddRange(new[] { new KeyboardButton[] { commands.College.text }, [commands.Message["Back"]] });
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }
@@ -131,7 +131,7 @@ namespace Core.Bot {
             }
 
             if(groupLastUpdate is not null) {
-                string marking = (DateTime.Now - groupLastUpdate).Value > TimeSpan.FromMinutes(commands.Config.DisciplineUpdateTime * 2) ? "‼️‼️" : "";
+                string marking = (DateTime.Now - groupLastUpdate).Value > TimeSpan.FromMinutes(commands.Config.DisciplineUpdateTime * 2) ? "‼️" : "";
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: $"{marking}{commands.Message["ScheduleIsRelevantOn"]} {groupLastUpdate:dd.MM HH:mm}{marking}", replyMarkup: replyMarkup);
             }
@@ -150,7 +150,7 @@ namespace Core.Bot {
             }
 
             if(teacherLastUpdate is not null) {
-                string marking = (DateTime.Now - teacherLastUpdate).Value > TimeSpan.FromMinutes(commands.Config.TeacherWorkScheduleUpdateTime * 2) ? "‼️‼️" : "";
+                string marking = (DateTime.Now - teacherLastUpdate).Value > TimeSpan.FromMinutes(commands.Config.TeacherWorkScheduleUpdateTime * 2) ? "‼️" : "";
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: $"{marking}{commands.Message["ScheduleIsRelevantOn"]} {teacherLastUpdate:dd.MM HH:mm}{marking}", replyMarkup: replyMarkup);
             }
@@ -168,7 +168,7 @@ namespace Core.Bot {
             }
 
             if(send && studentIDlastUpdate is not null) {
-                string marking = (DateTime.Now - studentIDlastUpdate).Value > TimeSpan.FromMinutes(commands.Config.StudentIDUpdateTime * 2) ? "‼️‼️" : "";
+                string marking = (DateTime.Now - studentIDlastUpdate).Value > TimeSpan.FromMinutes(commands.Config.StudentIDUpdateTime * 2) ? "‼️" : "";
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: $"{marking}{commands.Message["AcademicPerformanceIsRelevantOn"]} {studentIDlastUpdate:dd.MM HH:mm}{marking}", replyMarkup: replyMarkup);
             }

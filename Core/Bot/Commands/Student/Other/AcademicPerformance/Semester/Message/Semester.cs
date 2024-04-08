@@ -20,6 +20,8 @@ namespace Core.Bot.Commands.Student.AcademicPerformance.Semester.Message {
             string StudentID = user.ScheduleProfile.StudentID!;
 
             await Statics.ProgressRelevance(dbContext, BotClient, chatId, StudentID, DefaultMessage.GetTermsKeyboardMarkup(dbContext, StudentID));
+            await dbContext.SaveChangesAsync();
+
             await BotClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetProgressByTerm(dbContext, int.Parse(args), StudentID), replyMarkup: DefaultMessage.GetTermsKeyboardMarkup(dbContext, StudentID));
         }
     }

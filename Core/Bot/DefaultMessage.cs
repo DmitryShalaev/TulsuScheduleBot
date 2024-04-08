@@ -12,9 +12,9 @@ namespace Core.Bot {
 
             int[] terms = dbContext.Progresses.Where(i => i.StudentID == StudentID).Select(i => i.Term).Distinct().OrderBy(i => i).ToArray();
             for(int i = 0; i < terms.Length; i++)
-                TermsKeyboardMarkup.Add(new KeyboardButton[] { $"{terms[i]} {UserCommands.Instance.Message["Semester"]}", i + 1 < terms.Length ? $"{terms[++i]} {UserCommands.Instance.Message["Semester"]}" : "" });
+                TermsKeyboardMarkup.Add([$"{terms[i]} {UserCommands.Instance.Message["Semester"]}", i + 1 < terms.Length ? $"{terms[++i]} {UserCommands.Instance.Message["Semester"]}" : ""]);
 
-            TermsKeyboardMarkup.Add(new KeyboardButton[] { UserCommands.Instance.Message["Back"] });
+            TermsKeyboardMarkup.Add([UserCommands.Instance.Message["Back"]]);
 
             return new(TermsKeyboardMarkup) { ResizeKeyboard = true };
         }
@@ -24,15 +24,15 @@ namespace Core.Bot {
 
             if(user.IsOwner()) {
                 ProfileKeyboardMarkup.AddRange(new[] {  new KeyboardButton[] { $"{UserCommands.Instance.Message["GroupNumber"]}:\n{user.ScheduleProfile.Group}", $"{UserCommands.Instance.Message["StudentIDNumber"]}:\n{user.ScheduleProfile.StudentID}" },
-                                                        new KeyboardButton[] { UserCommands.Instance.Message["GetProfileLink"] }
+                                                        [UserCommands.Instance.Message["GetProfileLink"]]
                                                      });
             } else {
-                ProfileKeyboardMarkup.Add(new KeyboardButton[] { UserCommands.Instance.Message["ResetProfileLink"] });
+                ProfileKeyboardMarkup.Add([UserCommands.Instance.Message["ResetProfileLink"]]);
             }
 
             ProfileKeyboardMarkup.AddRange(new[] {
                 new KeyboardButton[] { UserCommands.Instance.Message["Settings"] },
-                new KeyboardButton[] { UserCommands.Instance.Message["Back"] }
+                [UserCommands.Instance.Message["Back"]]
             });
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
@@ -41,8 +41,8 @@ namespace Core.Bot {
         public static ReplyKeyboardMarkup GetSettingsKeyboardMarkup(TelegramUser user) {
             List<KeyboardButton[]> ProfileKeyboardMarkup = new(new[] {
                 new KeyboardButton[] { UserCommands.Instance.Message["Notifications"] },
-                new KeyboardButton[] { $"{UserCommands.Instance.Message["TeacherLincsEnabled"]}: {(user.Settings.TeacherLincsEnabled ? "вкл" : "выкл")}" },
-                new KeyboardButton[] { UserCommands.Instance.Message["Back"] }
+                [$"{UserCommands.Instance.Message["TeacherLincsEnabled"]}: {(user.Settings.TeacherLincsEnabled ? "вкл" : "выкл")}"],
+                [UserCommands.Instance.Message["Back"]]
             });
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
@@ -50,7 +50,7 @@ namespace Core.Bot {
 
         public static ReplyKeyboardMarkup GetCorpsKeyboardMarkup() {
             List<KeyboardButton[]> ProfileKeyboardMarkup = [
-                new KeyboardButton[] { UserCommands.Instance.Corps[0].text }
+                [UserCommands.Instance.Corps[0].text]
             ];
 
             for(int i = 0; i < 3; i++) {
@@ -62,19 +62,19 @@ namespace Core.Bot {
             }
 
             for(int i = 16; i < UserCommands.Instance.Corps.Length; i++)
-                ProfileKeyboardMarkup.Add(new KeyboardButton[] { UserCommands.Instance.Corps[i].text });
+                ProfileKeyboardMarkup.Add([UserCommands.Instance.Corps[i].text]);
 
-            ProfileKeyboardMarkup.AddRange(new[] { new KeyboardButton[] { UserCommands.Instance.College.text }, new KeyboardButton[] { UserCommands.Instance.Message["Back"] } });
+            ProfileKeyboardMarkup.AddRange(new[] { new KeyboardButton[] { UserCommands.Instance.College.text }, [UserCommands.Instance.Message["Back"]] });
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }
 
         public static ReplyKeyboardMarkup GetTeacherWorkScheduleSelectedKeyboardMarkup(string teacher) {
             List<KeyboardButton[]> KeyboardMarkup = [
-                new KeyboardButton[] { $"{UserCommands.Instance.Message["CurrentTeacher"]}:\n{teacher}" },
-                new KeyboardButton[] { UserCommands.Instance.Message["Today"], UserCommands.Instance.Message["Tomorrow"] },
-                new KeyboardButton[] { UserCommands.Instance.Message["ByDays"], UserCommands.Instance.Message["ForAWeek"] },
-                new KeyboardButton[] { UserCommands.Instance.Message["TeachersWorkScheduleBack"] }
+                [$"{UserCommands.Instance.Message["CurrentTeacher"]}:\n{teacher}"],
+                [UserCommands.Instance.Message["Today"], UserCommands.Instance.Message["Tomorrow"]],
+                [UserCommands.Instance.Message["ByDays"], UserCommands.Instance.Message["ForAWeek"]],
+                [UserCommands.Instance.Message["TeachersWorkScheduleBack"]]
             ];
 
             return new(KeyboardMarkup) { ResizeKeyboard = true };

@@ -20,6 +20,7 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Message {
             user.TelegramUserTmp.Mode = Mode.Default;
 
             await Statics.DeleteTempMessage(user, messageId);
+            await dbContext.SaveChangesAsync();
 
             await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["MainMenu"], replyMarkup: Statics.MainKeyboardMarkup);
         }

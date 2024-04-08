@@ -6,7 +6,7 @@ namespace Core.DB {
     public static class ClearTemporary {
         public static async Task ClearAsync() {
             using(ScheduleDbContext dbContext = new()) {
-   
+
                 foreach(ScheduleBot.DB.Entity.TelegramUser item in dbContext.TelegramUsers)
                     item.TodayRequests = 0;
 

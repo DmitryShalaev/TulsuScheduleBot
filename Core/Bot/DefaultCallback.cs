@@ -14,28 +14,28 @@ namespace Core.Bot {
 
             IOrderedQueryable<Discipline> disciplines = dbContext.Disciplines.Where(i => i.Group == scheduleProfile.Group && i.Date == date).OrderBy(i => i.StartTime);
             if(disciplines.Any()) {
-                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "В этот день", callbackData: "!"), InlineKeyboardButton.WithCallbackData(text: "Семестр", callbackData: "!") });
+                editButtons.Add([InlineKeyboardButton.WithCallbackData(text: "В этот день", callbackData: "!"), InlineKeyboardButton.WithCallbackData(text: "Семестр", callbackData: "!")]);
 
                 foreach(Discipline? item in disciplines) {
                     CompletedDiscipline tmp = new(item, scheduleProfile.ID) { Date = null };
                     bool always = сompletedDisciplines.FirstOrDefault(i => i.Equals(tmp)) is not null;
 
-                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime} {item.Lecturer?.Split(' ')[0]} {(always ? "🚫" : сompletedDisciplines.Contains((CompletedDiscipline)item) ? "❌" : "✅")}", callbackData: $"{(always ? "!" : $"DisciplineDay {item.ID}|{item.Date}")}"),
-                                            InlineKeyboardButton.WithCallbackData(text: always ? "❌" : "✅", callbackData: $"DisciplineAlways {item.ID}|{item.Date}")});
+                    editButtons.Add([ InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime} {item.Lecturer?.Split(' ')[0]} {(always ? "🚫" : сompletedDisciplines.Contains((CompletedDiscipline)item) ? "❌" : "✅")}", callbackData: $"{(always ? "!" : $"DisciplineDay {item.ID}|{item.Date}")}"),
+                                            InlineKeyboardButton.WithCallbackData(text: always ? "❌" : "✅", callbackData: $"DisciplineAlways {item.ID}|{item.Date}")]);
                 }
             }
 
             IOrderedQueryable<CustomDiscipline> castom = dbContext.CustomDiscipline.Where(i => i.ScheduleProfileGuid == scheduleProfile.ID && i.Date == date).OrderBy(i => i.StartTime);
             if(castom.Any()) {
-                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: "Пользовательские", callbackData: "!") });
+                editButtons.Add([InlineKeyboardButton.WithCallbackData(text: "Пользовательские", callbackData: "!")]);
 
                 foreach(CustomDiscipline? item in castom)
-                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime} {item.Lecturer?.Split(' ')[0]} 🔧", callbackData: $"CustomEdit {item.ID}|{item.Date}"),
-                                            InlineKeyboardButton.WithCallbackData(text: $"🗑", callbackData: $"CustomDelete {item.ID}|{item.Date}"),});
+                    editButtons.Add([ InlineKeyboardButton.WithCallbackData(text: $"{item.StartTime} {item.Lecturer?.Split(' ')[0]} 🔧", callbackData: $"CustomEdit {item.ID}|{item.Date}"),
+                                            InlineKeyboardButton.WithCallbackData(text: $"🗑", callbackData: $"CustomDelete {item.ID}|{item.Date}"),]);
             }
 
-            editButtons.AddRange(new[] { new[] { InlineKeyboardButton.WithCallbackData(UserCommands.Instance.Callback["Add"].text, $"{UserCommands.Instance.Callback["Add"].callback} {date}") },
-                                         new[] { InlineKeyboardButton.WithCallbackData(UserCommands.Instance.Callback["Back"].text, $"{UserCommands.Instance.Callback["Back"].callback} {date}") }});
+            editButtons.AddRange([ [InlineKeyboardButton.WithCallbackData(UserCommands.Instance.Callback["Add"].text, $"{UserCommands.Instance.Callback["Add"].callback} {date}")],
+                                         [InlineKeyboardButton.WithCallbackData(UserCommands.Instance.Callback["Back"].text, $"{UserCommands.Instance.Callback["Back"].callback} {date}")]]);
 
             return new InlineKeyboardMarkup(editButtons);
         }
@@ -60,13 +60,13 @@ namespace Core.Bot {
 
             if(user.IsOwner()) {
                 if(all) {
-                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["All"].text, callbackData: $"{UserCommands.Instance.Callback["All"].callback} {date}"),
-                                            InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["Edit"].text, callbackData: $"{UserCommands.Instance.Callback["Edit"].callback} {date}") });
+                    editButtons.Add([ InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["All"].text, callbackData: $"{UserCommands.Instance.Callback["All"].callback} {date}"),
+                                            InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["Edit"].text, callbackData: $"{UserCommands.Instance.Callback["Edit"].callback} {date}") ]);
                 } else {
-                    editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["Edit"].text, callbackData: $"{UserCommands.Instance.Callback["Edit"].callback} {date}") });
+                    editButtons.Add([InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["Edit"].text, callbackData: $"{UserCommands.Instance.Callback["Edit"].callback} {date}")]);
                 }
             } else if(all) {
-                editButtons.Add(new[] { InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["All"].text, callbackData: $"{UserCommands.Instance.Callback["All"].callback} {date}") });
+                editButtons.Add([InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["All"].text, callbackData: $"{UserCommands.Instance.Callback["All"].callback} {date}")]);
             }
 
             return new InlineKeyboardMarkup(editButtons);
@@ -80,9 +80,9 @@ namespace Core.Bot {
             var buttons = new List<InlineKeyboardButton[]>();
 
             if(user.Settings.NotificationEnabled)
-                buttons.Add(new[] { InlineKeyboardButton.WithCallbackData("Выключить уведомления", "ToggleNotifications off") });
+                buttons.Add([InlineKeyboardButton.WithCallbackData("Выключить уведомления", "ToggleNotifications off")]);
             else
-                buttons.Add(new[] { InlineKeyboardButton.WithCallbackData("Включить уведомления", "ToggleNotifications on") });
+                buttons.Add([InlineKeyboardButton.WithCallbackData("Включить уведомления", "ToggleNotifications on")]);
 
             static string via(int days) => days switch {
                 1 => $"{days} день",
@@ -91,7 +91,7 @@ namespace Core.Bot {
                 _ => "",
             };
 
-            buttons.Add(new[] { InlineKeyboardButton.WithCallbackData($"В период: {via(user.Settings.NotificationDays)}", "DaysNotifications") });
+            buttons.Add([InlineKeyboardButton.WithCallbackData($"В период: {via(user.Settings.NotificationDays)}", "DaysNotifications")]);
 
             return new InlineKeyboardMarkup(buttons);
         }

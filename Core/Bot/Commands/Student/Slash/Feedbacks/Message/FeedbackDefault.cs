@@ -26,6 +26,8 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Message {
             await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["ThanksForTheFeedback"], replyMarkup: Statics.MainKeyboardMarkup);
             await Statics.DeleteTempMessage(user);
 
+            await dbContext.SaveChangesAsync();
+
             foreach(TelegramUser? item in dbContext.TelegramUsers.Where(i => i.IsAdmin))
                 await BotClient.SendTextMessageAsync(chatId: item.ChatID, text: $"Получен новый отзыв или предложение. От {user.FirstName}\n/feedback", disableNotification: true);
         }

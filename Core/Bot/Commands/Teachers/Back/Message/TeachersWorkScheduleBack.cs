@@ -23,6 +23,8 @@ namespace Core.Bot.Commands.Teachers.Back.Message {
             user.TelegramUserTmp.TmpData = null;
 
             await Statics.DeleteTempMessage(user, messageId);
+
+            await dbContext.SaveChangesAsync();
         }
     }
 }

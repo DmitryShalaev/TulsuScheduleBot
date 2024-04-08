@@ -35,6 +35,8 @@ namespace Core.Bot.Commands.Student.Back_Cancel.Message {
             user.TelegramUserTmp.TmpData = null;
 
             await Statics.DeleteTempMessage(user, messageId);
+
+            await dbContext.SaveChangesAsync();
         }
     }
 }

@@ -8,8 +8,8 @@ namespace ScheduleBot.Migrations {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder) => migrationBuilder.InsertData(
                 table: "Modes",
-                columns: new[] { "ID", "Name" },
-                values: new object[] { (byte)11, "DaysNotifications" });
+                columns: ["ID", "Name"],
+                values: [(byte)11, "DaysNotifications"]);
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder) => migrationBuilder.DeleteData(

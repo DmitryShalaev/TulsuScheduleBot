@@ -46,8 +46,8 @@ namespace ScheduleBot.Migrations {
 
             migrationBuilder.InsertData(
                 table: "Modes",
-                columns: new[] { "ID", "Name" },
-                values: new object[] { (byte)12, "TeachersWorkSchedule" });
+                columns: ["ID", "Name"],
+                values: [(byte)12, "TeachersWorkSchedule"]);
 
             migrationBuilder.CreateIndex(
                 name: "IX_TeacherWorkSchedule_Class",
