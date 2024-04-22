@@ -5,7 +5,7 @@
 
     "TeacherWorkScheduleUpdateTime": 60, //Minutes
 
-    "DisciplineUpdateDays": 7,
+    "DisciplineUpdateDays": 4,
 
     "UpdateAttemptTime": 5, //Minutes
 
