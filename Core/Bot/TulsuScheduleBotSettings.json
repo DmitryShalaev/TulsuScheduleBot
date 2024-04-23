@@ -54,7 +54,7 @@
     "ResetProfileLink": "Восстановить свой профиль",
 
     "Notifications": "Уведомления",
-    "NotificationMessage": "Расписание изменилось на следующие дни:",
+    "NotificationMessage": "Изменения в расписании:\n(/notifications)",
     "NotificationSettings": "Настройка уведомлений при изменении расписания:",
 
     "Corps": "Корпуса",

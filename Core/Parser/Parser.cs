@@ -32,7 +32,7 @@ namespace ScheduleBot {
                 //Proxy = new WebProxy("127.0.0.1:8888"),
             };
 
-            Task.Run(GetTeachersData);
+            _ = Task.Run(GetTeachersData);
         }
 
         public async Task GetTeachersData() {
@@ -73,7 +73,7 @@ namespace ScheduleBot {
                     dbContext.Progresses.AddRange(except);
 
                     await dbContext.SaveChangesAsync();
-                    _list = dbContext.Progresses.Where(i => i.StudentID == studentID).ToList();
+                    _list = [.. dbContext.Progresses.Where(i => i.StudentID == studentID)];
                 }
 
                 except = _list.Except(progress);
@@ -128,7 +128,7 @@ namespace ScheduleBot {
                             updatedDisciplines.AddRange(except);
 
                         await dbContext.SaveChangesAsync();
-                        _list = dbContext.Disciplines.Where(i => i.Group == group).ToList();
+                        _list = [.. dbContext.Disciplines.Where(i => i.Group == group)];
                     }
 
                     except = _list.Except(disciplines);
@@ -144,7 +144,7 @@ namespace ScheduleBot {
 
                     if(updatedDisciplines.Count != 0) {
                         var date = DateOnly.FromDateTime(DateTime.Now);
-                        await Notifications.UpdatedDisciplinesAsync(dbContext, updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList());
+                        _ = Task.Run(() => Notifications.UpdatedDisciplinesAsync(dbContext, [.. updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date)]));
                     }
 
                     await IntersectionOfSubgroups(dbContext, group);
@@ -212,7 +212,7 @@ namespace ScheduleBot {
                         dbContext.TeacherWorkSchedule.AddRange(except);
 
                         await dbContext.SaveChangesAsync();
-                        _list = dbContext.TeacherWorkSchedule.Where(i => i.Lecturer == teacher).ToList();
+                        _list = [.. dbContext.TeacherWorkSchedule.Where(i => i.Lecturer == teacher)];
                     }
 
                     except = _list.Except(teacherWorkSchedule);
@@ -240,7 +240,7 @@ namespace ScheduleBot {
                     dbContext.TeacherLastUpdate.AddRange(except.Select(i => new TeacherLastUpdate() { Teacher = i, Update = updDate }));
 
                     await dbContext.SaveChangesAsync();
-                    _list = dbContext.TeacherLastUpdate.Select(i => i.Teacher).ToList();
+                    _list = [.. dbContext.TeacherLastUpdate.Select(i => i.Teacher)];
                 }
 
                 except = _list.Except(teachers);

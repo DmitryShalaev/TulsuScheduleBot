@@ -56,7 +56,7 @@ namespace ScheduleBot {
 
             list.AddRange(dbContext.CustomDiscipline.Where(i => i.IsAdded && i.ScheduleProfileGuid == profile.ID && i.Date == date).Select(i => new Discipline(i)));
 
-            list = list.OrderBy(i => i.StartTime).ToList();
+            list = [.. list.OrderBy(i => i.StartTime)];
 
             int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
             string str = $"📌 {date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
@@ -89,7 +89,7 @@ namespace ScheduleBot {
 
             list.AddRange(dbContext.DeletedDisciplines.Include(i => i.TeacherLastUpdate).Where(i => i.Group == profile.Group && i.Date == date).Select(i => new ExtendedDiscipline(i, true)).ToList());
 
-            list = list.OrderBy(i => i.StartTime).ToList();
+            list = [.. list.OrderBy(i => i.StartTime)];
 
             int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
             string str = $"📌 {date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";

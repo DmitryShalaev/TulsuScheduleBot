@@ -34,7 +34,7 @@ namespace ScheduleBot {
         public IEnumerable<string> FindMatch(string query, int n = 3, int count = 5) {
             if(ngramsDict.Count == 0) {
                 using(ScheduleDbContext dbContext = new()) {
-                    PrecomputeNGrams(dbContext.TeacherLastUpdate.Select(i => i.Teacher).ToList(), n);
+                    PrecomputeNGrams([.. dbContext.TeacherLastUpdate.Select(i => i.Teacher)], n);
                 }
             }
 

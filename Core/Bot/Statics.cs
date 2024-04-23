@@ -89,7 +89,7 @@ namespace Core.Bot {
                 for(int j = 0; j < 5; j++)
                     keyboardButtonsLine.Add(commands.Corps[1 + i * 5 + j].text);
 
-                ProfileKeyboardMarkup.Add(keyboardButtonsLine.ToArray());
+                ProfileKeyboardMarkup.Add([.. keyboardButtonsLine]);
             }
 
             for(int i = 16; i < commands.Corps.Length; i++)

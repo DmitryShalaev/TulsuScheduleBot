@@ -9,15 +9,14 @@ using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Core.Bot {
-    public class ExtendedTelegramUser : TelegramUser {
-        public ExtendedTelegramUser(TelegramUser telegramUser) : base(telegramUser) { }
+    public class ExtendedTelegramUser(TelegramUser telegramUser) : TelegramUser(telegramUser) {
         public bool Flag { get; set; } = false;
     }
 
     public static class Notifications {
         private static readonly ITelegramBotClient botClient = TelegramBot.Instance.botClient;
 
-        public static async Task UpdatedDisciplinesAsync(ScheduleDbContext dbContext, List<(string Group, DateOnly Date)> values) {
+        public static async Task UpdatedDisciplinesAsync(ScheduleDbContext dbContext, List<(string, DateOnly)> values) {
             var telegramUsers = dbContext.TelegramUsers.Include(u => u.Settings).Where(u => u.Settings.NotificationEnabled).Include(u => u.ScheduleProfile).Select(u => new ExtendedTelegramUser(u)).ToList();
 
             foreach((string Group, DateOnly Date) in values) {
@@ -35,6 +34,8 @@ namespace Core.Bot {
                     await botClient.SendTextMessageAsync(chatId: user.ChatID, text: str,
                             replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: Commands.UserCommands.Instance.Callback["All"].text, callbackData: $"NotificationsAll {Date}")),
                             disableNotification: true);
+
+                    await Task.Delay(TimeSpan.FromSeconds(1));
                 }
             }
         }
