@@ -131,7 +131,7 @@ namespace Core.Bot {
             }
 
             if(groupLastUpdate is not null) {
-                string marking = (DateTime.Now - groupLastUpdate).Value > TimeSpan.FromMinutes(commands.Config.DisciplineUpdateTime * 2) ? "‼️" : "";
+                string marking = (DateTime.Now - groupLastUpdate).Value > TimeSpan.FromMinutes(commands.Config.DisciplineUpdateTime * 2) ? "❗" : "";
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: $"{marking}{commands.Message["ScheduleIsRelevantOn"]} {groupLastUpdate:dd.MM HH:mm}{marking}", replyMarkup: replyMarkup);
             }
@@ -150,7 +150,7 @@ namespace Core.Bot {
             }
 
             if(teacherLastUpdate is not null) {
-                string marking = (DateTime.Now - teacherLastUpdate).Value > TimeSpan.FromMinutes(commands.Config.TeacherWorkScheduleUpdateTime * 2) ? "‼️" : "";
+                string marking = (DateTime.Now - teacherLastUpdate).Value > TimeSpan.FromMinutes(commands.Config.TeacherWorkScheduleUpdateTime * 2) ? "❗" : "";
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: $"{marking}{commands.Message["ScheduleIsRelevantOn"]} {teacherLastUpdate:dd.MM HH:mm}{marking}", replyMarkup: replyMarkup);
             }
@@ -168,7 +168,7 @@ namespace Core.Bot {
             }
 
             if(send && studentIDlastUpdate is not null) {
-                string marking = (DateTime.Now - studentIDlastUpdate).Value > TimeSpan.FromMinutes(commands.Config.StudentIDUpdateTime * 2) ? "‼️" : "";
+                string marking = (DateTime.Now - studentIDlastUpdate).Value > TimeSpan.FromMinutes(commands.Config.StudentIDUpdateTime * 2) ? "❗" : "";
 
                 await botClient.SendTextMessageAsync(chatId: chatId, text: $"{marking}{commands.Message["AcademicPerformanceIsRelevantOn"]} {studentIDlastUpdate:dd.MM HH:mm}{marking}", replyMarkup: replyMarkup);
             }
