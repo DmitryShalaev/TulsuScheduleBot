@@ -23,27 +23,27 @@ namespace Core.Bot {
             List<KeyboardButton[]> ProfileKeyboardMarkup = [];
 
             if(user.IsOwner()) {
-                ProfileKeyboardMarkup.AddRange(new[] {  new KeyboardButton[] { $"{UserCommands.Instance.Message["GroupNumber"]}:\n{user.ScheduleProfile.Group}", $"{UserCommands.Instance.Message["StudentIDNumber"]}:\n{user.ScheduleProfile.StudentID}" },
+                ProfileKeyboardMarkup.AddRange([  [$"{UserCommands.Instance.Message["GroupNumber"]}:\n{user.ScheduleProfile.Group}", $"{UserCommands.Instance.Message["StudentIDNumber"]}:\n{user.ScheduleProfile.StudentID}"],
                                                         [UserCommands.Instance.Message["GetProfileLink"]]
-                                                     });
+                                                     ]);
             } else {
                 ProfileKeyboardMarkup.Add([UserCommands.Instance.Message["ResetProfileLink"]]);
             }
 
-            ProfileKeyboardMarkup.AddRange(new[] {
-                new KeyboardButton[] { UserCommands.Instance.Message["Settings"] },
+            ProfileKeyboardMarkup.AddRange([
+                [UserCommands.Instance.Message["Settings"]],
                 [UserCommands.Instance.Message["Back"]]
-            });
+            ]);
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }
 
         public static ReplyKeyboardMarkup GetSettingsKeyboardMarkup(TelegramUser user) {
-            List<KeyboardButton[]> ProfileKeyboardMarkup = new(new[] {
-                new KeyboardButton[] { UserCommands.Instance.Message["Notifications"] },
+            List<KeyboardButton[]> ProfileKeyboardMarkup = new([
+                [UserCommands.Instance.Message["Notifications"]],
                 [$"{UserCommands.Instance.Message["TeacherLincsEnabled"]}: {(user.Settings.TeacherLincsEnabled ? "вкл" : "выкл")}"],
                 [UserCommands.Instance.Message["Back"]]
-            });
+            ]);
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }
@@ -64,7 +64,7 @@ namespace Core.Bot {
             for(int i = 16; i < UserCommands.Instance.Corps.Length; i++)
                 ProfileKeyboardMarkup.Add([UserCommands.Instance.Corps[i].text]);
 
-            ProfileKeyboardMarkup.AddRange(new[] { new KeyboardButton[] { UserCommands.Instance.College.text }, [UserCommands.Instance.Message["Back"]] });
+            ProfileKeyboardMarkup.AddRange([[UserCommands.Instance.College.text], [UserCommands.Instance.Message["Back"]]]);
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }

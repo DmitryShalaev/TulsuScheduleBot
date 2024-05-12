@@ -95,7 +95,7 @@ namespace Core.Bot {
             for(int i = 16; i < commands.Corps.Length; i++)
                 ProfileKeyboardMarkup.Add([commands.Corps[i].text]);
 
-            ProfileKeyboardMarkup.AddRange(new[] { new KeyboardButton[] { commands.College.text }, [commands.Message["Back"]] });
+            ProfileKeyboardMarkup.AddRange([[commands.College.text], [commands.Message["Back"]]]);
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }
@@ -130,11 +130,8 @@ namespace Core.Bot {
                 groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group)?.Update.ToLocalTime();
             }
 
-            if(groupLastUpdate is not null) {
-                string marking = (DateTime.Now - groupLastUpdate).Value > TimeSpan.FromMinutes(commands.Config.DisciplineUpdateTime * 2) ? "❗" : "";
-
-                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{marking}{commands.Message["ScheduleIsRelevantOn"]} {groupLastUpdate:dd.MM HH:mm}{marking}", replyMarkup: replyMarkup);
-            }
+            if(groupLastUpdate is not null)
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{commands.Message["ScheduleIsRelevantOn"]} {groupLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
         public static async Task TeacherWorkScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string teacher, IReplyMarkup? replyMarkup) {
@@ -149,11 +146,8 @@ namespace Core.Bot {
                 teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher)?.Update.ToLocalTime();
             }
 
-            if(teacherLastUpdate is not null) {
-                string marking = (DateTime.Now - teacherLastUpdate).Value > TimeSpan.FromMinutes(commands.Config.TeacherWorkScheduleUpdateTime * 2) ? "❗" : "";
-
-                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{marking}{commands.Message["ScheduleIsRelevantOn"]} {teacherLastUpdate:dd.MM HH:mm}{marking}", replyMarkup: replyMarkup);
-            }
+            if(teacherLastUpdate is not null)
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{commands.Message["ScheduleIsRelevantOn"]} {teacherLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
         public static async Task ProgressRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
@@ -167,11 +161,8 @@ namespace Core.Bot {
                 studentIDlastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID)?.Update.ToLocalTime();
             }
 
-            if(send && studentIDlastUpdate is not null) {
-                string marking = (DateTime.Now - studentIDlastUpdate).Value > TimeSpan.FromMinutes(commands.Config.StudentIDUpdateTime * 2) ? "❗" : "";
-
-                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{marking}{commands.Message["AcademicPerformanceIsRelevantOn"]} {studentIDlastUpdate:dd.MM HH:mm}{marking}", replyMarkup: replyMarkup);
-            }
+            if(send && studentIDlastUpdate is not null)
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{commands.Message["AcademicPerformanceIsRelevantOn"]} {studentIDlastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
         public static async Task DeleteTempMessage(TelegramUser user, int? messageId = null) {
