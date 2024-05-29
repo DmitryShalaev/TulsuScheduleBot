@@ -32,7 +32,7 @@ namespace ScheduleBot {
                 //Proxy = new WebProxy("127.0.0.1:8888"),
             };
 
-            _ = Task.Run(GetTeachersData);
+            Task.Run(GetTeachersData).Start();
         }
 
         public async Task GetTeachersData() {
@@ -142,12 +142,12 @@ namespace ScheduleBot {
 
                     await dbContext.SaveChangesAsync();
 
+                    await IntersectionOfSubgroups(dbContext, group);
+
                     if(updatedDisciplines.Count != 0) {
                         var date = DateOnly.FromDateTime(DateTime.Now);
-                        _ = Task.Run(() => Notifications.UpdatedDisciplinesAsync(dbContext, [.. updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date)]));
+                        Task.Run(() => Notifications.UpdatedDisciplinesAsync(dbContext, [.. updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date)])).Start();
                     }
-
-                    await IntersectionOfSubgroups(dbContext, group);
 
                     return true;
                 }
