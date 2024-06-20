@@ -16,12 +16,6 @@ namespace ScheduleBot.DB {
                 modelBuilder.Entity<ModeDTO>().HasData(new ModeDTO() { ID = type, Name = type.ToString() });
         }
 
-        public void CleanDB() {
-            Database.EnsureDeleted();
-            Database.EnsureCreated();
-            SaveChanges();
-        }
-
 #pragma warning disable CS8618
         public DbSet<Discipline> Disciplines { get; set; }
         public DbSet<DeletedDisciplines> DeletedDisciplines { get; set; }
