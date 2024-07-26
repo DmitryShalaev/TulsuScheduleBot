@@ -39,7 +39,7 @@ namespace Core.Bot.Commands {
         public static UserCommands Instance => instance ??= new UserCommands();
 
         public UserCommands() {
-            using(StreamReader sr = new(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + @"/Bot/TulsuScheduleBotSettings.json")) {
+            using(StreamReader sr = new(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + @"/TulsuScheduleBotSettings.json")) {
                 var commands = JObject.Parse(sr.ReadToEnd());
 
                 Message = commands[nameof(Message)]?.ToObject<Dictionary<string, string>>() ?? throw new NullReferenceException("Message");
