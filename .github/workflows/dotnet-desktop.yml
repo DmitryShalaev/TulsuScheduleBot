@@ -45,6 +45,7 @@ jobs:
         rmRemote: true
         atomicPut: true 
         tryKeyboard: true
+        recursive: true
       env:
         ASPNETCORE_ENVIRONMENT: Production
 
