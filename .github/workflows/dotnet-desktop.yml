@@ -42,6 +42,7 @@ jobs:
         username: ${{ secrets.REMOTE_USER }}
         passphrase: ${{ secrets.PASSPHRASE }}
         privateKey: ${{ secrets.REMOTE_SSH_KEY }}
+        concurrency: 10
         rmRemote: true
         atomicPut: true 
         tryKeyboard: true
