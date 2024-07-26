@@ -20,7 +20,7 @@ jobs:
       run: dotnet restore
     
     - name: DotNet Publish
-      run: dotnet publish ./WebHook/WebHook.csproj -c Release -r linux-x64 -p:PublishReadyToRun=true  --self-contained false
+      run: dotnet publish ./WebHook/WebHook.csproj -c Release -r linux-x64 -p:PublishReadyToRun=true --self-contained false
       
     - name: Stop ScheduleBot Service
       uses: garygrossgarten/github-action-ssh@release
@@ -36,13 +36,14 @@ jobs:
       uses: garygrossgarten/github-action-scp@release
       with:
         local: /home/runner/work/TulsuScheduleBot/TulsuScheduleBot/WebHook/bin/Release/net8.0/linux-x64/publish/
-        concurrency: 10
         remote: ${{ secrets.REMOTE_TARGET }}
         host: ${{ secrets.REMOTE_HOST }}
         port: 10022
         username: ${{ secrets.REMOTE_USER }}
         passphrase: ${{ secrets.PASSPHRASE }}
         privateKey: ${{ secrets.REMOTE_SSH_KEY }}
+        rmRemote: true
+        atomicPut: true 
       env:
         ASPNETCORE_ENVIRONMENT: Production
 
