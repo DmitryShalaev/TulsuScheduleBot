@@ -6,7 +6,7 @@ using Quartz.Impl;
 namespace ScheduleBot.Jobs {
     public class ClearTemporaryJob : IJob {
         public static async Task StartAsync() {
-            ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
+            var schedulerFactory = new StdSchedulerFactory();
             IScheduler scheduler = await schedulerFactory.GetScheduler();
 
             IJobDetail job = JobBuilder.Create<ClearTemporaryJob>().WithIdentity("ClearTemporaryJob", "group1").Build();

@@ -23,7 +23,7 @@ namespace ScheduleBot.Jobs {
 
             dateTime = DateTime.Now;
 
-            ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
+            var schedulerFactory = new StdSchedulerFactory();
             IScheduler scheduler = await schedulerFactory.GetScheduler();
 
             IJobDetail job = JobBuilder.Create<UpdatingDisciplinesJob>().WithIdentity("UpdatingDisciplinesJob", "group1").Build();
