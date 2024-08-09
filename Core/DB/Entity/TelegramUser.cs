@@ -12,6 +12,8 @@ namespace ScheduleBot.DB.Entity {
         public string? Username { get; set; }
 
         public DateTime LastAppeal { get; set; } = DateTime.UtcNow;
+        public DateTime? DateOfRegistration { get; set; }
+
         public long TotalRequests { get; set; } = 0;
         public long TodayRequests { get; set; } = 0;
 

@@ -152,7 +152,8 @@ namespace Core.Bot {
                                 LastName = message.From.LastName,
                                 ScheduleProfile = new() { OwnerID = message.Chat.Id },
                                 Settings = new() { OwnerID = message.Chat.Id },
-                                TelegramUserTmp = new() { OwnerID = message.Chat.Id }
+                                TelegramUserTmp = new() { OwnerID = message.Chat.Id },
+                                DateOfRegistration = DateTime.UtcNow
                             };
 
                             dbContext.TelegramUsers.Add(user);
