@@ -33,18 +33,17 @@ jobs:
         privateKey: ${{ secrets.REMOTE_SSH_KEY }}
       
     - name: Copy to Server via SCP
-      uses: garygrossgarten/github-action-scp@release
+      uses: appleboy/scp-action@v0.1.7
       with:
-        local: /home/runner/work/TulsuScheduleBot/TulsuScheduleBot/WebHook/bin/Release/net8.0/linux-x64/publish/
-        remote: ${{ secrets.REMOTE_TARGET }}
         host: ${{ secrets.REMOTE_HOST }}
         port: 10022
         username: ${{ secrets.REMOTE_USER }}
+        key: ${{ secrets.REMOTE_SSH_KEY }}
         passphrase: ${{ secrets.PASSPHRASE }}
-        privateKey: ${{ secrets.REMOTE_SSH_KEY }}
-        concurrency: 10
-        rmRemote: true
-
+        source: /home/runner/work/TulsuScheduleBot/TulsuScheduleBot/WebHook/bin/Release/net8.0/linux-x64/publish/*
+        target: ${{ secrets.REMOTE_TARGET }}
+        rm: true
+      
     - name: Start ScheduleBot Service
       uses: garygrossgarten/github-action-ssh@release
       with:
