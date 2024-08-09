@@ -44,11 +44,6 @@ jobs:
         privateKey: ${{ secrets.REMOTE_SSH_KEY }}
         concurrency: 10
         rmRemote: true
-        atomicPut: true 
-        tryKeyboard: true
-        recursive: true
-      env:
-        ASPNETCORE_ENVIRONMENT: Production
 
     - name: Start ScheduleBot Service
       uses: garygrossgarten/github-action-ssh@release
