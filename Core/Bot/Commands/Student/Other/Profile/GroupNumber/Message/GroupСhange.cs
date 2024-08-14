@@ -39,7 +39,9 @@ namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
                 await BotClient.SendTextMessageAsync(chatId: chatId, text: $"Номер группы успешно изменен на {args} ", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user));
 
             } else {
-                user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["IsNoSuchGroup"], replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text:
+                    $"{UserCommands.Instance.Message["IsNoSuchGroup"]}{(DateTime.Now.Month == 8 ? UserCommands.Instance.Message["FreshmanSchedule"] : "")}",
+                    replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
                 await dbContext.SaveChangesAsync();
             }
 
