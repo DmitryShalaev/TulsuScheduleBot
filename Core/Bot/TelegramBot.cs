@@ -164,6 +164,9 @@ namespace Core.Bot {
                         user.LastAppeal = user.ScheduleProfile.LastAppeal = DateTime.UtcNow;
                         user.TodayRequests++;
                         user.TotalRequests++;
+                        user.Username = message.From.Username;
+                        user.FirstName = message.From.FirstName;
+                        user.LastName = message.From.LastName;
                         await dbContext.SaveChangesAsync();
 
                         switch(update.Type) {
