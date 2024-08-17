@@ -12,7 +12,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LongPolling", "LongPolling\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{37F9B13D-33C4-4C27-A3E6-B319BC9BEECA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHook", "WebHook\WebHook.csproj", "{CDABB412-25F2-41BB-8D95-B063AF6AF747}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook", "WebHook\WebHook.csproj", "{CDABB412-25F2-41BB-8D95-B063AF6AF747}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{94573457-9746-4B9E-9186-33480714E558}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

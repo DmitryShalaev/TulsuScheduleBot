@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -40,39 +41,70 @@ namespace ScheduleBot {
         }
 
         public static (string, bool) GetScheduleByDate(ScheduleDbContext dbContext, DateOnly date, TelegramUser user, bool all = false, bool link = true) {
-            ScheduleProfile profile = user.ScheduleProfile;
-
+            var profile = user.ScheduleProfile;
             link &= user.Settings.TeacherLincsEnabled;
 
-            var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID && (i.Date == null || i.Date == date)).ToList();
+            // Получаем завершенные дисциплины и дисциплины на указанную дату
+            var completedDisciplines = dbContext.CompletedDisciplines
+                .Where(i => i.ScheduleProfileGuid == profile.ID && (i.Date == null || i.Date == date))
+                .ToList();
 
-            var list = dbContext.Disciplines.Include(i => i.TeacherLastUpdate).Where(i => i.Group == profile.Group && i.Date == date).ToList();
+            var disciplines = dbContext.Disciplines
+                .Include(i => i.TeacherLastUpdate)
+                .Where(i => i.Group == profile.Group && i.Date == date)
+                .ToList();
 
-            int count = list.Count;
+            int initialCount = disciplines.Count;
 
-            list = list.Where(i => all || !completedDisciplines.Contains((CompletedDiscipline)i)).ToList();
+            // Фильтруем дисциплины в зависимости от параметра "all"
+            disciplines = [.. disciplines
+                .Where(i => all || !completedDisciplines.Contains((CompletedDiscipline)i))
+                .OrderBy(i => i.StartTime)];
 
-            bool flag = list.Count < count;
+            bool hasExcludedDisciplines = disciplines.Count < initialCount;
 
-            list.AddRange(dbContext.CustomDiscipline.Where(i => i.IsAdded && i.ScheduleProfileGuid == profile.ID && i.Date == date).Select(i => new Discipline(i)));
+            // Добавляем пользовательские дисциплины
+            var customDisciplines = dbContext.CustomDiscipline
+                .Where(i => i.IsAdded && i.ScheduleProfileGuid == profile.ID && i.Date == date)
+                .Select(i => new Discipline(i))
+                .ToList();
 
-            list = [.. list.OrderBy(i => i.StartTime)];
+            disciplines.AddRange(customDisciplines);
+            disciplines = [.. disciplines.OrderBy(i => i.StartTime)];
 
-            int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-            string str = $"📌 {date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
+            // Формируем заголовок уведомления
+            int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(
+                date.ToDateTime(TimeOnly.MinValue),
+                CalendarWeekRule.FirstFourDayWeek,
+                DayOfWeek.Monday);
 
-            if(list.Count == 0)
-                return (str += "Ничего нет", flag);
+            var sb = new StringBuilder()
+                .AppendLine($"📌 {date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})")
+                .AppendLine("⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯");
 
-            foreach(Discipline? item in list) {
-                str += $"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}\n" +
-                       $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : (!string.IsNullOrWhiteSpace(item.IntersectionMark) ? item.IntersectionMark : ""))}\n" +
-                       (link ? $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ [{item.Lecturer}]({item.TeacherLastUpdate?.LinkProfile})\n" : "")}\n" :
-                               $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n");
+            if(disciplines.Count == 0) {
+                return (sb.AppendLine("Ничего нет").ToString(), hasExcludedDisciplines);
             }
 
-            return (str, flag);
+            // Формирование строк для каждого предмета
+            foreach(var item in disciplines) {
+                sb.AppendLine($"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}")
+                  .AppendLine($"📎 {item.Name} ({item.Type}) {(string.IsNullOrWhiteSpace(item.Subgroup) ? item.IntersectionMark : item.Subgroup)}");
+
+                if(!string.IsNullOrWhiteSpace(item.Lecturer)) {
+                    if(link && !string.IsNullOrWhiteSpace(item.TeacherLastUpdate?.LinkProfile)) {
+                        sb.AppendLine($"✒ [{item.Lecturer}]({item.TeacherLastUpdate?.LinkProfile})");
+                    } else {
+                        sb.AppendLine($"✒ {item.Lecturer}");
+                    }
+                }
+
+                sb.AppendLine();
+            }
+
+            return (sb.ToString(), hasExcludedDisciplines);
         }
+
 
         public class ExtendedDiscipline : Discipline {
             public ExtendedDiscipline(Discipline discipline, bool deleted = false) : base(discipline) => Deleted = deleted;
@@ -85,65 +117,110 @@ namespace ScheduleBot {
         public static string GetScheduleByDateNotification(ScheduleDbContext dbContext, DateOnly date, TelegramUser user) {
             ScheduleProfile profile = user.ScheduleProfile;
 
-            var list = dbContext.Disciplines.Include(i => i.TeacherLastUpdate).Where(i => i.Group == profile.Group && i.Date == date).Select(i => new ExtendedDiscipline(i, false)).ToList();
+            // Получение списка дисциплин и удаленных дисциплин
+            var disciplines = dbContext.Disciplines
+                .Include(i => i.TeacherLastUpdate)
+                .Where(i => i.Group == profile.Group && i.Date == date)
+                .Select(i => new ExtendedDiscipline(i, false))
+                .ToList();
 
-            list.AddRange(dbContext.DeletedDisciplines.Include(i => i.TeacherLastUpdate).Where(i => i.Group == profile.Group && i.Date == date).Select(i => new ExtendedDiscipline(i, true)).ToList());
+            var deletedDisciplines = dbContext.DeletedDisciplines
+                .Include(i => i.TeacherLastUpdate)
+                .Where(i => i.Group == profile.Group && i.Date == date)
+                .Select(i => new ExtendedDiscipline(i, true))
+                .ToList();
 
-            list = [.. list.OrderBy(i => i.StartTime)];
+            // Объединение и сортировка списка
+            var scheduleList = disciplines
+                .Concat(deletedDisciplines)
+                .OrderBy(i => i.StartTime)
+                .ToList();
 
-            int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-            string str = $"📌 {date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
+            // Формирование заголовка уведомления
+            int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(
+                date.ToDateTime(TimeOnly.MinValue),
+                CalendarWeekRule.FirstFourDayWeek,
+                DayOfWeek.Monday);
 
-            if(list.Count == 0)
-                return str += "Ничего нет";
+            var sb = new StringBuilder();
+            sb.AppendLine($"📌 {date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})")
+              .AppendLine("⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯");
 
-            bool link = user.Settings.TeacherLincsEnabled;
-
-            foreach(ExtendedDiscipline? item in list) {
-                str += $"{(item.Deleted ? "<s>" : "")}⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}\n" +
-                       $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}\n" +
-                       (link ? $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ <a href=\"{item.TeacherLastUpdate?.LinkProfile}\">{item.Lecturer}</a>\n" : "")}\n" :
-                               $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n") +
-
-                       $"{(item.Deleted ? "</s>" : "")}";
+            if(scheduleList.Count == 0) {
+                return sb.AppendLine("Ничего нет").ToString();
             }
 
-            return str;
+            bool linkEnabled = user.Settings.TeacherLincsEnabled;
+
+            // Формирование строк для каждого предмета
+            foreach(ExtendedDiscipline? item in scheduleList) {
+                sb.Append(item.Deleted ? "<s>" : "")
+                  .AppendLine($"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}")
+                  .AppendLine($"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}");
+
+                if(!string.IsNullOrWhiteSpace(item.Lecturer)) {
+                    if(linkEnabled && !string.IsNullOrWhiteSpace(item.TeacherLastUpdate?.LinkProfile)) {
+                        sb.AppendLine($"✒ <a href=\"{item.TeacherLastUpdate.LinkProfile}\">{item.Lecturer}</a>");
+                    } else {
+                        sb.AppendLine($"✒ {item.Lecturer}");
+                    }
+                }
+
+                sb.AppendLine(item.Deleted ? "</s>" : "");
+            }
+
+            return sb.ToString();
         }
 
         public static string GetTeacherWorkScheduleByDate(ScheduleDbContext dbContext, DateOnly date, string teacher) {
-            var list = dbContext.TeacherWorkSchedule.ToList().Where(i => i.Lecturer == teacher && i.Date == date).ToList();
+            var schedules = dbContext.TeacherWorkSchedule
+                .Where(i => i.Lecturer == teacher && i.Date == date)
+                .OrderBy(i => i.StartTime)
+                .ToList();
 
-            int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-            string str = $"📌 {date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n" +
-                            $"👤 {teacher}\n" +
-                            $"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯";
+            int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(
+                date.ToDateTime(TimeOnly.MinValue),
+                CalendarWeekRule.FirstFourDayWeek,
+                DayOfWeek.Monday);
 
-            if(list.Count == 0)
-                return str += "\nНичего нет";
+            var sb = new StringBuilder();
+            sb.AppendLine($"📌 {date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})")
+              .AppendLine($"👤 {teacher}")
+              .AppendLine("⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯");
 
-            foreach(TeacherWorkSchedule? item in list) {
-                str += $"\n⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}\n" +
-                       $"📎 {item.Name} ({item.Type})\n" +
-                       $"{item.Groups}";
+            if(schedules.Count == 0) {
+                sb.AppendLine("Ничего нет");
+            } else {
+                foreach(TeacherWorkSchedule? item in schedules) {
+                    sb.AppendLine($"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}")
+                      .AppendLine($"📎 {item.Name} ({item.Type})")
+                      .AppendLine(item.Groups);
+                }
             }
 
-            return str;
+            return sb.ToString();
         }
 
-        public static string GetProgressByTerm(ScheduleDbContext dbContext, int term, string StudentID) {
-            IOrderedQueryable<Progress> progresses = dbContext.Progresses.Where(i => i.StudentID == StudentID && i.Term == term).OrderBy(i => i.Discipline);
+        public static string GetProgressByTerm(ScheduleDbContext dbContext, int term, string studentID) {
+            var progresses = dbContext.Progresses
+                .Where(i => i.StudentID == studentID && i.Term == term)
+                .OrderBy(i => i.Discipline)
+                .ToList();
 
-            string str = $"📌 Семестр {term}\n" +
-                            $"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n";
+            var sb = new StringBuilder();
 
-            if(!progresses.Any())
-                return str += "В этом семестре нет проставленных баллов";
+            sb.AppendLine($"📌 Семестр {term}")
+              .AppendLine("⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯");
 
-            foreach(Progress? item in progresses)
-                str += $"🔹 {item.Discipline} | {item.Mark} | {item.MarkTitle}\n";
+            if(progresses.Count == 0) {
+                sb.AppendLine("В этом семестре нет проставленных баллов");
+            } else {
+                foreach(Progress? item in progresses) {
+                    sb.AppendLine($"🔹 {item.Discipline} | {item.Mark} | {item.MarkTitle}");
+                }
+            }
 
-            return str;
+            return sb.ToString();
         }
 
         public static List<((string, bool), DateOnly)> GetScheduleByDay(ScheduleDbContext dbContext, DayOfWeek dayOfWeek, TelegramUser user) {
@@ -176,53 +253,41 @@ namespace ScheduleBot {
             var exams = new List<string>();
 
             var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == profile.ID).ToList();
-            IOrderedEnumerable<Discipline> disciplines = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && (i.Class == Class.def || i.Class == Class.other) && DateTime.Parse($"{i.Date} {i.EndTime}") >= DateTime.Now && !completedDisciplines.Contains((CompletedDiscipline)i)).OrderBy(i => i.Date);
 
-            if(!disciplines.Any()) {
+            var disciplines = dbContext.Disciplines.ToList().Where(i => i.Group == profile.Group && (i.Class == Class.def || i.Class == Class.other) && DateTime.Parse($"{i.Date} {i.EndTime}") >= DateTime.Now && !completedDisciplines.Contains((CompletedDiscipline)i)).OrderBy(i => i.Date).ToList();
+
+            if(disciplines.Count == 0) {
                 exams.Add("Ничего нет");
                 return exams;
             }
 
             static string Get(Discipline item) {
                 int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(item.Date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-                return $"📌{item.Date:dd.MM.yy} - {char.ToUpper(item.Date.ToString("dddd")[0]) + item.Date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})\n⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n" +
-                       $"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}\n" +
-                       $"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}\n" +
-                       $"{(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}\n" : "")}\n";
+                return new StringBuilder()
+                    .AppendLine($"📌{item.Date:dd.MM.yy} - {char.ToUpper(item.Date.ToString("dddd")[0]) + item.Date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})")
+                    .AppendLine("⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯")
+                    .AppendLine($"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}")
+                    .AppendLine($"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}")
+                    .AppendLine(!string.IsNullOrWhiteSpace(item.Lecturer) ? $"✒ {item.Lecturer}" : string.Empty)
+                    .ToString();
             }
 
             if(all) {
-                foreach(Discipline? item in disciplines)
-                    exams.Add(Get(item));
+                exams.AddRange(disciplines.Select(Get));
 
             } else {
-                Discipline item = disciplines.First();
+                Discipline nearestExam = disciplines.First();
+                int daysUntilExam = (DateTime.Parse(nearestExam.Date.ToString()).Date - DateTime.Now.Date).Days;
 
-                int via = (DateTime.Parse(item.Date.ToString()).Date - DateTime.Now.Date).Days;
+                // Определяем сообщение о времени до ближайшего экзамена
+                string message = daysUntilExam switch {
+                    0 => "Ближайший экзамен сегодня",
+                    1 => "Ближайший экзамен завтра",
+                    2 or 3 or 4 => $"Ближайший экзамен через {daysUntilExam} дня.",
+                    _ => $"Ближайший экзамен через {daysUntilExam} дней."
+                };
 
-                #region Via
-                switch(via) {
-                    case 0:
-                        exams.Add($"Ближайший экзамен сегодня");
-                        break;
-
-                    case 1:
-                        exams.Add($"Ближайший экзамен завтра");
-                        break;
-
-                    case 2:
-                    case 3:
-                    case 4:
-                        exams.Add($"Ближайший экзамен через {via} дня.");
-                        break;
-
-                    case var _ when via > 4:
-                        exams.Add($"Ближайший экзамен через {via} дней.");
-                        break;
-                }
-                #endregion
-
-                exams[0] += $"\n\n{Get(item)}";
+                exams.Add($"{message}\n\n{Get(nearestExam)}");
             }
 
             return exams;
