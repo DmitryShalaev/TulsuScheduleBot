@@ -41,20 +41,24 @@ namespace Core.Bot {
         public static readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["Today"], commands.Message["Tomorrow"] },
                             [commands.Message["ByDays"], commands.Message["ForAWeek"]],
-                            [commands.Message["Additional"]],
                             [commands.Message["Other"]]
                         }) { ResizeKeyboard = true };
 
-        public static readonly ReplyKeyboardMarkup AdditionalKeyboardMarkup = new(new[] {
+        public static readonly ReplyKeyboardMarkup ScheduleKeyboardMarkup = new(new[] {
                              new KeyboardButton[] { commands.Message["Exam"]},
                              [commands.Message["TeachersWorkSchedule"], commands.Message["ClassroomSchedule"]],
                              [commands.Message["Back"]]
                         }) { ResizeKeyboard = true };
 
         public static readonly ReplyKeyboardMarkup OtherKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["Profile"] },
-                            [commands.Message["AcademicPerformance"]],
+                            new KeyboardButton[] { commands.Message["Schedule"] },
                             [commands.Message["Corps"], commands.Message["GroupList"]],
+                            [commands.Message["Personal"]],
+                            [commands.Message["Back"]]
+                        }) { ResizeKeyboard = true };
+
+        public static readonly ReplyKeyboardMarkup PersonalKeyboardMarkup = new(new[] {
+                            new KeyboardButton[] { commands.Message["AcademicPerformance"], commands.Message["Profile"] },
                             [commands.Message["Back"]]
                         }) { ResizeKeyboard = true };
 
