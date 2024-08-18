@@ -1,5 +1,3 @@
-using Core.Bot;
-
 using Microsoft.AspNetCore.Mvc;
 
 using Telegram.Bot.Types;
@@ -10,8 +8,16 @@ namespace WebHook.Controllers {
     [Route("/")]
     public class BotController : ControllerBase {
 
-       [HttpPost]
-        public async Task PostAsync(Update update) => await TelegramBot.Instance.UpdateAsync(update);
+        private readonly TelegramUpdateBackgroundService _backgroundService;
+
+        public BotController(TelegramUpdateBackgroundService backgroundService) {
+            _backgroundService = backgroundService;
+        }
+
+        [HttpPost]
+        public void Post([FromBody] Update update) {
+            _backgroundService.ProcessUpdateAsync(update);
+        }
 
         [HttpGet]
         public string Get() => "Telegram bot was started";
