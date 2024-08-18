@@ -12,7 +12,7 @@ namespace Core.Bot.Commands.Teachers.Message {
     internal class ClassroomsSchedule : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string>? Commands => [UserCommands.Instance.Message["ClassroomsSchedule"]];
+        public List<string>? Commands => [UserCommands.Instance.Message["ClassroomSchedule"]];
 
         public List<Mode> Modes => [Mode.Default];
 
