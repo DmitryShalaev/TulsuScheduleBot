@@ -5,7 +5,7 @@ using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
-namespace Core.Bot.Commands.Student.Other.Exam.Message {
+namespace Core.Bot.Commands.Student.Additional.Exam.Message {
     internal class Exam : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 

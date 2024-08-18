@@ -40,7 +40,7 @@ namespace Core.Bot.Commands.Teachers.Message {
                     if(string.IsNullOrWhiteSpace(teacher.LinkProfile))
                         await Parser.Instance.UpdatingTeacherInfo(dbContext, teacherName);
 
-                    await BotClient.SendTextMessageAsync(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentTeacher"]}: [{teacherName}]({teacher.LinkProfile})", replyMarkup: DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(teacherName), parseMode: ParseMode.Markdown);
+                    await BotClient.SendTextMessageAsync(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentTeacher"]}: [{teacherName}]({teacher.LinkProfile})", replyMarkup: DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(teacherName), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
                 }
 
                 await dbContext.SaveChangesAsync();

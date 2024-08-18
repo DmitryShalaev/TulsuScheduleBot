@@ -107,7 +107,7 @@ namespace Core.Bot {
             foreach(UserCommands.CorpsStruct item in UserCommands.Instance.Corps) {
                 commandManager.AddMessageCommand(item.text, Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                     if(!string.IsNullOrWhiteSpace(item.map))
-                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"[Схема корпуса]({item.map})", parseMode: ParseMode.Markdown);
+                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"[Схема корпуса]({item.map})", parseMode: ParseMode.Markdown, disableWebPagePreview: true);
 
                     await botClient.SendVenueAsync(chatId: chatId, latitude: item.latitude, longitude: item.longitude, title: item.title, address: item.address, replyMarkup: Statics.CorpsKeyboardMarkup);
                 });
@@ -164,15 +164,17 @@ namespace Core.Bot {
                         user.LastAppeal = user.ScheduleProfile.LastAppeal = DateTime.UtcNow;
                         user.TodayRequests++;
                         user.TotalRequests++;
-                        user.Username = message.From.Username;
-                        user.FirstName = message.From.FirstName;
-                        user.LastName = message.From.LastName;
+
                         await dbContext.SaveChangesAsync();
 
                         switch(update.Type) {
                             case UpdateType.Message:
                             case UpdateType.EditedMessage:
                                 if(message.Text is null) return;
+
+                                user.Username = message.From.Username;
+                                user.FirstName = message.From.FirstName;
+                                user.LastName = message.From.LastName;
 
                                 await commandManager.OnMessageAsync(dbContext, message.Chat, message.MessageId, message.Text, user);
                                 dbContext.MessageLog.Add(new() { Message = message.Text, TelegramUser = user });

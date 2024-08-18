@@ -6,7 +6,7 @@ using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
-namespace Core.Bot.Commands.Student.AcademicPerformance.Semester.Message {
+namespace Core.Bot.Commands.Student.Other.AcademicPerformance.Semester.Message {
     internal class Semester : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 

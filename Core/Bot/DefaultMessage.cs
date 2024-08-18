@@ -42,6 +42,7 @@ namespace Core.Bot {
             List<KeyboardButton[]> ProfileKeyboardMarkup = new([
                 [UserCommands.Instance.Message["Notifications"]],
                 [$"{UserCommands.Instance.Message["TeacherLincsEnabled"]}: {(user.Settings.TeacherLincsEnabled ? "вкл" : "выкл")}"],
+                [$"{UserCommands.Instance.Message["DisplayingGroupList"]}: {(user.Settings.DisplayingGroupList ? "вкл" : "выкл")}"],
                 [UserCommands.Instance.Message["Back"]]
             ]);
 
