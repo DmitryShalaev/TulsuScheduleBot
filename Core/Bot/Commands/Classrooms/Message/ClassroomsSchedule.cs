@@ -19,10 +19,10 @@ namespace Core.Bot.Commands.Teachers.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            user.TelegramUserTmp.Mode = Mode.ClassroomsSchedule;
+            //user.TelegramUserTmp.Mode = Mode.ClassroomsSchedule;
             await dbContext.SaveChangesAsync();
 
-            await BotClient.SendTextMessageAsync(chatId: chatId, text: $"{UserCommands.Instance.Message["ClassroomsSchedule"]} \n\n*coming soon*", replyMarkup: Statics.MainKeyboardMarkup);
+            await BotClient.SendTextMessageAsync(chatId: chatId, text: $"{UserCommands.Instance.Message["ClassroomSchedule"]} \n\n*coming soon*", replyMarkup: Statics.MainKeyboardMarkup);
         }
     }
 }
