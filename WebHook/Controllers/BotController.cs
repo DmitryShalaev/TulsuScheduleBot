@@ -14,7 +14,9 @@ namespace WebHook.Controllers {
         public void Post(Update update) {
             try {
 
-                Task.Run(async () => await TelegramBot.Instance.UpdateAsync(update));
+                Task.Run(() => {
+            Task.Factory.StartNew(TelegramBot.Instance.UpdateAsync(update), TaskCreationOptions.LongRunning);
+});
 
             } catch(Exception e) {
                 Console.WriteLine(e.Message);
