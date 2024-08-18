@@ -10,18 +10,8 @@ namespace WebHook.Controllers {
     [Route("/")]
     public class BotController : ControllerBase {
 
-        [HttpPost]
-        public void Post(Update update) {
-            try {
-
-                Task.Run(() => {
-            Task.Factory.StartNew(TelegramBot.Instance.UpdateAsync(update), TaskCreationOptions.LongRunning);
-});
-
-            } catch(Exception e) {
-                Console.WriteLine(e.Message);
-            }
-        }
+       [HttpPost]
+        public async Task PostAsync(Update update) => await TelegramBot.Instance.UpdateAsync(update);
 
         [HttpGet]
         public string Get() => "Telegram bot was started";
