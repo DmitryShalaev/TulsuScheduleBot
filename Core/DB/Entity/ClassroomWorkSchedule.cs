@@ -2,10 +2,13 @@
 
 using Newtonsoft.Json.Linq;
 
-namespace ScheduleBot.DB.Entity {
+using ScheduleBot.DB.Entity;
+
+namespace Core.DB.Entity {
 
 #pragma warning disable CS8618
-    public class TeacherWorkSchedule {
+
+    public class ClassroomWorkSchedule {
         public long ID { get; set; }
 
         public string Name { get; set; }
@@ -29,9 +32,9 @@ namespace ScheduleBot.DB.Entity {
         public Class Class { get; set; }
         public ClassDTO ClassDTO { get; set; }
 
-        public TeacherWorkSchedule() { }
+        public ClassroomWorkSchedule() { }
 
-        public TeacherWorkSchedule(JToken json) {
+        public ClassroomWorkSchedule(JToken json) {
             LectureHall = json.Value<string>("AUD") ?? throw new NullReferenceException("AUD");
             Date = DateOnly.Parse(json.Value<string>("DATE_Z") ?? throw new NullReferenceException("DATE_Z"));
             Name = json.Value<string>("DISCIP") ?? throw new NullReferenceException("DISCIP");

@@ -17,7 +17,10 @@ namespace ScheduleBot.DB.Entity {
         public string? Lecturer { get; set; }
         public TeacherLastUpdate TeacherLastUpdate { get; set; }
 
-        public string LectureHall { get; set; }
+        [ForeignKey("ClassroomLastUpdate")]
+        public string? LectureHall { get; set; }
+        public ClassroomLastUpdate ClassroomLastUpdate { get; set; }
+
         public string? Subgroup { get; set; } = null;
         public string? IntersectionMark { get; set; } = null;
 
@@ -112,7 +115,7 @@ namespace ScheduleBot.DB.Entity {
 
             hash += Name?.GetHashCode() ?? 0;
             hash += Lecturer?.GetHashCode() ?? 0;
-            hash += LectureHall.GetHashCode();
+            hash += LectureHall?.GetHashCode() ?? 0;
             hash += Subgroup?.GetHashCode() ?? 0;
             hash += Date.GetHashCode();
             hash += StartTime.GetHashCode();

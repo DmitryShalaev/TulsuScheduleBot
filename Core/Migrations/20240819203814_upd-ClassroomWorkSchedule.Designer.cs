@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScheduleBot.DB;
@@ -11,9 +12,11 @@ using ScheduleBot.DB;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240819203814_upd-ClassroomWorkSchedule")]
+    partial class updClassroomWorkSchedule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,56 +24,6 @@ namespace ScheduleBot.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Core.DB.Entity.ClassroomWorkSchedule", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
-
-                    b.Property<byte>("Class")
-                        .HasColumnType("smallint");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<TimeOnly>("EndTime")
-                        .HasColumnType("time without time zone");
-
-                    b.Property<string>("Groups")
-                        .HasColumnType("text");
-
-                    b.Property<string>("LectureHall")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Lecturer")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<TimeOnly>("StartTime")
-                        .HasColumnType("time without time zone");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("Class");
-
-                    b.HasIndex("LectureHall");
-
-                    b.HasIndex("Lecturer");
-
-                    b.ToTable("ClassroomWorkSchedule");
-                });
 
             modelBuilder.Entity("Core.DB.Entity.IntersectionOfSubgroups", b =>
                 {
@@ -335,6 +288,7 @@ namespace ScheduleBot.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("LectureHall")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Lecturer")
@@ -361,8 +315,6 @@ namespace ScheduleBot.Migrations
                     b.HasIndex("Date");
 
                     b.HasIndex("Group");
-
-                    b.HasIndex("LectureHall");
 
                     b.HasIndex("Lecturer");
 
@@ -764,33 +716,6 @@ namespace ScheduleBot.Migrations
                     b.ToTable("TelegramUsersTmp");
                 });
 
-            modelBuilder.Entity("Core.DB.Entity.ClassroomWorkSchedule", b =>
-                {
-                    b.HasOne("ScheduleBot.DB.Entity.ClassDTO", "ClassDTO")
-                        .WithMany()
-                        .HasForeignKey("Class")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ScheduleBot.DB.Entity.ClassroomLastUpdate", "ClassroomLastUpdate")
-                        .WithMany()
-                        .HasForeignKey("LectureHall")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ScheduleBot.DB.Entity.TeacherLastUpdate", "TeacherLastUpdate")
-                        .WithMany()
-                        .HasForeignKey("Lecturer")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ClassDTO");
-
-                    b.Navigation("ClassroomLastUpdate");
-
-                    b.Navigation("TeacherLastUpdate");
-                });
-
             modelBuilder.Entity("Core.DB.Entity.IntersectionOfSubgroups", b =>
                 {
                     b.HasOne("ScheduleBot.DB.Entity.ClassDTO", "ClassDTO")
@@ -871,17 +796,11 @@ namespace ScheduleBot.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ScheduleBot.DB.Entity.ClassroomLastUpdate", "ClassroomLastUpdate")
-                        .WithMany()
-                        .HasForeignKey("LectureHall");
-
                     b.HasOne("ScheduleBot.DB.Entity.TeacherLastUpdate", "TeacherLastUpdate")
                         .WithMany()
                         .HasForeignKey("Lecturer");
 
                     b.Navigation("ClassDTO");
-
-                    b.Navigation("ClassroomLastUpdate");
 
                     b.Navigation("GroupLastUpdate");
 
