@@ -41,7 +41,7 @@ namespace ScheduleBot {
         }
 
         public static (string, bool) GetScheduleByDate(ScheduleDbContext dbContext, DateOnly date, TelegramUser user, bool all = false, bool link = true) {
-            var profile = user.ScheduleProfile;
+            ScheduleProfile profile = user.ScheduleProfile;
             link &= user.Settings.TeacherLincsEnabled;
 
             // Получаем завершенные дисциплины и дисциплины на указанную дату
@@ -78,7 +78,7 @@ namespace ScheduleBot {
                 CalendarWeekRule.FirstFourDayWeek,
                 DayOfWeek.Monday);
 
-            var sb = new StringBuilder()
+            StringBuilder sb = new StringBuilder()
                 .AppendLine($"📌 {date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})")
                 .AppendLine("⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯");
 
@@ -87,7 +87,7 @@ namespace ScheduleBot {
             }
 
             // Формирование строк для каждого предмета
-            foreach(var item in disciplines) {
+            foreach(Discipline? item in disciplines) {
                 sb.AppendLine($"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}")
                   .AppendLine($"📎 {item.Name} ({item.Type}) {(string.IsNullOrWhiteSpace(item.Subgroup) ? item.IntersectionMark : item.Subgroup)}");
 
@@ -104,7 +104,6 @@ namespace ScheduleBot {
 
             return (sb.ToString(), hasExcludedDisciplines);
         }
-
 
         public class ExtendedDiscipline : Discipline {
             public ExtendedDiscipline(Discipline discipline, bool deleted = false) : base(discipline) => Deleted = deleted;

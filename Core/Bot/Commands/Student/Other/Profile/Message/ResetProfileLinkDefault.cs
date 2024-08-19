@@ -5,10 +5,8 @@ using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
-namespace Core.Bot.Commands.Student.Other.Profile.Message
-{
-    internal class ResetProfileLinkDefault : IMessageCommand
-    {
+namespace Core.Bot.Commands.Student.Other.Profile.Message {
+    internal class ResetProfileLinkDefault : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string>? Commands => null;

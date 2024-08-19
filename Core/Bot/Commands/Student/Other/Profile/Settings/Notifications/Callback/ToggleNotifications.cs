@@ -5,10 +5,8 @@ using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
-namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Callback
-{
-    public class ToggleNotifications : ICallbackCommand
-    {
+namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Callback {
+    public class ToggleNotifications : ICallbackCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public string Command => "ToggleNotifications";
@@ -17,10 +15,8 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Callbac
 
         public Manager.Check Check => Manager.Check.none;
 
-        public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args)
-        {
-            switch (args)
-            {
+        public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
+            switch(args) {
                 case "on":
                     user.Settings.NotificationEnabled = true;
                     break;

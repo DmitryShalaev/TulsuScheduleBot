@@ -10,14 +10,10 @@ namespace WebHook.Controllers {
 
         private readonly TelegramUpdateBackgroundService _backgroundService;
 
-        public BotController(TelegramUpdateBackgroundService backgroundService) {
-            _backgroundService = backgroundService;
-        }
+        public BotController(TelegramUpdateBackgroundService backgroundService) => _backgroundService = backgroundService;
 
         [HttpPost]
-        public void Post([FromBody] Update update) {
-            _backgroundService.ProcessUpdateAsync(update);
-        }
+        public void Post([FromBody] Update update) => _backgroundService.ProcessUpdateAsync(update);
 
         [HttpGet]
         public string Get() => "Telegram bot was started";

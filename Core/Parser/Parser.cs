@@ -102,9 +102,9 @@ namespace ScheduleBot {
 
             await dbContext.SaveChangesAsync();
 
-            (DateOnly min, DateOnly max)? dates = await GetDates(group);
+            (DateOnly min, DateOnly max, string searchField)? dates = await GetDates(group);
 
-            if(dates is not null) {
+            if(dates is not null && dates.Value.searchField == "GROUP_P") {
 
                 List<Discipline>? disciplines = await GetDisciplines(group);
 
@@ -191,8 +191,8 @@ namespace ScheduleBot {
 
             await UpdatingTeacherInfo(dbContext, teacher);
 
-            (DateOnly min, DateOnly max)? dates = await GetDates(teacher);
-            if(dates is not null) {
+            (DateOnly min, DateOnly max, string searchField)? dates = await GetDates(teacher);
+            if(dates is not null && dates.Value.searchField == "PREP") {
 
                 List<TeacherWorkSchedule>? teacherWorkSchedule = await GetTeachersWorkSchedule(teacher);
 
@@ -245,8 +245,10 @@ namespace ScheduleBot {
 
                 except = _list.Except(teachers);
 
-                if(except.Any())
-                    dbContext.TeacherLastUpdate.RemoveRange(dbContext.TeacherLastUpdate.Where(i => except.Contains(i.Teacher)));
+                if(except.Any()) {
+                    var fd = dbContext.TeacherLastUpdate.Where(i => except.Contains(i.Teacher)).ToList();
+                    dbContext.TeacherLastUpdate.RemoveRange(fd);
+                }
 
                 await dbContext.SaveChangesAsync();
 
@@ -364,7 +366,8 @@ namespace ScheduleBot {
                     using(HttpResponseMessage response = await client.GetAsync("https://tulsu.ru/schedule/queries/GetDictionaries.php")) {
                         if(response.IsSuccessStatusCode) {
                             var jObject = JArray.Parse(await response.Content.ReadAsStringAsync());
-                            return jObject.Count == 0 ? throw new Exception() : jObject?.Where(i => regex.IsMatch(i.Value<string>("value")?.Trim() ?? "")).Select(j => j.Value<string>("value")?.Trim() ?? "").ToList();
+
+                            return jObject.Count == 0 ? throw new Exception() : jObject?.Where(i => regex.IsMatch(i.Value<string>("value")?.Trim() ?? "")).Select(j => j.Value<string>("value") ?? "").ToList();
                         }
                     }
                 }
@@ -375,7 +378,7 @@ namespace ScheduleBot {
             return null;
         }
 
-        public async Task<(DateOnly min, DateOnly max)?> GetDates(string group) {
+        public async Task<(DateOnly min, DateOnly max, string searchField)?> GetDates(string search_value) {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
                     #region RequestHeaders
@@ -384,7 +387,7 @@ namespace ScheduleBot {
                     client.DefaultRequestHeaders.Add("Accept-Language", "ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7");
                     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.34");
                     client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
-                    client.DefaultRequestHeaders.Add("Referer", $"https://tulsu.ru/schedule/?search={group}");
+                    client.DefaultRequestHeaders.Add("Referer", $"https://tulsu.ru/schedule/?search={search_value}");
                     client.DefaultRequestHeaders.Add("Origin", "https://tulsu.ru");
                     client.DefaultRequestHeaders.Add("sec-ch-ua", "\"Chromium\";v=\"112\", \"Microsoft Edge\";v=\"112\", \"Not:A-Brand\";v=\"99\"");
                     client.DefaultRequestHeaders.Add("sec-ch-ua-mobile", "?0");
@@ -399,13 +402,14 @@ namespace ScheduleBot {
 
                     #endregion
 
-                    using(var content = new StringContent($"search_value={group}", Encoding.UTF8, "application/x-www-form-urlencoded"))
+                    using(var content = new StringContent($"search_value={search_value}", Encoding.UTF8, "application/x-www-form-urlencoded"))
                     using(HttpResponseMessage response = await client.PostAsync("https://tulsu.ru/schedule/queries/GetDates.php", content))
                         if(response.IsSuccessStatusCode) {
                             var jObject = JObject.Parse(await response.Content.ReadAsStringAsync());
 
                             return (DateOnly.Parse(jObject.Value<string>("MIN_DATE") ?? throw new NullReferenceException("MIN_DATE")),
-                                    DateOnly.Parse(jObject.Value<string>("MAX_DATE") ?? throw new NullReferenceException("MAX_DATE")));
+                                    DateOnly.Parse(jObject.Value<string>("MAX_DATE") ?? throw new NullReferenceException("MAX_DATE")),
+                                    jObject.Value<string>("SEARCH_FIELD") ?? throw new NullReferenceException("SEARCH_FIELD"));
                         }
                 }
             } catch(Exception) {

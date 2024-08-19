@@ -21,7 +21,7 @@ namespace Core.Bot.Commands.Student.Other.GroupList.Message {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             var sb = new StringBuilder();
 
-            var group = user.ScheduleProfile.Group;
+            string? group = user.ScheduleProfile.Group;
 
             var users = dbContext.TelegramUsers.Where(u => u.Settings.DisplayingGroupList && u.ScheduleProfile.Group == group).ToList();
 
@@ -31,7 +31,7 @@ namespace Core.Bot.Commands.Student.Other.GroupList.Message {
                 sb.AppendLine("Здесь никого нет 😢😢😢");
             }
 
-            foreach(var u in users) {
+            foreach(TelegramUser? u in users) {
                 if(!string.IsNullOrWhiteSpace(u.Username)) {
                     sb.AppendLine($"[{EscapeSpecialCharacters($"{u.FirstName} {u.LastName}")}](https://t.me/{u.Username})");
                 } else {
@@ -46,13 +46,14 @@ namespace Core.Bot.Commands.Student.Other.GroupList.Message {
             // Перечень символов, которые нужно экранировать
             char[] specialChars = { '_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!' };
 
-            StringBuilder escapedString = new StringBuilder();
+            var escapedString = new StringBuilder();
 
             foreach(char c in input) {
                 // Если символ является специальным, добавляем перед ним обратный слэш
                 if(Array.Exists(specialChars, element => element == c)) {
                     escapedString.Append('\\');
                 }
+
                 escapedString.Append(c);
             }
 

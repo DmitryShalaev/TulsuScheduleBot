@@ -19,7 +19,6 @@ namespace Core.Bot.Commands.Student.Additional.Message {
             user.TelegramUserTmp.TmpData = UserCommands.Instance.Message["Schedule"];
             await dbContext.SaveChangesAsync();
 
-
             await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["Schedule"], replyMarkup: Statics.ScheduleKeyboardMarkup);
         }
     }

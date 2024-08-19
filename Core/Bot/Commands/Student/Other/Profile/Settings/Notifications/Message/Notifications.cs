@@ -5,10 +5,8 @@ using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
-namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message
-{
-    internal class Notifications : IMessageCommand
-    {
+namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message {
+    internal class Notifications : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string>? Commands => [UserCommands.Instance.Message["Notifications"], "/notifications"];

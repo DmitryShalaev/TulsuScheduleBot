@@ -27,7 +27,7 @@ namespace Core.Bot.Commands.Student.Back_Cancel.Message {
                                     { commands["Exam"], (commands["Schedule"], Statics.ScheduleKeyboardMarkup) }
                                 };
 
-            if(user.TelegramUserTmp.TmpData is not null && transitions.TryGetValue(user.TelegramUserTmp.TmpData, out var transition)) {
+            if(user.TelegramUserTmp.TmpData is not null && transitions.TryGetValue(user.TelegramUserTmp.TmpData, out (string nextState, IReplyMarkup replyMarkup) transition)) {
                 user.TelegramUserTmp.TmpData = transition.nextState;
                 await BotClient.SendTextMessageAsync(chatId, transition.nextState, replyMarkup: transition.replyMarkup);
             } else {
