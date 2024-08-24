@@ -33,6 +33,8 @@ namespace ScheduleBot.DB {
         public DbSet<TelegramUsersTmp> TelegramUsersTmp { get; set; }
         public DbSet<TeacherWorkSchedule> TeacherWorkSchedule { get; set; }
         public DbSet<TeacherLastUpdate> TeacherLastUpdate { get; set; }
+        public DbSet<ClassroomLastUpdate> ClassroomLastUpdate { get; set; }
+        public DbSet<ClassroomWorkSchedule> ClassroomWorkSchedule { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<IntersectionOfSubgroups> IntersectionOfSubgroups { get; set; }
     }

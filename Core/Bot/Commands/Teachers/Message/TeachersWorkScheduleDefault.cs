@@ -19,7 +19,7 @@ namespace Core.Bot.Commands.Teachers.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            IEnumerable<string> find = NGramSearch.Instance.FindMatch(args);
+            IEnumerable<string> find = NGramSearch.Instance.TeacherFindMatch(args);
 
             if(find.Any()) {
                 if(find.Count() > 1) {
@@ -45,7 +45,7 @@ namespace Core.Bot.Commands.Teachers.Message {
 
                 await dbContext.SaveChangesAsync();
             } else {
-                await BotClient.SendTextMessageAsync(chatId: chatId, text: "Преподаватель не найден!", replyMarkup: Statics.TeachersWorkScheduleBackKeyboardMarkup);
+                await BotClient.SendTextMessageAsync(chatId: chatId, text: "Преподаватель не найден!", replyMarkup: Statics.WorkScheduleBackKeyboardMarkup);
             }
         }
     }

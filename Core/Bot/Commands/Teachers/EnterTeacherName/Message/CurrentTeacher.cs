@@ -21,7 +21,7 @@ namespace Core.Bot.Commands.Teachers.EnterTeacherName.Message {
             user.TelegramUserTmp.Mode = Mode.TeachersWorkSchedule;
             await dbContext.SaveChangesAsync();
 
-            await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["EnterTeacherName"], replyMarkup: Statics.TeachersWorkScheduleBackKeyboardMarkup);
+            await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["EnterTeacherName"], replyMarkup: Statics.WorkScheduleBackKeyboardMarkup);
         }
     }
 }

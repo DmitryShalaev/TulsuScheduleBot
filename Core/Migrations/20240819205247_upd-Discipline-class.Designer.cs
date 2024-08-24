@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScheduleBot.DB;
@@ -11,9 +12,11 @@ using ScheduleBot.DB;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240819205247_upd-Discipline-class")]
+    partial class updDisciplineclass
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,6 +50,7 @@ namespace ScheduleBot.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Lecturer")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
@@ -524,16 +528,11 @@ namespace ScheduleBot.Migrations
                         new
                         {
                             ID = (byte)14,
-                            Name = "ClassroomSchedule"
+                            Name = "ClassroomsSchedule"
                         },
                         new
                         {
                             ID = (byte)15,
-                            Name = "ClassroomSelected"
-                        },
-                        new
-                        {
-                            ID = (byte)16,
                             Name = "Feedback"
                         });
                 });
@@ -784,7 +783,9 @@ namespace ScheduleBot.Migrations
 
                     b.HasOne("ScheduleBot.DB.Entity.TeacherLastUpdate", "TeacherLastUpdate")
                         .WithMany()
-                        .HasForeignKey("Lecturer");
+                        .HasForeignKey("Lecturer")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("ClassDTO");
 

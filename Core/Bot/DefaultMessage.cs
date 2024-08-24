@@ -75,7 +75,18 @@ namespace Core.Bot {
                 [$"{UserCommands.Instance.Message["CurrentTeacher"]}:\n{teacher}"],
                 [UserCommands.Instance.Message["Today"], UserCommands.Instance.Message["Tomorrow"]],
                 [UserCommands.Instance.Message["ByDays"], UserCommands.Instance.Message["ForAWeek"]],
-                [UserCommands.Instance.Message["TeachersWorkScheduleBack"]]
+                [UserCommands.Instance.Message["WorkScheduleBack"]]
+            ];
+
+            return new(KeyboardMarkup) { ResizeKeyboard = true };
+        }
+
+        public static ReplyKeyboardMarkup GetClassroomWorkScheduleSelectedKeyboardMarkup(string teacher) {
+            List<KeyboardButton[]> KeyboardMarkup = [
+                [$"{UserCommands.Instance.Message["CurrentClassroom"]}:\n{teacher}"],
+                [UserCommands.Instance.Message["Today"], UserCommands.Instance.Message["Tomorrow"]],
+                [UserCommands.Instance.Message["ByDays"], UserCommands.Instance.Message["ForAWeek"]],
+                [UserCommands.Instance.Message["WorkScheduleBack"]]
             ];
 
             return new(KeyboardMarkup) { ResizeKeyboard = true };

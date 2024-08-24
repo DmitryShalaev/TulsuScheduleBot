@@ -25,7 +25,7 @@ namespace Core.Bot {
         [GeneratedRegex("^([A-z]+)[ ]([A-z]+)$")]
         public static partial Regex NotificationsCallbackRegex();
 
-        [GeneratedRegex("^([A-z]+)[|]([А-яЁё. ]+)$")]
+        [GeneratedRegex("^([A-z]+)[|]([А-яЁё. 0-9-]+)$")]
         public static partial Regex TeachersCallbackRegex();
 
         [GeneratedRegex("^(\\d{1,2})([ ,.-](\\d{1,2}|\\w{3,8}))?([ ,.-](\\d{2}|\\d{4}))?$")]
@@ -78,8 +78,8 @@ namespace Core.Bot {
                             [commands.Message["Back"]]
                         }) { ResizeKeyboard = true };
 
-        public static readonly ReplyKeyboardMarkup TeachersWorkScheduleBackKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["TeachersWorkScheduleBack"] }
+        public static readonly ReplyKeyboardMarkup WorkScheduleBackKeyboardMarkup = new(new[] {
+                            new KeyboardButton[] { commands.Message["WorkScheduleBack"] }
                         }) { ResizeKeyboard = true };
 
         #region Corps
@@ -143,7 +143,7 @@ namespace Core.Bot {
         public static async Task TeacherWorkScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string teacher, IReplyMarkup? replyMarkup) {
             DateTime? teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher)?.Update.ToLocalTime();
 
-            if(teacherLastUpdate is null || (DateTime.Now - teacherLastUpdate)?.TotalMinutes > commands.Config.TeacherWorkScheduleUpdateTime) {
+            if(teacherLastUpdate is null || (DateTime.Now - teacherLastUpdate)?.TotalMinutes > commands.Config.WorkScheduleUpdateTime) {
                 int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["WeNeedToWait"])).MessageId;
                 if(!await parser.UpdatingTeacherWorkSchedule(dbContext, teacher, commands.Config.UpdateAttemptTime))
                     await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
@@ -154,6 +154,22 @@ namespace Core.Bot {
 
             if(teacherLastUpdate is not null)
                 await botClient.SendTextMessageAsync(chatId: chatId, text: $"{commands.Message["ScheduleIsRelevantOn"]} {teacherLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
+        }
+
+        public static async Task ClassroomWorkScheduleRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string classroom, IReplyMarkup? replyMarkup) {
+            DateTime? classroomLastUpdate = dbContext.ClassroomLastUpdate.FirstOrDefault(i => i.Classroom == classroom)?.Update.ToLocalTime();
+
+            if(classroomLastUpdate is null || (DateTime.Now - classroomLastUpdate)?.TotalMinutes > commands.Config.WorkScheduleUpdateTime) {
+                int messageId = (await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["WeNeedToWait"])).MessageId;
+                if(!await parser.UpdatingClassroomWorkSchedule(dbContext, classroom, commands.Config.UpdateAttemptTime))
+                    await botClient.SendTextMessageAsync(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
+
+                await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
+                classroomLastUpdate = dbContext.ClassroomLastUpdate.FirstOrDefault(i => i.Classroom == classroom)?.Update.ToLocalTime();
+            }
+
+            if(classroomLastUpdate is not null)
+                await botClient.SendTextMessageAsync(chatId: chatId, text: $"{commands.Message["ScheduleIsRelevantOn"]} {classroomLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
         public static async Task ProgressRelevance(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
