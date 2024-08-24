@@ -1,4 +1,4 @@
-﻿using Core.Bot.Interfaces;
+﻿using Core.Bot.Commands.Interfaces;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
@@ -6,7 +6,7 @@ using ScheduleBot.DB.Entity;
 using Telegram.Bot.Types;
 
 namespace Core.Bot.Commands {
-    public class Manager {
+    public class Manager(Manager.GetCommand getMessageCommand, Manager.GetCommand getCallbackCommand) {
         public enum Check : byte {
             none,
             group,
@@ -19,23 +19,13 @@ namespace Core.Bot.Commands {
 
         public delegate string GetCommand(string message, TelegramUser user, out string args);
 
-        private readonly Dictionary<string, (Check, MessageFunction)> MessageCommands;
-        private readonly Dictionary<string, (Check, CallbackFunction)> CallbackCommands;
+        private readonly Dictionary<string, (Check, MessageFunction)> MessageCommands = [];
+        private readonly Dictionary<string, (Check, CallbackFunction)> CallbackCommands = [];
 
-        private readonly (Check, MessageFunction)[] DefaultMessageCommands;
+        private readonly (Check, MessageFunction)[] DefaultMessageCommands = new (Check, MessageFunction)[Enum.GetValues(typeof(Mode)).Length];
 
-        private readonly GetCommand getMessageCommand;
-        private readonly GetCommand getCallbackCommand;
-
-        public Manager(GetCommand getMessageCommand, GetCommand getCallbackCommand) {
-            this.getMessageCommand = getMessageCommand;
-            this.getCallbackCommand = getCallbackCommand;
-
-            MessageCommands = [];
-            CallbackCommands = [];
-
-            DefaultMessageCommands = new (Check, MessageFunction)[Enum.GetValues(typeof(Mode)).Length];
-        }
+        private readonly GetCommand getMessageCommand = getMessageCommand;
+        private readonly GetCommand getCallbackCommand = getCallbackCommand;
 
         public void InitMessageCommands() {
             IEnumerable<Type> types = AppDomain

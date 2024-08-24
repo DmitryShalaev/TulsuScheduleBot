@@ -1,11 +1,9 @@
-﻿using Core.Bot.Commands;
-
-using ScheduleBot.DB;
+﻿using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace Core.Bot {
+namespace Core.Bot.Commands {
     public static class DefaultCallback {
         public static InlineKeyboardMarkup GetEditAdminInlineKeyboardButton(ScheduleDbContext dbContext, DateOnly date, ScheduleProfile scheduleProfile) {
             var editButtons = new List<InlineKeyboardButton[]>();

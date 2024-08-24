@@ -1,5 +1,5 @@
 ﻿using Core.Bot.Commands.AddingDiscipline;
-using Core.Bot.Interfaces;
+using Core.Bot.Commands.Interfaces;
 
 using ScheduleBot;
 using ScheduleBot.DB;

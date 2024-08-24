@@ -1,5 +1,5 @@
 ﻿using Core.Bot.Commands;
-using Core.Bot.Interfaces;
+using Core.Bot.Commands.Interfaces;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;

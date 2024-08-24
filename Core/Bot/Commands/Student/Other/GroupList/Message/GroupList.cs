@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-using Core.Bot.Interfaces;
+using Core.Bot.Commands.Interfaces;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;

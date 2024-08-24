@@ -11,8 +11,8 @@ namespace Core.Bot.Messages {
     public static class MessageQueue {
         private static readonly ConcurrentQueue<IMessageQueue> stack = new();
 
-        public static void SendTextMessage(ChatId chatId, string text, IReplyMarkup? replyMarkup, ParseMode? parseMode) {
-            var message = new TextMessage(chatId, text, replyMarkup, parseMode);
+        public static void SendTextMessage(ChatId chatId, string text, IReplyMarkup? replyMarkup, ParseMode? parseMode, bool? disableWebPagePreview) {
+            var message = new TextMessage(chatId, text, replyMarkup, parseMode, disableWebPagePreview);
 
             stack.Enqueue(message);
         }

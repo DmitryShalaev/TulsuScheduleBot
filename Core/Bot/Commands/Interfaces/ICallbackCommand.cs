@@ -6,7 +6,7 @@ using Telegram.Bot.Types;
 
 using static Core.Bot.Commands.Manager;
 
-namespace Core.Bot.Interfaces {
+namespace Core.Bot.Commands.Interfaces {
     public interface ICallbackCommand {
         public ITelegramBotClient BotClient { get; }
 

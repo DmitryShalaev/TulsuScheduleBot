@@ -1,4 +1,4 @@
-﻿using Core.Bot.Interfaces;
+﻿using Core.Bot.Commands.Interfaces;
 
 using ScheduleBot;
 using ScheduleBot.DB;
@@ -21,7 +21,7 @@ namespace Core.Bot.Commands.Classrooms.Days.ForAWeek.Message {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             await Statics.ClassroomWorkScheduleRelevance(dbContext, BotClient, chatId, user.TelegramUserTmp.TmpData!, replyMarkup: Statics.WeekKeyboardMarkup);
             foreach((string, DateOnly) item in Scheduler.GetClassroomWorkScheduleByWeak(dbContext, true, user.TelegramUserTmp.TmpData!, user))
-                await BotClient.SendTextMessageAsync(chatId: chatId, text: item.Item1, replyMarkup: Statics.WeekKeyboardMarkup, parseMode: ParseMode.Markdown);
+                await BotClient.SendTextMessageAsync(chatId: chatId, text: item.Item1, replyMarkup: Statics.WeekKeyboardMarkup, parseMode: ParseMode.Markdown, disableWebPagePreview: true);
         }
     }
 }

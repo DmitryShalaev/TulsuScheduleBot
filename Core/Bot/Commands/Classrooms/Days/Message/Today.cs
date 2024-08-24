@@ -1,4 +1,4 @@
-﻿using Core.Bot.Interfaces;
+﻿using Core.Bot.Commands.Interfaces;
 
 using ScheduleBot;
 using ScheduleBot.DB;
@@ -24,7 +24,7 @@ namespace Core.Bot.Commands.Classrooms.Days.Message {
 
             await Statics.ClassroomWorkScheduleRelevance(dbContext, BotClient, chatId, user.TelegramUserTmp.TmpData!, teacherWorkSchedule);
             var date = DateOnly.FromDateTime(DateTime.Now);
-            await BotClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetClassroomWorkScheduleByDate(dbContext, date, user.TelegramUserTmp.TmpData!, user), replyMarkup: teacherWorkSchedule, parseMode: ParseMode.Markdown);
+            await BotClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetClassroomWorkScheduleByDate(dbContext, date, user.TelegramUserTmp.TmpData!, user), replyMarkup: teacherWorkSchedule, parseMode: ParseMode.Markdown, disableWebPagePreview: true);
         }
     }
 }
