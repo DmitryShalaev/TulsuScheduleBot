@@ -68,7 +68,10 @@ jobs:
         LAST_COMMIT_MESSAGE: ${{ env.LAST_COMMIT_MESSAGE }}
         LAST_COMMIT_AUTHOR: ${{ env.LAST_COMMIT_AUTHOR }}
         LAST_COMMIT_HASH: ${{ env.LAST_COMMIT_HASH }}
+        REPO_URL: ${{ github.repository_url }}
       run: |
+        COMMIT_URL="${REPO_URL}/commit/${LAST_COMMIT_HASH}"
         curl -s -X POST https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage \
         -d chat_id=${CHAT_ID} \
-        -d text="New commit by ${LAST_COMMIT_AUTHOR}: ${LAST_COMMIT_MESSAGE} (Hash: ${LAST_COMMIT_HASH})"
+        -d parse_mode="Markdown" \
+        -d text="*New commit in [${{ github.repository }}](${REPO_URL})*\n\n*Author:* ${LAST_COMMIT_AUTHOR}\n*Message:* ${LAST_COMMIT_MESSAGE}\n[View Commit](${COMMIT_URL})"
