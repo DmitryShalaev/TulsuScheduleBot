@@ -1,6 +1,8 @@
 ﻿using System.Globalization;
 using System.Text;
 
+using Core.DB.Entity;
+
 using Microsoft.EntityFrameworkCore;
 
 using ScheduleBot.DB;
