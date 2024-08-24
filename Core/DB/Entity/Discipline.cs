@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
+using Core.DB.Entity;
+
 using Microsoft.EntityFrameworkCore;
 
 using Newtonsoft.Json.Linq;

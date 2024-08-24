@@ -2,7 +2,9 @@
 
 using Microsoft.EntityFrameworkCore;
 
-namespace ScheduleBot.DB.Entity {
+using ScheduleBot.DB.Entity;
+
+namespace Core.DB.Entity {
 
 #pragma warning disable CS8618
     [Index(nameof(Date))]
@@ -15,7 +17,7 @@ namespace ScheduleBot.DB.Entity {
         public string? Lecturer { get; set; }
         public TeacherLastUpdate TeacherLastUpdate { get; set; }
 
-        public string LectureHall { get; set; }
+        public string? LectureHall { get; set; }
         public string? Subgroup { get; set; } = null;
 
         public DateOnly Date { get; set; }
