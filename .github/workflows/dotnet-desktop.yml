@@ -72,8 +72,10 @@ jobs:
       run: |
         REPO_URL="https://github.com/${GITHUB_REPOSITORY}"
         COMMIT_URL="${REPO_URL}/commit/${LAST_COMMIT_HASH}"
+        ESCAPED_COMMIT_MESSAGE=$(echo "${LAST_COMMIT_MESSAGE}" | sed 's/[-_{}()|`~]/\\&/g')
         curl -s -X POST https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage \
         -d chat_id=${CHAT_ID} \
         -d parse_mode="MarkdownV2" \
-        -d text="*New commit in [${GITHUB_REPOSITORY}](${REPO_URL})*  %0A%0A*Author:* ${LAST_COMMIT_AUTHOR}  %0A*Message:* ${LAST_COMMIT_MESSAGE} %0A[View Commit](${COMMIT_URL})"
+        -d text="*New commit in [${GITHUB_REPOSITORY}](${REPO_URL})*%0A%0A*Author:* ${LAST_COMMIT_AUTHOR}%0A*Message:* ${ESCAPED_COMMIT_MESSAGE}%0A[View Commit](${COMMIT_URL})"
+
 
