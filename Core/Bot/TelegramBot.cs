@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 using Core.Bot.Commands;
@@ -6,7 +5,6 @@ using Core.Bot.New.Commands.Student;
 
 using Microsoft.EntityFrameworkCore;
 
-using ScheduleBot;
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 

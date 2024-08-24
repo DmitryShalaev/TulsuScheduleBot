@@ -58,7 +58,6 @@ namespace ScheduleBot {
             return schedules;
         }
 
-
         public static (string, bool) GetScheduleByDate(ScheduleDbContext dbContext, DateOnly date, TelegramUser user, bool all = false, bool link = true) {
             ScheduleProfile profile = user.ScheduleProfile;
             link &= user.Settings.TeacherLincsEnabled;

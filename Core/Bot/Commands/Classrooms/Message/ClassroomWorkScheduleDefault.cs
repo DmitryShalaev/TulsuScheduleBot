@@ -6,7 +6,6 @@ using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 namespace Core.Bot.Commands.Classrooms.Message {
     internal class ClassroomWorkScheduleDefault : IMessageCommand {
@@ -35,8 +34,7 @@ namespace Core.Bot.Commands.Classrooms.Message {
                     user.TelegramUserTmp.Mode = Mode.ClassroomSelected;
                     string _classroom = user.TelegramUserTmp.TmpData = find.First();
 
-                    var classroom = dbContext.ClassroomLastUpdate.First(i => i.Classroom == _classroom);
-
+                    ClassroomLastUpdate classroom = dbContext.ClassroomLastUpdate.First(i => i.Classroom == _classroom);
 
                     await BotClient.SendTextMessageAsync(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentClassroom"]}: {_classroom}", replyMarkup: DefaultMessage.GetClassroomWorkScheduleSelectedKeyboardMarkup(_classroom), disableWebPagePreview: true);
                 }
