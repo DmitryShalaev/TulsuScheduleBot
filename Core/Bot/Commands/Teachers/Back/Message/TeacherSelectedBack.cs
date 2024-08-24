@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
@@ -15,6 +16,9 @@ namespace Core.Bot.Commands.Teachers.Back.Message {
 
         public Manager.Check Check => Manager.Check.none;
 
-        public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) => await BotClient.SendTextMessageAsync(chatId: chatId, text: "Основное меню", replyMarkup: DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TelegramUserTmp.TmpData!));
+        public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
+            MessageQueue.SendTextMessage(chatId: chatId, text: "Основное меню", replyMarkup: DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TelegramUserTmp.TmpData!));
+            return Task.CompletedTask;
+        }
     }
 }

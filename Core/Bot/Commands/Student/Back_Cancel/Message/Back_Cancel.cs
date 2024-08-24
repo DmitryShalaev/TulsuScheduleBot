@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
@@ -29,13 +30,12 @@ namespace Core.Bot.Commands.Student.Back_Cancel.Message {
 
             if(user.TelegramUserTmp.TmpData is not null && transitions.TryGetValue(user.TelegramUserTmp.TmpData, out (string nextState, IReplyMarkup replyMarkup) transition)) {
                 user.TelegramUserTmp.TmpData = transition.nextState;
-                await BotClient.SendTextMessageAsync(chatId, transition.nextState, replyMarkup: transition.replyMarkup);
+                MessageQueue.SendTextMessage(chatId, transition.nextState, replyMarkup: transition.replyMarkup);
             } else {
                 user.TelegramUserTmp.TmpData = null;
-                await BotClient.SendTextMessageAsync(chatId, commands["MainMenu"], replyMarkup: Statics.MainKeyboardMarkup);
+                MessageQueue.SendTextMessage(chatId, commands["MainMenu"], replyMarkup: Statics.MainKeyboardMarkup);
             }
 
-            await Statics.DeleteTempMessage(user, messageId);
             await dbContext.SaveChangesAsync();
         }
     }

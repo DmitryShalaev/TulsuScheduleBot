@@ -1,5 +1,6 @@
 ﻿using Core.Bot.Commands;
 using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
@@ -19,10 +20,10 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Message {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             user.TelegramUserTmp.Mode = Mode.Default;
 
-            await Statics.DeleteTempMessage(user, messageId);
+             
             await dbContext.SaveChangesAsync();
 
-            await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["MainMenu"], replyMarkup: Statics.MainKeyboardMarkup);
+            MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["MainMenu"], replyMarkup: Statics.MainKeyboardMarkup);
         }
     }
 }

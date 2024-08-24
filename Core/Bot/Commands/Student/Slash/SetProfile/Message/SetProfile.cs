@@ -1,5 +1,6 @@
 ﻿using Core.Bot.Commands;
 using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
@@ -23,12 +24,12 @@ namespace Core.Bot.New.Commands.Student.Slash.SetProfile.Message {
                         user.ScheduleProfileGuid = profile;
                         await dbContext.SaveChangesAsync();
 
-                        await BotClient.SendTextMessageAsync(chatId: chatId, text: "Вы успешно сменили профиль", replyMarkup: Statics.MainKeyboardMarkup);
+                        MessageQueue.SendTextMessage(chatId: chatId, text: "Вы успешно сменили профиль", replyMarkup: Statics.MainKeyboardMarkup);
                     } else {
-                        await BotClient.SendTextMessageAsync(chatId: chatId, text: "Вы пытаетесь изменить свой профиль на текущий или на профиль, который не существует", replyMarkup: Statics.MainKeyboardMarkup);
+                        MessageQueue.SendTextMessage(chatId: chatId, text: "Вы пытаетесь изменить свой профиль на текущий или на профиль, который не существует", replyMarkup: Statics.MainKeyboardMarkup);
                     }
                 } else {
-                    await BotClient.SendTextMessageAsync(chatId: chatId, text: "Идентификатор профиля не распознан", replyMarkup: Statics.MainKeyboardMarkup);
+                    MessageQueue.SendTextMessage(chatId: chatId, text: "Идентификатор профиля не распознан", replyMarkup: Statics.MainKeyboardMarkup);
                 }
             } catch(IndexOutOfRangeException) { }
         }

@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
@@ -17,14 +18,16 @@ namespace Core.Bot.Commands.Student.Other.Profile.Message {
 
         public Manager.Check Check => Manager.Check.none;
 
-        public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
+        public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             if(user.IsOwner()) {
-                await BotClient.SendTextMessageAsync(chatId: chatId, text: $"Если вы хотите поделиться своим расписанием с кем-то, просто отправьте им следующую команду: " +
+                MessageQueue.SendTextMessage(chatId: chatId, text: $"Если вы хотите поделиться своим расписанием с кем-то, просто отправьте им следующую команду: " +
                 $"\n`/SetProfile {user.ScheduleProfileGuid}`" +
                 $"\nЕсли другой пользователь введет эту команду, он сможет видеть расписание с вашими изменениями.", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
             } else {
-                await BotClient.SendTextMessageAsync(chatId: chatId, text: "Поделиться профилем может только его владелец!", replyMarkup: Statics.MainKeyboardMarkup);
+                MessageQueue.SendTextMessage(chatId: chatId, text: "Поделиться профилем может только его владелец!", replyMarkup: Statics.MainKeyboardMarkup);
             }
+
+            return Task.CompletedTask;
         }
     }
 }

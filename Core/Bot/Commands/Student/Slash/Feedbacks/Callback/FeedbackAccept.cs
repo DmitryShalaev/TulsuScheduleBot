@@ -1,5 +1,6 @@
 ﻿using Core.Bot.Commands;
 using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -31,7 +32,7 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Callback {
                 await BotClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: FeedbackMessage.GetFeedbackMessage(feedback), replyMarkup: DefaultCallback.GetFeedbackInlineKeyboardButton(dbContext, feedback));
             } else {
                 await BotClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
-                await BotClient.SendTextMessageAsync(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: Statics.MainKeyboardMarkup);
+                MessageQueue.SendTextMessage(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: Statics.MainKeyboardMarkup);
             }
         }
     }

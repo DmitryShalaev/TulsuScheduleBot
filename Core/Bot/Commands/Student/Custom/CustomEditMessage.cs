@@ -1,4 +1,6 @@
-﻿using ScheduleBot;
+﻿using Core.Bot.Messages;
+
+using ScheduleBot;
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
@@ -16,7 +18,7 @@ namespace Core.Bot.Commands.Student.Custom {
                     user.TelegramUserTmp.TmpData = $"{discipline.ID}";
 
                     await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
-                    user.TelegramUserTmp.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: text, replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                      MessageQueue.SendTextMessage(chatId: chatId, text: text, replyMarkup: Statics.CancelKeyboardMarkup);
 
                     await dbContext.SaveChangesAsync();
                     return;

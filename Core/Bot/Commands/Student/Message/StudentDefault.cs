@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 
 using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot;
 using ScheduleBot.DB;
@@ -30,18 +31,18 @@ namespace Core.Bot.Commands.Student.Message {
                                $"{(string.IsNullOrWhiteSpace(match.Groups[5].Value) ? now.Year : match.Groups[5].Value)}";
                 try {
                     var date = DateOnly.Parse(sDate);
-                    await Statics.ScheduleRelevance(dbContext, BotClient, chatId, user.ScheduleProfile.Group!, Statics.MainKeyboardMarkup);
+                    await Statics.ScheduleRelevance(dbContext,  chatId, user.ScheduleProfile.Group!, Statics.MainKeyboardMarkup);
 
                     (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user);
-                    await BotClient.SendTextMessageAsync(chatId: chatId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                    MessageQueue.SendTextMessage(chatId: chatId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
                 } catch(Exception) {
-                    await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["CommandRecognizedAsADate"], replyMarkup: Statics.MainKeyboardMarkup);
+                    MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["CommandRecognizedAsADate"], replyMarkup: Statics.MainKeyboardMarkup);
                 }
 
                 return;
             }
 
-            await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["CommandNotRecognized"], replyMarkup: Statics.MainKeyboardMarkup);
+            MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["CommandNotRecognized"], replyMarkup: Statics.MainKeyboardMarkup);
 
         }
     }

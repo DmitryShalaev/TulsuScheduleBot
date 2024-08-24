@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
@@ -20,8 +21,7 @@ namespace Core.Bot.Commands.Classrooms.Callback {
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
             user.TelegramUserTmp.Mode = Mode.ClassroomSelected;
-            user.TelegramUserTmp.RequestingMessageID = null;
-
+ 
             ClassroomLastUpdate classroom = dbContext.ClassroomLastUpdate.First(i => i.Classroom.ToLower().StartsWith(args));
 
             string _classroom = user.TelegramUserTmp.TmpData = classroom.Classroom;
@@ -29,7 +29,7 @@ namespace Core.Bot.Commands.Classrooms.Callback {
 
             await BotClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
 
-            await BotClient.SendTextMessageAsync(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentClassroom"]}: {_classroom}", replyMarkup: DefaultMessage.GetClassroomWorkScheduleSelectedKeyboardMarkup(_classroom), disableWebPagePreview: true);
+            MessageQueue.SendTextMessage(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentClassroom"]}: {_classroom}", replyMarkup: DefaultMessage.GetClassroomWorkScheduleSelectedKeyboardMarkup(_classroom), disableWebPagePreview: true);
         }
     }
 }

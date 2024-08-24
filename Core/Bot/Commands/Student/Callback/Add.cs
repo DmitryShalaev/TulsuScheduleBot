@@ -1,5 +1,6 @@
 ﻿using Core.Bot.Commands.AddingDiscipline;
 using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot;
 using ScheduleBot.DB;
@@ -28,7 +29,7 @@ namespace Core.Bot.Commands.Student.Callback {
                     await dbContext.SaveChangesAsync();
 
                     await BotClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user).Item1, parseMode: ParseMode.Markdown, disableWebPagePreview: true);
-                    user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: AddingDisciplineMode.GetStagesAddingDiscipline(dbContext, user), replyMarkup: Statics.CancelKeyboardMarkup, parseMode: ParseMode.Markdown, disableWebPagePreview: true)).MessageId;
+                      MessageQueue.SendTextMessage(chatId: chatId, text: AddingDisciplineMode.GetStagesAddingDiscipline(dbContext, user), replyMarkup: Statics.CancelKeyboardMarkup, parseMode: ParseMode.Markdown, disableWebPagePreview: true);
 
                 } else {
                     (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user);

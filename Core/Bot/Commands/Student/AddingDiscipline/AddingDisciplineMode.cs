@@ -1,4 +1,6 @@
-﻿using ScheduleBot;
+﻿using Core.Bot.Messages;
+
+using ScheduleBot;
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
@@ -9,10 +11,8 @@ using Telegram.Bot.Types.ReplyMarkups;
 namespace Core.Bot.Commands.AddingDiscipline {
     public static class AddingDisciplineMode {
 
-        public static async Task SetStagesAddingDisciplineAsync(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, int messageId, string message, TelegramUser user) {
+        public static async Task SetStagesAddingDisciplineAsync(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, string message, TelegramUser user) {
             CustomDiscipline customDiscipline = dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile).OrderByDescending(i => i.AddDate).First();
-
-            await Statics.DeleteTempMessage(user, messageId);
 
             try {
                 switch(customDiscipline.Counter) {
@@ -38,7 +38,7 @@ namespace Core.Bot.Commands.AddingDiscipline {
                         break;
                 }
             } catch(Exception) {
-                user.TelegramUserTmp.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: "Ошибка! " + GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                  MessageQueue.SendTextMessage(chatId: chatId, text: "Ошибка! " + GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.CancelKeyboardMarkup);
                 return;
             }
 
@@ -50,13 +50,13 @@ namespace Core.Bot.Commands.AddingDiscipline {
                 case 2:
                 case 3:
                 case 4:
-                    user.TelegramUserTmp.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                      MessageQueue.SendTextMessage(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.CancelKeyboardMarkup);
                     break;
 
                 case 5:
                     TimeOnly? endTime = customDiscipline.StartTime?.AddMinutes(95);
-                    user.TelegramUserTmp.RequestingMessageID = (await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter),
-                            replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: endTime?.ToString() ?? "endTime Error", callbackData: $"{UserCommands.Instance.Callback["SetEndTime"].callback} {endTime}")))).MessageId;
+                      MessageQueue.SendTextMessage(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter),
+                            replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: endTime?.ToString() ?? "endTime Error", callbackData: $"{UserCommands.Instance.Callback["SetEndTime"].callback} {endTime}")));
                     break;
 
                 case 6:
@@ -75,8 +75,8 @@ namespace Core.Bot.Commands.AddingDiscipline {
 
             await dbContext.SaveChangesAsync();
 
-            await botClient.SendTextMessageAsync(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.MainKeyboardMarkup);
-            await botClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, customDiscipline.Date, user, all: true).Item1, replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, customDiscipline.Date, user.ScheduleProfile), parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
+            MessageQueue.SendTextMessage(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.MainKeyboardMarkup);
+            MessageQueue.SendTextMessage(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, customDiscipline.Date, user, all: true).Item1, replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, customDiscipline.Date, user.ScheduleProfile), parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
         }
 
         public static async Task DeleteInitialMessage(ITelegramBotClient botClient, ChatId chatId, TelegramUser user) {

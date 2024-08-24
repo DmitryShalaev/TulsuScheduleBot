@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
@@ -19,7 +20,7 @@ namespace Core.Bot.Commands.Student.Additional.Exam.Message {
             user.TelegramUserTmp.TmpData = UserCommands.Instance.Message["Exam"];
             await dbContext.SaveChangesAsync();
 
-            await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["Exam"], replyMarkup: Statics.ExamKeyboardMarkup);
+            MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["Exam"], replyMarkup: Statics.ExamKeyboardMarkup);
         }
     }
 }

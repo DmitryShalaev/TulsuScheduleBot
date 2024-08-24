@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 
 using Core.Bot.Commands;
+using Core.Bot.Messages;
 using Core.Bot.New.Commands.Student;
 
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,6 @@ namespace Core.Bot {
 
         public readonly TelegramBotClient botClient;
 
-        private readonly UserActivityTracker activityTracker;
         private readonly Manager commandManager;
 
         private TelegramBot() {
@@ -43,8 +43,6 @@ namespace Core.Bot {
             botClient = new TelegramBotClient(Environment.GetEnvironmentVariable("TelegramBotToken")!);
 
             Task.Factory.StartNew(Jobs.Job.InitAsync, TaskCreationOptions.LongRunning);
-
-            activityTracker = new UserActivityTracker();
 
             commandManager = new((string message, TelegramUser user, out string args) => {
                 args = "";
@@ -101,20 +99,20 @@ namespace Core.Bot {
             commandManager.AddMessageCommand(UserCommands.Instance.Message["Corps"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 user.TelegramUserTmp.TmpData = UserCommands.Instance.Message["Corps"];
                 await dbContext.SaveChangesAsync();
-                await botClient.SendTextMessageAsync(chatId: chatId, text: "Выберите корпус, и я покажу где он на карте", replyMarkup: Statics.CorpsKeyboardMarkup);
+                MessageQueue.SendTextMessage(chatId: chatId, text: "Выберите корпус, и я покажу где он на карте", replyMarkup: Statics.CorpsKeyboardMarkup);
             });
 
             foreach(UserCommands.CorpsStruct item in UserCommands.Instance.Corps) {
                 commandManager.AddMessageCommand(item.text, Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                     if(!string.IsNullOrWhiteSpace(item.map))
-                        await botClient.SendTextMessageAsync(chatId: chatId, text: $"[Схема корпуса]({item.map})", parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                        MessageQueue.SendTextMessage(chatId: chatId, text: $"[Схема корпуса]({item.map})", parseMode: ParseMode.Markdown, disableWebPagePreview: true);
 
                     await botClient.SendVenueAsync(chatId: chatId, latitude: item.latitude, longitude: item.longitude, title: item.title, address: item.address, replyMarkup: Statics.CorpsKeyboardMarkup);
                 });
             }
 
             commandManager.AddMessageCommand(UserCommands.Instance.College.text, Mode.Default, async (dbContext, chatId, messageId, user, args) => {
-                await botClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.College.title, replyMarkup: Statics.CancelKeyboardMarkup);
+                MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.College.title, replyMarkup: Statics.CancelKeyboardMarkup);
 
                 foreach(UserCommands.CorpsStruct item in UserCommands.Instance.College.corps)
                     await botClient.SendVenueAsync(chatId: chatId, latitude: item.latitude, longitude: item.longitude, title: "", address: item.address, replyMarkup: Statics.CorpsKeyboardMarkup);
@@ -130,11 +128,6 @@ namespace Core.Bot {
             Console.WriteLine(msg);
 #endif
             Message? message = update.Message ?? update.EditedMessage ?? update.CallbackQuery?.Message;
-
-            if(message is not null && !activityTracker.IsAllowed(message.Chat.Id)) {
-                await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "Вы слишком часто отправляете сообщения!!!");
-                return;
-            }
 
             try {
                 using(ScheduleDbContext dbContext = new()) {

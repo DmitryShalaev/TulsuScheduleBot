@@ -16,6 +16,9 @@ namespace Core.Bot.Commands.AddingDiscipline.Callback {
 
         public Manager.Check Check => Manager.Check.none;
 
-        public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) => await AddingDisciplineMode.SetStagesAddingDisciplineAsync(dbContext, BotClient, chatId, messageId, args, user);
+        public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
+            await BotClient.EditMessageReplyMarkupAsync(chatId, messageId);
+            await AddingDisciplineMode.SetStagesAddingDisciplineAsync(dbContext, BotClient, chatId, args, user);
+        }
     }
 }

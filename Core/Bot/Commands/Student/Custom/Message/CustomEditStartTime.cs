@@ -1,5 +1,6 @@
 ﻿using Core.Bot.Commands.AddingDiscipline;
 using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot;
 using ScheduleBot.DB;
@@ -26,14 +27,14 @@ namespace Core.Bot.Commands.Student.Custom.Message {
                     user.TelegramUserTmp.Mode = Mode.Default;
                     user.TelegramUserTmp.TmpData = null;
 
-                    await Statics.DeleteTempMessage(user, messageId);
+                     
 
                     await dbContext.SaveChangesAsync();
 
-                    await BotClient.SendTextMessageAsync(chatId: chatId, text: "Время начала успешно изменено.", replyMarkup: Statics.MainKeyboardMarkup);
-                    await BotClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, discipline.Date, user, all: true).Item1, replyMarkup: DefaultCallback.GetCustomEditAdminInlineKeyboardButton(discipline), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                    MessageQueue.SendTextMessage(chatId: chatId, text: "Время начала успешно изменено.", replyMarkup: Statics.MainKeyboardMarkup);
+                    MessageQueue.SendTextMessage(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, discipline.Date, user, all: true).Item1, replyMarkup: DefaultCallback.GetCustomEditAdminInlineKeyboardButton(discipline), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
                 } catch(Exception) {
-                    await BotClient.SendTextMessageAsync(chatId: chatId, text: "Ошибка в формате времени!", replyMarkup: Statics.CancelKeyboardMarkup);
+                    MessageQueue.SendTextMessage(chatId: chatId, text: "Ошибка в формате времени!", replyMarkup: Statics.CancelKeyboardMarkup);
                 }
             }
         }

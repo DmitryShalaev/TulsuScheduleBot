@@ -1,5 +1,6 @@
 ﻿using Core.Bot.Commands;
 using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
@@ -23,13 +24,12 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Message {
 
             dbContext.Feedbacks.Add(new() { Message = args, TelegramUser = user });
 
-            await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["ThanksForTheFeedback"], replyMarkup: Statics.MainKeyboardMarkup);
-            await Statics.DeleteTempMessage(user);
+            MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["ThanksForTheFeedback"], replyMarkup: Statics.MainKeyboardMarkup);
 
             await dbContext.SaveChangesAsync();
 
             foreach(TelegramUser? item in dbContext.TelegramUsers.Where(i => i.IsAdmin))
-                await BotClient.SendTextMessageAsync(chatId: item.ChatID, text: $"Получен новый отзыв или предложение. От {user.FirstName}\n/feedback", disableNotification: true);
+                MessageQueue.SendTextMessage(chatId: item.ChatID, text: $"Получен новый отзыв или предложение. От {user.FirstName}\n/feedback", disableNotification: true);
         }
     }
 }

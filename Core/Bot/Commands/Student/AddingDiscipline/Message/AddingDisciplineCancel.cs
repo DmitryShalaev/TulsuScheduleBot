@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot;
 using ScheduleBot.DB;
@@ -24,15 +25,15 @@ namespace Core.Bot.Commands.AddingDiscipline.Message {
             user.TelegramUserTmp.Mode = Mode.Default;
             dbContext.CustomDiscipline.RemoveRange(tmp);
 
-            await Statics.DeleteTempMessage(user, messageId);
+             
             await AddingDisciplineMode.DeleteInitialMessage(BotClient, chatId, user);
 
             await dbContext.SaveChangesAsync();
 
-            await Statics.ScheduleRelevance(dbContext, BotClient, chatId, user.ScheduleProfile.Group!, Statics.MainKeyboardMarkup);
+            await Statics.ScheduleRelevance(dbContext, chatId, user.ScheduleProfile.Group!, Statics.MainKeyboardMarkup);
 
             (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, first.Date, user, true);
-            await BotClient.SendTextMessageAsync(chatId: chatId, text: schedule.Item1, replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, first.Date, user.ScheduleProfile), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+            MessageQueue.SendTextMessage(chatId: chatId, text: schedule.Item1, replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, first.Date, user.ScheduleProfile), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
         }
     }
 }

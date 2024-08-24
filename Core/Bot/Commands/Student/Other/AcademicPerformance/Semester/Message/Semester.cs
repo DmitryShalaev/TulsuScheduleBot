@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot;
 using ScheduleBot.DB;
@@ -19,10 +20,10 @@ namespace Core.Bot.Commands.Student.Other.AcademicPerformance.Semester.Message {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             string StudentID = user.ScheduleProfile.StudentID!;
 
-            await Statics.ProgressRelevance(dbContext, BotClient, chatId, StudentID, DefaultMessage.GetTermsKeyboardMarkup(dbContext, StudentID));
+            await Statics.ProgressRelevance(dbContext, chatId, StudentID, DefaultMessage.GetTermsKeyboardMarkup(dbContext, StudentID));
             await dbContext.SaveChangesAsync();
 
-            await BotClient.SendTextMessageAsync(chatId: chatId, text: Scheduler.GetProgressByTerm(dbContext, int.Parse(args), StudentID), replyMarkup: DefaultMessage.GetTermsKeyboardMarkup(dbContext, StudentID));
+            MessageQueue.SendTextMessage(chatId: chatId, text: Scheduler.GetProgressByTerm(dbContext, int.Parse(args), StudentID), replyMarkup: DefaultMessage.GetTermsKeyboardMarkup(dbContext, StudentID));
         }
     }
 }

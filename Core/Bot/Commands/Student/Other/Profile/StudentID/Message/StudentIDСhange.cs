@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot;
 using ScheduleBot.DB;
@@ -17,15 +18,15 @@ namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            await Statics.DeleteTempMessage(user, messageId);
+             
 
             if(args.Length > 10) {
-                user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Номер зачетки не может содержать более 10 символов.", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                  MessageQueue.SendTextMessage(chatId: chatId, text: "Номер зачетки не может содержать более 10 символов.", replyMarkup: Statics.CancelKeyboardMarkup);
                 await dbContext.SaveChangesAsync();
                 return;
             }
 
-            int _messageId = (await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["WeNeedToWait"], replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+            MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["WeNeedToWait"], replyMarkup: Statics.CancelKeyboardMarkup);
 
             if(int.TryParse(args, out int id)) {
                 StudentIDLastUpdate? studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args && i.Update != DateTime.MinValue);
@@ -38,18 +39,16 @@ namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
                     user.ScheduleProfile.StudentIDLastUpdate = studentID;
                     await dbContext.SaveChangesAsync();
 
-                    await BotClient.SendTextMessageAsync(chatId: chatId, text: $"Номер зачётки успешно изменен на {args} ", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user));
+                    MessageQueue.SendTextMessage(chatId: chatId, text: $"Номер зачётки успешно изменен на {args} ", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user));
 
                 } else {
-                    user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["InvalidStudentIDNumber"], replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                      MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["InvalidStudentIDNumber"], replyMarkup: Statics.CancelKeyboardMarkup);
                     await dbContext.SaveChangesAsync();
                 }
             } else {
-                user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Не удалось распознать введенный номер зачётной книжки", replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+                  MessageQueue.SendTextMessage(chatId: chatId, text: "Не удалось распознать введенный номер зачётной книжки", replyMarkup: Statics.CancelKeyboardMarkup);
                 await dbContext.SaveChangesAsync();
             }
-
-            await BotClient.DeleteMessageAsync(chatId: chatId, messageId: _messageId);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot;
 using ScheduleBot.DB;
@@ -29,19 +30,19 @@ namespace Core.Bot.Commands.Classrooms.Message {
                         buttons.Add([InlineKeyboardButton.WithCallbackData(text: item, callbackData: callback[..Math.Min(callback.Length, 35)])]);
                     }
 
-                    user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Выберите аудиторию.\nЕсли её нет уточните запрос.", replyMarkup: new InlineKeyboardMarkup(buttons))).MessageId;
+                      MessageQueue.SendTextMessage(chatId: chatId, text: "Выберите аудиторию.\nЕсли её нет уточните запрос.", replyMarkup: new InlineKeyboardMarkup(buttons));
                 } else {
                     user.TelegramUserTmp.Mode = Mode.ClassroomSelected;
                     string _classroom = user.TelegramUserTmp.TmpData = find.First();
 
                     ClassroomLastUpdate classroom = dbContext.ClassroomLastUpdate.First(i => i.Classroom == _classroom);
 
-                    await BotClient.SendTextMessageAsync(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentClassroom"]}: {_classroom}", replyMarkup: DefaultMessage.GetClassroomWorkScheduleSelectedKeyboardMarkup(_classroom), disableWebPagePreview: true);
+                    MessageQueue.SendTextMessage(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentClassroom"]}: {_classroom}", replyMarkup: DefaultMessage.GetClassroomWorkScheduleSelectedKeyboardMarkup(_classroom), disableWebPagePreview: true);
                 }
 
                 await dbContext.SaveChangesAsync();
             } else {
-                await BotClient.SendTextMessageAsync(chatId: chatId, text: "Аудитория не найдена!", replyMarkup: Statics.WorkScheduleBackKeyboardMarkup);
+                MessageQueue.SendTextMessage(chatId: chatId, text: "Аудитория не найдена!", replyMarkup: Statics.WorkScheduleBackKeyboardMarkup);
             }
         }
     }

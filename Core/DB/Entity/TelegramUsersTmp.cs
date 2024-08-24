@@ -14,7 +14,6 @@ namespace ScheduleBot.DB.Entity {
         public Mode Mode { get; set; } = Mode.Default;
         public ModeDTO ModeDTO { get; set; }
 
-        public int? RequestingMessageID { get; set; }
         public string? TmpData { get; set; }
     }
 }

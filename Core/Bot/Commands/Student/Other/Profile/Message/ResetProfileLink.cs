@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
@@ -20,9 +21,9 @@ namespace Core.Bot.Commands.Student.Other.Profile.Message {
                 user.TelegramUserTmp.Mode = Mode.ResetProfileLink;
                 await dbContext.SaveChangesAsync();
 
-                await BotClient.SendTextMessageAsync(chatId: chatId, text: "Вы точно уверены что хотите восстановить свой профиль?", replyMarkup: Statics.ResetProfileLinkKeyboardMarkup);
+                MessageQueue.SendTextMessage(chatId: chatId, text: "Вы точно уверены что хотите восстановить свой профиль?", replyMarkup: Statics.ResetProfileLinkKeyboardMarkup);
             } else {
-                await BotClient.SendTextMessageAsync(chatId: chatId, text: "Владельцу профиля нет смысла его восстанавливать!", replyMarkup: Statics.MainKeyboardMarkup);
+                MessageQueue.SendTextMessage(chatId: chatId, text: "Владельцу профиля нет смысла его восстанавливать!", replyMarkup: Statics.MainKeyboardMarkup);
             }
         }
     }

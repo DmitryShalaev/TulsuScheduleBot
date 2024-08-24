@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot;
 using ScheduleBot.DB;
@@ -22,8 +23,7 @@ namespace Core.Bot.Commands.Teachers.Callback {
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
             user.TelegramUserTmp.Mode = Mode.TeacherSelected;
-            user.TelegramUserTmp.RequestingMessageID = null;
-
+              
             TeacherLastUpdate teacher = dbContext.TeacherLastUpdate.First(i => i.Teacher.ToLower().StartsWith(args));
 
             string teacherName = user.TelegramUserTmp.TmpData = teacher.Teacher;
@@ -34,7 +34,7 @@ namespace Core.Bot.Commands.Teachers.Callback {
 
             await BotClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
 
-            await BotClient.SendTextMessageAsync(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentTeacher"]}: [{teacherName}]({teacher.LinkProfile})", replyMarkup: DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(teacherName), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+            MessageQueue.SendTextMessage(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentTeacher"]}: [{teacherName}]({teacher.LinkProfile})", replyMarkup: DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(teacherName), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
         }
     }
 }

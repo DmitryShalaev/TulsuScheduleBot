@@ -1,5 +1,6 @@
 ﻿using Core.Bot.Commands;
 using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -23,22 +24,21 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Message {
                 dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile));
 
             user.TelegramUserTmp.TmpData = null;
-            await Statics.DeleteTempMessage(user);
 
             if(user.IsAdmin) {
                 ScheduleBot.DB.Entity.Feedback? feedback = dbContext.Feedbacks.Include(i => i.TelegramUser).Where(i => !i.IsCompleted).OrderBy(i => i.Date).FirstOrDefault();
 
                 if(feedback is not null) {
-                    await BotClient.SendTextMessageAsync(chatId: chatId, text: FeedbackMessage.GetFeedbackMessage(feedback), replyMarkup: FeedbackMessage.GetFeedbackInlineKeyboardButton(dbContext, feedback));
+                    MessageQueue.SendTextMessage(chatId: chatId, text: FeedbackMessage.GetFeedbackMessage(feedback), replyMarkup: FeedbackMessage.GetFeedbackInlineKeyboardButton(dbContext, feedback));
                 } else {
-                    await BotClient.SendTextMessageAsync(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: Statics.MainKeyboardMarkup);
+                    MessageQueue.SendTextMessage(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: Statics.MainKeyboardMarkup);
                 }
 
                 return;
             }
 
             user.TelegramUserTmp.Mode = Mode.Feedback;
-            user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["FeedbackMessage"], replyMarkup: Statics.CancelKeyboardMarkup)).MessageId;
+              MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["FeedbackMessage"], replyMarkup: Statics.CancelKeyboardMarkup);
 
             await dbContext.SaveChangesAsync();
         }

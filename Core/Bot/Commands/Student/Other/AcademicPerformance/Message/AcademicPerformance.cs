@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
@@ -20,10 +21,10 @@ namespace Core.Bot.Commands.Student.AcademicPerformance.Message {
 
             string StudentID = user.ScheduleProfile.StudentID!;
 
-            await Statics.ProgressRelevance(dbContext, BotClient, chatId, StudentID, null, false);
+            await Statics.ProgressRelevance(dbContext, chatId, StudentID, null, false);
             await dbContext.SaveChangesAsync();
 
-            await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["AcademicPerformance"], replyMarkup: DefaultMessage.GetTermsKeyboardMarkup(dbContext, StudentID));
+            MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["AcademicPerformance"], replyMarkup: DefaultMessage.GetTermsKeyboardMarkup(dbContext, StudentID));
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Text;
 
 using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
@@ -18,7 +19,7 @@ namespace Core.Bot.Commands.Student.Other.GroupList.Message {
 
         public Manager.Check Check => Manager.Check.group;
 
-        public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
+        public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             var sb = new StringBuilder();
 
             string? group = user.ScheduleProfile.Group;
@@ -27,19 +28,17 @@ namespace Core.Bot.Commands.Student.Other.GroupList.Message {
 
             sb.AppendLine($"{UserCommands.Instance.Message["GroupList"]}: {group}\n");
 
-            if(users.Count == 0) {
-                sb.AppendLine("Здесь никого нет 😢😢😢");
-            }
+            if(users.Count == 0)                 sb.AppendLine("Здесь никого нет 😢😢😢");
 
             foreach(TelegramUser? u in users) {
-                if(!string.IsNullOrWhiteSpace(u.Username)) {
-                    sb.AppendLine($"[{EscapeSpecialCharacters($"{u.FirstName} {u.LastName}")}](https://t.me/{u.Username})");
-                } else {
+                if(!string.IsNullOrWhiteSpace(u.Username))                     sb.AppendLine($"[{EscapeSpecialCharacters($"{u.FirstName} {u.LastName}")}](https://t.me/{u.Username})");
+else {
                     sb.AppendLine(EscapeSpecialCharacters($"{u.FirstName} {u.LastName}"));
                 }
             }
 
-            await BotClient.SendTextMessageAsync(chatId: chatId, text: sb.ToString(), replyMarkup: Statics.OtherKeyboardMarkup, parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+            MessageQueue.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: Statics.OtherKeyboardMarkup, parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+            return Task.CompletedTask;
         }
 
         public static string EscapeSpecialCharacters(string input) {

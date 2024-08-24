@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot;
 using ScheduleBot.DB;
@@ -30,7 +31,7 @@ namespace Core.Bot.Commands.Teachers.Message {
                         buttons.Add([InlineKeyboardButton.WithCallbackData(text: item, callbackData: callback[..Math.Min(callback.Length, 35)])]);
                     }
 
-                    user.TelegramUserTmp.RequestingMessageID = (await BotClient.SendTextMessageAsync(chatId: chatId, text: "Выберите преподавателя.\nЕсли его нет уточните ФИО.", replyMarkup: new InlineKeyboardMarkup(buttons))).MessageId;
+                      MessageQueue.SendTextMessage(chatId: chatId, text: "Выберите преподавателя.\nЕсли его нет уточните ФИО.", replyMarkup: new InlineKeyboardMarkup(buttons));
                 } else {
                     user.TelegramUserTmp.Mode = Mode.TeacherSelected;
                     string teacherName = user.TelegramUserTmp.TmpData = find.First();
@@ -40,12 +41,12 @@ namespace Core.Bot.Commands.Teachers.Message {
                     if(string.IsNullOrWhiteSpace(teacher.LinkProfile))
                         await Parser.Instance.UpdatingTeacherInfo(dbContext, teacherName);
 
-                    await BotClient.SendTextMessageAsync(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentTeacher"]}: [{teacherName}]({teacher.LinkProfile})", replyMarkup: DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(teacherName), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                    MessageQueue.SendTextMessage(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentTeacher"]}: [{teacherName}]({teacher.LinkProfile})", replyMarkup: DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(teacherName), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
                 }
 
                 await dbContext.SaveChangesAsync();
             } else {
-                await BotClient.SendTextMessageAsync(chatId: chatId, text: "Преподаватель не найден!", replyMarkup: Statics.WorkScheduleBackKeyboardMarkup);
+                MessageQueue.SendTextMessage(chatId: chatId, text: "Преподаватель не найден!", replyMarkup: Statics.WorkScheduleBackKeyboardMarkup);
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
@@ -22,7 +23,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message
                 int maxDaysNotifications = UserCommands.Instance.Config.MaxDaysNotifications;
 
                 if(!user.IsAdmin && _days > maxDaysNotifications) {
-                    await BotClient.SendTextMessageAsync(chatId: chatId, text: $"Максимальное количество дней: {maxDaysNotifications}", replyMarkup: Statics.CancelKeyboardMarkup);
+                    MessageQueue.SendTextMessage(chatId: chatId, text: $"Максимальное количество дней: {maxDaysNotifications}", replyMarkup: Statics.CancelKeyboardMarkup);
 
                     return;
                 }
@@ -30,14 +31,14 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message
                 user.Settings.NotificationDays = Math.Abs(int.Parse(args));
                 user.TelegramUserTmp.Mode = Mode.Default;
 
-                await Statics.DeleteTempMessage(user, messageId);
+                 
 
                 await dbContext.SaveChangesAsync();
 
-                await BotClient.SendTextMessageAsync(chatId: chatId, text: "Количество дней успешно изменено.", replyMarkup: DefaultMessage.GetSettingsKeyboardMarkup(user));
-                await BotClient.SendTextMessageAsync(chatId: chatId, text: UserCommands.Instance.Message["NotificationSettings"], replyMarkup: DefaultCallback.GetNotificationsInlineKeyboardButton(user));
+                MessageQueue.SendTextMessage(chatId: chatId, text: "Количество дней успешно изменено.", replyMarkup: DefaultMessage.GetSettingsKeyboardMarkup(user));
+                MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["NotificationSettings"], replyMarkup: DefaultCallback.GetNotificationsInlineKeyboardButton(user));
             } catch(Exception) {
-                await BotClient.SendTextMessageAsync(chatId: chatId, text: "Ошибка в формате количества дней!", replyMarkup: Statics.CancelKeyboardMarkup);
+                MessageQueue.SendTextMessage(chatId: chatId, text: "Ошибка в формате количества дней!", replyMarkup: Statics.CancelKeyboardMarkup);
             }
         }
     }
