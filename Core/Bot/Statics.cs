@@ -25,8 +25,8 @@ namespace Core.Bot {
         [GeneratedRegex("^([A-z]+)[ ]([A-z]+)$")]
         public static partial Regex NotificationsCallbackRegex();
 
-        [GeneratedRegex("^([A-z]+)[|]([А-яЁё. 0-9-]+)$")]
-        public static partial Regex TeachersCallbackRegex();
+        [GeneratedRegex("^([Ss]elect)[|](.+)$")]
+        public static partial Regex WorksCallbackRegex();
 
         [GeneratedRegex("^(\\d{1,2})([ ,.-](\\d{1,2}|\\w{3,8}))?([ ,.-](\\d{2}|\\d{4}))?$")]
         public static partial Regex DateRegex();
