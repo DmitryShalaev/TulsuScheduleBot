@@ -6,13 +6,13 @@ using ScheduleBot.DB.Entity;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace Core.Bot.Commands.Teachers.Back.Message {
-    public class TeachersWorkScheduleBack : IMessageCommand {
+namespace Core.Bot.Commands.Student.Back_Cancel.Message {
+    public class WorkScheduleBack : IMessageCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
-        public List<string>? Commands => [UserCommands.Instance.Message["TeachersWorkScheduleBack"]];
+        public List<string>? Commands => [UserCommands.Instance.Message["WorkScheduleBack"]];
 
-        public List<Mode> Modes => [Mode.TeachersWorkSchedule, Mode.TeacherSelected];
+        public List<Mode> Modes => [Mode.TeachersWorkSchedule, Mode.TeacherSelected, Mode.ClassroomSchedule, Mode.ClassroomSelected];
 
         public Manager.Check Check => Manager.Check.none;
 

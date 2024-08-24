@@ -45,7 +45,7 @@ namespace Core.Bot.Commands.Teachers.Message {
 
                 await dbContext.SaveChangesAsync();
             } else {
-                await BotClient.SendTextMessageAsync(chatId: chatId, text: "Преподаватель не найден!", replyMarkup: Statics.TeachersWorkScheduleBackKeyboardMarkup);
+                await BotClient.SendTextMessageAsync(chatId: chatId, text: "Преподаватель не найден!", replyMarkup: Statics.WorkScheduleBackKeyboardMarkup);
             }
         }
     }

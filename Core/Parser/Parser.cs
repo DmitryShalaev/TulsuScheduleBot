@@ -122,7 +122,7 @@ namespace ScheduleBot {
 
                     IEnumerable<Discipline> except = disciplines.Except(_list);
                     if(except.Any()) {
-                       var dd= except.ToList();
+                        var dd = except.ToList();
                         dbContext.Disciplines.AddRange(except);
 
                         if(_list.Count != 0)
@@ -219,6 +219,57 @@ namespace ScheduleBot {
                     except = _list.Except(teacherWorkSchedule);
                     if(except.Any())
                         dbContext.TeacherWorkSchedule.RemoveRange(except);
+
+                    await dbContext.SaveChangesAsync();
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public async Task<bool> UpdatingClassroomWorkSchedule(ScheduleDbContext dbContext, string classroom, int updateAttemptTime) {
+            ClassroomLastUpdate? classroomLastUpdate = dbContext.ClassroomLastUpdate.FirstOrDefault(i => i.Classroom == classroom);
+            if(classroomLastUpdate is null) {
+                classroomLastUpdate = new() { Classroom = classroom, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
+                dbContext.ClassroomLastUpdate.Add(classroomLastUpdate);
+            } else {
+                if((DateTime.Now - classroomLastUpdate.UpdateAttempt.ToLocalTime()).TotalMinutes > updateAttemptTime)
+                    classroomLastUpdate.UpdateAttempt = DateTime.UtcNow;
+                else
+                    return false;
+            }
+
+            await dbContext.SaveChangesAsync();
+
+            (DateOnly min, DateOnly max, string searchField)? dates = await GetDates(classroom);
+            if(dates is not null && dates.Value.searchField == "AUD") {
+
+                List<ClassroomWorkSchedule>? classroomWorkSchedule = await GetClassroomWorkSchedule(classroom);
+
+                if(classroomWorkSchedule is not null) {
+
+                    classroomLastUpdate!.Update = DateTime.UtcNow;
+
+                    if(dbContext.ClassroomWorkSchedule.Any(i => i.LectureHall == classroom && (i.Date < dates.Value.min || i.Date > dates.Value.max))) {
+                        dbContext.ClassroomWorkSchedule.RemoveRange(dbContext.ClassroomWorkSchedule.Where(i => i.LectureHall == classroom && (i.Date < dates.Value.min || i.Date > dates.Value.max)));
+                        await dbContext.SaveChangesAsync();
+                    }
+
+                    var _list = dbContext.ClassroomWorkSchedule.Where(i => i.LectureHall == classroom).ToList();
+
+                    IEnumerable<ClassroomWorkSchedule> except = classroomWorkSchedule.Except(_list);
+                    if(except.Any()) {
+                        dbContext.ClassroomWorkSchedule.AddRange(except);
+
+                        await dbContext.SaveChangesAsync();
+                        _list = [.. dbContext.ClassroomWorkSchedule.Where(i => i.LectureHall == classroom)];
+                    }
+
+                    except = _list.Except(classroomWorkSchedule);
+                    if(except.Any())
+                        dbContext.ClassroomWorkSchedule.RemoveRange(except);
 
                     await dbContext.SaveChangesAsync();
 
@@ -370,6 +421,44 @@ namespace ScheduleBot {
             return null;
         }
 
+        public async Task<List<ClassroomWorkSchedule>?> GetClassroomWorkSchedule(string classroom) {
+            try {
+                using(var client = new HttpClient(clientHandler, false)) {
+                    #region RequestHeaders
+                    client.DefaultRequestHeaders.Add("Accept", "application/json, text/javascript, */*; q=0.01");
+                    client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
+                    client.DefaultRequestHeaders.Add("Accept-Language", "ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7");
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.34");
+                    client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
+                    client.DefaultRequestHeaders.Add("Referer", $"https://tulsu.ru/schedule/?search={classroom}");
+                    client.DefaultRequestHeaders.Add("Origin", "https://tulsu.ru");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua", "\"Chromium\";v=\"112\", \"Microsoft Edge\";v=\"112\", \"Not:A-Brand\";v=\"99\"");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua-mobile", "?0");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua-platform", "\"Windows\"");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-Dest", "empty");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-Mode", "cors");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-Site", "same-origin");
+                    client.DefaultRequestHeaders.Add("Connection", "keep-alive");
+                    client.DefaultRequestHeaders.Add("Host", "tulsu.ru");
+
+                    client.Timeout = TimeSpan.FromSeconds(10);
+
+                    #endregion
+
+                    using(var content = new StringContent($"search_field=AUD&search_value={classroom}", Encoding.UTF8, "application/x-www-form-urlencoded"))
+                    using(HttpResponseMessage response = await client.PostAsync("https://tulsu.ru/schedule/queries/GetSchedule.php", content))
+                        if(response.IsSuccessStatusCode) {
+                            var jObject = JArray.Parse(await response.Content.ReadAsStringAsync());
+                            return jObject.Count == 0 ? throw new Exception() : jObject.Select(j => new ClassroomWorkSchedule(j)).ToList();
+                        }
+                }
+            } catch(Exception) {
+                return null;
+            }
+
+            return null;
+        }
+
         private async Task<JArray?> GetDictionaries() {
             using(var client = new HttpClient(clientHandler, false)) {
                 #region RequestHeaders
@@ -453,7 +542,7 @@ namespace ScheduleBot {
         public static List<string>? GetClassrooms(JArray jObject) {
             try {
                 var res = jObject?.Where(i => {
-                 
+
                     string str = i.Value<string>("value")?.Trim() ?? "";
                     return !regexes.Any(r => r.IsMatch(str));
                 }).Select(j => j.Value<string>("value") ?? "").ToList();

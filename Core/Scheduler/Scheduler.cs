@@ -6,7 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
+#pragma warning disable IDE0130 // Пространство имен (namespace) не соответствует структуре папок.
+
 namespace ScheduleBot {
+
     public static class Scheduler {
 
         private static DateOnly GetFirstDayOfWeek(DateOnly currentDate) {
@@ -39,6 +42,20 @@ namespace ScheduleBot {
 
             return schedules;
         }
+
+        public static List<(string, DateOnly)> GetClassroomWorkScheduleByWeak(ScheduleDbContext dbContext, bool next, string classroom, TelegramUser user) {
+            DateOnly firstDayOfWeek = GetFirstDayOfWeek(DateOnly.FromDateTime(!next ? DateTime.Now : DateTime.Now.AddDays(7)));
+
+            var schedules = new List<(string, DateOnly)>();
+
+            for(int i = 0; i < 7; i++) {
+                DateOnly tmp = firstDayOfWeek.AddDays(i);
+                schedules.Add((GetClassroomWorkScheduleByDate(dbContext, tmp, classroom, user), tmp));
+            }
+
+            return schedules;
+        }
+
 
         public static (string, bool) GetScheduleByDate(ScheduleDbContext dbContext, DateOnly date, TelegramUser user, bool all = false, bool link = true) {
             ScheduleProfile profile = user.ScheduleProfile;
@@ -188,13 +205,53 @@ namespace ScheduleBot {
               .AppendLine("⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯");
 
             if(schedules.Count == 0) {
-                sb.AppendLine("Ничего нет");
-            } else {
-                foreach(TeacherWorkSchedule? item in schedules) {
-                    sb.AppendLine($"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}")
-                      .AppendLine($"📎 {item.Name} ({item.Type})")
-                      .AppendLine(item.Groups);
+                return sb.AppendLine("Ничего нет").ToString();
+            }
+
+            foreach(TeacherWorkSchedule? item in schedules) {
+                sb.AppendLine($"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}")
+                  .AppendLine($"📎 {item.Name} ({item.Type})")
+                  .AppendLine($"👥 {item.Groups}").AppendLine();
+            }
+
+            return sb.ToString();
+        }
+
+        public static string GetClassroomWorkScheduleByDate(ScheduleDbContext dbContext, DateOnly date, string classroom, TelegramUser user) {
+            var schedules = dbContext.ClassroomWorkSchedule.Include(i => i.TeacherLastUpdate)
+                .Where(i => i.LectureHall == classroom && i.Date == date)
+                .OrderBy(i => i.StartTime)
+                .ToList();
+
+            int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(
+                date.ToDateTime(TimeOnly.MinValue),
+                CalendarWeekRule.FirstFourDayWeek,
+                DayOfWeek.Monday);
+
+            var sb = new StringBuilder();
+            sb.AppendLine($"📌 {date:dd.MM.yy} - {char.ToUpper(date.ToString("dddd")[0]) + date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})")
+              .AppendLine($"🚪 {classroom}")
+              .AppendLine("⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯");
+
+            if(schedules.Count == 0) {
+                return sb.AppendLine("Ничего нет").ToString();
+            }
+
+            bool linkEnabled = user.Settings.TeacherLincsEnabled;
+
+            foreach(Core.DB.Entity.ClassroomWorkSchedule? item in schedules) {
+                sb.AppendLine($"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm}")
+                  .AppendLine($"📎 {item.Name} ({item.Type})");
+
+                if(!string.IsNullOrWhiteSpace(item.Lecturer)) {
+                    if(linkEnabled && !string.IsNullOrWhiteSpace(item.TeacherLastUpdate?.LinkProfile)) {
+                        sb.AppendLine($"✒ [{item.Lecturer}]({item.TeacherLastUpdate?.LinkProfile})");
+                    } else {
+                        sb.AppendLine($"✒ {item.Lecturer}");
+                    }
                 }
+
+                sb.AppendLine($"👥 {item.Groups}").AppendLine();
             }
 
             return sb.ToString();
@@ -243,6 +300,19 @@ namespace ScheduleBot {
             for(int i = -1; i <= 1; i++) {
                 DateOnly tmp = dateOnly.AddDays(7 * (weeks + i) + ((byte)dayOfWeek - 1));
                 list.Add((GetTeacherWorkScheduleByDate(dbContext, tmp, teacher), tmp));
+            }
+
+            return list;
+        }
+
+        public static List<(string, DateOnly)> GetClassroomWorkScheduleByDay(ScheduleDbContext dbContext, DayOfWeek dayOfWeek, string classroom, TelegramUser user) {
+            int weeks = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+            var dateOnly = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 1, 1));
+
+            var list = new List<(string, DateOnly)>();
+            for(int i = -1; i <= 1; i++) {
+                DateOnly tmp = dateOnly.AddDays(7 * (weeks + i) + ((byte)dayOfWeek - 1));
+                list.Add((GetClassroomWorkScheduleByDate(dbContext, tmp, classroom, user), tmp));
             }
 
             return list;

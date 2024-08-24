@@ -8,8 +8,10 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace Core.Bot.Commands.Teachers.Back.Callback {
-    public class Select : ICallbackCommand {
+#pragma warning disable CA1862 // Используйте перегрузки метода "StringComparison" для сравнения строк без учета регистра
+
+namespace Core.Bot.Commands.Teachers.Callback {
+    public class TeacherSelect : ICallbackCommand {
         public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public string Command => "Select";

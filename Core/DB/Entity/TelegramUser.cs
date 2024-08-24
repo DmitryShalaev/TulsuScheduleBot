@@ -61,7 +61,8 @@ namespace ScheduleBot.DB.Entity {
 
         TeachersWorkSchedule,
         TeacherSelected,
-        ClassroomsSchedule,
+        ClassroomSchedule,
+        ClassroomSelected,
 
         Feedback
     }

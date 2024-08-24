@@ -46,10 +46,35 @@ namespace ScheduleBot {
 
             var queryNgrams = new HashSet<string>(GetNGrams(query, n));
 
-            IEnumerable<string> found = TeachersNgramsDict.Select(i => new Tuple<string, double>(i.Key, Similarity(queryNgrams, i.Value))).Where(i => i.Item2 != 0).OrderByDescending(i => i.Item2).Take(count).Select(i => i.Item1);
+            IEnumerable<string> found = TeachersNgramsDict.Select(i => new Tuple<string, double>(i.Key, Similarity(queryNgrams, i.Value)))
+                .Where(i => i.Item2 != 0)
+                .OrderByDescending(i => i.Item2)
+                .Take(count)
+                .Select(i => i.Item1);
 
             IEnumerable<string> contains = found.Where(i => i.Contains(query, StringComparison.CurrentCultureIgnoreCase));
             return contains.Any() ? contains : found;
+        }
+
+        private static int LevenshteinDistance(string s, string t) {
+            int[,] d = new int[s.Length + 1, t.Length + 1];
+
+            for(int i = 0; i <= s.Length; i++)
+                d[i, 0] = i;
+
+            for(int j = 0; j <= t.Length; j++)
+                d[0, j] = j;
+
+            for(int i = 1; i <= s.Length; i++) {
+                for(int j = 1; j <= t.Length; j++) {
+                    int cost = s[i - 1] == t[j - 1] ? 0 : 1;
+                    d[i, j] = Math.Min(
+                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                        d[i - 1, j - 1] + cost);
+                }
+            }
+
+            return d[s.Length, t.Length];
         }
 
         public IEnumerable<string> ClassroomFindMatch(string query, int n = 2, int count = 5) {
@@ -61,9 +86,26 @@ namespace ScheduleBot {
 
             query = query.ToLower().Trim();
 
-            var queryNgrams = new HashSet<string>(GetNGrams(query, n));
+            bool isNumericQuery = query.All(c => char.IsDigit(c) || c == '-' || c == ' ' || c == '.');
 
-            IEnumerable<string> found = ClassroomNgramsDict.Select(i => new Tuple<string, double>(i.Key, Similarity(queryNgrams, i.Value))).Where(i => i.Item2 != 0).OrderByDescending(i => i.Item2).Take(count).Select(i => i.Item1);
+            IEnumerable<string> found;
+            if(isNumericQuery) {
+                found = ClassroomNgramsDict.Keys
+                    .Select(room => new Tuple<string, int>(room, LevenshteinDistance(query, room)))
+                    .OrderBy(t => t.Item2)
+                    .Take(count)
+                    .Select(t => t.Item1);
+
+            } else {
+                var queryNgrams = new HashSet<string>(GetNGrams(query, n));
+
+                found = ClassroomNgramsDict
+                    .Select(i => new Tuple<string, double>(i.Key, Similarity(queryNgrams, i.Value)))
+                    .Where(i => i.Item2 != 0)
+                    .OrderByDescending(i => i.Item2)
+                    .Take(count)
+                    .Select(i => i.Item1);
+            }
 
             IEnumerable<string> contains = found.Where(i => i.Contains(query, StringComparison.CurrentCultureIgnoreCase));
             return contains.Any() ? contains : found;

@@ -22,7 +22,7 @@ namespace Core.Bot.Commands {
         public struct ConfigStruct {
             public int DisciplineUpdateTime;
             public int StudentIDUpdateTime;
-            public int TeacherWorkScheduleUpdateTime;
+            public int WorkScheduleUpdateTime;
             public int DisciplineUpdateDays;
             public int UpdateAttemptTime;
             public int MaxDaysNotifications;

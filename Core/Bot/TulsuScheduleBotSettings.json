@@ -3,7 +3,7 @@
     "DisciplineUpdateTime": 45, //Minutes
     "StudentIDUpdateTime": 45, //Minutes
 
-    "TeacherWorkScheduleUpdateTime": 60, //Minutes
+    "WorkScheduleUpdateTime": 60, //Minutes
 
     "DisciplineUpdateDays": 4,
 
@@ -64,12 +64,15 @@
     "Other": "Другое",
     "Schedule": "Расписание",
 
+    "WorkScheduleBack": "Вернуться к своему расписанию",
+
     "TeachersWorkSchedule": "Преподаватели",
     "EnterTeacherName": "Введите ФИО преподавателя (можно не полностью)",
-    "TeachersWorkScheduleBack": "Вернуться к своему расписанию",
     "CurrentTeacher": "Преподаватель",
 
     "ClassroomSchedule": "Аудитории",
+    "EnterClassroom": "Введите номер корпуса и кабинета",
+    "CurrentClassroom": "Аудитория",
 
     "CommandRecognizedAsADate": "Команда распознана как дата, но не является ей. Укажите дату в формате \"день месяц год\".\nНапример: \"1 мая 2023\", \"1 05 23\", \"1 5\", \"1\"\n\nЕсли вы ожидали другое поведение, сообщите нам /feedback",
     "CommandNotRecognized": "Команда не распознана. Пожалуйста, используйте кнопки или укажите дату в формате \"день месяц год\".\nНапример: \"1 мая 2023\", \"1 05 23\", \"1 5\", \"1\"\n\nЕсли вы ожидали другое поведение, сообщите нам /feedback",

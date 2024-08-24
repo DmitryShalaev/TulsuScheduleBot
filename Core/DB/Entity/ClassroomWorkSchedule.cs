@@ -14,7 +14,7 @@ namespace Core.DB.Entity {
         public string Name { get; set; }
 
         [ForeignKey("TeacherLastUpdate")]
-        public string Lecturer { get; set; }
+        public string? Lecturer { get; set; }
         public TeacherLastUpdate TeacherLastUpdate { get; set; }
 
         [ForeignKey("ClassroomLastUpdate")]
@@ -48,7 +48,7 @@ namespace Core.DB.Entity {
 
             Groups = Groups?[..^2];
 
-            Lecturer = json.Value<string?>("PREP") ?? throw new NullReferenceException("PREP");
+            Lecturer = json.Value<string?>("PREP");
 
             Class = (Class)Enum.Parse(typeof(Class), (json.Value<string>("CLASS") ?? "other").Replace("default", "def"));
 
