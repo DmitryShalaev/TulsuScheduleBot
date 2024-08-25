@@ -20,7 +20,6 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Message {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             user.TelegramUserTmp.Mode = Mode.Default;
 
-             
             await dbContext.SaveChangesAsync();
 
             MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["MainMenu"], replyMarkup: Statics.MainKeyboardMarkup);

@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
@@ -27,7 +28,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Callbac
 
             await dbContext.SaveChangesAsync();
 
-            await BotClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: UserCommands.Instance.Message["NotificationSettings"], replyMarkup: DefaultCallback.GetNotificationsInlineKeyboardButton(user));
+            MessageQueue.EditMessageText(chatId: chatId, messageId: messageId, text: UserCommands.Instance.Message["NotificationSettings"], replyMarkup: DefaultCallback.GetNotificationsInlineKeyboardButton(user));
         }
     }
 }

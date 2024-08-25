@@ -19,7 +19,7 @@ namespace Core.Bot.Commands.Student.Additional.Exam.Message {
         public Manager.Check Check => Manager.Check.group;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            await Statics.ScheduleRelevance(dbContext,  chatId, user.ScheduleProfile.Group!, Statics.ExamKeyboardMarkup);
+            await Statics.ScheduleRelevanceAsync(dbContext, chatId, user.ScheduleProfile.Group!, Statics.ExamKeyboardMarkup);
             foreach(string item in Scheduler.GetExamse(dbContext, user.ScheduleProfile, true))
                 MessageQueue.SendTextMessage(chatId: chatId, text: item, replyMarkup: Statics.ExamKeyboardMarkup);
         }

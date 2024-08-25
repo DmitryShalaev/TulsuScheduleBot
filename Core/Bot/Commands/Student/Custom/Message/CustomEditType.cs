@@ -26,8 +26,6 @@ namespace Core.Bot.Commands.Student.Custom.Message {
                 user.TelegramUserTmp.Mode = Mode.Default;
                 user.TelegramUserTmp.TmpData = null;
 
-                 
-
                 await dbContext.SaveChangesAsync();
 
                 MessageQueue.SendTextMessage(chatId: chatId, text: "Тип предмета успешно изменен.", replyMarkup: Statics.MainKeyboardMarkup);

@@ -31,7 +31,7 @@ namespace Core.Bot.Commands.Teachers.Message {
                         buttons.Add([InlineKeyboardButton.WithCallbackData(text: item, callbackData: callback[..Math.Min(callback.Length, 35)])]);
                     }
 
-                      MessageQueue.SendTextMessage(chatId: chatId, text: "Выберите преподавателя.\nЕсли его нет уточните ФИО.", replyMarkup: new InlineKeyboardMarkup(buttons));
+                    MessageQueue.SendTextMessage(chatId: chatId, text: "Выберите преподавателя.\nЕсли его нет уточните ФИО.", replyMarkup: new InlineKeyboardMarkup(buttons));
                 } else {
                     user.TelegramUserTmp.Mode = Mode.TeacherSelected;
                     string teacherName = user.TelegramUserTmp.TmpData = find.First();

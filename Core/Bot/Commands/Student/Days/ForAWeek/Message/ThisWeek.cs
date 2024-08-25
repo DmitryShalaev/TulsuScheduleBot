@@ -19,7 +19,7 @@ namespace Core.Bot.Commands.Student.Days.ForAWeek.Message {
         public Manager.Check Check => Manager.Check.group;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            await Statics.ScheduleRelevance(dbContext,  chatId, user.ScheduleProfile.Group!, Statics.WeekKeyboardMarkup);
+            await Statics.ScheduleRelevanceAsync(dbContext, chatId, user.ScheduleProfile.Group!, Statics.WeekKeyboardMarkup);
             foreach(((string, bool), DateOnly) item in Scheduler.GetScheduleByWeak(dbContext, false, user))
                 MessageQueue.SendTextMessage(chatId: chatId, text: item.Item1.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(item.Item2, user, item.Item1.Item2), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
         }

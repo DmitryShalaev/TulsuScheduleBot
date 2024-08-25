@@ -20,7 +20,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
             if(user.IsOwner()) {
                 user.TelegramUserTmp.Mode = Mode.GroupСhange;
 
-                  MessageQueue.SendTextMessage(chatId: chatId, text: "Хотите сменить номер учебной группы? Если да, то напишите новый номер", replyMarkup: Statics.CancelKeyboardMarkup);
+                MessageQueue.SendTextMessage(chatId: chatId, text: "Хотите сменить номер учебной группы? Если да, то напишите новый номер", replyMarkup: Statics.CancelKeyboardMarkup);
                 await dbContext.SaveChangesAsync();
             }
         }

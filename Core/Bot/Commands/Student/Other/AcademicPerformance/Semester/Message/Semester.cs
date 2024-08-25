@@ -20,7 +20,7 @@ namespace Core.Bot.Commands.Student.Other.AcademicPerformance.Semester.Message {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             string StudentID = user.ScheduleProfile.StudentID!;
 
-            await Statics.ProgressRelevance(dbContext, chatId, StudentID, DefaultMessage.GetTermsKeyboardMarkup(dbContext, StudentID));
+            await Statics.ProgressRelevanceAsync(dbContext, chatId, StudentID, DefaultMessage.GetTermsKeyboardMarkup(dbContext, StudentID));
             await dbContext.SaveChangesAsync();
 
             MessageQueue.SendTextMessage(chatId: chatId, text: Scheduler.GetProgressByTerm(dbContext, int.Parse(args), StudentID), replyMarkup: DefaultMessage.GetTermsKeyboardMarkup(dbContext, StudentID));

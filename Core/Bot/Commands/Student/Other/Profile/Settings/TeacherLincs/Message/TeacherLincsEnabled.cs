@@ -19,7 +19,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.TeacherLincs.Message 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             user.Settings.TeacherLincsEnabled = !user.Settings.TeacherLincsEnabled;
 
-              MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["Settings"], replyMarkup: DefaultMessage.GetSettingsKeyboardMarkup(user));
+            MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["Settings"], replyMarkup: DefaultMessage.GetSettingsKeyboardMarkup(user));
 
             await dbContext.SaveChangesAsync();
         }

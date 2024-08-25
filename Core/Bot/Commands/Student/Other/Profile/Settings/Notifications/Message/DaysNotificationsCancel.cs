@@ -19,7 +19,6 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             user.TelegramUserTmp.Mode = Mode.Default;
 
-             
             await dbContext.SaveChangesAsync();
 
             MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["Settings"], replyMarkup: DefaultMessage.GetSettingsKeyboardMarkup(user));

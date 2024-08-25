@@ -6,7 +6,6 @@ using ScheduleBot;
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -108,7 +107,7 @@ namespace Core.Bot {
         #endregion
         #endregion
 
-        public static async Task GroupErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
+        public static async Task GroupErrorAdminAsync(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
             user.TelegramUserTmp.Mode = Mode.GroupСhange;
             await dbContext.SaveChangesAsync();
 
@@ -116,7 +115,7 @@ namespace Core.Bot {
         }
         public static void GroupErrorUser(ChatId chatId) => MessageQueue.SendTextMessage(chatId: chatId, text: $"Попросите владельца профиля указать номер группы в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
 
-        public static async Task StudentIdErrorAdmin(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
+        public static async Task StudentIdErrorAdminAsync(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
             user.TelegramUserTmp.Mode = Mode.StudentIDСhange;
             await dbContext.SaveChangesAsync();
 
@@ -124,7 +123,7 @@ namespace Core.Bot {
         }
         public static void StudentIdErrorUser(ChatId chatId) => MessageQueue.SendTextMessage(chatId: chatId, text: $"Попросите владельца профиля указать номер зачетной книжки в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
 
-        public static async Task ScheduleRelevance(ScheduleDbContext dbContext, ChatId chatId, string group, IReplyMarkup? replyMarkup) {
+        public static async Task ScheduleRelevanceAsync(ScheduleDbContext dbContext, ChatId chatId, string group, IReplyMarkup? replyMarkup) {
             DateTime? groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group)?.Update.ToLocalTime();
 
             if(groupLastUpdate is null || (DateTime.Now - groupLastUpdate)?.TotalMinutes > commands.Config.DisciplineUpdateTime) {
@@ -139,7 +138,7 @@ namespace Core.Bot {
                 MessageQueue.SendTextMessage(chatId: chatId, text: $"{commands.Message["ScheduleIsRelevantOn"]} {groupLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
-        public static async Task TeacherWorkScheduleRelevance(ScheduleDbContext dbContext, ChatId chatId, string teacher, IReplyMarkup? replyMarkup) {
+        public static async Task TeacherWorkScheduleRelevanceAsync(ScheduleDbContext dbContext, ChatId chatId, string teacher, IReplyMarkup? replyMarkup) {
             DateTime? teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher)?.Update.ToLocalTime();
 
             if(teacherLastUpdate is null || (DateTime.Now - teacherLastUpdate)?.TotalMinutes > commands.Config.WorkScheduleUpdateTime) {
@@ -154,7 +153,7 @@ namespace Core.Bot {
                 MessageQueue.SendTextMessage(chatId: chatId, text: $"{commands.Message["ScheduleIsRelevantOn"]} {teacherLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
-        public static async Task ClassroomWorkScheduleRelevance(ScheduleDbContext dbContext, ChatId chatId, string classroom, IReplyMarkup? replyMarkup) {
+        public static async Task ClassroomWorkScheduleRelevanceAsync(ScheduleDbContext dbContext, ChatId chatId, string classroom, IReplyMarkup? replyMarkup) {
             DateTime? classroomLastUpdate = dbContext.ClassroomLastUpdate.FirstOrDefault(i => i.Classroom == classroom)?.Update.ToLocalTime();
 
             if(classroomLastUpdate is null || (DateTime.Now - classroomLastUpdate)?.TotalMinutes > commands.Config.WorkScheduleUpdateTime) {
@@ -169,7 +168,7 @@ namespace Core.Bot {
                 MessageQueue.SendTextMessage(chatId: chatId, text: $"{commands.Message["ScheduleIsRelevantOn"]} {classroomLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
-        public static async Task ProgressRelevance(ScheduleDbContext dbContext, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
+        public static async Task ProgressRelevanceAsync(ScheduleDbContext dbContext, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
             DateTime? studentIDlastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID)?.Update.ToLocalTime();
             if(studentIDlastUpdate is null || (DateTime.Now - studentIDlastUpdate)?.TotalMinutes > commands.Config.StudentIDUpdateTime) {
                 MessageQueue.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);

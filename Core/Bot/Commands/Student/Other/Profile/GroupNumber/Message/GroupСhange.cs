@@ -18,10 +18,9 @@ namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-             
 
             if(args.Length > 15) {
-                  MessageQueue.SendTextMessage(chatId: chatId, text: "Номер группы не может содержать более 15 символов.", replyMarkup: Statics.CancelKeyboardMarkup);
+                MessageQueue.SendTextMessage(chatId: chatId, text: "Номер группы не может содержать более 15 символов.", replyMarkup: Statics.CancelKeyboardMarkup);
                 await dbContext.SaveChangesAsync();
                 return;
             }
@@ -40,9 +39,9 @@ namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
                 MessageQueue.SendTextMessage(chatId: chatId, text: $"Номер группы успешно изменен на {args} ", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user));
 
             } else {
-                  MessageQueue.SendTextMessage(chatId: chatId, text:
-                    $"{UserCommands.Instance.Message["IsNoSuchGroup"]}{(DateTime.Now.Month == 8 ? UserCommands.Instance.Message["FreshmanSchedule"] : "")}",
-                    replyMarkup: Statics.CancelKeyboardMarkup);
+                MessageQueue.SendTextMessage(chatId: chatId, text:
+                  $"{UserCommands.Instance.Message["IsNoSuchGroup"]}{(DateTime.Now.Month == 8 ? UserCommands.Instance.Message["FreshmanSchedule"] : "")}",
+                  replyMarkup: Statics.CancelKeyboardMarkup);
                 await dbContext.SaveChangesAsync();
             }
         }

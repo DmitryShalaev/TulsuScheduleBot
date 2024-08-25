@@ -19,7 +19,7 @@ namespace Core.Bot.Commands.Student.Days.Message {
         public Manager.Check Check => Manager.Check.group;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            await Statics.ScheduleRelevance(dbContext,  chatId, user.ScheduleProfile.Group!, Statics.MainKeyboardMarkup);
+            await Statics.ScheduleRelevanceAsync(dbContext, chatId, user.ScheduleProfile.Group!, Statics.MainKeyboardMarkup);
             var date = DateOnly.FromDateTime(DateTime.Now);
 
             (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user);

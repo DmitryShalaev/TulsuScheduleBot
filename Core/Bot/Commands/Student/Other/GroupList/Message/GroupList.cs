@@ -28,11 +28,11 @@ namespace Core.Bot.Commands.Student.Other.GroupList.Message {
 
             sb.AppendLine($"{UserCommands.Instance.Message["GroupList"]}: {group}\n");
 
-            if(users.Count == 0)                 sb.AppendLine("Здесь никого нет 😢😢😢");
+            if(users.Count == 0) sb.AppendLine("Здесь никого нет 😢😢😢");
 
             foreach(TelegramUser? u in users) {
-                if(!string.IsNullOrWhiteSpace(u.Username))                     sb.AppendLine($"[{EscapeSpecialCharacters($"{u.FirstName} {u.LastName}")}](https://t.me/{u.Username})");
-else {
+                if(!string.IsNullOrWhiteSpace(u.Username)) sb.AppendLine($"[{EscapeSpecialCharacters($"{u.FirstName} {u.LastName}")}](https://t.me/{u.Username})");
+                else {
                     sb.AppendLine(EscapeSpecialCharacters($"{u.FirstName} {u.LastName}"));
                 }
             }
@@ -43,7 +43,7 @@ else {
 
         public static string EscapeSpecialCharacters(string input) {
             // Перечень символов, которые нужно экранировать
-            char[] specialChars = { '_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!' };
+            char[] specialChars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
 
             var escapedString = new StringBuilder();
 

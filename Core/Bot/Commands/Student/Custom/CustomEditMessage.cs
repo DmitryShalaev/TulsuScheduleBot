@@ -18,7 +18,7 @@ namespace Core.Bot.Commands.Student.Custom {
                     user.TelegramUserTmp.TmpData = $"{discipline.ID}";
 
                     await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
-                      MessageQueue.SendTextMessage(chatId: chatId, text: text, replyMarkup: Statics.CancelKeyboardMarkup);
+                    MessageQueue.SendTextMessage(chatId: chatId, text: text, replyMarkup: Statics.CancelKeyboardMarkup);
 
                     await dbContext.SaveChangesAsync();
                     return;
@@ -27,7 +27,7 @@ namespace Core.Bot.Commands.Student.Custom {
 
             if(DateOnly.TryParse(tmp[1], out DateOnly date)) {
                 (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user, all: true);
-                await botClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2));
+                MessageQueue.EditMessageText(chatId: chatId, messageId: messageId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2));
             }
         }
     }

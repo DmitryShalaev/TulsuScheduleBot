@@ -23,8 +23,6 @@ namespace Core.Bot.Commands.Student.Back_Cancel.Message {
             user.TelegramUserTmp.Mode = Mode.Default;
             user.TelegramUserTmp.TmpData = null;
 
-             
-
             await dbContext.SaveChangesAsync();
         }
     }

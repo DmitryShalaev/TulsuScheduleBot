@@ -13,71 +13,147 @@ namespace Core.Bot.Messages {
         private static ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         // Очереди сообщений для каждого пользователя
-        private static readonly ConcurrentDictionary<ChatId, ConcurrentQueue<IMessageQueue>> userQueues = new();
+        private static readonly ConcurrentDictionary<ChatId, (SemaphoreSlim semaphore, ConcurrentQueue<IMessageQueue> queue)> userQueues = new();
 
-        // Флаги активности обработки очередей
-        private static readonly ConcurrentDictionary<ChatId, bool> isProcessing = new();
+        // Переменные для глобального ограничения количества сообщений
+        private static readonly SemaphoreSlim globalLock = new(1, 1);
+        private static int globalMessageCount = 0;
+        private static DateTime lastGlobalResetTime = DateTime.UtcNow;
 
-        // Семафор для ограничения глобального числа сообщений в секунду
-        private static readonly SemaphoreSlim globalSemaphore = new(30, 30);
+        // Дополнительный словарь для контроля всплесков
+        private static readonly ConcurrentDictionary<ChatId, (int burstCount, DateTime lastMessageTime)> userBurstControl = new();
 
-        // Лимиты для всплесков
-        private const int BurstLimit = 5;
-        private const int DelayAfterBurst = 1000;
+        // Настройки всплесков
+        private static readonly int burstLimit = 5; // Максимальное количество сообщений в всплеске
+        private static readonly TimeSpan burstInterval = TimeSpan.FromSeconds(1); // Интервал времени для всплеска
+
+        // Глобальные настройки ограничения скорости сообщений
+        private const int globalRateLimit = 30; // Максимальное количество сообщений в секунду
+        private static readonly TimeSpan globalRateLimitInterval = TimeSpan.FromSeconds(1); // Интервал времени для глобального лимита
 
         public static void SendTextMessage(ChatId chatId, string text, IReplyMarkup? replyMarkup = null, ParseMode? parseMode = null, bool? disableWebPagePreview = null, bool? disableNotification = null) {
             var message = new TextMessage(chatId, text, replyMarkup, parseMode, disableWebPagePreview, disableNotification);
 
-            userQueues.GetOrAdd(chatId, _ => new ConcurrentQueue<IMessageQueue>()).Enqueue(message);
-
-            if(isProcessing.TryAdd(chatId, true))
-                Task.Run(() => ProcessUserQueue(chatId));
+            AddMessageToQueue(chatId, message);
         }
 
-        private static async Task ProcessUserQueue(ChatId chatId) {
-            try {
-                ConcurrentQueue<IMessageQueue> userQueue = userQueues[chatId];
-                int burstCounter = 0;
+        public static void EditMessageText(ChatId chatId, int messageId, string text, InlineKeyboardMarkup? replyMarkup = null, ParseMode? parseMode = null, bool? disableWebPagePreview = null) {
+            var message = new EditMessageText(chatId, messageId, text, replyMarkup, parseMode, disableWebPagePreview);
 
-                while(!userQueue.IsEmpty) {
-                    if(userQueue.TryDequeue(out IMessageQueue? message)) {
-                        // Ограничение на всплеск сообщений
-                        if(burstCounter >= BurstLimit) {
-                            burstCounter = 0;
-                            await Task.Delay(DelayAfterBurst);
-                        }
+            AddMessageToQueue(chatId, message);
+        }
 
-                        // Отправляем сообщение
-                        if(message is TextMessage textMessage)
-                            await ThrottleMessageSending(textMessage);
+        private static void AddMessageToQueue(ChatId chatId, IMessageQueue message) {
+            (SemaphoreSlim semaphore, ConcurrentQueue<IMessageQueue> queue) user = userQueues.GetOrAdd(chatId, _ => (new SemaphoreSlim(1, 1), new ConcurrentQueue<IMessageQueue>()));
 
-                        burstCounter++;
-                    }
+            user.queue.Enqueue(message);
 
-                    // Маленькая задержка для избежания перегрузки процессора при пустой очереди
-                    await Task.Delay(50);
-                }
-            } finally {
-                // Снимаем флаг активности после завершения обработки очереди
-                isProcessing.TryRemove(chatId, out _);
+            // Запускаем обработку очереди 
+            if(user.semaphore.CurrentCount > 0) {
+                _ = Task.Run(() => ProcessQueue(user));
             }
         }
 
-        private static async Task ThrottleMessageSending(TextMessage message) {
-            // Ограничение глобальной отправки: не более 30 сообщений в секунду
-            await globalSemaphore.WaitAsync();
+        private static async Task ProcessQueue((SemaphoreSlim semaphore, ConcurrentQueue<IMessageQueue> queue) user) {
+            await user.semaphore.WaitAsync();
             try {
+
+                while(!user.queue.IsEmpty) {
+                    if(user.queue.TryDequeue(out IMessageQueue? message)) {
+
+                        // Контроль всплесков для пользователя
+                        await ControlUserBurst(message.ChatId);
+
+                        // Учитываем глобальный лимит
+                        await EnsureGlobalRateLimit();
+
+                        // Отправляем сообщение
+                        await SendMessageAsync(message);
+                    }
+                }
+            } finally {
+                user.semaphore.Release(); // Освобождаем чат для следующего сообщения
+            }
+        }
+
+        private static async Task SendMessageAsync(IMessageQueue message) {
+            if(message is TextMessage textMessage) {
                 await BotClient.SendTextMessageAsync(
-                    chatId: message.ChatId,
-                    text: message.Text,
-                    parseMode: message.ParseMode,
-                    disableWebPagePreview: message.DisableWebPagePreview,
-                    disableNotification: message.DisableNotification,
-                    replyMarkup: message.ReplyMarkup
+                    chatId: textMessage.ChatId,
+                    text: textMessage.Text,
+                    parseMode: textMessage.ParseMode,
+                    disableWebPagePreview: textMessage.DisableWebPagePreview,
+                    disableNotification: textMessage.DisableNotification,
+                    replyMarkup: textMessage.ReplyMarkup
                 );
+                return;
+            }
+
+            if(message is EditMessageText editMessageText) {
+                await BotClient.EditMessageTextAsync(
+                    chatId: editMessageText.ChatId,
+                    text: editMessageText.Text,
+                    messageId: editMessageText.MessageId,
+                    parseMode: editMessageText.ParseMode,
+                    replyMarkup: editMessageText.ReplyMarkup,
+                    disableWebPagePreview: editMessageText.DisableWebPagePreview
+                );
+            }
+        }
+
+        private static async Task ControlUserBurst(ChatId chatId) {
+            DateTime currentTime = DateTime.UtcNow;
+
+            (int burstCount, DateTime lastMessageTime) = userBurstControl.GetOrAdd(chatId, _ => (0, DateTime.MinValue));
+
+            if(currentTime - lastMessageTime > burstInterval) {
+                // Сбрасываем счетчик всплесков, если интервал превышен
+                burstCount = 0;
+            }
+
+            if(burstCount >= burstLimit) {
+                // Если достигнут лимит всплесков, ждем до следующего разрешенного интервала
+                TimeSpan delay = burstInterval - (currentTime - lastMessageTime);
+                if(delay > TimeSpan.Zero) {
+                    await Task.Delay(delay);
+                }
+
+                // Обновляем время последнего сообщения после задержки
+                lastMessageTime = DateTime.UtcNow;
+                burstCount = 0; // Сбрасываем счетчик всплесков после задержки
+            }
+
+            // Обновляем данные всплесков для пользователя
+            userBurstControl[chatId] = (burstCount + 1, currentTime);
+        }
+
+        private static async Task EnsureGlobalRateLimit() {
+            await globalLock.WaitAsync(); // Блокируем глобальный счётчик
+
+            try {
+                DateTime currentTime = DateTime.UtcNow;
+
+                // Если прошло больше секунды с последнего сброса, сбрасываем счётчик
+                if((currentTime - lastGlobalResetTime).TotalSeconds >= 1) {
+                    globalMessageCount = 0;
+                    lastGlobalResetTime = currentTime;
+                }
+
+                // Если достигли лимита в 30 сообщений в секунду, делаем задержку
+                if(globalMessageCount >= globalRateLimit) {
+                    TimeSpan delay = globalRateLimitInterval - (currentTime - lastGlobalResetTime);
+                    if(delay > TimeSpan.Zero) {
+                        await Task.Delay(delay);
+                    }
+
+                    globalMessageCount = 0;
+                    lastGlobalResetTime = DateTime.UtcNow;
+                }
+
+                globalMessageCount++; // Увеличиваем счётчик сообщений
 
             } finally {
-                globalSemaphore.Release();
+                globalLock.Release(); // Освобождаем глобальную блокировку
             }
         }
     }

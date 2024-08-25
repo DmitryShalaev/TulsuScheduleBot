@@ -19,7 +19,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Message {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             user.TelegramUserTmp.TmpData = UserCommands.Instance.Message["Settings"];
 
-              MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["Settings"], replyMarkup: DefaultMessage.GetSettingsKeyboardMarkup(user));
+            MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["Settings"], replyMarkup: DefaultMessage.GetSettingsKeyboardMarkup(user));
             await dbContext.SaveChangesAsync();
         }
     }

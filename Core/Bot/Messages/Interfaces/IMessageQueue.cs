@@ -1,5 +1,7 @@
-﻿#pragma warning disable IDE1006 // Стили именования
+﻿using Telegram.Bot.Types;
+
 namespace Core.Bot.Messages.Interfaces {
     public interface IMessageQueue {
+        public ChatId ChatId { get; set; }
     }
 }

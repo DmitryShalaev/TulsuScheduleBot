@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot;
 using ScheduleBot.DB;
@@ -17,11 +18,13 @@ namespace Core.Bot.Commands.Student.Callback {
 
         public Manager.Check Check => Manager.Check.group;
 
-        public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
+        public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
             if(DateOnly.TryParse(args, out DateOnly date)) {
                 (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user);
-                await BotClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                MessageQueue.EditMessageText(chatId: chatId, messageId: messageId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
             }
+
+            return Task.CompletedTask;
         }
     }
 }

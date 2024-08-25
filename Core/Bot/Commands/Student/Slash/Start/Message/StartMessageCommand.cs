@@ -29,7 +29,7 @@ namespace Core.Bot.New.Commands.Student.Slash.Start.Message {
             if(string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
                 user.TelegramUserTmp.Mode = Mode.GroupСhange;
 
-                  MessageQueue.SendTextMessage(chatId: chatId, text: "Для начала работы с ботом укажите номер учебной группы.", replyMarkup: Statics.CancelKeyboardMarkup);
+                MessageQueue.SendTextMessage(chatId: chatId, text: "Для начала работы с ботом укажите номер учебной группы.", replyMarkup: Statics.CancelKeyboardMarkup);
             }
 
             await dbContext.SaveChangesAsync();

@@ -23,7 +23,7 @@ namespace Core.Bot.Commands.Teachers.Callback {
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
             user.TelegramUserTmp.Mode = Mode.TeacherSelected;
-              
+
             TeacherLastUpdate teacher = dbContext.TeacherLastUpdate.First(i => i.Teacher.ToLower().StartsWith(args));
 
             string teacherName = user.TelegramUserTmp.TmpData = teacher.Teacher;

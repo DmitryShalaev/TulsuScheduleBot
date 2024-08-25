@@ -21,7 +21,7 @@ namespace Core.Bot.Commands.Classrooms.Callback {
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
             user.TelegramUserTmp.Mode = Mode.ClassroomSelected;
- 
+
             ClassroomLastUpdate classroom = dbContext.ClassroomLastUpdate.First(i => i.Classroom.ToLower().StartsWith(args));
 
             string _classroom = user.TelegramUserTmp.TmpData = classroom.Classroom;

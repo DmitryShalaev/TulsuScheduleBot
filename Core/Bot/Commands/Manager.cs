@@ -109,7 +109,7 @@ namespace Core.Bot.Commands {
                 case Check.group:
                     if(string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
                         if(user.IsOwner())
-                            await Statics.GroupErrorAdmin(dbContext, chatId, user);
+                            await Statics.GroupErrorAdminAsync(dbContext, chatId, user);
                         else
                             Statics.GroupErrorUser(chatId);
                         return false;
@@ -120,7 +120,7 @@ namespace Core.Bot.Commands {
                 case Check.studentId:
                     if(string.IsNullOrWhiteSpace(user.ScheduleProfile.StudentID)) {
                         if(user.IsOwner())
-                            await Statics.StudentIdErrorAdmin(dbContext, chatId, user);
+                            await Statics.StudentIdErrorAdminAsync(dbContext, chatId, user);
                         else
                             Statics.StudentIdErrorUser(chatId);
                         return false;

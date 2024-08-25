@@ -29,7 +29,7 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Callback {
 
             feedback = dbContext.Feedbacks.Include(i => i.TelegramUser).Where(i => !i.IsCompleted).OrderBy(i => i.Date).FirstOrDefault();
             if(feedback is not null) {
-                await BotClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: FeedbackMessage.GetFeedbackMessage(feedback), replyMarkup: DefaultCallback.GetFeedbackInlineKeyboardButton(dbContext, feedback));
+                MessageQueue.EditMessageText(chatId: chatId, messageId: messageId, text: FeedbackMessage.GetFeedbackMessage(feedback), replyMarkup: DefaultCallback.GetFeedbackInlineKeyboardButton(dbContext, feedback));
             } else {
                 await BotClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
                 MessageQueue.SendTextMessage(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: Statics.MainKeyboardMarkup);

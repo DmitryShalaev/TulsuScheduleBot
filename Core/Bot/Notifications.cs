@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using ScheduleBot.DB;
 using ScheduleBot.DB.Entity;
 
-using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Core.Bot {

@@ -38,7 +38,7 @@ namespace Core.Bot.Commands.AddingDiscipline {
                         break;
                 }
             } catch(Exception) {
-                  MessageQueue.SendTextMessage(chatId: chatId, text: "Ошибка! " + GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.CancelKeyboardMarkup);
+                MessageQueue.SendTextMessage(chatId: chatId, text: "Ошибка! " + GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.CancelKeyboardMarkup);
                 return;
             }
 
@@ -50,13 +50,13 @@ namespace Core.Bot.Commands.AddingDiscipline {
                 case 2:
                 case 3:
                 case 4:
-                      MessageQueue.SendTextMessage(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.CancelKeyboardMarkup);
+                    MessageQueue.SendTextMessage(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.CancelKeyboardMarkup);
                     break;
 
                 case 5:
                     TimeOnly? endTime = customDiscipline.StartTime?.AddMinutes(95);
-                      MessageQueue.SendTextMessage(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter),
-                            replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: endTime?.ToString() ?? "endTime Error", callbackData: $"{UserCommands.Instance.Callback["SetEndTime"].callback} {endTime}")));
+                    MessageQueue.SendTextMessage(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter),
+                          replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: endTime?.ToString() ?? "endTime Error", callbackData: $"{UserCommands.Instance.Callback["SetEndTime"].callback} {endTime}")));
                     break;
 
                 case 6:

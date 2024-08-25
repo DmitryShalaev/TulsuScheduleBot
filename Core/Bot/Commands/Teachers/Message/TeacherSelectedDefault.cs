@@ -34,7 +34,7 @@ namespace Core.Bot.Commands.Teachers.Message {
                 try {
                     var date = DateOnly.Parse(sDate);
 
-                    await Statics.TeacherWorkScheduleRelevance(dbContext,  chatId, user.TelegramUserTmp.TmpData!, teacherWorkSchedule);
+                    await Statics.TeacherWorkScheduleRelevanceAsync(dbContext, chatId, user.TelegramUserTmp.TmpData!, teacherWorkSchedule);
                     MessageQueue.SendTextMessage(chatId: chatId, text: Scheduler.GetTeacherWorkScheduleByDate(dbContext, date, user.TelegramUserTmp.TmpData!));
                 } catch(Exception) {
                     MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["CommandRecognizedAsADate"], replyMarkup: teacherWorkSchedule);

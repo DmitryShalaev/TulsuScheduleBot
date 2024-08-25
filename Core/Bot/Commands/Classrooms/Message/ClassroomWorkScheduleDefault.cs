@@ -30,7 +30,7 @@ namespace Core.Bot.Commands.Classrooms.Message {
                         buttons.Add([InlineKeyboardButton.WithCallbackData(text: item, callbackData: callback[..Math.Min(callback.Length, 35)])]);
                     }
 
-                      MessageQueue.SendTextMessage(chatId: chatId, text: "Выберите аудиторию.\nЕсли её нет уточните запрос.", replyMarkup: new InlineKeyboardMarkup(buttons));
+                    MessageQueue.SendTextMessage(chatId: chatId, text: "Выберите аудиторию.\nЕсли её нет уточните запрос.", replyMarkup: new InlineKeyboardMarkup(buttons));
                 } else {
                     user.TelegramUserTmp.Mode = Mode.ClassroomSelected;
                     string _classroom = user.TelegramUserTmp.TmpData = find.First();

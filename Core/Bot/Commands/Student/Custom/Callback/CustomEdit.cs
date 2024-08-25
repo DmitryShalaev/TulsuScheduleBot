@@ -1,4 +1,5 @@
 ﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.Messages;
 
 using ScheduleBot;
 using ScheduleBot.DB;
@@ -29,7 +30,7 @@ namespace Core.Bot.Commands.Student.Custom.Callback {
 
             if(DateOnly.TryParse(tmp[1], out DateOnly date)) {
                 (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user);
-                await BotClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                MessageQueue.EditMessageText(chatId: chatId, messageId: messageId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
             }
         }
     }

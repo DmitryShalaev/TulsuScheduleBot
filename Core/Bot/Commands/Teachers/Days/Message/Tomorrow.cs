@@ -21,7 +21,7 @@ namespace Core.Bot.Commands.Teachers.Days.Message {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             ReplyKeyboardMarkup teacherWorkSchedule = DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(user.TelegramUserTmp.TmpData!);
 
-            await Statics.TeacherWorkScheduleRelevance(dbContext,  chatId, user.TelegramUserTmp.TmpData!, teacherWorkSchedule);
+            await Statics.TeacherWorkScheduleRelevanceAsync(dbContext, chatId, user.TelegramUserTmp.TmpData!, teacherWorkSchedule);
             var date = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
             MessageQueue.SendTextMessage(chatId: chatId, text: Scheduler.GetTeacherWorkScheduleByDate(dbContext, date, user.TelegramUserTmp.TmpData!), replyMarkup: teacherWorkSchedule);
         }

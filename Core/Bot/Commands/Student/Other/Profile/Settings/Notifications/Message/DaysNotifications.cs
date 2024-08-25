@@ -31,8 +31,6 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message
                 user.Settings.NotificationDays = Math.Abs(int.Parse(args));
                 user.TelegramUserTmp.Mode = Mode.Default;
 
-                 
-
                 await dbContext.SaveChangesAsync();
 
                 MessageQueue.SendTextMessage(chatId: chatId, text: "Количество дней успешно изменено.", replyMarkup: DefaultMessage.GetSettingsKeyboardMarkup(user));

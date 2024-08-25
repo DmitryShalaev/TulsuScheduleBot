@@ -53,9 +53,9 @@ namespace Core.Bot.New.Commands.Student {
                 if((DateTime.Now - dbContext.GroupLastUpdate.Single(i => i.Group == user.ScheduleProfile.Group).Update.ToLocalTime()).TotalMinutes > config.DisciplineUpdateTime)
                     await Parser.Instance.UpdatingDisciplines(dbContext, user.ScheduleProfile.Group, config.UpdateAttemptTime);
 
-                await TelegramBot.Instance.botClient.AnswerInlineQueryAsync(inlineQuery.Id, new[] {
+                await TelegramBot.Instance.botClient.AnswerInlineQueryAsync(inlineQuery.Id, [
                     new InlineQueryResultArticle(date.ToString(), date.ToString(), new InputTextMessageContent(Scheduler.GetScheduleByDate(dbContext, date, user, link: false).Item1)),
-                }, cacheTime: 60, isPersonal: true);
+                ], cacheTime: 60, isPersonal: true);
             }
         }
     }

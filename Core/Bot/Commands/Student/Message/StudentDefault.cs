@@ -31,7 +31,7 @@ namespace Core.Bot.Commands.Student.Message {
                                $"{(string.IsNullOrWhiteSpace(match.Groups[5].Value) ? now.Year : match.Groups[5].Value)}";
                 try {
                     var date = DateOnly.Parse(sDate);
-                    await Statics.ScheduleRelevance(dbContext,  chatId, user.ScheduleProfile.Group!, Statics.MainKeyboardMarkup);
+                    await Statics.ScheduleRelevanceAsync(dbContext, chatId, user.ScheduleProfile.Group!, Statics.MainKeyboardMarkup);
 
                     (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user);
                     MessageQueue.SendTextMessage(chatId: chatId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown, disableWebPagePreview: true);

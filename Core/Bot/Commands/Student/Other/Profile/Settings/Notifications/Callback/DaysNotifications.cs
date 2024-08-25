@@ -21,7 +21,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Callbac
             user.TelegramUserTmp.Mode = Mode.DaysNotifications;
 
             await BotClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
-              MessageQueue.SendTextMessage(chatId: chatId, text: "Хотите изменить количество дней? Если да, то напишите новое", replyMarkup: Statics.CancelKeyboardMarkup);
+            MessageQueue.SendTextMessage(chatId: chatId, text: "Хотите изменить количество дней? Если да, то напишите новое", replyMarkup: Statics.CancelKeyboardMarkup);
             await dbContext.SaveChangesAsync();
         }
     }
