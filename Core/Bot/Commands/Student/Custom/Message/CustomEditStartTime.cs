@@ -26,7 +26,7 @@ namespace Core.Bot.Commands.Student.Custom.Message {
 
                     await dbContext.SaveChangesAsync();
 
-                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Время начала успешно изменено.", replyMarkup: Statics.MainKeyboardMarkup);
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Время начала успешно изменено.", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
                     MessagesQueue.Message.SendTextMessage(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, discipline.Date, user, all: true).Item1, replyMarkup: DefaultCallback.GetCustomEditAdminInlineKeyboardButton(discipline), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
                 } catch(Exception) {
                     MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Ошибка в формате времени!", replyMarkup: Statics.CancelKeyboardMarkup);

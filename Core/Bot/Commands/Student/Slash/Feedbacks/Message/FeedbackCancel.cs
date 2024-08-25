@@ -17,7 +17,7 @@ namespace Core.Bot.Commands.Student.Slash.Feedbacks.Message {
 
             await dbContext.SaveChangesAsync();
 
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["MainMenu"], replyMarkup: Statics.MainKeyboardMarkup);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["MainMenu"], replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
         }
     }
 }

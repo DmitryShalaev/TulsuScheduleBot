@@ -26,7 +26,7 @@ namespace Core.Bot.Commands.AddingDiscipline.Message {
 
             await dbContext.SaveChangesAsync();
 
-            await Statics.ScheduleRelevanceAsync(dbContext, chatId, user.ScheduleProfile.Group!, Statics.MainKeyboardMarkup);
+            await Statics.ScheduleRelevanceAsync(dbContext, chatId, user.ScheduleProfile.Group!, DefaultMessage.GetMainKeyboardMarkup(user));
 
             (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, first.Date, user, true);
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: schedule.Item1, replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, first.Date, user.ScheduleProfile), parseMode: ParseMode.Markdown, disableWebPagePreview: true);

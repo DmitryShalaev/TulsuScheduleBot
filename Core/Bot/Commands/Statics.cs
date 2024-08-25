@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
+using Core.Bot.Commands;
 using Core.DB;
 using Core.DB.Entity;
 
@@ -31,18 +32,11 @@ namespace Core.Bot {
         [GeneratedRegex("^(\\d{1,2})([ ,.-](\\d{1,2}|\\w{3,8}))?([ ,.-](\\d{2}|\\d{4}))?$")]
         public static partial Regex DateRegex();
 
-        private static readonly Commands.UserCommands commands = Commands.UserCommands.Instance;
+        private static readonly UserCommands commands = UserCommands.Instance;
 
         private static readonly ScheduleParser parser = ScheduleParser.Instance;
 
         #region ReplyKeyboardMarkup
-        public static readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["Today"], commands.Message["Tomorrow"] },
-                            [commands.Message["ByDays"], commands.Message["ForAWeek"]],
-                            [commands.Message["Corps"], commands.Message["Schedule"]],
-                            [commands.Message["Other"]]
-                        }) { ResizeKeyboard = true };
-
         public static readonly ReplyKeyboardMarkup ScheduleKeyboardMarkup = new(new[] {
                              new KeyboardButton[] { commands.Message["Exam"]},
                              [commands.Message["TeachersWorkSchedule"], commands.Message["ClassroomSchedule"]],
@@ -64,6 +58,12 @@ namespace Core.Bot {
                             new KeyboardButton[] { commands.Message["Monday"], commands.Message["Tuesday"] },
                             [commands.Message["Wednesday"], commands.Message["Thursday"]],
                             [commands.Message["Friday"], commands.Message["Saturday"]],
+                            [commands.Message["Back"]]
+                        }) { ResizeKeyboard = true };
+
+        public static readonly ReplyKeyboardMarkup AdminPanelKeyboardMarkup = new(new[] {
+                            new KeyboardButton[] { commands.Message["Back"] },
+  
                             [commands.Message["Back"]]
                         }) { ResizeKeyboard = true };
 
@@ -112,7 +112,7 @@ namespace Core.Bot {
 
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Для того чтобы узнать расписание, необходимо указать номер группы.", replyMarkup: CancelKeyboardMarkup);
         }
-        public static void GroupErrorUser(ChatId chatId) => MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Попросите владельца профиля указать номер группы в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
+        public static void GroupErrorUser(TelegramUser user) => MessagesQueue.Message.SendTextMessage(chatId: user.ChatID, text: $"Попросите владельца профиля указать номер группы в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
 
         public static async Task StudentIdErrorAdminAsync(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
             user.TelegramUserTmp.Mode = Mode.StudentIDСhange;
@@ -120,7 +120,7 @@ namespace Core.Bot {
 
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Для того чтобы узнать успеваемость, необходимо указать номер зачетной книжки.", replyMarkup: CancelKeyboardMarkup);
         }
-        public static void StudentIdErrorUser(ChatId chatId) => MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Попросите владельца профиля указать номер зачетной книжки в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
+        public static void StudentIdErrorUser(TelegramUser user) => MessagesQueue.Message.SendTextMessage(chatId: user.ChatID, text: $"Попросите владельца профиля указать номер зачетной книжки в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
 
         public static async Task ScheduleRelevanceAsync(ScheduleDbContext dbContext, ChatId chatId, string group, IReplyMarkup? replyMarkup) {
             DateTime? groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group)?.Update.ToLocalTime();

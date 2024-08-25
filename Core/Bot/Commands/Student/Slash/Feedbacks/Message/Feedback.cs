@@ -25,7 +25,7 @@ namespace Core.Bot.Commands.Student.Slash.Feedbacks.Message {
 
                 if(feedback is not null) MessagesQueue.Message.SendTextMessage(chatId: chatId, text: FeedbackMessage.GetFeedbackMessage(feedback), replyMarkup: FeedbackMessage.GetFeedbackInlineKeyboardButton(dbContext, feedback));
                 else {
-                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: Statics.MainKeyboardMarkup);
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
                 }
 
                 return;

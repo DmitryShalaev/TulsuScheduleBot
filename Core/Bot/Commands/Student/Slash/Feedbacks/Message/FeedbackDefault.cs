@@ -19,7 +19,7 @@ namespace Core.Bot.Commands.Student.Slash.Feedbacks.Message {
 
             dbContext.Feedbacks.Add(new() { Message = args, TelegramUser = user });
 
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["ThanksForTheFeedback"], replyMarkup: Statics.MainKeyboardMarkup);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["ThanksForTheFeedback"], replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
 
             await dbContext.SaveChangesAsync();
 
