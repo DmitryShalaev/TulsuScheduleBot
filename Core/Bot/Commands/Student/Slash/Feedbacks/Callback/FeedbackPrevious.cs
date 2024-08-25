@@ -1,7 +1,6 @@
 ﻿using Core.Bot.Commands;
 using Core.Bot.Commands.Interfaces;
 using Core.Bot.Commands.Student.Slash.Feedbacks;
-using Core.Bot.MessagesQueue;
 using Core.DB;
 using Core.DB.Entity;
 

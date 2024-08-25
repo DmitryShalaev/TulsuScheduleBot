@@ -2,7 +2,6 @@ using System.Text.RegularExpressions;
 
 using Core.Bot.Commands;
 using Core.Bot.Commands.Student;
-using Core.Bot.MessagesQueue;
 using Core.DB;
 using Core.DB.Entity;
 
@@ -11,11 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-
-#if !DEBUG
-using System.Net.Mail;
-using System.Net;
-#endif
 
 namespace Core.Bot {
     public class TelegramBot {
@@ -126,10 +120,11 @@ namespace Core.Bot {
 #if DEBUG
             Console.WriteLine(msg);
 #endif
-            Telegram.Bot.Types.Message? message = update.Message ?? update.EditedMessage ?? update.CallbackQuery?.Message;
 
             try {
                 using(ScheduleDbContext dbContext = new()) {
+                    Message? message = update.Message ?? update.EditedMessage ?? update.CallbackQuery?.Message;
+
                     if(message is not null) {
                         if(message.From is null) return;
 
@@ -190,21 +185,7 @@ namespace Core.Bot {
                     }
                 }
             } catch(Exception e) {
-                await Console.Out.WriteLineAsync($"{msg}\n{new('-', 25)}\n{e.Message}");
-#if !DEBUG
-                MailAddress from = new(Environment.GetEnvironmentVariable("TelegramBot_FromEmail") ?? "", "Error");
-                MailAddress to = new(Environment.GetEnvironmentVariable("TelegramBot_ToEmail") ?? "");
-                MailMessage mailMessage = new(from, to) {
-                    Subject = "Error",
-                    Body = $"{msg}\n{new('-', 25)}\n{e.Message}"
-                };
-
-                SmtpClient smtp = new("smtp.yandex.ru", 25) {
-                    Credentials = new NetworkCredential(Environment.GetEnvironmentVariable("TelegramBot_FromEmail"), Environment.GetEnvironmentVariable("TelegramBot_PassEmail")),
-                    EnableSsl = true
-                };
-                smtp.SendMailAsync(mailMessage).Wait();
-#endif
+                await ErrorReport.Send(msg, e);
             } finally {
                 GC.Collect();
             }

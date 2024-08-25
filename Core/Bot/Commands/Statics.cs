@@ -1,7 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 
-using Core.Bot.Commands.Student.Schedule.Message;
-using Core.Bot.MessagesQueue;
 using Core.DB;
 using Core.DB.Entity;
 

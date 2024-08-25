@@ -92,43 +92,57 @@ namespace Core.Bot.MessagesQueue {
         }
 
         private static async Task SendMessageAsync(IMessageQueue message) {
-            switch(message) {
-                case TextMessage textMessage:
-                    await BotClient.SendTextMessageAsync(
-                        chatId: textMessage.ChatId,
-                        text: textMessage.Text,
-                        parseMode: textMessage.ParseMode,
-                        disableWebPagePreview: textMessage.DisableWebPagePreview,
-                        disableNotification: textMessage.DisableNotification,
-                        replyMarkup: textMessage.ReplyMarkup
-                    );
-                    break;
+            string msg = " ";
 
-                case EditMessageText editMessageText:
-                    await BotClient.EditMessageTextAsync(
-                        chatId: editMessageText.ChatId,
-                        text: editMessageText.Text,
-                        messageId: editMessageText.MessageId,
-                        parseMode: editMessageText.ParseMode,
-                        replyMarkup: editMessageText.ReplyMarkup,
-                        disableWebPagePreview: editMessageText.DisableWebPagePreview
-                    );
-                    break;
+            try {
+                switch(message) {
+                    case TextMessage textMessage:
+                        msg = textMessage.Text;
 
-                case DeleteMessage deleteMessage:
-                    await BotClient.DeleteMessageAsync(
-                        chatId: deleteMessage.ChatId,
-                        messageId: deleteMessage.MessageId
-                    );
-                    break;
+                        await BotClient.SendTextMessageAsync(
+                            chatId: textMessage.ChatId,
+                            text: textMessage.Text,
+                            parseMode: textMessage.ParseMode,
+                            disableWebPagePreview: textMessage.DisableWebPagePreview,
+                            disableNotification: textMessage.DisableNotification,
+                            replyMarkup: textMessage.ReplyMarkup
+                        );
+                        break;
 
-                case EditMessageReplyMarkup editMessageReplyMarkup:
-                    await BotClient.EditMessageReplyMarkupAsync(
-                        chatId: editMessageReplyMarkup.ChatId,
-                        replyMarkup: editMessageReplyMarkup.ReplyMarkup,
-                        messageId: editMessageReplyMarkup.MessageId
-                    );
-                    break;
+                    case EditMessageText editMessageText:
+                        msg = editMessageText.Text;
+
+                        await BotClient.EditMessageTextAsync(
+                            chatId: editMessageText.ChatId,
+                            text: editMessageText.Text,
+                            messageId: editMessageText.MessageId,
+                            parseMode: editMessageText.ParseMode,
+                            replyMarkup: editMessageText.ReplyMarkup,
+                            disableWebPagePreview: editMessageText.DisableWebPagePreview
+                        );
+                        break;
+
+                    case DeleteMessage deleteMessage:
+                        msg = $"DeleteMessageAsync {deleteMessage.MessageId}";
+
+                        await BotClient.DeleteMessageAsync(
+                            chatId: deleteMessage.ChatId,
+                            messageId: deleteMessage.MessageId
+                        );
+                        break;
+
+                    case EditMessageReplyMarkup editMessageReplyMarkup:
+                        msg = $"EditMessageReplyMarkupAsync {editMessageReplyMarkup.MessageId}";
+
+                        await BotClient.EditMessageReplyMarkupAsync(
+                            chatId: editMessageReplyMarkup.ChatId,
+                            replyMarkup: editMessageReplyMarkup.ReplyMarkup,
+                            messageId: editMessageReplyMarkup.MessageId
+                        );
+                        break;
+                }
+            } catch(Exception e) {
+                await ErrorReport.Send(msg, e);
             }
         }
 

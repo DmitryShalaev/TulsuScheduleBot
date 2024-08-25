@@ -1,7 +1,6 @@
 ﻿using System.Text;
 
 using Core.Bot.Commands.Interfaces;
-using Core.Bot.MessagesQueue;
 using Core.DB;
 using Core.DB.Entity;
 

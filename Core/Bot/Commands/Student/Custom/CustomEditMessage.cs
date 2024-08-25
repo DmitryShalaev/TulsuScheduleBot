@@ -1,5 +1,4 @@
-﻿using Core.Bot.MessagesQueue;
-using Core.DB;
+﻿using Core.DB;
 using Core.DB.Entity;
 
 using ScheduleBot;
