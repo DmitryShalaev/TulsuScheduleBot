@@ -1,14 +1,11 @@
 ﻿using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types;
 namespace Core.Bot.Commands.Student.Other.Profile.Message {
     internal class ProfileCancel : IMessageCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string>? Commands => [UserCommands.Instance.Message["Cancel"]];
 
@@ -21,7 +18,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Message {
 
             await dbContext.SaveChangesAsync();
 
-            MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["Profile"], replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user));
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["Profile"], replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user));
         }
     }
 }

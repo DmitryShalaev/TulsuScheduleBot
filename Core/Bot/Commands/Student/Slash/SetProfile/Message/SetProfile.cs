@@ -1,15 +1,11 @@
-﻿using Core.Bot.Commands;
-using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types;
-namespace Core.Bot.New.Commands.Student.Slash.SetProfile.Message {
+namespace Core.Bot.Commands.Student.Slash.SetProfile.Message {
     public class SetProfile : IMessageCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string> Commands => ["/SetProfile"];
 
@@ -24,12 +20,12 @@ namespace Core.Bot.New.Commands.Student.Slash.SetProfile.Message {
                         user.ScheduleProfileGuid = profile;
                         await dbContext.SaveChangesAsync();
 
-                        MessageQueue.SendTextMessage(chatId: chatId, text: "Вы успешно сменили профиль", replyMarkup: Statics.MainKeyboardMarkup);
+                        MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Вы успешно сменили профиль", replyMarkup: Statics.MainKeyboardMarkup);
                     } else {
-                        MessageQueue.SendTextMessage(chatId: chatId, text: "Вы пытаетесь изменить свой профиль на текущий или на профиль, который не существует", replyMarkup: Statics.MainKeyboardMarkup);
+                        MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Вы пытаетесь изменить свой профиль на текущий или на профиль, который не существует", replyMarkup: Statics.MainKeyboardMarkup);
                     }
                 } else {
-                    MessageQueue.SendTextMessage(chatId: chatId, text: "Идентификатор профиля не распознан", replyMarkup: Statics.MainKeyboardMarkup);
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Идентификатор профиля не распознан", replyMarkup: Statics.MainKeyboardMarkup);
                 }
             } catch(IndexOutOfRangeException) { }
         }

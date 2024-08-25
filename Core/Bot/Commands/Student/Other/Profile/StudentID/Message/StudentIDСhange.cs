@@ -1,15 +1,13 @@
 ﻿using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
 using ScheduleBot;
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
 
-using Telegram.Bot;
 using Telegram.Bot.Types;
 namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
     internal class StudentIDСhange : IMessageCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string>? Commands => null;
 
@@ -20,17 +18,17 @@ namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
 
             if(args.Length > 10) {
-                MessageQueue.SendTextMessage(chatId: chatId, text: "Номер зачетки не может содержать более 10 символов.", replyMarkup: Statics.CancelKeyboardMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Номер зачетки не может содержать более 10 символов.", replyMarkup: Statics.CancelKeyboardMarkup);
                 await dbContext.SaveChangesAsync();
                 return;
             }
 
-            MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["WeNeedToWait"], replyMarkup: Statics.CancelKeyboardMarkup);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["WeNeedToWait"], replyMarkup: Statics.CancelKeyboardMarkup);
 
             if(int.TryParse(args, out int id)) {
                 StudentIDLastUpdate? studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args && i.Update != DateTime.MinValue);
 
-                if(studentID is null && await Parser.Instance.UpdatingProgress(dbContext, args, 0))
+                if(studentID is null && await ScheduleParser.Instance.UpdatingProgress(dbContext, args, 0))
                     studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args && i.Update != DateTime.MinValue);
 
                 if(studentID is not null) {
@@ -38,14 +36,14 @@ namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
                     user.ScheduleProfile.StudentIDLastUpdate = studentID;
                     await dbContext.SaveChangesAsync();
 
-                    MessageQueue.SendTextMessage(chatId: chatId, text: $"Номер зачётки успешно изменен на {args} ", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user));
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Номер зачётки успешно изменен на {args} ", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user));
 
                 } else {
-                    MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["InvalidStudentIDNumber"], replyMarkup: Statics.CancelKeyboardMarkup);
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["InvalidStudentIDNumber"], replyMarkup: Statics.CancelKeyboardMarkup);
                     await dbContext.SaveChangesAsync();
                 }
             } else {
-                MessageQueue.SendTextMessage(chatId: chatId, text: "Не удалось распознать введенный номер зачётной книжки", replyMarkup: Statics.CancelKeyboardMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Не удалось распознать введенный номер зачётной книжки", replyMarkup: Statics.CancelKeyboardMarkup);
                 await dbContext.SaveChangesAsync();
             }
         }

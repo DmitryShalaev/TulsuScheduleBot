@@ -1,15 +1,11 @@
 ﻿using Core.Bot.Commands.Interfaces;
 using Core.DB;
+using Core.DB.Entity;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace Core.Bot.Commands.Admin.Message {
     public class Clear : IMessageCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string> Commands => ["/clear"];
 

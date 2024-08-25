@@ -1,14 +1,11 @@
 ﻿using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types;
 namespace Core.Bot.Commands.Student.Other.Profile.Message {
     internal class ResetProfileLink : IMessageCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string>? Commands => [UserCommands.Instance.Message["ResetProfileLink"]];
 
@@ -21,9 +18,9 @@ namespace Core.Bot.Commands.Student.Other.Profile.Message {
                 user.TelegramUserTmp.Mode = Mode.ResetProfileLink;
                 await dbContext.SaveChangesAsync();
 
-                MessageQueue.SendTextMessage(chatId: chatId, text: "Вы точно уверены что хотите восстановить свой профиль?", replyMarkup: Statics.ResetProfileLinkKeyboardMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Вы точно уверены что хотите восстановить свой профиль?", replyMarkup: Statics.ResetProfileLinkKeyboardMarkup);
             } else {
-                MessageQueue.SendTextMessage(chatId: chatId, text: "Владельцу профиля нет смысла его восстанавливать!", replyMarkup: Statics.MainKeyboardMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Владельцу профиля нет смысла его восстанавливать!", replyMarkup: Statics.MainKeyboardMarkup);
             }
         }
     }

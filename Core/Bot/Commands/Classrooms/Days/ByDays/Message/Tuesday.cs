@@ -1,16 +1,14 @@
 ﻿using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
 using ScheduleBot;
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
 
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 namespace Core.Bot.Commands.Classrooms.Days.ByDays.Message {
     internal class ClassroomTuesday : IMessageCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string>? Commands => [UserCommands.Instance.Message["Tuesday"]];
 
@@ -21,7 +19,7 @@ namespace Core.Bot.Commands.Classrooms.Days.ByDays.Message {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             await Statics.ClassroomWorkScheduleRelevanceAsync(dbContext, chatId, user.TelegramUserTmp.TmpData!, Statics.DaysKeyboardMarkup);
             foreach((string, DateOnly) day in Scheduler.GetClassroomWorkScheduleByDay(dbContext, DayOfWeek.Tuesday, user.TelegramUserTmp.TmpData!, user))
-                MessageQueue.SendTextMessage(chatId: chatId, text: day.Item1, replyMarkup: Statics.DaysKeyboardMarkup, parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: day.Item1, replyMarkup: Statics.DaysKeyboardMarkup, parseMode: ParseMode.Markdown, disableWebPagePreview: true);
         }
     }
 }

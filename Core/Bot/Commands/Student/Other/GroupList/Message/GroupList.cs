@@ -1,17 +1,14 @@
 ﻿using System.Text;
 
 using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 namespace Core.Bot.Commands.Student.Other.GroupList.Message {
     internal class GroupList : IMessageCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string>? Commands => [UserCommands.Instance.Message["GroupList"]];
 
@@ -37,7 +34,7 @@ namespace Core.Bot.Commands.Student.Other.GroupList.Message {
                 }
             }
 
-            MessageQueue.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: Statics.OtherKeyboardMarkup, parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: Statics.OtherKeyboardMarkup, parseMode: ParseMode.Markdown, disableWebPagePreview: true);
             return Task.CompletedTask;
         }
 

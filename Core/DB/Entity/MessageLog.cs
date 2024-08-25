@@ -1,4 +1,4 @@
-﻿namespace ScheduleBot.DB.Entity {
+﻿namespace Core.DB.Entity {
 #pragma warning disable CS8618
     public class MessageLog {
         public long ID { get; set; }

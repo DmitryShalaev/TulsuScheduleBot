@@ -4,7 +4,7 @@
 
 namespace ScheduleBot.Migrations {
     /// <inheritdoc />
-    public partial class addMode : Migration {
+    public partial class AddMode : Migration {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder) => migrationBuilder.InsertData(
                 table: "Modes",

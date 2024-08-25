@@ -1,15 +1,12 @@
 ﻿using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Callback {
     public class DaysNotifications : ICallbackCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public string Command => "DaysNotifications";
 
@@ -20,8 +17,8 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Callbac
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
             user.TelegramUserTmp.Mode = Mode.DaysNotifications;
 
-            await BotClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
-            MessageQueue.SendTextMessage(chatId: chatId, text: "Хотите изменить количество дней? Если да, то напишите новое", replyMarkup: Statics.CancelKeyboardMarkup);
+            MessagesQueue.Message.DeleteMessage(chatId: chatId, messageId: messageId);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Хотите изменить количество дней? Если да, то напишите новое", replyMarkup: Statics.CancelKeyboardMarkup);
             await dbContext.SaveChangesAsync();
         }
     }

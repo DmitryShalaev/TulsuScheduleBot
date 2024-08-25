@@ -1,14 +1,11 @@
 ﻿using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types;
 namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Callback {
     public class ToggleNotifications : ICallbackCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public string Command => "ToggleNotifications";
 
@@ -28,7 +25,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Callbac
 
             await dbContext.SaveChangesAsync();
 
-            MessageQueue.EditMessageText(chatId: chatId, messageId: messageId, text: UserCommands.Instance.Message["NotificationSettings"], replyMarkup: DefaultCallback.GetNotificationsInlineKeyboardButton(user));
+            MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: UserCommands.Instance.Message["NotificationSettings"], replyMarkup: DefaultCallback.GetNotificationsInlineKeyboardButton(user));
         }
     }
 }

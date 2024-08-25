@@ -1,14 +1,11 @@
 ﻿using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types;
 namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
     internal class GroupNumber : IMessageCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string>? Commands => [UserCommands.Instance.Message["GroupNumber"]];
 
@@ -20,7 +17,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
             if(user.IsOwner()) {
                 user.TelegramUserTmp.Mode = Mode.GroupСhange;
 
-                MessageQueue.SendTextMessage(chatId: chatId, text: "Хотите сменить номер учебной группы? Если да, то напишите новый номер", replyMarkup: Statics.CancelKeyboardMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Хотите сменить номер учебной группы? Если да, то напишите новый номер", replyMarkup: Statics.CancelKeyboardMarkup);
                 await dbContext.SaveChangesAsync();
             }
         }

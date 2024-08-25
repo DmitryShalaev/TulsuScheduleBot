@@ -1,16 +1,14 @@
 ﻿using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
 using ScheduleBot;
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
 
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 namespace Core.Bot.Commands.Student.Days.Message {
     internal class Tomorrow : IMessageCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string>? Commands => [UserCommands.Instance.Message["Tomorrow"]];
 
@@ -23,7 +21,7 @@ namespace Core.Bot.Commands.Student.Days.Message {
             var date = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
 
             (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user);
-            MessageQueue.SendTextMessage(chatId: chatId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
         }
     }
 }

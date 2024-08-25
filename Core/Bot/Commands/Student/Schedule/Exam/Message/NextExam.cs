@@ -1,15 +1,13 @@
 ﻿using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
 using ScheduleBot;
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
 
-using Telegram.Bot;
 using Telegram.Bot.Types;
-namespace Core.Bot.Commands.Student.Additional.Exam.Message {
+namespace Core.Bot.Commands.Student.Schedule.Exam.Message {
     internal class NextExam : IMessageCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string>? Commands => [UserCommands.Instance.Message["NextExam"]];
 
@@ -20,7 +18,7 @@ namespace Core.Bot.Commands.Student.Additional.Exam.Message {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             await Statics.ScheduleRelevanceAsync(dbContext, chatId, user.ScheduleProfile.Group!, Statics.ExamKeyboardMarkup);
             foreach(string item in Scheduler.GetExamse(dbContext, user.ScheduleProfile, false))
-                MessageQueue.SendTextMessage(chatId: chatId, text: item, replyMarkup: Statics.ExamKeyboardMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: item, replyMarkup: Statics.ExamKeyboardMarkup);
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
+﻿using Core.DB;
+using Core.DB.Entity;
 
 using Telegram.Bot.Types.ReplyMarkups;
 

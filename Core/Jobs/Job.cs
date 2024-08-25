@@ -1,6 +1,4 @@
-﻿using ScheduleBot.Jobs;
-
-namespace Core.Jobs {
+﻿namespace Core.Jobs {
     public static class Job {
         public static async Task InitAsync() {
             await Task.Delay(TimeSpan.FromSeconds(30));

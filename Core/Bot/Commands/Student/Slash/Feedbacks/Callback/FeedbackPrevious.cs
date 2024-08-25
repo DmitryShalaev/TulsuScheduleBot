@@ -1,17 +1,15 @@
 ﻿using Core.Bot.Commands;
 using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+using Core.Bot.Commands.Student.Slash.Feedbacks;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
 using Microsoft.EntityFrameworkCore;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types;
 namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Callback {
     public class FeedbackPrevious : ICallbackCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public string Command => "FeedbackPrevious";
 
@@ -23,7 +21,7 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Callback {
             Feedback? feedback = dbContext.Feedbacks.Include(i => i.TelegramUser).Where(i => !i.IsCompleted && i.ID < long.Parse(args)).OrderByDescending(i => i.Date).FirstOrDefault();
 
             if(feedback is not null)
-                MessageQueue.EditMessageText(chatId: chatId, messageId: messageId, text: FeedbackMessage.GetFeedbackMessage(feedback), replyMarkup: DefaultCallback.GetFeedbackInlineKeyboardButton(dbContext, feedback));
+                MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: FeedbackMessage.GetFeedbackMessage(feedback), replyMarkup: DefaultCallback.GetFeedbackInlineKeyboardButton(dbContext, feedback));
             return Task.CompletedTask;
         }
     }

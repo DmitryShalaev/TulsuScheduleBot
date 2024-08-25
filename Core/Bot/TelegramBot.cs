@@ -1,13 +1,12 @@
 using System.Text.RegularExpressions;
 
 using Core.Bot.Commands;
-using Core.Bot.Messages;
-using Core.Bot.New.Commands.Student;
+using Core.Bot.Commands.Student;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
 using Microsoft.EntityFrameworkCore;
-
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -99,20 +98,20 @@ namespace Core.Bot {
             commandManager.AddMessageCommand(UserCommands.Instance.Message["Corps"], Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                 user.TelegramUserTmp.TmpData = UserCommands.Instance.Message["Corps"];
                 await dbContext.SaveChangesAsync();
-                MessageQueue.SendTextMessage(chatId: chatId, text: "Выберите корпус, и я покажу где он на карте", replyMarkup: Statics.CorpsKeyboardMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Выберите корпус, и я покажу где он на карте", replyMarkup: Statics.CorpsKeyboardMarkup);
             });
 
             foreach(UserCommands.CorpsStruct item in UserCommands.Instance.Corps) {
                 commandManager.AddMessageCommand(item.text, Mode.Default, async (dbContext, chatId, messageId, user, args) => {
                     if(!string.IsNullOrWhiteSpace(item.map))
-                        MessageQueue.SendTextMessage(chatId: chatId, text: $"[Схема корпуса]({item.map})", parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                        MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"[Схема корпуса]({item.map})", parseMode: ParseMode.Markdown, disableWebPagePreview: true);
 
                     await botClient.SendVenueAsync(chatId: chatId, latitude: item.latitude, longitude: item.longitude, title: item.title, address: item.address, replyMarkup: Statics.CorpsKeyboardMarkup);
                 });
             }
 
             commandManager.AddMessageCommand(UserCommands.Instance.College.text, Mode.Default, async (dbContext, chatId, messageId, user, args) => {
-                MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.College.title, replyMarkup: Statics.CancelKeyboardMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.College.title, replyMarkup: Statics.CancelKeyboardMarkup);
 
                 foreach(UserCommands.CorpsStruct item in UserCommands.Instance.College.corps)
                     await botClient.SendVenueAsync(chatId: chatId, latitude: item.latitude, longitude: item.longitude, title: "", address: item.address, replyMarkup: Statics.CorpsKeyboardMarkup);
@@ -127,7 +126,7 @@ namespace Core.Bot {
 #if DEBUG
             Console.WriteLine(msg);
 #endif
-            Message? message = update.Message ?? update.EditedMessage ?? update.CallbackQuery?.Message;
+            Telegram.Bot.Types.Message? message = update.Message ?? update.EditedMessage ?? update.CallbackQuery?.Message;
 
             try {
                 using(ScheduleDbContext dbContext = new()) {

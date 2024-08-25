@@ -1,17 +1,18 @@
-﻿using Core.Bot.Commands;
+﻿using Core.DB;
+using Core.DB.Entity;
 
 using Microsoft.EntityFrameworkCore;
 
 using ScheduleBot;
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.InlineQueryResults;
 
-namespace Core.Bot.New.Commands.Student {
+namespace Core.Bot.Commands.Student {
     public static class InlineQueryMessage {
+        public static ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
+
         public static async Task InlineQuery(ScheduleDbContext dbContext, Update update) {
             InlineQuery? inlineQuery = update.InlineQuery;
 
@@ -21,11 +22,11 @@ namespace Core.Bot.New.Commands.Student {
                 UserCommands instance = UserCommands.Instance;
 
                 switch(str) {
-                    case var _ when str == instance.Message["Today"].ToLower():
+                    case var _ when str.Equals(instance.Message["Today"], StringComparison.CurrentCultureIgnoreCase):
                         await AnswerInlineQueryAsync(dbContext, inlineQuery, DateOnly.FromDateTime(DateTime.Now));
                         break;
 
-                    case var _ when str == instance.Message["Tomorrow"].ToLower():
+                    case var _ when str.Equals(instance.Message["Tomorrow"], StringComparison.CurrentCultureIgnoreCase):
                         await AnswerInlineQueryAsync(dbContext, inlineQuery, DateOnly.FromDateTime(DateTime.Now.AddDays(1)));
                         break;
 
@@ -51,9 +52,9 @@ namespace Core.Bot.New.Commands.Student {
 
             if(user is not null && !string.IsNullOrWhiteSpace(user.ScheduleProfile.Group)) {
                 if((DateTime.Now - dbContext.GroupLastUpdate.Single(i => i.Group == user.ScheduleProfile.Group).Update.ToLocalTime()).TotalMinutes > config.DisciplineUpdateTime)
-                    await Parser.Instance.UpdatingDisciplines(dbContext, user.ScheduleProfile.Group, config.UpdateAttemptTime);
+                    await ScheduleParser.Instance.UpdatingDisciplines(dbContext, user.ScheduleProfile.Group, config.UpdateAttemptTime);
 
-                await TelegramBot.Instance.botClient.AnswerInlineQueryAsync(inlineQuery.Id, [
+                await BotClient.AnswerInlineQueryAsync(inlineQuery.Id, [
                     new InlineQueryResultArticle(date.ToString(), date.ToString(), new InputTextMessageContent(Scheduler.GetScheduleByDate(dbContext, date, user, link: false).Item1)),
                 ], cacheTime: 60, isPersonal: true);
             }

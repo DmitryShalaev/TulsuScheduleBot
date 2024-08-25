@@ -1,14 +1,11 @@
 ﻿using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types;
-namespace Core.Bot.Commands.Student.Additional.Message {
+namespace Core.Bot.Commands.Student.Schedule.Message {
     internal class Schedule : IMessageCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string>? Commands => [UserCommands.Instance.Message["Schedule"]];
 
@@ -20,7 +17,7 @@ namespace Core.Bot.Commands.Student.Additional.Message {
             user.TelegramUserTmp.TmpData = UserCommands.Instance.Message["Schedule"];
             await dbContext.SaveChangesAsync();
 
-            MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["Schedule"], replyMarkup: Statics.ScheduleKeyboardMarkup);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["Schedule"], replyMarkup: Statics.ScheduleKeyboardMarkup);
         }
     }
 }

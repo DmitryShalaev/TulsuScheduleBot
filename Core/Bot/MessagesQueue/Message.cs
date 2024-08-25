@@ -1,15 +1,16 @@
 ﻿using System.Collections.Concurrent;
 
-using Core.Bot.Messages.Interfaces;
+using Core.Bot.MessagesQueue.Classes;
+using Core.Bot.MessagesQueue.Interfaces;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace Core.Bot.Messages {
+namespace Core.Bot.MessagesQueue {
 
-    public static class MessageQueue {
+    public static class Message {
         private static ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         // Очереди сообщений для каждого пользователя
@@ -17,8 +18,12 @@ namespace Core.Bot.Messages {
 
         // Переменные для глобального ограничения количества сообщений
         private static readonly SemaphoreSlim globalLock = new(1, 1);
+
+        private const int globalRateLimit = 30; // Максимальное количество сообщений в секунду
         private static int globalMessageCount = 0;
+
         private static DateTime lastGlobalResetTime = DateTime.UtcNow;
+        private static readonly TimeSpan globalRateLimitInterval = TimeSpan.FromSeconds(1); // Интервал времени для лимита
 
         // Дополнительный словарь для контроля всплесков
         private static readonly ConcurrentDictionary<ChatId, (int burstCount, DateTime lastMessageTime)> userBurstControl = new();
@@ -27,10 +32,7 @@ namespace Core.Bot.Messages {
         private static readonly int burstLimit = 5; // Максимальное количество сообщений в всплеске
         private static readonly TimeSpan burstInterval = TimeSpan.FromSeconds(1); // Интервал времени для всплеска
 
-        // Глобальные настройки ограничения скорости сообщений
-        private const int globalRateLimit = 30; // Максимальное количество сообщений в секунду
-        private static readonly TimeSpan globalRateLimitInterval = TimeSpan.FromSeconds(1); // Интервал времени для глобального лимита
-
+        #region Messag
         public static void SendTextMessage(ChatId chatId, string text, IReplyMarkup? replyMarkup = null, ParseMode? parseMode = null, bool? disableWebPagePreview = null, bool? disableNotification = null) {
             var message = new TextMessage(chatId, text, replyMarkup, parseMode, disableWebPagePreview, disableNotification);
 
@@ -42,6 +44,19 @@ namespace Core.Bot.Messages {
 
             AddMessageToQueue(chatId, message);
         }
+
+        public static void EditMessageReplyMarkup(ChatId chatId, int messageId, InlineKeyboardMarkup? replyMarkup = null) {
+            var message = new EditMessageReplyMarkup(chatId, messageId, replyMarkup);
+
+            AddMessageToQueue(chatId, message);
+        }
+
+        public static void DeleteMessage(ChatId chatId, int messageId) {
+            var message = new DeleteMessage(chatId, messageId);
+
+            AddMessageToQueue(chatId, message);
+        }
+        #endregion
 
         private static void AddMessageToQueue(ChatId chatId, IMessageQueue message) {
             (SemaphoreSlim semaphore, ConcurrentQueue<IMessageQueue> queue) user = userQueues.GetOrAdd(chatId, _ => (new SemaphoreSlim(1, 1), new ConcurrentQueue<IMessageQueue>()));
@@ -77,27 +92,43 @@ namespace Core.Bot.Messages {
         }
 
         private static async Task SendMessageAsync(IMessageQueue message) {
-            if(message is TextMessage textMessage) {
-                await BotClient.SendTextMessageAsync(
-                    chatId: textMessage.ChatId,
-                    text: textMessage.Text,
-                    parseMode: textMessage.ParseMode,
-                    disableWebPagePreview: textMessage.DisableWebPagePreview,
-                    disableNotification: textMessage.DisableNotification,
-                    replyMarkup: textMessage.ReplyMarkup
-                );
-                return;
-            }
+            switch(message) {
+                case TextMessage textMessage:
+                    await BotClient.SendTextMessageAsync(
+                        chatId: textMessage.ChatId,
+                        text: textMessage.Text,
+                        parseMode: textMessage.ParseMode,
+                        disableWebPagePreview: textMessage.DisableWebPagePreview,
+                        disableNotification: textMessage.DisableNotification,
+                        replyMarkup: textMessage.ReplyMarkup
+                    );
+                    break;
 
-            if(message is EditMessageText editMessageText) {
-                await BotClient.EditMessageTextAsync(
-                    chatId: editMessageText.ChatId,
-                    text: editMessageText.Text,
-                    messageId: editMessageText.MessageId,
-                    parseMode: editMessageText.ParseMode,
-                    replyMarkup: editMessageText.ReplyMarkup,
-                    disableWebPagePreview: editMessageText.DisableWebPagePreview
-                );
+                case EditMessageText editMessageText:
+                    await BotClient.EditMessageTextAsync(
+                        chatId: editMessageText.ChatId,
+                        text: editMessageText.Text,
+                        messageId: editMessageText.MessageId,
+                        parseMode: editMessageText.ParseMode,
+                        replyMarkup: editMessageText.ReplyMarkup,
+                        disableWebPagePreview: editMessageText.DisableWebPagePreview
+                    );
+                    break;
+
+                case DeleteMessage deleteMessage:
+                    await BotClient.DeleteMessageAsync(
+                        chatId: deleteMessage.ChatId,
+                        messageId: deleteMessage.MessageId
+                    );
+                    break;
+
+                case EditMessageReplyMarkup editMessageReplyMarkup:
+                    await BotClient.EditMessageReplyMarkupAsync(
+                        chatId: editMessageReplyMarkup.ChatId,
+                        replyMarkup: editMessageReplyMarkup.ReplyMarkup,
+                        messageId: editMessageReplyMarkup.MessageId
+                    );
+                    break;
             }
         }
 

@@ -1,15 +1,11 @@
-﻿using Core.Bot.Commands;
-using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types;
-namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Message {
+namespace Core.Bot.Commands.Student.Slash.Feedbacks.Message {
     public class FeedbackCancel : IMessageCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string>? Commands => [UserCommands.Instance.Message["Cancel"]];
 
@@ -22,7 +18,7 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Message {
 
             await dbContext.SaveChangesAsync();
 
-            MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["MainMenu"], replyMarkup: Statics.MainKeyboardMarkup);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["MainMenu"], replyMarkup: Statics.MainKeyboardMarkup);
         }
     }
 }

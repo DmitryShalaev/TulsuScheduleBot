@@ -1,15 +1,14 @@
-﻿using Core.Bot.Messages;
+﻿using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
 using ScheduleBot;
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
 
-using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace Core.Bot.Commands.Student.Custom {
     public static class CustomEditMessage {
-        public static async Task CustomEdit(ScheduleDbContext dbContext, ITelegramBotClient botClient, ChatId chatId, int messageId, TelegramUser user, string args, Mode mode, string text) {
+        public static async Task CustomEdit(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args, Mode mode, string text) {
             string[] tmp = args.Split('|');
             CustomDiscipline? discipline = dbContext.CustomDiscipline.FirstOrDefault(i => i.ID == uint.Parse(tmp[0]));
             if(discipline is not null) {
@@ -17,8 +16,8 @@ namespace Core.Bot.Commands.Student.Custom {
                     user.TelegramUserTmp.Mode = mode;
                     user.TelegramUserTmp.TmpData = $"{discipline.ID}";
 
-                    await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
-                    MessageQueue.SendTextMessage(chatId: chatId, text: text, replyMarkup: Statics.CancelKeyboardMarkup);
+                    MessagesQueue.Message.DeleteMessage(chatId: chatId, messageId: messageId);
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: text, replyMarkup: Statics.CancelKeyboardMarkup);
 
                     await dbContext.SaveChangesAsync();
                     return;
@@ -27,7 +26,7 @@ namespace Core.Bot.Commands.Student.Custom {
 
             if(DateOnly.TryParse(tmp[1], out DateOnly date)) {
                 (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user, all: true);
-                MessageQueue.EditMessageText(chatId: chatId, messageId: messageId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2));
+                MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2));
             }
         }
     }

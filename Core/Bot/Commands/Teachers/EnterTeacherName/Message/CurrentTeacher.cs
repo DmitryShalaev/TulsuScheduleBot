@@ -1,16 +1,13 @@
 ﻿using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace Core.Bot.Commands.Teachers.EnterTeacherName.Message {
 
     public class CurrentTeacher : IMessageCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string>? Commands => [UserCommands.Instance.Message["CurrentTeacher"]];
 
@@ -22,7 +19,7 @@ namespace Core.Bot.Commands.Teachers.EnterTeacherName.Message {
             user.TelegramUserTmp.Mode = Mode.TeachersWorkSchedule;
             await dbContext.SaveChangesAsync();
 
-            MessageQueue.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["EnterTeacherName"], replyMarkup: Statics.WorkScheduleBackKeyboardMarkup);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["EnterTeacherName"], replyMarkup: Statics.WorkScheduleBackKeyboardMarkup);
         }
     }
 }

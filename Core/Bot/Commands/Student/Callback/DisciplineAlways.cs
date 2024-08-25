@@ -1,16 +1,14 @@
 ﻿using Core.Bot.Commands.Interfaces;
-using Core.Bot.Messages;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
 using ScheduleBot;
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
 
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 namespace Core.Bot.Commands.Student.Callback {
     public class DisciplineAlways : ICallbackCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public string Command => "DisciplineAlways";
 
@@ -36,14 +34,14 @@ namespace Core.Bot.Commands.Student.Callback {
                     }
 
                     await dbContext.SaveChangesAsync();
-                    await BotClient.EditMessageReplyMarkupAsync(chatId: chatId, messageId: messageId, replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, discipline.Date, user.ScheduleProfile));
+                    MessagesQueue.Message.EditMessageReplyMarkup(chatId: chatId, messageId: messageId, replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, discipline.Date, user.ScheduleProfile));
                     return;
                 }
             }
 
             if(DateOnly.TryParse(tmp[1], out DateOnly date)) {
                 (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user);
-                MessageQueue.EditMessageText(chatId: chatId, messageId: messageId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
             }
         }
     }

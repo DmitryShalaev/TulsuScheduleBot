@@ -1,10 +1,11 @@
 ﻿using System.Text.RegularExpressions;
 
-using Core.Bot.Messages;
+using Core.Bot.Commands.Student.Schedule.Message;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
 using ScheduleBot;
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
 
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -34,7 +35,7 @@ namespace Core.Bot {
 
         private static readonly Commands.UserCommands commands = Commands.UserCommands.Instance;
 
-        private static readonly Parser parser = Parser.Instance;
+        private static readonly ScheduleParser parser = ScheduleParser.Instance;
 
         #region ReplyKeyboardMarkup
         public static readonly ReplyKeyboardMarkup MainKeyboardMarkup = new(new[] {
@@ -111,75 +112,75 @@ namespace Core.Bot {
             user.TelegramUserTmp.Mode = Mode.GroupСhange;
             await dbContext.SaveChangesAsync();
 
-            MessageQueue.SendTextMessage(chatId: chatId, text: $"Для того чтобы узнать расписание, необходимо указать номер группы.", replyMarkup: CancelKeyboardMarkup);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Для того чтобы узнать расписание, необходимо указать номер группы.", replyMarkup: CancelKeyboardMarkup);
         }
-        public static void GroupErrorUser(ChatId chatId) => MessageQueue.SendTextMessage(chatId: chatId, text: $"Попросите владельца профиля указать номер группы в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
+        public static void GroupErrorUser(ChatId chatId) => MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Попросите владельца профиля указать номер группы в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
 
         public static async Task StudentIdErrorAdminAsync(ScheduleDbContext dbContext, ChatId chatId, TelegramUser user) {
             user.TelegramUserTmp.Mode = Mode.StudentIDСhange;
             await dbContext.SaveChangesAsync();
 
-            MessageQueue.SendTextMessage(chatId: chatId, text: $"Для того чтобы узнать успеваемость, необходимо указать номер зачетной книжки.", replyMarkup: CancelKeyboardMarkup);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Для того чтобы узнать успеваемость, необходимо указать номер зачетной книжки.", replyMarkup: CancelKeyboardMarkup);
         }
-        public static void StudentIdErrorUser(ChatId chatId) => MessageQueue.SendTextMessage(chatId: chatId, text: $"Попросите владельца профиля указать номер зачетной книжки в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
+        public static void StudentIdErrorUser(ChatId chatId) => MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Попросите владельца профиля указать номер зачетной книжки в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
 
         public static async Task ScheduleRelevanceAsync(ScheduleDbContext dbContext, ChatId chatId, string group, IReplyMarkup? replyMarkup) {
             DateTime? groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group)?.Update.ToLocalTime();
 
             if(groupLastUpdate is null || (DateTime.Now - groupLastUpdate)?.TotalMinutes > commands.Config.DisciplineUpdateTime) {
-                MessageQueue.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
                 if(!await parser.UpdatingDisciplines(dbContext, group, commands.Config.UpdateAttemptTime))
-                    MessageQueue.SendTextMessage(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
 
                 groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group)?.Update.ToLocalTime();
             }
 
             if(groupLastUpdate is not null)
-                MessageQueue.SendTextMessage(chatId: chatId, text: $"{commands.Message["ScheduleIsRelevantOn"]} {groupLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"{commands.Message["ScheduleIsRelevantOn"]} {groupLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
         public static async Task TeacherWorkScheduleRelevanceAsync(ScheduleDbContext dbContext, ChatId chatId, string teacher, IReplyMarkup? replyMarkup) {
             DateTime? teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher)?.Update.ToLocalTime();
 
             if(teacherLastUpdate is null || (DateTime.Now - teacherLastUpdate)?.TotalMinutes > commands.Config.WorkScheduleUpdateTime) {
-                MessageQueue.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
                 if(!await parser.UpdatingTeacherWorkSchedule(dbContext, teacher, commands.Config.UpdateAttemptTime))
-                    MessageQueue.SendTextMessage(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
 
                 teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher)?.Update.ToLocalTime();
             }
 
             if(teacherLastUpdate is not null)
-                MessageQueue.SendTextMessage(chatId: chatId, text: $"{commands.Message["ScheduleIsRelevantOn"]} {teacherLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"{commands.Message["ScheduleIsRelevantOn"]} {teacherLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
         public static async Task ClassroomWorkScheduleRelevanceAsync(ScheduleDbContext dbContext, ChatId chatId, string classroom, IReplyMarkup? replyMarkup) {
             DateTime? classroomLastUpdate = dbContext.ClassroomLastUpdate.FirstOrDefault(i => i.Classroom == classroom)?.Update.ToLocalTime();
 
             if(classroomLastUpdate is null || (DateTime.Now - classroomLastUpdate)?.TotalMinutes > commands.Config.WorkScheduleUpdateTime) {
-                MessageQueue.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
                 if(!await parser.UpdatingClassroomWorkSchedule(dbContext, classroom, commands.Config.UpdateAttemptTime))
-                    MessageQueue.SendTextMessage(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
 
                 classroomLastUpdate = dbContext.ClassroomLastUpdate.FirstOrDefault(i => i.Classroom == classroom)?.Update.ToLocalTime();
             }
 
             if(classroomLastUpdate is not null)
-                MessageQueue.SendTextMessage(chatId: chatId, text: $"{commands.Message["ScheduleIsRelevantOn"]} {classroomLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"{commands.Message["ScheduleIsRelevantOn"]} {classroomLastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
         public static async Task ProgressRelevanceAsync(ScheduleDbContext dbContext, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
             DateTime? studentIDlastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID)?.Update.ToLocalTime();
             if(studentIDlastUpdate is null || (DateTime.Now - studentIDlastUpdate)?.TotalMinutes > commands.Config.StudentIDUpdateTime) {
-                MessageQueue.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
                 if(!await parser.UpdatingProgress(dbContext, studentID, commands.Config.UpdateAttemptTime))
-                    MessageQueue.SendTextMessage(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
 
                 studentIDlastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID)?.Update.ToLocalTime();
             }
 
             if(send && studentIDlastUpdate is not null)
-                MessageQueue.SendTextMessage(chatId: chatId, text: $"{commands.Message["AcademicPerformanceIsRelevantOn"]} {studentIDlastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"{commands.Message["AcademicPerformanceIsRelevantOn"]} {studentIDlastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup);
         }
 
         public static string GetFeedbackMessage(Feedback feedback) {

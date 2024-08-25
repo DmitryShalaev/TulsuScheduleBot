@@ -1,11 +1,10 @@
 ﻿using System.Globalization;
 
-using Core.Bot.Messages;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
 using Microsoft.EntityFrameworkCore;
-
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
 
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -28,11 +27,11 @@ namespace Core.Bot {
                 foreach(ExtendedTelegramUser? user in telegramUsers.Where(i => i.ScheduleProfile.Group == Group && days <= i.Settings.NotificationDays)) {
                     try {
                         if(!user.Flag) {
-                            MessageQueue.SendTextMessage(chatId: user.ChatID, text: Commands.UserCommands.Instance.Message["NotificationMessage"], disableNotification: true);
+                            Message.SendTextMessage(chatId: user.ChatID, text: Commands.UserCommands.Instance.Message["NotificationMessage"], disableNotification: true);
                             user.Flag = true;
                         }
 
-                        MessageQueue.SendTextMessage(chatId: user.ChatID, text: str,
+                        Message.SendTextMessage(chatId: user.ChatID, text: str,
                                 replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: Commands.UserCommands.Instance.Callback["All"].text, callbackData: $"NotificationsAll {Date}")),
                                 disableNotification: true);
 
