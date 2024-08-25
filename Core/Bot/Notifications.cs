@@ -15,29 +15,30 @@ namespace Core.Bot {
 
     public static class Notifications {
 
-        public static async Task UpdatedDisciplinesAsync(ScheduleDbContext dbContext, List<(string, DateOnly)> values) {
-            var telegramUsers = dbContext.TelegramUsers.Include(u => u.Settings).Where(u => u.Settings.NotificationEnabled).Include(u => u.ScheduleProfile).Select(u => new ExtendedTelegramUser(u)).ToList();
+        public static void UpdatedDisciplines(List<(string, DateOnly)> values) {
+            using(ScheduleDbContext dbContext = new()) {
 
-            foreach((string Group, DateOnly Date) in values) {
-                int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(Date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-                string str = $"{Date:dd.MM.yy} - {char.ToUpper(Date.ToString("dddd")[0]) + Date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})";
+                var telegramUsers = dbContext.TelegramUsers.Include(u => u.Settings).Include(u => u.ScheduleProfile).Where(u => u.Settings.NotificationEnabled).Select(u => new ExtendedTelegramUser(u)).ToList();
 
-                double days = (DateTime.Parse(Date.ToString()) - DateTime.Now.Date).TotalDays;
+                foreach((string Group, DateOnly Date) in values) {
+                    int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(Date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+                    string str = $"{Date:dd.MM.yy} - {char.ToUpper(Date.ToString("dddd")[0]) + Date.ToString("dddd")[1..]} ({(weekNumber % 2 == 0 ? "чётная неделя" : "нечётная неделя")})";
 
-                foreach(ExtendedTelegramUser? user in telegramUsers.Where(i => i.ScheduleProfile.Group == Group && days <= i.Settings.NotificationDays)) {
-                    try {
-                        if(!user.Flag) {
-                            Message.SendTextMessage(chatId: user.ChatID, text: Commands.UserCommands.Instance.Message["NotificationMessage"], disableNotification: true);
-                            user.Flag = true;
-                        }
+                    double days = (DateTime.Parse(Date.ToString()) - DateTime.Now.Date).TotalDays;
 
-                        Message.SendTextMessage(chatId: user.ChatID, text: str,
-                                replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: Commands.UserCommands.Instance.Callback["All"].text, callbackData: $"NotificationsAll {Date}")),
-                                disableNotification: true);
+                    foreach(ExtendedTelegramUser? user in telegramUsers.Where(i => i.ScheduleProfile.Group == Group && days <= i.Settings.NotificationDays)) {
+                        try {
+                            if(!user.Flag) {
+                                Message.SendTextMessage(chatId: user.ChatID, text: Commands.UserCommands.Instance.Message["NotificationMessage"], disableNotification: true);
+                                user.Flag = true;
+                            }
 
-                    } catch(Exception) { }
+                            Message.SendTextMessage(chatId: user.ChatID, text: str,
+                                    replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: Commands.UserCommands.Instance.Callback["All"].text, callbackData: $"NotificationsAll {Date}")),
+                                    disableNotification: true);
 
-                    await Task.Delay(TimeSpan.FromSeconds(1)); //TODO: Удалить 
+                        } catch(Exception) { }
+                    }
                 }
             }
         }

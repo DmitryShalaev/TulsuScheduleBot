@@ -30,7 +30,7 @@ namespace ScheduleBot {
                 //Proxy = new WebProxy("127.0.0.1:8888"),
             };
 
-            Task.Factory.StartNew(GetTeachersData, TaskCreationOptions.LongRunning);
+            Task.Run(GetTeachersData);
         }
 
         public async Task GetTeachersData() {
@@ -145,7 +145,10 @@ namespace ScheduleBot {
 
                     if(updatedDisciplines.Count != 0) {
                         var date = DateOnly.FromDateTime(DateTime.Now);
-                        _ = Task.Factory.StartNew(() => Notifications.UpdatedDisciplinesAsync(dbContext, [.. updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date)]), TaskCreationOptions.LongRunning);
+                        var _updatedDisciplines = updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList();
+
+                        if(_updatedDisciplines.Count != 0)
+                            _ = Task.Run(() => Notifications.UpdatedDisciplines(_updatedDisciplines));
                     }
 
                     return true;
