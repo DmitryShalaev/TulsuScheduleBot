@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 
 using Core.Bot;
 using Core.Bot.Commands;
+using Core.DB;
 using Core.DB.Entity;
 
 using HtmlAgilityPack;
@@ -13,18 +14,15 @@ using Microsoft.EntityFrameworkCore;
 
 using Newtonsoft.Json.Linq;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
 namespace ScheduleBot {
-    public partial class Parser {
+    public partial class ScheduleParser {
         private readonly HttpClientHandler clientHandler;
 
-        private static Parser? instance;
+        private static ScheduleParser? instance;
 
-        public static Parser Instance => instance ??= new Parser();
+        public static ScheduleParser Instance => instance ??= new ScheduleParser();
 
-        private Parser() {
+        private ScheduleParser() {
             clientHandler = new() {
                 AllowAutoRedirect = false,
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip | DecompressionMethods.None,
@@ -693,4 +691,3 @@ namespace ScheduleBot {
         }
     }
 }
-

@@ -1,11 +1,11 @@
 ﻿using System.Globalization;
 
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
+
 using Microsoft.EntityFrameworkCore;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Core.Bot {
@@ -14,7 +14,6 @@ namespace Core.Bot {
     }
 
     public static class Notifications {
-        private static readonly ITelegramBotClient botClient = TelegramBot.Instance.botClient;
 
         public static async Task UpdatedDisciplinesAsync(ScheduleDbContext dbContext, List<(string, DateOnly)> values) {
             var telegramUsers = dbContext.TelegramUsers.Include(u => u.Settings).Where(u => u.Settings.NotificationEnabled).Include(u => u.ScheduleProfile).Select(u => new ExtendedTelegramUser(u)).ToList();
@@ -28,11 +27,11 @@ namespace Core.Bot {
                 foreach(ExtendedTelegramUser? user in telegramUsers.Where(i => i.ScheduleProfile.Group == Group && days <= i.Settings.NotificationDays)) {
                     try {
                         if(!user.Flag) {
-                            await botClient.SendTextMessageAsync(chatId: user.ChatID, text: Commands.UserCommands.Instance.Message["NotificationMessage"], disableNotification: true);
+                            Message.SendTextMessage(chatId: user.ChatID, text: Commands.UserCommands.Instance.Message["NotificationMessage"], disableNotification: true);
                             user.Flag = true;
                         }
 
-                        await botClient.SendTextMessageAsync(chatId: user.ChatID, text: str,
+                        Message.SendTextMessage(chatId: user.ChatID, text: str,
                                 replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: Commands.UserCommands.Instance.Callback["All"].text, callbackData: $"NotificationsAll {Date}")),
                                 disableNotification: true);
 

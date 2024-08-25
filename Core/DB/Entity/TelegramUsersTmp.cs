@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ScheduleBot.DB.Entity {
+namespace Core.DB.Entity {
 #pragma warning disable CS8618
 
     public class TelegramUsersTmp {
@@ -14,7 +14,6 @@ namespace ScheduleBot.DB.Entity {
         public Mode Mode { get; set; } = Mode.Default;
         public ModeDTO ModeDTO { get; set; }
 
-        public int? RequestingMessageID { get; set; }
         public string? TmpData { get; set; }
     }
 }

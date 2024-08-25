@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ScheduleBot.DB.Entity {
+namespace Core.DB.Entity {
     public class Settings {
         public bool NotificationEnabled { get; set; } = true;
         public bool DisplayingGroupList { get; set; } = true;

@@ -1,12 +1,10 @@
 ﻿using System.Globalization;
 using System.Text;
 
+using Core.DB;
 using Core.DB.Entity;
 
 using Microsoft.EntityFrameworkCore;
-
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
 
 #pragma warning disable IDE0130 // Пространство имен (namespace) не соответствует структуре папок.
 
@@ -57,7 +55,6 @@ namespace ScheduleBot {
 
             return schedules;
         }
-
 
         public static (string, bool) GetScheduleByDate(ScheduleDbContext dbContext, DateOnly date, TelegramUser user, bool all = false, bool link = true) {
             ScheduleProfile profile = user.ScheduleProfile;

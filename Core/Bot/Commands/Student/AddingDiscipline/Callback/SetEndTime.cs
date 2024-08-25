@@ -1,14 +1,13 @@
-﻿using Core.Bot.Interfaces;
+﻿using Core.Bot.Commands.AddingDiscipline;
+using Core.Bot.Commands.Interfaces;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace Core.Bot.Commands.AddingDiscipline.Callback {
+namespace Core.Bot.Commands.Student.AddingDiscipline.Callback {
     public class SetEndTime : ICallbackCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public string Command => UserCommands.Instance.Callback["SetEndTime"].callback;
 
@@ -16,6 +15,9 @@ namespace Core.Bot.Commands.AddingDiscipline.Callback {
 
         public Manager.Check Check => Manager.Check.none;
 
-        public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) => await AddingDisciplineMode.SetStagesAddingDisciplineAsync(dbContext, BotClient, chatId, messageId, args, user);
+        public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
+            MessagesQueue.Message.EditMessageReplyMarkup(chatId, messageId);
+            await AddingDisciplineMode.SetStagesAddingDisciplineAsync(dbContext, chatId, args, user);
+        }
     }
 }

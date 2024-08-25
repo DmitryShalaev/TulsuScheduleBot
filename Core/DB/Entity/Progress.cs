@@ -2,7 +2,7 @@
 
 using Newtonsoft.Json.Linq;
 
-namespace ScheduleBot.DB.Entity {
+namespace Core.DB.Entity {
 
 #pragma warning disable CS8618
     public class Progress : IEquatable<Progress?> {

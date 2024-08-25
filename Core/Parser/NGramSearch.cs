@@ -1,6 +1,6 @@
-﻿using ScheduleBot.DB;
+﻿using Core.DB;
 
-namespace ScheduleBot {
+namespace Core.Parser {
     public class NGramSearch {
         private static NGramSearch? instance;
         private readonly Dictionary<string, HashSet<string>> TeachersNgramsDict;

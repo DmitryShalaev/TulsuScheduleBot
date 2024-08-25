@@ -1,11 +1,11 @@
-﻿using ScheduleBot.DB;
+﻿using Core.DB.Entity;
 
 namespace Core.DB {
     public static class ClearTemporary {
         public static async Task ClearAsync() {
             using(ScheduleDbContext dbContext = new()) {
 
-                foreach(ScheduleBot.DB.Entity.TelegramUser item in dbContext.TelegramUsers)
+                foreach(TelegramUser item in dbContext.TelegramUsers)
                     item.TodayRequests = 0;
 
                 var date = DateOnly.FromDateTime(DateTime.Now);

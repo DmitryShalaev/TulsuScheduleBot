@@ -2,8 +2,6 @@
 
 using Microsoft.EntityFrameworkCore;
 
-using ScheduleBot.DB.Entity;
-
 namespace Core.DB.Entity {
 
 #pragma warning disable CS8618

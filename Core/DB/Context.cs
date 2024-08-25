@@ -2,9 +2,7 @@
 
 using Microsoft.EntityFrameworkCore;
 
-using ScheduleBot.DB.Entity;
-
-namespace ScheduleBot.DB {
+namespace Core.DB {
     public class ScheduleDbContext : DbContext {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("TelegramBotConnectionString"));
 

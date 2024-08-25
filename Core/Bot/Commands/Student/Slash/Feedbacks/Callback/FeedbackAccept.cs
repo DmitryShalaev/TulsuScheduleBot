@@ -1,16 +1,13 @@
-﻿using Core.Bot.Commands;
-using Core.Bot.Interfaces;
+﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
 using Microsoft.EntityFrameworkCore;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types;
-namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Callback {
+namespace Core.Bot.Commands.Student.Slash.Feedbacks.Callback {
     public class FeedbackAccept : ICallbackCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public string Command => "FeedbackAccept";
 
@@ -27,11 +24,10 @@ namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Callback {
             }
 
             feedback = dbContext.Feedbacks.Include(i => i.TelegramUser).Where(i => !i.IsCompleted).OrderBy(i => i.Date).FirstOrDefault();
-            if(feedback is not null) {
-                await BotClient.EditMessageTextAsync(chatId: chatId, messageId: messageId, text: FeedbackMessage.GetFeedbackMessage(feedback), replyMarkup: DefaultCallback.GetFeedbackInlineKeyboardButton(dbContext, feedback));
-            } else {
-                await BotClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
-                await BotClient.SendTextMessageAsync(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: Statics.MainKeyboardMarkup);
+            if(feedback is not null) MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: FeedbackMessage.GetFeedbackMessage(feedback), replyMarkup: DefaultCallback.GetFeedbackInlineKeyboardButton(dbContext, feedback));
+            else {
+                MessagesQueue.Message.DeleteMessage(chatId: chatId, messageId: messageId);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: Statics.MainKeyboardMarkup);
             }
         }
     }

@@ -1,13 +1,14 @@
 ﻿using Core.Bot.Commands;
+using Core.DB;
 
 using Microsoft.EntityFrameworkCore;
 
 using Quartz;
 using Quartz.Impl;
 
-using ScheduleBot.DB;
+using ScheduleBot;
 
-namespace ScheduleBot.Jobs {
+namespace Core.Jobs {
     public class UpdatingDisciplinesJob : IJob {
         private static DateTime dateTime = DateTime.Now;
 
@@ -15,7 +16,7 @@ namespace ScheduleBot.Jobs {
 
         public static async Task StartAsync() {
             using(ScheduleDbContext dbContext = new()) {
-                Parser instance = Parser.Instance;
+                ScheduleParser instance = ScheduleParser.Instance;
 
                 foreach(string item in dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= config.DisciplineUpdateDays).Select(i => i.Group!).Distinct().ToList())
                     await instance.UpdatingDisciplines(dbContext, group: item, updateAttemptTime: 0);
@@ -40,7 +41,7 @@ namespace ScheduleBot.Jobs {
 
         async Task IJob.Execute(IJobExecutionContext context) {
             using(ScheduleDbContext dbContext = new()) {
-                Parser instance = Parser.Instance;
+                ScheduleParser instance = ScheduleParser.Instance;
 
                 if((DateTime.Now - dateTime).Minutes >= config.DisciplineUpdateTime) {
                     dateTime = DateTime.Now;

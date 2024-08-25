@@ -1,10 +1,10 @@
-﻿using Core.Bot.Interfaces;
+﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
 using ScheduleBot;
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
 
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -12,7 +12,6 @@ using Telegram.Bot.Types.Enums;
 
 namespace Core.Bot.Commands.Teachers.Callback {
     public class TeacherSelect : ICallbackCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public string Command => "Select";
 
@@ -22,7 +21,6 @@ namespace Core.Bot.Commands.Teachers.Callback {
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
             user.TelegramUserTmp.Mode = Mode.TeacherSelected;
-            user.TelegramUserTmp.RequestingMessageID = null;
 
             TeacherLastUpdate teacher = dbContext.TeacherLastUpdate.First(i => i.Teacher.ToLower().StartsWith(args));
 
@@ -30,11 +28,11 @@ namespace Core.Bot.Commands.Teachers.Callback {
             await dbContext.SaveChangesAsync();
 
             if(string.IsNullOrWhiteSpace(teacher.LinkProfile))
-                await Parser.Instance.UpdatingTeacherInfo(dbContext, teacherName);
+                await ScheduleParser.Instance.UpdatingTeacherInfo(dbContext, teacherName);
 
-            await BotClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
+            MessagesQueue.Message.DeleteMessage(chatId: chatId, messageId: messageId);
 
-            await BotClient.SendTextMessageAsync(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentTeacher"]}: [{teacherName}]({teacher.LinkProfile})", replyMarkup: DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(teacherName), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentTeacher"]}: [{teacherName}]({teacher.LinkProfile})", replyMarkup: DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(teacherName), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
         }
     }
 }

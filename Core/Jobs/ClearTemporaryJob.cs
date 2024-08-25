@@ -3,7 +3,9 @@
 using Quartz;
 using Quartz.Impl;
 
-namespace ScheduleBot.Jobs {
+using ScheduleBot;
+
+namespace Core.Jobs {
     public class ClearTemporaryJob : IJob {
         public static async Task StartAsync() {
             var schedulerFactory = new StdSchedulerFactory();
@@ -23,7 +25,7 @@ namespace ScheduleBot.Jobs {
         async Task IJob.Execute(IJobExecutionContext context) {
             await ClearTemporary.ClearAsync();
 
-            await Parser.Instance.GetTeachersData();
+            await ScheduleParser.Instance.GetTeachersData();
         }
     }
 }

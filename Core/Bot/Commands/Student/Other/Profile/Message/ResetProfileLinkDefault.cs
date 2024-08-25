@@ -1,13 +1,11 @@
-﻿using Core.Bot.Interfaces;
+﻿using Core.Bot.Commands.Interfaces;
+using Core.Bot.MessagesQueue;
+using Core.DB;
+using Core.DB.Entity;
 
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
-
-using Telegram.Bot;
 using Telegram.Bot.Types;
 namespace Core.Bot.Commands.Student.Other.Profile.Message {
     internal class ResetProfileLinkDefault : IMessageCommand {
-        public ITelegramBotClient BotClient => TelegramBot.Instance.botClient;
 
         public List<string>? Commands => null;
 
@@ -15,6 +13,9 @@ namespace Core.Bot.Commands.Student.Other.Profile.Message {
 
         public Manager.Check Check => Manager.Check.none;
 
-        public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) => await BotClient.SendTextMessageAsync(chatId: chatId, text: "Выберите один из представленных вариантов!", replyMarkup: Statics.ResetProfileLinkKeyboardMarkup);
+        public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Выберите один из представленных вариантов!", replyMarkup: Statics.ResetProfileLinkKeyboardMarkup);
+            return Task.CompletedTask;
+        }
     }
 }

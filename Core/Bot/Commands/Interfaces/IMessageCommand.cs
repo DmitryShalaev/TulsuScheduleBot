@@ -1,15 +1,12 @@
-﻿using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
+﻿using Core.DB;
+using Core.DB.Entity;
 
-using Telegram.Bot;
 using Telegram.Bot.Types;
 
 using static Core.Bot.Commands.Manager;
 
-namespace Core.Bot.Interfaces {
+namespace Core.Bot.Commands.Interfaces {
     public interface IMessageCommand {
-        public ITelegramBotClient BotClient { get; }
-
         public List<string>? Commands { get; }
 
         public List<Mode> Modes { get; }

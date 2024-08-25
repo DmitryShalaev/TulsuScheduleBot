@@ -1,11 +1,9 @@
-﻿using Core.Bot.Commands;
-
-using ScheduleBot.DB;
-using ScheduleBot.DB.Entity;
+﻿using Core.DB;
+using Core.DB.Entity;
 
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace Core.Bot {
+namespace Core.Bot.Commands {
     public static class DefaultMessage {
         public static ReplyKeyboardMarkup GetTermsKeyboardMarkup(ScheduleDbContext dbContext, string StudentID) {
             List<KeyboardButton[]> TermsKeyboardMarkup = [];

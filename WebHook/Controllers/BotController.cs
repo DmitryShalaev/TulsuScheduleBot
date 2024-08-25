@@ -6,11 +6,9 @@ namespace WebHook.Controllers {
 
     [ApiController]
     [Route("/")]
-    public class BotController : ControllerBase {
+    public class BotController(TelegramUpdateBackgroundService backgroundService) : ControllerBase {
 
-        private readonly TelegramUpdateBackgroundService _backgroundService;
-
-        public BotController(TelegramUpdateBackgroundService backgroundService) => _backgroundService = backgroundService;
+        private readonly TelegramUpdateBackgroundService _backgroundService = backgroundService;
 
         [HttpPost]
         public void Post([FromBody] Update update) => _backgroundService.ProcessUpdateAsync(update);
