@@ -521,10 +521,8 @@ namespace ScheduleBot {
         private static partial Regex ClassroomRegex6();
         [GeneratedRegex("^[.]{3}\\d{5,6}[а-я]{1,2}")]
         private static partial Regex ClassroomRegex7();
-        [GeneratedRegex("^[КБПМЗСИТЦ]{1,3}-\\d{1,3}$")]
-        private static partial Regex ClassroomRegex8();
         [GeneratedRegex("^[А-Я][а-яё]+\\s[А-Я]")]
-        private static partial Regex ClassroomRegex9();
+        private static partial Regex ClassroomRegex8();
 
         private static readonly List<Regex> regexes = [
                 ClassroomRegex1(),
@@ -535,7 +533,6 @@ namespace ScheduleBot {
                 ClassroomRegex6(),
                 ClassroomRegex7(),
                 ClassroomRegex8(),
-                ClassroomRegex9(),
                 TeachersRegex()
             ];
         #endregion
