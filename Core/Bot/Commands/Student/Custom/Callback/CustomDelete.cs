@@ -19,7 +19,7 @@ namespace Core.Bot.Commands.Student.Custom.Callback {
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
             string[] tmp = args.Split('|');
-            CustomDiscipline? customDiscipline = await  dbContext.CustomDiscipline.FirstOrDefaultAsync(i => i.ID == uint.Parse(tmp[0]));
+            CustomDiscipline? customDiscipline = await dbContext.CustomDiscipline.FirstOrDefaultAsync(i => i.ID == uint.Parse(tmp[0]));
             if(customDiscipline is not null) {
                 if(user.IsOwner()) {
                     dbContext.CustomDiscipline.Remove(customDiscipline);

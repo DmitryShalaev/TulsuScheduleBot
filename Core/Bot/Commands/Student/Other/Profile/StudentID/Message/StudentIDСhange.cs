@@ -37,14 +37,14 @@ namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
                     user.ScheduleProfile.StudentIDLastUpdate = studentID;
                     await dbContext.SaveChangesAsync();
 
-                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Номер зачётки успешно изменен на {args} ", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user));
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Номер зачётки успешно изменен на {args} ", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user), deletePrevious: true);
 
                 } else {
-                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["InvalidStudentIDNumber"], replyMarkup: Statics.CancelKeyboardMarkup);
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["InvalidStudentIDNumber"], replyMarkup: Statics.CancelKeyboardMarkup, deletePrevious: true);
                     await dbContext.SaveChangesAsync();
                 }
             } else {
-                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Не удалось распознать введенный номер зачётной книжки", replyMarkup: Statics.CancelKeyboardMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Не удалось распознать введенный номер зачётной книжки", replyMarkup: Statics.CancelKeyboardMarkup, deletePrevious: true);
                 await dbContext.SaveChangesAsync();
             }
         }
