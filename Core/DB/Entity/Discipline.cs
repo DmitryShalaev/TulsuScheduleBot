@@ -50,7 +50,7 @@ namespace Core.DB.Entity {
             string? _subgroup = json.Value<JToken>("GROUPS")?[0]?.Value<string>("PRIM");
             Subgroup = string.IsNullOrWhiteSpace(_subgroup) ? null : _subgroup;
 
-            Lecturer = json.Value<string?>("PREP")?.Trim();
+            Lecturer = json.Value<string?>("PREP");
 
             Class = (Class)Enum.Parse(typeof(Class), (json.Value<string>("CLASS") ?? "other").Replace("default", "def"));
 
