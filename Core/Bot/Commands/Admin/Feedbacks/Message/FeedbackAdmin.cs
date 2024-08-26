@@ -15,15 +15,20 @@ namespace Core.Bot.Commands.Admin.Feedbacks.Message {
 
         public Manager.Check Check => Manager.Check.none;
 
-        public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            Feedback? feedback = dbContext.Feedbacks.Include(i => i.TelegramUser).Where(i => !i.IsCompleted).OrderBy(i => i.Date).FirstOrDefault();
+        public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
+            Feedback? feedback = await dbContext.Feedbacks.Include(i => i.TelegramUser).Where(i => !i.IsCompleted).OrderBy(i => i.Date).FirstOrDefaultAsync();
 
-            if(feedback is not null) MessagesQueue.Message.SendTextMessage(chatId: chatId, text: FeedbackMessage.GetFeedbackMessage(feedback), replyMarkup: FeedbackMessage.GetFeedbackInlineKeyboardButton(dbContext, feedback));
-            else {
+            if(feedback is not null) {
+                MessagesQueue.Message.SendTextMessage(
+                    chatId: chatId,
+                    text: FeedbackMessage.GetFeedbackMessage(feedback),
+                    replyMarkup: FeedbackMessage.GetFeedbackInlineKeyboardButton(dbContext, feedback),
+                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                    disableWebPagePreview: true);
+
+            } else {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: Statics.AdminPanelKeyboardMarkup);
             }
-
-            return Task.CompletedTask;
         }
     }
 }
