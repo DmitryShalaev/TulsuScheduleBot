@@ -8,7 +8,7 @@ namespace Core.Bot {
 
         public static async Task Send(string msg, Exception e) {
             await Console.Out.WriteLineAsync($"{msg}\n{new('-', 25)}");
-            await Console.Out.WriteLineAsync($"{e.Message}");
+            await Console.Out.WriteLineAsync($"{e.Message}\n{new('-', 25)}\n{e}");
 #if !DEBUG
             MailAddress from = new(Environment.GetEnvironmentVariable("TelegramBot_FromEmail") ?? "", "Error");
             MailAddress to = new(Environment.GetEnvironmentVariable("TelegramBot_ToEmail") ?? "");
