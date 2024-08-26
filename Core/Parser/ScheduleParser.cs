@@ -506,33 +506,37 @@ namespace ScheduleBot {
         }
 
         private async Task<JArray?> GetDictionaries() {
-            using(var client = new HttpClient(clientHandler, false)) {
-                #region RequestHeaders
-                client.DefaultRequestHeaders.Add("Accept", "application/json, text/javascript, */*; q=0.01");
-                client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
-                client.DefaultRequestHeaders.Add("Accept-Language", "ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7");
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.34");
-                client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
-                client.DefaultRequestHeaders.Add("Referer", $"https://tulsu.ru/schedule/");
-                client.DefaultRequestHeaders.Add("Origin", "https://tulsu.ru");
-                client.DefaultRequestHeaders.Add("sec-ch-ua", "\"Chromium\";v=\"112\", \"Microsoft Edge\";v=\"112\", \"Not:A-Brand\";v=\"99\"");
-                client.DefaultRequestHeaders.Add("sec-ch-ua-mobile", "?0");
-                client.DefaultRequestHeaders.Add("sec-ch-ua-platform", "\"Windows\"");
-                client.DefaultRequestHeaders.Add("Sec-Fetch-Dest", "empty");
-                client.DefaultRequestHeaders.Add("Sec-Fetch-Mode", "cors");
-                client.DefaultRequestHeaders.Add("Sec-Fetch-Site", "same-origin");
-                client.DefaultRequestHeaders.Add("Connection", "keep-alive");
-                client.DefaultRequestHeaders.Add("Host", "tulsu.ru");
+            try {
+                using(var client = new HttpClient(clientHandler, false)) {
+                    #region RequestHeaders
+                    client.DefaultRequestHeaders.Add("Accept", "application/json, text/javascript, */*; q=0.01");
+                    client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
+                    client.DefaultRequestHeaders.Add("Accept-Language", "ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7");
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.34");
+                    client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
+                    client.DefaultRequestHeaders.Add("Referer", $"https://tulsu.ru/schedule/");
+                    client.DefaultRequestHeaders.Add("Origin", "https://tulsu.ru");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua", "\"Chromium\";v=\"112\", \"Microsoft Edge\";v=\"112\", \"Not:A-Brand\";v=\"99\"");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua-mobile", "?0");
+                    client.DefaultRequestHeaders.Add("sec-ch-ua-platform", "\"Windows\"");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-Dest", "empty");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-Mode", "cors");
+                    client.DefaultRequestHeaders.Add("Sec-Fetch-Site", "same-origin");
+                    client.DefaultRequestHeaders.Add("Connection", "keep-alive");
+                    client.DefaultRequestHeaders.Add("Host", "tulsu.ru");
 
-                client.Timeout = TimeSpan.FromSeconds(10);
+                    client.Timeout = TimeSpan.FromSeconds(10);
 
-                #endregion
+                    #endregion
 
-                using(HttpResponseMessage response = await client.GetAsync("https://tulsu.ru/schedule/queries/GetDictionaries.php")) {
-                    if(response.IsSuccessStatusCode) {
-                        return JArray.Parse(await response.Content.ReadAsStringAsync());
+                    using(HttpResponseMessage response = await client.GetAsync("https://tulsu.ru/schedule/queries/GetDictionaries.php")) {
+                        if(response.IsSuccessStatusCode) {
+                            return JArray.Parse(await response.Content.ReadAsStringAsync());
+                        }
                     }
                 }
+            } catch(Exception) {
+                return null;
             }
 
             return null;
