@@ -2,6 +2,8 @@
 using Core.DB;
 using Core.DB.Entity;
 
+using Microsoft.EntityFrameworkCore;
+
 using ScheduleBot;
 
 using Telegram.Bot.Types;
@@ -17,7 +19,7 @@ namespace Core.Bot.Commands.Student.Callback {
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
             string[] tmp = args.Split('|');
-            Discipline? discipline = dbContext.Disciplines.FirstOrDefault(i => i.ID == uint.Parse(tmp[0]));
+            Discipline? discipline = await dbContext.Disciplines.FirstOrDefaultAsync(i => i.ID == uint.Parse(tmp[0]));
             if(discipline is not null) {
                 if(user.IsOwner()) {
                     var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid).ToList();

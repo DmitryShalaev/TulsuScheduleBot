@@ -49,7 +49,7 @@ namespace ScheduleBot {
         }
 
         public async Task<bool> UpdatingProgress(ScheduleDbContext dbContext, string studentID, int updateAttemptTime) {
-            StudentIDLastUpdate? studentIDLastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID);
+            StudentIDLastUpdate? studentIDLastUpdate = await dbContext.StudentIDLastUpdate.FirstOrDefaultAsync(i => i.StudentID == studentID);
             if(studentIDLastUpdate is null) {
                 studentIDLastUpdate = new() { StudentID = studentID, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
                 dbContext.StudentIDLastUpdate.Add(studentIDLastUpdate);
@@ -90,7 +90,7 @@ namespace ScheduleBot {
         }
 
         public async Task<bool> UpdatingDisciplines(ScheduleDbContext dbContext, string group, int updateAttemptTime) {
-            GroupLastUpdate? groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group);
+            GroupLastUpdate? groupLastUpdate = await dbContext.GroupLastUpdate.FirstOrDefaultAsync(i => i.Group == group);
             if(groupLastUpdate is null) {
                 groupLastUpdate = new() { Group = group, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
                 dbContext.GroupLastUpdate.Add(groupLastUpdate);
@@ -222,7 +222,7 @@ namespace ScheduleBot {
         }
 
         public async Task<bool> UpdatingTeacherWorkSchedule(ScheduleDbContext dbContext, string teacher, int updateAttemptTime) {
-            TeacherLastUpdate? teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher);
+            TeacherLastUpdate? teacherLastUpdate = await dbContext.TeacherLastUpdate.FirstOrDefaultAsync(i => i.Teacher == teacher);
             if(teacherLastUpdate is null) {
                 teacherLastUpdate = new() { Teacher = teacher, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
                 dbContext.TeacherLastUpdate.Add(teacherLastUpdate);
@@ -275,7 +275,7 @@ namespace ScheduleBot {
         }
 
         public async Task<bool> UpdatingClassroomWorkSchedule(ScheduleDbContext dbContext, string classroom, int updateAttemptTime) {
-            ClassroomLastUpdate? classroomLastUpdate = dbContext.ClassroomLastUpdate.FirstOrDefault(i => i.Classroom == classroom);
+            ClassroomLastUpdate? classroomLastUpdate = await dbContext.ClassroomLastUpdate.FirstOrDefaultAsync(i => i.Classroom == classroom);
             if(classroomLastUpdate is null) {
                 classroomLastUpdate = new() { Classroom = classroom, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
                 dbContext.ClassroomLastUpdate.Add(classroomLastUpdate);
@@ -733,7 +733,7 @@ namespace ScheduleBot {
         }
 
         public async Task UpdatingTeacherInfo(ScheduleDbContext dbContext, string teacher) {
-            TeacherLastUpdate? teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher);
+            TeacherLastUpdate? teacherLastUpdate = await dbContext.TeacherLastUpdate.FirstOrDefaultAsync(i => i.Teacher == teacher);
             if(teacherLastUpdate is not null) {
 
                 string? info = await GetTeacherInfo(teacher);

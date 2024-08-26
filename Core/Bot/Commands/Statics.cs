@@ -3,6 +3,8 @@
 using Core.DB;
 using Core.DB.Entity;
 
+using Microsoft.EntityFrameworkCore;
+
 using ScheduleBot;
 
 using Telegram.Bot.Types;
@@ -123,14 +125,14 @@ namespace Core.Bot {
         public static void StudentIdErrorUser(ChatId chatId) => MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Попросите владельца профиля указать номер зачетной книжки в настройках профиля ({commands.Message["Other"]} -> {commands.Message["Profile"]}).", replyMarkup: MainKeyboardMarkup);
 
         public static async Task ScheduleRelevanceAsync(ScheduleDbContext dbContext, ChatId chatId, string group, IReplyMarkup? replyMarkup) {
-            DateTime? groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group)?.Update.ToLocalTime();
+            DateTime? groupLastUpdate = (await dbContext.GroupLastUpdate.FirstOrDefaultAsync(i => i.Group == group))?.Update.ToLocalTime();
 
             if(groupLastUpdate is null || (DateTime.Now - groupLastUpdate)?.TotalMinutes > commands.Config.DisciplineUpdateTime) {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
                 if(!await parser.UpdatingDisciplines(dbContext, group, commands.Config.UpdateAttemptTime))
                     MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
 
-                groupLastUpdate = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == group)?.Update.ToLocalTime();
+                groupLastUpdate =(await dbContext.GroupLastUpdate.FirstOrDefaultAsync(i => i.Group == group))?.Update.ToLocalTime();
             }
 
             if(groupLastUpdate is not null)
@@ -138,14 +140,14 @@ namespace Core.Bot {
         }
 
         public static async Task TeacherWorkScheduleRelevanceAsync(ScheduleDbContext dbContext, ChatId chatId, string teacher, IReplyMarkup? replyMarkup) {
-            DateTime? teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher)?.Update.ToLocalTime();
+            DateTime? teacherLastUpdate = (await dbContext.TeacherLastUpdate.FirstOrDefaultAsync(i => i.Teacher == teacher))?.Update.ToLocalTime();
 
             if(teacherLastUpdate is null || (DateTime.Now - teacherLastUpdate)?.TotalMinutes > commands.Config.WorkScheduleUpdateTime) {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
                 if(!await parser.UpdatingTeacherWorkSchedule(dbContext, teacher, commands.Config.UpdateAttemptTime))
                     MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
 
-                teacherLastUpdate = dbContext.TeacherLastUpdate.FirstOrDefault(i => i.Teacher == teacher)?.Update.ToLocalTime();
+                teacherLastUpdate =(await dbContext.TeacherLastUpdate.FirstOrDefaultAsync(i => i.Teacher == teacher))?.Update.ToLocalTime();
             }
 
             if(teacherLastUpdate is not null)
@@ -153,14 +155,14 @@ namespace Core.Bot {
         }
 
         public static async Task ClassroomWorkScheduleRelevanceAsync(ScheduleDbContext dbContext, ChatId chatId, string classroom, IReplyMarkup? replyMarkup) {
-            DateTime? classroomLastUpdate = dbContext.ClassroomLastUpdate.FirstOrDefault(i => i.Classroom == classroom)?.Update.ToLocalTime();
+            DateTime? classroomLastUpdate =(await dbContext.ClassroomLastUpdate.FirstOrDefaultAsync(i => i.Classroom == classroom))?.Update.ToLocalTime();
 
             if(classroomLastUpdate is null || (DateTime.Now - classroomLastUpdate)?.TotalMinutes > commands.Config.WorkScheduleUpdateTime) {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
                 if(!await parser.UpdatingClassroomWorkSchedule(dbContext, classroom, commands.Config.UpdateAttemptTime))
                     MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
 
-                classroomLastUpdate = dbContext.ClassroomLastUpdate.FirstOrDefault(i => i.Classroom == classroom)?.Update.ToLocalTime();
+                classroomLastUpdate =(await dbContext.ClassroomLastUpdate.FirstOrDefaultAsync(i => i.Classroom == classroom))?.Update.ToLocalTime();
             }
 
             if(classroomLastUpdate is not null)
@@ -168,13 +170,13 @@ namespace Core.Bot {
         }
 
         public static async Task ProgressRelevanceAsync(ScheduleDbContext dbContext, ChatId chatId, string studentID, IReplyMarkup? replyMarkup, bool send = true) {
-            DateTime? studentIDlastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID)?.Update.ToLocalTime();
+            DateTime? studentIDlastUpdate =(await dbContext.StudentIDLastUpdate.FirstOrDefaultAsync(i => i.StudentID == studentID))?.Update.ToLocalTime();
             if(studentIDlastUpdate is null || (DateTime.Now - studentIDlastUpdate)?.TotalMinutes > commands.Config.StudentIDUpdateTime) {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
                 if(!await parser.UpdatingProgress(dbContext, studentID, commands.Config.UpdateAttemptTime))
                     MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["SiteIsNotResponding"]);
 
-                studentIDlastUpdate = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == studentID)?.Update.ToLocalTime();
+                studentIDlastUpdate =(await dbContext.StudentIDLastUpdate.FirstOrDefaultAsync(i => i.StudentID == studentID))?.Update.ToLocalTime();
             }
 
             if(send && studentIDlastUpdate is not null)

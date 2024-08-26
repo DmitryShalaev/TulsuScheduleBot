@@ -2,6 +2,8 @@
 using Core.DB;
 using Core.DB.Entity;
 
+using Microsoft.EntityFrameworkCore;
+
 using ScheduleBot;
 
 using Telegram.Bot.Types;
@@ -25,10 +27,10 @@ namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["WeNeedToWait"], replyMarkup: Statics.CancelKeyboardMarkup);
 
             if(int.TryParse(args, out int id)) {
-                StudentIDLastUpdate? studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args && i.Update != DateTime.MinValue);
+                StudentIDLastUpdate? studentID = await dbContext.StudentIDLastUpdate.FirstOrDefaultAsync(i => i.StudentID == args && i.Update != DateTime.MinValue);
 
                 if(studentID is null && await ScheduleParser.Instance.UpdatingProgress(dbContext, args, 0))
-                    studentID = dbContext.StudentIDLastUpdate.FirstOrDefault(i => i.StudentID == args && i.Update != DateTime.MinValue);
+                    studentID = await dbContext.StudentIDLastUpdate.FirstOrDefaultAsync(i => i.StudentID == args && i.Update != DateTime.MinValue);
 
                 if(studentID is not null) {
                     user.TelegramUserTmp.Mode = Mode.Default;
