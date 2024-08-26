@@ -5,12 +5,12 @@ using Core.DB.Entity;
 using Microsoft.EntityFrameworkCore;
 
 using Telegram.Bot.Types;
-namespace Core.Bot.Commands.Student.Slash.Feedbacks.Callback {
+namespace Core.Bot.Commands.Admin.Feedbacks.Callback {
     public class FeedbackAccept : ICallbackCommand {
 
         public string Command => "FeedbackAccept";
 
-        public Mode Mode => Mode.Default;
+        public Mode Mode => Mode.Admin;
 
         public Manager.Check Check => Manager.Check.admin;
 
@@ -26,7 +26,7 @@ namespace Core.Bot.Commands.Student.Slash.Feedbacks.Callback {
             if(feedback is not null) MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: FeedbackMessage.GetFeedbackMessage(feedback), replyMarkup: DefaultCallback.GetFeedbackInlineKeyboardButton(dbContext, feedback));
             else {
                 MessagesQueue.Message.DeleteMessage(chatId: chatId, messageId: messageId);
-                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: Statics.AdminPanelKeyboardMarkup);
             }
         }
     }

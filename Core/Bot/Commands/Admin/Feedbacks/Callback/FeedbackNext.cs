@@ -1,18 +1,17 @@
 ﻿using Core.Bot.Commands;
 using Core.Bot.Commands.Interfaces;
-using Core.Bot.Commands.Student.Slash.Feedbacks;
 using Core.DB;
 using Core.DB.Entity;
 
 using Microsoft.EntityFrameworkCore;
 
 using Telegram.Bot.Types;
-namespace Core.Bot.New.Commands.Student.Slash.Feedbacks.Callback {
+namespace Core.Bot.Commands.Admin.Feedbacks.Callback {
     public class FeedbackNext : ICallbackCommand {
 
         public string Command => "FeedbackNext";
 
-        public Mode Mode => Mode.Default;
+        public Mode Mode => Mode.Admin;
 
         public Manager.Check Check => Manager.Check.admin;
 

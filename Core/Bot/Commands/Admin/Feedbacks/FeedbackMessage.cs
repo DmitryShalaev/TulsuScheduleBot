@@ -3,7 +3,7 @@ using Core.DB.Entity;
 
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace Core.Bot.Commands.Student.Slash.Feedbacks {
+namespace Core.Bot.Commands.Admin.Feedbacks {
     public static class FeedbackMessage {
         public static string GetFeedbackMessage(Feedback feedback) {
             return $"От: {feedback.TelegramUser.FirstName}{(string.IsNullOrWhiteSpace(feedback.TelegramUser.LastName) ? "" : $", {feedback.TelegramUser.LastName}")}{(string.IsNullOrWhiteSpace(feedback.TelegramUser.Username) ? "" : $", {feedback.TelegramUser.Username}")}\n" +

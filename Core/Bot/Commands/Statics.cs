@@ -62,7 +62,7 @@ namespace Core.Bot {
                         }) { ResizeKeyboard = true };
 
         public static readonly ReplyKeyboardMarkup AdminPanelKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["Back"] },
+                            new KeyboardButton[] { "Отзывы" },
   
                             [commands.Message["Back"]]
                         }) { ResizeKeyboard = true };
