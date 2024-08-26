@@ -35,5 +35,6 @@ namespace Core.DB {
         public DbSet<ClassroomWorkSchedule> ClassroomWorkSchedule { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<IntersectionOfSubgroups> IntersectionOfSubgroups { get; set; }
+        public DbSet<MissingFields> MissingFields { get; set; }
     }
 }

@@ -14,6 +14,8 @@ using Microsoft.EntityFrameworkCore;
 
 using Newtonsoft.Json.Linq;
 
+using Npgsql;
+
 namespace ScheduleBot {
     public partial class ScheduleParser {
         private readonly HttpClientHandler clientHandler;
@@ -35,6 +37,7 @@ namespace ScheduleBot {
 
         public async Task GetTeachersData() {
             using(ScheduleDbContext dbContext = new()) {
+
                 await UpdatingData(dbContext);
 
                 var teachers = dbContext.Disciplines.Include(i => i.TeacherLastUpdate).Where(i => i.Lecturer != null && string.IsNullOrEmpty(i.TeacherLastUpdate.LinkProfile)).Select(i => i.Lecturer!).Distinct().ToList();
@@ -111,51 +114,92 @@ namespace ScheduleBot {
 
                     groupLastUpdate.Update = DateTime.UtcNow;
 
-                    if(dbContext.Disciplines.Any(i => i.Group == group && (i.Date < dates.Value.min || i.Date > dates.Value.max))) {
-                        dbContext.Disciplines.RemoveRange(dbContext.Disciplines.Where(i => i.Group == group && (i.Date < dates.Value.min || i.Date > dates.Value.max)));
-                        await dbContext.SaveChangesAsync();
-                    }
+                    try {
+                        if(dbContext.Disciplines.Any(i => i.Group == group && (i.Date < dates.Value.min || i.Date > dates.Value.max))) {
+                            dbContext.Disciplines.RemoveRange(dbContext.Disciplines.Where(i => i.Group == group && (i.Date < dates.Value.min || i.Date > dates.Value.max)));
+                            await dbContext.SaveChangesAsync();
+                        }
 
-                    var _list = dbContext.Disciplines.Where(i => i.Group == group).ToList();
+                        var _list = dbContext.Disciplines.Where(i => i.Group == group).ToList();
 
-                    IEnumerable<Discipline> except = disciplines.Except(_list);
-                    if(except.Any()) {
-                        var dd = except.ToList();
-                        dbContext.Disciplines.AddRange(except);
+                        IEnumerable<Discipline> except = disciplines.Except(_list);
+                        if(except.Any()) {
+                            var dd = except.ToList();
+                            await dbContext.Disciplines.AddRangeAsync(except);
 
-                        if(_list.Count != 0)
+                            if(_list.Count != 0)
+                                updatedDisciplines.AddRange(except);
+
+                            await dbContext.SaveChangesAsync();
+                            _list = [.. dbContext.Disciplines.Where(i => i.Group == group)];
+                        }
+
+                        except = _list.Except(disciplines);
+                        if(except.Any()) {
+                            dbContext.Disciplines.RemoveRange(except);
+
                             updatedDisciplines.AddRange(except);
 
+                            await dbContext.DeletedDisciplines.AddRangeAsync(except.Select(i => new DeletedDisciplines(i)));
+                        }
+
                         await dbContext.SaveChangesAsync();
-                        _list = [.. dbContext.Disciplines.Where(i => i.Group == group)];
+
+                        await IntersectionOfSubgroups(dbContext, group);
+
+                        if(updatedDisciplines.Count != 0) {
+                            var date = DateOnly.FromDateTime(DateTime.Now);
+                            var _updatedDisciplines = updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList();
+
+                            if(_updatedDisciplines.Count != 0)
+                                _ = Task.Run(() => Notifications.UpdatedDisciplines(_updatedDisciplines));
+                        }
+
+                        return true;
+
+                    } catch(DbUpdateException ex) {
+                        // Получаем исключение, содержащее подробности ошибки
+                        if(ex.InnerException is PostgresException innerException) {
+                            // Проверяем код ошибки (23503 указывает на нарушение внешнего ключа)
+                            if(innerException.SqlState == "23503" && innerException.Detail is not null) {
+                                string? missingValue = ExtractMissingValue(innerException.Detail);
+                                if(missingValue is null)
+                                    throw;
+
+                                DateTime updDate = new DateTime(2000, 1, 1).ToUniversalTime();
+                                await dbContext.MissingFields.AddAsync(new MissingFields { Field = missingValue });
+
+                                if(innerException.MessageText.Contains("ClassroomLastUpdate")) {
+
+                                    await dbContext.ClassroomLastUpdate.AddAsync(new ClassroomLastUpdate { Classroom = missingValue, Update = updDate });
+                                } else if(innerException.MessageText.Contains("GroupLastUpdate")) {
+
+                                    await dbContext.GroupLastUpdate.AddAsync(new GroupLastUpdate { Group = missingValue, Update = updDate });
+                                }
+
+                                await dbContext.SaveChangesAsync();
+
+                                foreach(TelegramUser? item in dbContext.TelegramUsers.Where(i => i.IsAdmin))
+                                    Core.Bot.MessagesQueue.Message.SendTextMessage(chatId: item.ChatID, text: $"Обнаружена ошибка парсера: {missingValue}", disableNotification: true);
+
+                                return await UpdatingDisciplines(dbContext, group, 0);
+                            }
+                        }
+
+                        throw;
                     }
-
-                    except = _list.Except(disciplines);
-                    if(except.Any()) {
-                        dbContext.Disciplines.RemoveRange(except);
-
-                        updatedDisciplines.AddRange(except);
-
-                        dbContext.DeletedDisciplines.AddRange(except.Select(i => new DeletedDisciplines(i)));
-                    }
-
-                    await dbContext.SaveChangesAsync();
-
-                    await IntersectionOfSubgroups(dbContext, group);
-
-                    if(updatedDisciplines.Count != 0) {
-                        var date = DateOnly.FromDateTime(DateTime.Now);
-                        var _updatedDisciplines = updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList();
-
-                        if(_updatedDisciplines.Count != 0)
-                            _ = Task.Run(() => Notifications.UpdatedDisciplines(_updatedDisciplines));
-                    }
-
-                    return true;
                 }
             }
 
             return false;
+        }
+
+        [GeneratedRegex(@"\(.+?\)=\((.+?)\)")]
+        private static partial Regex ExtractMissingValueRegex();
+
+        private static string? ExtractMissingValue(string detail) {
+            Match match = ExtractMissingValueRegex().Match(detail);
+            return match.Success ? match.Groups[1].Value : null;
         }
 
         public async Task IntersectionOfSubgroups(ScheduleDbContext dbContext, string group) {
@@ -285,9 +329,9 @@ namespace ScheduleBot {
             JArray? jObject = await GetDictionaries();
             if(jObject == null) return;
 
-            await UpdatingTeachers(dbContext, GetTeachers(jObject));
+            await UpdatingTeachers(dbContext, GetTeachers(dbContext, jObject));
 
-            await UpdatingClassrooms(dbContext, GetClassrooms(jObject));
+            await UpdatingClassrooms(dbContext, GetClassrooms(dbContext, jObject));
         }
 
         private static async Task<bool> UpdatingTeachers(ScheduleDbContext dbContext, List<string>? teachers) {
@@ -295,9 +339,10 @@ namespace ScheduleBot {
                 var _list = dbContext.TeacherLastUpdate.Select(i => i.Teacher).ToList();
 
                 IEnumerable<string> except = teachers.Except(_list);
+                var ff = except.ToList();
                 if(except.Any()) {
                     DateTime updDate = new DateTime(2000, 1, 1).ToUniversalTime();
-                    dbContext.TeacherLastUpdate.AddRange(except.Select(i => new TeacherLastUpdate() { Teacher = i, Update = updDate }));
+                    await dbContext.TeacherLastUpdate.AddRangeAsync(except.Select(i => new TeacherLastUpdate() { Teacher = i, Update = updDate }));
 
                     await dbContext.SaveChangesAsync();
                     _list = [.. dbContext.TeacherLastUpdate.Select(i => i.Teacher)];
@@ -307,7 +352,7 @@ namespace ScheduleBot {
 
                 if(except.Any()) {
                     var fd = dbContext.TeacherLastUpdate.Where(i => except.Contains(i.Teacher)).ToList();
-                    dbContext.TeacherLastUpdate.RemoveRange(fd);
+                    await dbContext.TeacherLastUpdate.AddRangeAsync(fd);
                 }
 
                 await dbContext.SaveChangesAsync();
@@ -325,7 +370,7 @@ namespace ScheduleBot {
                 IEnumerable<string> except = teachers.Except(_list);
                 if(except.Any()) {
                     DateTime updDate = new DateTime(2000, 1, 1).ToUniversalTime();
-                    dbContext.ClassroomLastUpdate.AddRange(except.Select(i => new ClassroomLastUpdate() { Classroom = i, Update = updDate }));
+                    await dbContext.ClassroomLastUpdate.AddRangeAsync(except.Select(i => new ClassroomLastUpdate() { Classroom = i, Update = updDate }));
 
                     await dbContext.SaveChangesAsync();
                     _list = [.. dbContext.ClassroomLastUpdate.Select(i => i.Classroom)];
@@ -496,10 +541,14 @@ namespace ScheduleBot {
         [GeneratedRegex("^[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?\\s[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?(?:\\s[А-ЯЁа-яё]+(?:\\s[А-ЯЁа-яё]+)*)?$")]
         private static partial Regex TeachersRegex();
 
-        public static List<string>? GetTeachers(JArray jObject) {
+        public static List<string>? GetTeachers(ScheduleDbContext dbContext, JArray jObject) {
             try {
                 Regex regex = TeachersRegex();
-                return jObject.Count == 0 ? throw new Exception() : jObject?.Where(i => regex.IsMatch(i.Value<string>("value")?.Trim() ?? "")).Select(j => j.Value<string>("value") ?? "").ToList();
+                return jObject.Count == 0 ? throw new Exception() : jObject?.Where(i => {
+                    string str = i.Value<string>("value")?.Trim() ?? "";
+                    return regex.IsMatch(str) || dbContext.MissingFields.Any(m => m.Field == str);
+
+                }).Select(j => j.Value<string>("value") ?? "").ToList();
 
             } catch(Exception) {
                 return null;
@@ -523,6 +572,8 @@ namespace ScheduleBot {
         private static partial Regex ClassroomRegex7();
         [GeneratedRegex("^[А-Я][а-яё]+\\s[А-Я]")]
         private static partial Regex ClassroomRegex8();
+        [GeneratedRegex("^[КБПМЗИТЦ]{1,3}-\\d{1,3}$")]
+        private static partial Regex ClassroomRegex9();
 
         private static readonly List<Regex> regexes = [
                 ClassroomRegex1(),
@@ -533,19 +584,19 @@ namespace ScheduleBot {
                 ClassroomRegex6(),
                 ClassroomRegex7(),
                 ClassroomRegex8(),
+                ClassroomRegex9(),
                 TeachersRegex()
             ];
         #endregion
 
-        public static List<string>? GetClassrooms(JArray jObject) {
+        public static List<string>? GetClassrooms(ScheduleDbContext dbContext, JArray jObject) {
             try {
-                var res = jObject?.Where(i => {
-
+                return jObject?.Count == 0 ? throw new Exception() : (jObject?.Where(i => {
                     string str = i.Value<string>("value")?.Trim() ?? "";
-                    return !regexes.Any(r => r.IsMatch(str));
-                }).Select(j => j.Value<string>("value") ?? "").ToList();
 
-                return jObject?.Count == 0 ? throw new Exception() : res;
+                    return dbContext.MissingFields.Any(m => m.Field == str) || !regexes.Any(r => r.IsMatch(str));
+
+                }).Select(j => j.Value<string>("value") ?? "").ToList());
 
             } catch(Exception) {
                 return null;

@@ -22,7 +22,7 @@ namespace Core.Bot.Commands.Student.Callback {
                 if(user.IsOwner()) {
                     user.TelegramUserTmp.Mode = Mode.AddingDiscipline;
                     user.TelegramUserTmp.TmpData = $"{messageId}";
-                    dbContext.CustomDiscipline.Add(new(user.ScheduleProfile, date));
+                    await dbContext.CustomDiscipline.AddAsync(new(user.ScheduleProfile, date));
                     await dbContext.SaveChangesAsync();
 
                     MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user).Item1, parseMode: ParseMode.Markdown, disableWebPagePreview: true);
