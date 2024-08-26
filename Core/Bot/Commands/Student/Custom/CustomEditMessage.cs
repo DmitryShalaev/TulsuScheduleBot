@@ -1,6 +1,8 @@
 ﻿using Core.DB;
 using Core.DB.Entity;
 
+using Microsoft.EntityFrameworkCore;
+
 using ScheduleBot;
 
 using Telegram.Bot.Types;
@@ -9,7 +11,7 @@ namespace Core.Bot.Commands.Student.Custom {
     public static class CustomEditMessage {
         public static async Task CustomEdit(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args, Mode mode, string text) {
             string[] tmp = args.Split('|');
-            CustomDiscipline? discipline = dbContext.CustomDiscipline.FirstOrDefault(i => i.ID == uint.Parse(tmp[0]));
+            CustomDiscipline? discipline = await dbContext.CustomDiscipline.FirstOrDefaultAsync(i => i.ID == uint.Parse(tmp[0]));
             if(discipline is not null) {
                 if(user.IsOwner()) {
                     user.TelegramUserTmp.Mode = mode;

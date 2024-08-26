@@ -2,6 +2,8 @@
 using Core.DB;
 using Core.DB.Entity;
 
+using Microsoft.EntityFrameworkCore;
+
 using Telegram.Bot.Types;
 namespace Core.Bot.Commands.Student.Other.Profile.Message {
     internal class ResetProfileLinkConfirm : IMessageCommand {
@@ -15,7 +17,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Message {
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             user.TelegramUserTmp.Mode = Mode.Default;
 
-            ScheduleProfile? profile = dbContext.ScheduleProfile.FirstOrDefault(i => i.OwnerID == user.ChatID);
+            ScheduleProfile? profile = await dbContext.ScheduleProfile.FirstOrDefaultAsync(i => i.OwnerID == user.ChatID);
             if(profile is not null) {
                 user.ScheduleProfile = profile;
             } else {

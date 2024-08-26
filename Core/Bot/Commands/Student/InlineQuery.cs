@@ -46,7 +46,7 @@ namespace Core.Bot.Commands.Student {
         }
 
         private static async Task AnswerInlineQueryAsync(ScheduleDbContext dbContext, InlineQuery inlineQuery, DateOnly date) {
-            TelegramUser? user = dbContext.TelegramUsers.Include(u => u.Settings).Include(u => u.ScheduleProfile).FirstOrDefault(u => u.ChatID == inlineQuery.From.Id);
+            TelegramUser? user = await dbContext.TelegramUsers.Include(u => u.Settings).Include(u => u.ScheduleProfile).FirstOrDefaultAsync(u => u.ChatID == inlineQuery.From.Id);
 
             UserCommands.ConfigStruct config = UserCommands.Instance.Config;
 

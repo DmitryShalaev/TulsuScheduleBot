@@ -2,6 +2,8 @@
 using Core.DB;
 using Core.DB.Entity;
 
+using Microsoft.EntityFrameworkCore;
+
 using ScheduleBot;
 
 using Telegram.Bot.Types;
@@ -23,22 +25,22 @@ namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
             }
 
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["WeNeedToWait"], replyMarkup: Statics.CancelKeyboardMarkup);
-            GroupLastUpdate? group = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == args && i.Update != DateTime.MinValue);
+            GroupLastUpdate? group = await dbContext.GroupLastUpdate.FirstOrDefaultAsync(i => i.Group == args && i.Update != DateTime.MinValue);
 
             if(group is null && await ScheduleParser.Instance.UpdatingDisciplines(dbContext, args, 0))
-                group = dbContext.GroupLastUpdate.FirstOrDefault(i => i.Group == args && i.Update != DateTime.MinValue);
+                group = await dbContext.GroupLastUpdate.FirstOrDefaultAsync(i => i.Group == args && i.Update != DateTime.MinValue);
 
             if(group is not null) {
                 user.TelegramUserTmp.Mode = Mode.Default;
                 user.ScheduleProfile.GroupLastUpdate = group;
                 await dbContext.SaveChangesAsync();
 
-                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Номер группы успешно изменен на {args} ", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user));
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Номер группы успешно изменен на {args} ", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user), deletePrevious: true);
 
             } else {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text:
                   $"{UserCommands.Instance.Message["IsNoSuchGroup"]}{(DateTime.Now.Month == 8 ? UserCommands.Instance.Message["FreshmanSchedule"] : "")}",
-                  replyMarkup: Statics.CancelKeyboardMarkup);
+                  replyMarkup: Statics.CancelKeyboardMarkup, deletePrevious: true);
                 await dbContext.SaveChangesAsync();
             }
         }
