@@ -40,10 +40,11 @@ namespace Core.Bot {
             commandManager = new((string message, TelegramUser user, out string args) => {
                 args = "";
 
-                if(Statics.DefaultMessageRegex().IsMatch(message))
-                    return $"{message} {user.TelegramUserTmp.Mode}".ToLower();
+                Match match = Statics.DefaultMessageRegex().Match(message);
+                if(match.Success)
+                    return $"{match.Groups[1]} {user.TelegramUserTmp.Mode}".ToLower();
 
-                Match match = Statics.TermsMessageRegex().Match(message);
+                match = Statics.TermsMessageRegex().Match(message);
                 if(match.Success) {
                     args = match.Groups[1].ToString();
                     return $"{match.Groups[2]} {user.TelegramUserTmp.Mode}".ToLower();

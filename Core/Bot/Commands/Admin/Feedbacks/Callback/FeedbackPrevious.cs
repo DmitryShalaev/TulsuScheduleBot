@@ -1,5 +1,4 @@
-﻿using Core.Bot.Commands;
-using Core.Bot.Commands.Interfaces;
+﻿using Core.Bot.Commands.Interfaces;
 using Core.DB;
 using Core.DB.Entity;
 
@@ -23,7 +22,7 @@ namespace Core.Bot.Commands.Admin.Feedbacks.Callback {
                     chatId: chatId,
                     messageId: messageId,
                     text: FeedbackMessage.GetFeedbackMessage(feedback),
-                    replyMarkup: DefaultCallback.GetFeedbackInlineKeyboardButton(dbContext, feedback), 
+                    replyMarkup: DefaultCallback.GetFeedbackInlineKeyboardButton(dbContext, feedback),
                     parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                     disableWebPagePreview: true);
 

@@ -13,7 +13,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Core.Bot {
     public static partial class Statics {
-        [GeneratedRegex("^[А-я]+[ ]?[а-я]*$")]
+        [GeneratedRegex("^(?:\\W{3})?([А-я]+[ ]?[а-я]*)(?:\\W{3})?$")]
         public static partial Regex DefaultMessageRegex();
         [GeneratedRegex("^([0-9]+)[ ]([а-я]+)$")]
         public static partial Regex TermsMessageRegex();
@@ -67,7 +67,7 @@ namespace Core.Bot {
 
         public static readonly ReplyKeyboardMarkup AdminPanelKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { "Отзывы" },
-  
+
                             [commands.Message["Back"]]
                         }) { ResizeKeyboard = true };
 
@@ -202,6 +202,7 @@ namespace Core.Bot {
                     MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["SiteIsNotResponding"], deletePrevious: siteIsNotResponding);
                     siteIsNotResponding = false;
                 }
+
                 studentIDlastUpdate = (await dbContext.StudentIDLastUpdate.FirstOrDefaultAsync(i => i.StudentID == studentID))?.Update.ToLocalTime();
             }
 

@@ -24,7 +24,9 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Callbac
 
             await dbContext.SaveChangesAsync();
 
-            MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: UserCommands.Instance.Message["NotificationSettings"], replyMarkup: DefaultCallback.GetNotificationsInlineKeyboardButton(user));
+            MessagesQueue.Message.DeleteMessage(chatId: chatId, messageId: messageId);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["Settings"], replyMarkup: DefaultMessage.GetSettingsKeyboardMarkup(user));
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["NotificationSettings"], replyMarkup: DefaultCallback.GetNotificationsInlineKeyboardButton(user));
         }
     }
 }

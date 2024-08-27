@@ -1,7 +1,6 @@
 ﻿using System.Text;
 
 using Core.Bot.Commands.Interfaces;
-using Core.Bot.Commands.Student.Schedule.Message;
 using Core.DB;
 using Core.DB.Entity;
 

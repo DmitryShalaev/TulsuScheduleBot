@@ -2,8 +2,6 @@
 using Core.DB;
 using Core.DB.Entity;
 
-using Microsoft.EntityFrameworkCore;
-
 using Telegram.Bot.Types;
 namespace Core.Bot.Commands.Student.Slash.Feedbacks.Message {
     public class Feedback : IMessageCommand {

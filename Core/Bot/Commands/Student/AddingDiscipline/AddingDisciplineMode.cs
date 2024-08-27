@@ -8,8 +8,6 @@ using ScheduleBot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
 namespace Core.Bot.Commands.AddingDiscipline {
     public static class AddingDisciplineMode {
 
