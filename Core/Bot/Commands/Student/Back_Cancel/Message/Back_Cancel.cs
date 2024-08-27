@@ -26,7 +26,7 @@ namespace Core.Bot.Commands.Student.Back_Cancel.Message {
 
             if(user.TelegramUserTmp.TmpData is not null && transitions.TryGetValue(user.TelegramUserTmp.TmpData, out (string nextState, IReplyMarkup replyMarkup) transition)) {
                 user.TelegramUserTmp.TmpData = transition.nextState;
-                MessagesQueue.Message.SendTextMessage(chatId, transition.nextState, replyMarkup: transition.replyMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId, transition.nextState, replyMarkup: transition.replyMarkup, deletePrevious: true);
             } else {
                 user.TelegramUserTmp.TmpData = null;
                 MessagesQueue.Message.SendTextMessage(chatId, commands["MainMenu"], replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));

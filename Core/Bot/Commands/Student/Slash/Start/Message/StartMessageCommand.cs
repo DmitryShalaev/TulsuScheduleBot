@@ -14,7 +14,7 @@ namespace Core.Bot.New.Commands.Student.Slash.Start.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "👋", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "👋", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user), deletePrevious: true);
 
             if(user.TelegramUserTmp.Mode == Mode.AddingDiscipline)
                 dbContext.CustomDiscipline.RemoveRange(dbContext.CustomDiscipline.Where(i => !i.IsAdded && i.ScheduleProfile == user.ScheduleProfile));

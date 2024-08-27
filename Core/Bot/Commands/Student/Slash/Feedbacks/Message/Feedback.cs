@@ -19,7 +19,7 @@ namespace Core.Bot.Commands.Student.Slash.Feedbacks.Message {
             user.TelegramUserTmp.TmpData = null;
 
             user.TelegramUserTmp.Mode = Mode.Feedback;
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["FeedbackMessage"], replyMarkup: Statics.CancelKeyboardMarkup);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["FeedbackMessage"], replyMarkup: Statics.CancelKeyboardMarkup, deletePrevious: true);
 
             await dbContext.SaveChangesAsync();
         }

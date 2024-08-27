@@ -13,7 +13,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message
         public Manager.Check Check => Manager.Check.none;
 
         public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["NotificationSettings"], replyMarkup: DefaultCallback.GetNotificationsInlineKeyboardButton(user));
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["NotificationSettings"], replyMarkup: DefaultCallback.GetNotificationsInlineKeyboardButton(user), saveMessageId: true);
             return Task.CompletedTask;
         }
     }
