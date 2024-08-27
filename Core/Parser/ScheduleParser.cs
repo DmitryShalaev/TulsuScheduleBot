@@ -174,7 +174,7 @@ namespace ScheduleBot {
                                     await dbContext.ClassroomLastUpdate.AddAsync(new ClassroomLastUpdate { Classroom = missingValue, Update = updDate });
                                 } else if(innerException.MessageText.Contains("TeacherLastUpdate")) {
 
-                                    await dbContext.TeacherLastUpdate.AddAsync(new GroupLastUpdate { Lecturer = missingValue, Update = updDate });
+                                    await dbContext.TeacherLastUpdate.AddAsync(new TeacherLastUpdate { Lecturer = missingValue, Update = updDate });
                                 }
 
                                 await dbContext.SaveChangesAsync();
