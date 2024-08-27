@@ -77,10 +77,10 @@ namespace Core.Bot.Commands {
         public static InlineKeyboardMarkup GetNotificationsInlineKeyboardButton(TelegramUser user) {
             var buttons = new List<InlineKeyboardButton[]>();
 
-            if(user.Settings.NotificationEnabled)
-                buttons.Add([InlineKeyboardButton.WithCallbackData("Выключить уведомления", "ToggleNotifications off")]);
-            else
-                buttons.Add([InlineKeyboardButton.WithCallbackData("Включить уведомления", "ToggleNotifications on")]);
+            bool _notificationEnabled = user.Settings.NotificationEnabled;
+            string notificationEnabled = _notificationEnabled ? "\U0001f7e2" : "🔴";
+
+            buttons.Add([InlineKeyboardButton.WithCallbackData($"{notificationEnabled} Уведомления {notificationEnabled} \n({(_notificationEnabled ? "Выключить" : "Включить")})", $"ToggleNotifications {(_notificationEnabled ? "off" : "on")}")]);
 
             static string via(int days) => days switch {
                 1 => $"{days} день",

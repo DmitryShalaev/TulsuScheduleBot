@@ -18,6 +18,8 @@ namespace Core.Bot {
         public static partial Regex TermsMessageRegex();
         [GeneratedRegex("(^[А-я]+[а-я ]*):")]
         public static partial Regex GroupOrStudentIDMessageRegex();
+        [GeneratedRegex("^\\W{3}([А-я]+[а-я ]*)\\W{3}[ ]")]
+        public static partial Regex MarkedMessageRegex();
         [GeneratedRegex("(^/[A-z]+)[ ]?([A-z0-9-]*)$")]
         public static partial Regex CommandMessageRegex();
 

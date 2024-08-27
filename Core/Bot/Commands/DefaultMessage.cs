@@ -37,10 +37,16 @@ namespace Core.Bot.Commands {
         }
 
         public static ReplyKeyboardMarkup GetSettingsKeyboardMarkup(TelegramUser user) {
+            bool _teacherLincsEnabled = user.Settings.TeacherLincsEnabled;
+            string teacherLincsEnabled = _teacherLincsEnabled ? "\U0001f7e2" : "🔴";
+
+            bool _displayingGroupList = user.Settings.DisplayingGroupList;
+            string displayingGroupList = _displayingGroupList ? "\U0001f7e2" : "🔴";
+
             List<KeyboardButton[]> ProfileKeyboardMarkup = new([
                 [UserCommands.Instance.Message["Notifications"]],
-                [$"{UserCommands.Instance.Message["TeacherLincsEnabled"]}: {(user.Settings.TeacherLincsEnabled ? "вкл" : "выкл")}"],
-                [$"{UserCommands.Instance.Message["DisplayingGroupList"]}: {(user.Settings.DisplayingGroupList ? "вкл" : "выкл")}"],
+                [$"{teacherLincsEnabled} {UserCommands.Instance.Message["TeacherLincsEnabled"]} {teacherLincsEnabled} \n({(_teacherLincsEnabled ? "Выключить" : "Включить")})"],
+                [$"{displayingGroupList} {UserCommands.Instance.Message["DisplayingGroupList"]} {displayingGroupList} \n({(_displayingGroupList ? "Выключить" : "Включить")})"],
                 [UserCommands.Instance.Message["Back"]]
             ]);
 
