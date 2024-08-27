@@ -28,7 +28,7 @@ namespace Core.Bot.Commands.Student.Custom.Message {
 
                     await dbContext.SaveChangesAsync();
 
-                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Время начала успешно изменено.", replyMarkup: Statics.MainKeyboardMarkup);
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Время начала успешно изменено.", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
 
                     StringBuilder sb = new(Scheduler.GetScheduleByDate(dbContext, discipline.Date, user, all: true).Item1);
                     sb.AppendLine($"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n<b>{UserCommands.Instance.Message["SelectAnAction"]}</b>");

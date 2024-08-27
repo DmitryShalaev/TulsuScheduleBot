@@ -19,12 +19,12 @@ namespace Core.Bot.Commands.Student.Slash.SetProfile.Message {
                         user.ScheduleProfileGuid = profile;
                         await dbContext.SaveChangesAsync();
 
-                        MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Вы успешно сменили профиль", replyMarkup: Statics.MainKeyboardMarkup);
+                        MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Вы успешно сменили профиль", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
                     } else {
-                        MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Вы пытаетесь изменить свой профиль на текущий или на профиль, который не существует", replyMarkup: Statics.MainKeyboardMarkup);
+                        MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Вы пытаетесь изменить свой профиль на текущий или на профиль, который не существует", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
                     }
                 } else {
-                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Идентификатор профиля не распознан", replyMarkup: Statics.MainKeyboardMarkup);
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Идентификатор профиля не распознан", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
                 }
             } catch(IndexOutOfRangeException) { }
         }

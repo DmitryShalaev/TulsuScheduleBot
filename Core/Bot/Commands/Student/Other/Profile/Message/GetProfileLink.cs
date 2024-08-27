@@ -20,7 +20,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Message {
                 $"\n`/SetProfile {user.ScheduleProfileGuid}`" +
                 $"\nЕсли другой пользователь введет эту команду, он сможет видеть расписание с вашими изменениями.", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
             } else {
-                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Поделиться профилем может только его владелец!", replyMarkup: Statics.MainKeyboardMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Поделиться профилем может только его владелец!", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
             }
 
             return Task.CompletedTask;

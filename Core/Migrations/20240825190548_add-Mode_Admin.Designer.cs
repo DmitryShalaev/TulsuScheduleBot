@@ -3,6 +3,7 @@ using System;
 using Core.DB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240825190548_add-Mode_Admin")]
+    partial class addMode_Admin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -434,16 +437,6 @@ namespace ScheduleBot.Migrations
                     b.HasIndex("TelegramUserChatID");
 
                     b.ToTable("MessageLog");
-                });
-
-            modelBuilder.Entity("Core.DB.Entity.MissingFields", b =>
-                {
-                    b.Property<string>("Field")
-                        .HasColumnType("text");
-
-                    b.HasKey("Field");
-
-                    b.ToTable("MissingFields");
                 });
 
             modelBuilder.Entity("Core.DB.Entity.ModeDTO", b =>

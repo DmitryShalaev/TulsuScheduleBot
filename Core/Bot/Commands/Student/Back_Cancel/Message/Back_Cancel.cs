@@ -29,7 +29,7 @@ namespace Core.Bot.Commands.Student.Back_Cancel.Message {
                 MessagesQueue.Message.SendTextMessage(chatId, transition.nextState, replyMarkup: transition.replyMarkup);
             } else {
                 user.TelegramUserTmp.TmpData = null;
-                MessagesQueue.Message.SendTextMessage(chatId, commands["MainMenu"], replyMarkup: Statics.MainKeyboardMarkup);
+                MessagesQueue.Message.SendTextMessage(chatId, commands["MainMenu"], replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
             }
 
             await dbContext.SaveChangesAsync();

@@ -28,18 +28,18 @@ namespace Core.Bot.Commands.Student.Message {
                                $"{(string.IsNullOrWhiteSpace(match.Groups[5].Value) ? now.Year : match.Groups[5].Value)}";
                 try {
                     var date = DateOnly.Parse(sDate);
-                    await Statics.ScheduleRelevanceAsync(dbContext, chatId, user.ScheduleProfile.Group!, Statics.MainKeyboardMarkup);
+                    await Statics.ScheduleRelevanceAsync(dbContext, chatId, user.ScheduleProfile.Group!, DefaultMessage.GetMainKeyboardMarkup(user));
 
                     (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user);
                     MessagesQueue.Message.SendTextMessage(chatId: chatId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
                 } catch(Exception) {
-                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["CommandRecognizedAsADate"], replyMarkup: Statics.MainKeyboardMarkup);
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["CommandRecognizedAsADate"], replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
                 }
 
                 return;
             }
 
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["CommandNotRecognized"], replyMarkup: Statics.MainKeyboardMarkup);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["CommandNotRecognized"], replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
 
         }
     }

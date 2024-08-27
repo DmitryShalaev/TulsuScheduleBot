@@ -110,7 +110,7 @@ namespace Core.Bot.Commands {
                         if(user.IsOwner())
                             await Statics.GroupErrorAdminAsync(dbContext, chatId, user);
                         else
-                            Statics.GroupErrorUser(chatId);
+                            Statics.GroupErrorUser(user);
                         return false;
                     }
 
@@ -121,7 +121,7 @@ namespace Core.Bot.Commands {
                         if(user.IsOwner())
                             await Statics.StudentIdErrorAdminAsync(dbContext, chatId, user);
                         else
-                            Statics.StudentIdErrorUser(chatId);
+                            Statics.StudentIdErrorUser(user);
                         return false;
                     }
 

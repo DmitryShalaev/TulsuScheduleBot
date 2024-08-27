@@ -5,14 +5,16 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Core.Bot.Commands {
     public static class DefaultMessage {
+        private static readonly UserCommands commands = UserCommands.Instance;
+
         public static ReplyKeyboardMarkup GetTermsKeyboardMarkup(ScheduleDbContext dbContext, string StudentID) {
             List<KeyboardButton[]> TermsKeyboardMarkup = [];
 
             int[] terms = [.. dbContext.Progresses.Where(i => i.StudentID == StudentID).Select(i => i.Term).Distinct().OrderBy(i => i)];
             for(int i = 0; i < terms.Length; i++)
-                TermsKeyboardMarkup.Add([$"{terms[i]} {UserCommands.Instance.Message["Semester"]}", i + 1 < terms.Length ? $"{terms[++i]} {UserCommands.Instance.Message["Semester"]}" : ""]);
+                TermsKeyboardMarkup.Add([$"{terms[i]} {commands.Message["Semester"]}", i + 1 < terms.Length ? $"{terms[++i]} {commands.Message["Semester"]}" : ""]);
 
-            TermsKeyboardMarkup.Add([UserCommands.Instance.Message["Back"]]);
+            TermsKeyboardMarkup.Add([commands.Message["Back"]]);
 
             return new(TermsKeyboardMarkup) { ResizeKeyboard = true };
         }
@@ -21,17 +23,32 @@ namespace Core.Bot.Commands {
             List<KeyboardButton[]> ProfileKeyboardMarkup = [];
 
             if(user.IsOwner()) {
-                ProfileKeyboardMarkup.AddRange([  [$"{UserCommands.Instance.Message["GroupNumber"]}:\n{user.ScheduleProfile.Group}", $"{UserCommands.Instance.Message["StudentIDNumber"]}:\n{user.ScheduleProfile.StudentID}"],
-                                                        [UserCommands.Instance.Message["GetProfileLink"]]
+                ProfileKeyboardMarkup.AddRange([  [$"{commands.Message["GroupNumber"]}:\n{user.ScheduleProfile.Group}", $"{commands.Message["StudentIDNumber"]}:\n{user.ScheduleProfile.StudentID}"],
+                                                        [commands.Message["GetProfileLink"]]
                                                      ]);
             } else {
-                ProfileKeyboardMarkup.Add([UserCommands.Instance.Message["ResetProfileLink"]]);
+                ProfileKeyboardMarkup.Add([commands.Message["ResetProfileLink"]]);
             }
 
             ProfileKeyboardMarkup.AddRange([
-                [UserCommands.Instance.Message["Settings"]],
-                [UserCommands.Instance.Message["Back"]]
+                [commands.Message["Settings"]],
+                [commands.Message["Back"]]
             ]);
+
+            return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
+        }
+
+        public static ReplyKeyboardMarkup GetMainKeyboardMarkup(TelegramUser user) {
+            List<KeyboardButton[]> ProfileKeyboardMarkup = new([
+                [commands.Message["Today"], commands.Message["Tomorrow"] ],
+                [commands.Message["ByDays"], commands.Message["ForAWeek"]],
+                [commands.Message["Corps"], commands.Message["Schedule"]],
+                [commands.Message["Other"]]
+            ]);
+
+            if(user.IsAdmin) {
+                ProfileKeyboardMarkup.Add([commands.Message["AdminPanel"]]);
+            }
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }
@@ -44,10 +61,10 @@ namespace Core.Bot.Commands {
             string displayingGroupList = _displayingGroupList ? "\U0001f7e2" : "🔴";
 
             List<KeyboardButton[]> ProfileKeyboardMarkup = new([
-                [UserCommands.Instance.Message["Notifications"]],
-                [$"{teacherLincsEnabled} {UserCommands.Instance.Message["TeacherLincsEnabled"]} {teacherLincsEnabled} \n({(_teacherLincsEnabled ? "Выключить" : "Включить")})"],
-                [$"{displayingGroupList} {UserCommands.Instance.Message["DisplayingGroupList"]} {displayingGroupList} \n({(_displayingGroupList ? "Выключить" : "Включить")})"],
-                [UserCommands.Instance.Message["Back"]]
+                [commands.Message["Notifications"]],
+                [$"{teacherLincsEnabled} {commands.Message["TeacherLincsEnabled"]} {teacherLincsEnabled} \n({(_teacherLincsEnabled ? "Выключить" : "Включить")})"],
+                [$"{displayingGroupList} {commands.Message["DisplayingGroupList"]} {displayingGroupList} \n({(_displayingGroupList ? "Выключить" : "Включить")})"],
+                [commands.Message["Back"]]
             ]);
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
@@ -55,31 +72,31 @@ namespace Core.Bot.Commands {
 
         public static ReplyKeyboardMarkup GetCorpsKeyboardMarkup() {
             List<KeyboardButton[]> ProfileKeyboardMarkup = [
-                [UserCommands.Instance.Corps[0].text]
+                [commands.Corps[0].text]
             ];
 
             for(int i = 0; i < 3; i++) {
                 List<KeyboardButton> keyboardButtonsLine = [];
                 for(int j = 0; j < 5; j++)
-                    keyboardButtonsLine.Add(UserCommands.Instance.Corps[1 + i * 5 + j].text);
+                    keyboardButtonsLine.Add(commands.Corps[1 + i * 5 + j].text);
 
                 ProfileKeyboardMarkup.Add([.. keyboardButtonsLine]);
             }
 
-            for(int i = 16; i < UserCommands.Instance.Corps.Length; i++)
-                ProfileKeyboardMarkup.Add([UserCommands.Instance.Corps[i].text]);
+            for(int i = 16; i < commands.Corps.Length; i++)
+                ProfileKeyboardMarkup.Add([commands.Corps[i].text]);
 
-            ProfileKeyboardMarkup.AddRange([[UserCommands.Instance.College.text], [UserCommands.Instance.Message["Back"]]]);
+            ProfileKeyboardMarkup.AddRange([[commands.College.text], [commands.Message["Back"]]]);
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }
 
         public static ReplyKeyboardMarkup GetTeacherWorkScheduleSelectedKeyboardMarkup(string teacher) {
             List<KeyboardButton[]> KeyboardMarkup = [
-                [$"{UserCommands.Instance.Message["CurrentTeacher"]}:\n{teacher}"],
-                [UserCommands.Instance.Message["Today"], UserCommands.Instance.Message["Tomorrow"]],
-                [UserCommands.Instance.Message["ByDays"], UserCommands.Instance.Message["ForAWeek"]],
-                [UserCommands.Instance.Message["WorkScheduleBack"]]
+                [$"{commands.Message["CurrentTeacher"]}:\n{teacher}"],
+                [commands.Message["Today"], commands.Message["Tomorrow"]],
+                [commands.Message["ByDays"], commands.Message["ForAWeek"]],
+                [commands.Message["WorkScheduleBack"]]
             ];
 
             return new(KeyboardMarkup) { ResizeKeyboard = true };
@@ -87,10 +104,10 @@ namespace Core.Bot.Commands {
 
         public static ReplyKeyboardMarkup GetClassroomWorkScheduleSelectedKeyboardMarkup(string teacher) {
             List<KeyboardButton[]> KeyboardMarkup = [
-                [$"{UserCommands.Instance.Message["CurrentClassroom"]}:\n{teacher}"],
-                [UserCommands.Instance.Message["Today"], UserCommands.Instance.Message["Tomorrow"]],
-                [UserCommands.Instance.Message["ByDays"], UserCommands.Instance.Message["ForAWeek"]],
-                [UserCommands.Instance.Message["WorkScheduleBack"]]
+                [$"{commands.Message["CurrentClassroom"]}:\n{teacher}"],
+                [commands.Message["Today"], commands.Message["Tomorrow"]],
+                [commands.Message["ByDays"], commands.Message["ForAWeek"]],
+                [commands.Message["WorkScheduleBack"]]
             ];
 
             return new(KeyboardMarkup) { ResizeKeyboard = true };

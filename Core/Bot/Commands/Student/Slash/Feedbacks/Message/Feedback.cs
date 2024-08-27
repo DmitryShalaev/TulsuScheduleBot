@@ -20,17 +20,6 @@ namespace Core.Bot.Commands.Student.Slash.Feedbacks.Message {
 
             user.TelegramUserTmp.TmpData = null;
 
-            if(user.IsAdmin) {
-                DB.Entity.Feedback? feedback = dbContext.Feedbacks.Include(i => i.TelegramUser).Where(i => !i.IsCompleted).OrderBy(i => i.Date).FirstOrDefault();
-
-                if(feedback is not null) MessagesQueue.Message.SendTextMessage(chatId: chatId, text: FeedbackMessage.GetFeedbackMessage(feedback), replyMarkup: FeedbackMessage.GetFeedbackInlineKeyboardButton(dbContext, feedback));
-                else {
-                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: Statics.MainKeyboardMarkup);
-                }
-
-                return;
-            }
-
             user.TelegramUserTmp.Mode = Mode.Feedback;
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["FeedbackMessage"], replyMarkup: Statics.CancelKeyboardMarkup);
 

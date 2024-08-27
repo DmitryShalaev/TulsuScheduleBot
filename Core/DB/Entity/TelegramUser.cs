@@ -64,7 +64,9 @@ namespace Core.DB.Entity {
         ClassroomSchedule,
         ClassroomSelected,
 
-        Feedback
+        Feedback,
+
+        Admin
     }
 
     public class ModeDTO {

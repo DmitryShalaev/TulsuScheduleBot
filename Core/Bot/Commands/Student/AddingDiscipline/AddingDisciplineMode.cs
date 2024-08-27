@@ -77,7 +77,7 @@ namespace Core.Bot.Commands.AddingDiscipline {
 
             await dbContext.SaveChangesAsync();
 
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.MainKeyboardMarkup);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
 
             StringBuilder sb = new(Scheduler.GetScheduleByDate(dbContext, customDiscipline.Date, user, all: true).Item1);
             sb.AppendLine($"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n<b>{UserCommands.Instance.Message["SelectAnAction"]}</b>");
