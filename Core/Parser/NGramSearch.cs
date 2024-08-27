@@ -13,6 +13,11 @@ namespace Core.Parser {
 
         public static NGramSearch Instance => instance ??= new NGramSearch();
 
+        public void Clear() {
+            TeachersNgramsDict.Clear();
+            ClassroomNgramsDict.Clear();
+        }
+
         private static IEnumerable<string> GetNGrams(string input, int n) {
             if(n > input.Length)
                 n = input.Length;

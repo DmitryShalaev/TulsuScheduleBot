@@ -7,6 +7,7 @@ using Core.Bot;
 using Core.Bot.Commands;
 using Core.DB;
 using Core.DB.Entity;
+using Core.Parser;
 
 using HtmlAgilityPack;
 
@@ -351,6 +352,8 @@ namespace ScheduleBot {
             await UpdatingTeachers(dbContext, GetTeachers(dbContext, jObject));
 
             await UpdatingClassrooms(dbContext, GetClassrooms(dbContext, jObject));
+
+            NGramSearch.Instance.Clear();
         }
 
         private static async Task<bool> UpdatingTeachers(ScheduleDbContext dbContext, List<string>? teachers) {
