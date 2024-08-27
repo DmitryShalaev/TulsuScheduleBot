@@ -89,7 +89,7 @@ namespace ScheduleBot {
             return false;
         }
 
-        public async Task<bool> UpdatingDisciplines(ScheduleDbContext dbContext, string group, int updateAttemptTime) {
+        public async Task<bool> UpdatingDisciplines(ScheduleDbContext dbContext, string group, int updateAttemptTime, (DateOnly min, DateOnly max, string searchField)? lastDates = null, List<Discipline>? lastDisciplines = null) {
             GroupLastUpdate? groupLastUpdate = await dbContext.GroupLastUpdate.FirstOrDefaultAsync(i => i.Group == group);
             if(groupLastUpdate is null) {
                 groupLastUpdate = new() { Group = group, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
@@ -103,91 +103,100 @@ namespace ScheduleBot {
 
             await dbContext.SaveChangesAsync();
 
-            (DateOnly min, DateOnly max, string searchField)? dates = await GetDates(group);
+            (DateOnly min, DateOnly max, string searchField)? dates = lastDates ?? await GetDates(group);
 
             if(dates is not null && dates.Value.searchField == "GROUP_P") {
 
-                List<Discipline>? disciplines = await GetDisciplines(group);
+                List<Discipline>? disciplines = lastDisciplines ?? await GetDisciplines(group);
 
                 if(disciplines is not null) {
                     List<Discipline> updatedDisciplines = [];
 
                     groupLastUpdate.Update = DateTime.UtcNow;
 
-                    try {
-                        if(dbContext.Disciplines.Any(i => i.Group == group && (i.Date < dates.Value.min || i.Date > dates.Value.max))) {
-                            dbContext.Disciplines.RemoveRange(dbContext.Disciplines.Where(i => i.Group == group && (i.Date < dates.Value.min || i.Date > dates.Value.max)));
-                            await dbContext.SaveChangesAsync();
-                        }
+                    if(dbContext.Disciplines.Any(i => i.Group == group && (i.Date < dates.Value.min || i.Date > dates.Value.max))) {
+                        dbContext.Disciplines.RemoveRange(dbContext.Disciplines.Where(i => i.Group == group && (i.Date < dates.Value.min || i.Date > dates.Value.max)));
+                        await dbContext.SaveChangesAsync();
+                    }
 
-                        var _list = dbContext.Disciplines.Where(i => i.Group == group).ToList();
+                    var _list = dbContext.Disciplines.Where(i => i.Group == group).ToList();
 
-                        IEnumerable<Discipline> except = disciplines.Except(_list);
-                        if(except.Any()) {
-                            var dd = except.ToList();
-                            await dbContext.Disciplines.AddRangeAsync(except);
+                    IEnumerable<Discipline> except = disciplines.Except(_list);
+                    if(except.Any()) {
+                        var dd = except.ToList();
+                        await dbContext.Disciplines.AddRangeAsync(except);
 
-                            if(_list.Count != 0)
-                                updatedDisciplines.AddRange(except);
-
-                            await dbContext.SaveChangesAsync();
-                            _list = [.. dbContext.Disciplines.Where(i => i.Group == group)];
-                        }
-
-                        except = _list.Except(disciplines);
-                        if(except.Any()) {
-                            dbContext.Disciplines.RemoveRange(except);
-
+                        if(_list.Count != 0)
                             updatedDisciplines.AddRange(except);
 
-                            await dbContext.DeletedDisciplines.AddRangeAsync(except.Select(i => new DeletedDisciplines(i)));
+                        try {
+                            await dbContext.SaveChangesAsync();
+                        } catch(DbUpdateException ex) {
+                            return await PostgresExceptionHandling(dbContext, ex) && await UpdatingDisciplines(dbContext, group, 0, dates, lastDisciplines);
                         }
 
-                        await dbContext.SaveChangesAsync();
-
-                        await IntersectionOfSubgroups(dbContext, group);
-
-                        if(updatedDisciplines.Count != 0) {
-                            var date = DateOnly.FromDateTime(DateTime.Now);
-                            var _updatedDisciplines = updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList();
-
-                            if(_updatedDisciplines.Count != 0)
-                                _ = Task.Run(() => Notifications.UpdatedDisciplines(_updatedDisciplines));
-                        }
-
-                        return true;
-
-                    } catch(DbUpdateException ex) {
-                        // Получаем исключение, содержащее подробности ошибки
-                        if(ex.InnerException is PostgresException innerException) {
-                            // Проверяем код ошибки (23503 указывает на нарушение внешнего ключа)
-                            if(innerException.SqlState == "23503" && innerException.Detail is not null) {
-                                string? missingValue = ExtractMissingValue(innerException.Detail);
-                                if(missingValue is null)
-                                    throw;
-
-                                DateTime updDate = new DateTime(2000, 1, 1).ToUniversalTime();
-                                await dbContext.MissingFields.AddAsync(new MissingFields { Field = missingValue });
-
-                                if(innerException.MessageText.Contains("ClassroomLastUpdate")) {
-
-                                    await dbContext.ClassroomLastUpdate.AddAsync(new ClassroomLastUpdate { Classroom = missingValue, Update = updDate });
-                                } else if(innerException.MessageText.Contains("TeacherLastUpdate")) {
-
-                                    await dbContext.TeacherLastUpdate.AddAsync(new TeacherLastUpdate { Teacher = missingValue, Update = updDate });
-                                }
-
-                                await dbContext.SaveChangesAsync();
-
-                                foreach(TelegramUser? item in dbContext.TelegramUsers.Where(i => i.IsAdmin))
-                                    Core.Bot.MessagesQueue.Message.SendTextMessage(chatId: item.ChatID, text: $"Обнаружена ошибка парсера: {missingValue}", disableNotification: true);
-
-                                return await UpdatingDisciplines(dbContext, group, 0);
-                            }
-                        }
-
-                        throw;
+                        _list = [.. dbContext.Disciplines.Where(i => i.Group == group)];
                     }
+
+                    except = _list.Except(disciplines);
+                    if(except.Any()) {
+                        dbContext.Disciplines.RemoveRange(except);
+
+                        updatedDisciplines.AddRange(except);
+
+                        await dbContext.DeletedDisciplines.AddRangeAsync(except.Select(i => new DeletedDisciplines(i)));
+                    }
+
+                    await dbContext.SaveChangesAsync();
+
+                    await IntersectionOfSubgroups(dbContext, group);
+
+                    if(updatedDisciplines.Count != 0) {
+                        var date = DateOnly.FromDateTime(DateTime.Now);
+                        var _updatedDisciplines = updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList();
+
+                        if(_updatedDisciplines.Count != 0)
+                            _ = Task.Run(() => Notifications.UpdatedDisciplines(_updatedDisciplines));
+                    }
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private async Task<bool> PostgresExceptionHandling(ScheduleDbContext dbContext, DbUpdateException ex) {
+            dbContext.ClearContext();
+
+            // Получаем исключение, содержащее подробности ошибки
+            if(ex.InnerException is PostgresException innerException) {
+                // Проверяем код ошибки (23503 указывает на нарушение внешнего ключа)
+                if(innerException.SqlState == "23503" && innerException.Detail is not null) {
+                    string? missingValue = ExtractMissingValue(innerException.Detail);
+                    if(missingValue is null)
+                        return false;
+
+                    DateTime updDate = new DateTime(2000, 1, 1).ToUniversalTime();
+                    await dbContext.MissingFields.AddAsync(new MissingFields { Field = missingValue });
+
+                    if(innerException.MessageText.Contains("ClassroomLastUpdate")) {
+
+                        await dbContext.ClassroomLastUpdate.AddAsync(new ClassroomLastUpdate { Classroom = missingValue, Update = updDate });
+
+                    } else if(innerException.MessageText.Contains("TeacherLastUpdate")) {
+
+                        await dbContext.TeacherLastUpdate.AddAsync(new TeacherLastUpdate { Teacher = missingValue, Update = updDate });
+                    }
+
+                    await dbContext.SaveChangesAsync();
+
+                    foreach(TelegramUser? item in dbContext.TelegramUsers.Where(i => i.IsAdmin))
+                        Core.Bot.MessagesQueue.Message.SendTextMessage(chatId: item.ChatID, text: $"Обнаружена ошибка парсера: {missingValue}", disableNotification: true);
+
+                    await UpdatingData(dbContext);
+
+                    return true;
                 }
             }
 
@@ -221,7 +230,7 @@ namespace ScheduleBot {
             }
         }
 
-        public async Task<bool> UpdatingTeacherWorkSchedule(ScheduleDbContext dbContext, string teacher, int updateAttemptTime) {
+        public async Task<bool> UpdatingTeacherWorkSchedule(ScheduleDbContext dbContext, string teacher, int updateAttemptTime, (DateOnly min, DateOnly max, string searchField)? lastDates = null, List<TeacherWorkSchedule>? lastTeacherWorkSchedule = null) {
             TeacherLastUpdate? teacherLastUpdate = await dbContext.TeacherLastUpdate.FirstOrDefaultAsync(i => i.Teacher == teacher);
             if(teacherLastUpdate is null) {
                 teacherLastUpdate = new() { Teacher = teacher, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
@@ -237,10 +246,10 @@ namespace ScheduleBot {
 
             await UpdatingTeacherInfo(dbContext, teacher);
 
-            (DateOnly min, DateOnly max, string searchField)? dates = await GetDates(teacher);
+            (DateOnly min, DateOnly max, string searchField)? dates = lastDates ?? await GetDates(teacher);
             if(dates is not null && dates.Value.searchField == "PREP") {
 
-                List<TeacherWorkSchedule>? teacherWorkSchedule = await GetTeachersWorkSchedule(teacher);
+                List<TeacherWorkSchedule>? teacherWorkSchedule = lastTeacherWorkSchedule ?? await GetTeachersWorkSchedule(teacher);
 
                 if(teacherWorkSchedule is not null) {
 
@@ -257,7 +266,12 @@ namespace ScheduleBot {
                     if(except.Any()) {
                         dbContext.TeacherWorkSchedule.AddRange(except);
 
-                        await dbContext.SaveChangesAsync();
+                        try {
+                            await dbContext.SaveChangesAsync();
+                        } catch(DbUpdateException ex) {
+                            return await PostgresExceptionHandling(dbContext, ex) && await UpdatingTeacherWorkSchedule(dbContext, teacher, 0, dates, teacherWorkSchedule);
+                        }
+
                         _list = [.. dbContext.TeacherWorkSchedule.Where(i => i.Lecturer == teacher)];
                     }
 
@@ -274,7 +288,7 @@ namespace ScheduleBot {
             return false;
         }
 
-        public async Task<bool> UpdatingClassroomWorkSchedule(ScheduleDbContext dbContext, string classroom, int updateAttemptTime) {
+        public async Task<bool> UpdatingClassroomWorkSchedule(ScheduleDbContext dbContext, string classroom, int updateAttemptTime, (DateOnly min, DateOnly max, string searchField)? lastDates = null, List<ClassroomWorkSchedule>? lastClassroomWorkSchedule = null) {
             ClassroomLastUpdate? classroomLastUpdate = await dbContext.ClassroomLastUpdate.FirstOrDefaultAsync(i => i.Classroom == classroom);
             if(classroomLastUpdate is null) {
                 classroomLastUpdate = new() { Classroom = classroom, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
@@ -288,10 +302,10 @@ namespace ScheduleBot {
 
             await dbContext.SaveChangesAsync();
 
-            (DateOnly min, DateOnly max, string searchField)? dates = await GetDates(classroom);
+            (DateOnly min, DateOnly max, string searchField)? dates = lastDates ?? await GetDates(classroom);
             if(dates is not null && dates.Value.searchField == "AUD") {
 
-                List<ClassroomWorkSchedule>? classroomWorkSchedule = await GetClassroomWorkSchedule(classroom);
+                List<ClassroomWorkSchedule>? classroomWorkSchedule = lastClassroomWorkSchedule ?? await GetClassroomWorkSchedule(classroom);
 
                 if(classroomWorkSchedule is not null) {
 
@@ -308,7 +322,12 @@ namespace ScheduleBot {
                     if(except.Any()) {
                         dbContext.ClassroomWorkSchedule.AddRange(except);
 
-                        await dbContext.SaveChangesAsync();
+                        try {
+                            await dbContext.SaveChangesAsync();
+                        } catch(DbUpdateException ex) {
+                            return await PostgresExceptionHandling(dbContext, ex) && await UpdatingClassroomWorkSchedule(dbContext, classroom, 0, dates, classroomWorkSchedule);
+                        }
+
                         _list = [.. dbContext.ClassroomWorkSchedule.Where(i => i.LectureHall == classroom)];
                     }
 
@@ -352,7 +371,7 @@ namespace ScheduleBot {
 
                 if(except.Any()) {
                     var fd = dbContext.TeacherLastUpdate.Where(i => except.Contains(i.Teacher)).ToList();
-                    await dbContext.TeacherLastUpdate.AddRangeAsync(fd);
+                    dbContext.TeacherLastUpdate.RemoveRange(fd);
                 }
 
                 await dbContext.SaveChangesAsync();

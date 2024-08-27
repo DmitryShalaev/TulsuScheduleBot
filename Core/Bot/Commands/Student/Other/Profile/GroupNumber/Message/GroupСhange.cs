@@ -24,7 +24,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
                 return;
             }
 
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["WeNeedToWait"], replyMarkup: Statics.CancelKeyboardMarkup);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["WeNeedToWait"], replyMarkup: Statics.CancelKeyboardMarkup, saveMessageId: true);
             GroupLastUpdate? group = await dbContext.GroupLastUpdate.FirstOrDefaultAsync(i => i.Group == args && i.Update != DateTime.MinValue);
 
             if(group is null && await ScheduleParser.Instance.UpdatingDisciplines(dbContext, args, 0))

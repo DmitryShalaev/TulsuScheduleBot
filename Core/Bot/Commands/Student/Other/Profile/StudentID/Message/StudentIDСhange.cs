@@ -24,7 +24,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
                 return;
             }
 
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["WeNeedToWait"], replyMarkup: Statics.CancelKeyboardMarkup);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["WeNeedToWait"], replyMarkup: Statics.CancelKeyboardMarkup, saveMessageId: true);
 
             if(int.TryParse(args, out int id)) {
                 StudentIDLastUpdate? studentID = await dbContext.StudentIDLastUpdate.FirstOrDefaultAsync(i => i.StudentID == args && i.Update != DateTime.MinValue);

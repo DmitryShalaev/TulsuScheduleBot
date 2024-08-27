@@ -14,6 +14,16 @@ namespace Core.DB {
                 modelBuilder.Entity<ModeDTO>().HasData(new ModeDTO() { ID = type, Name = type.ToString() });
         }
 
+        public void ClearContext() {
+            foreach(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry entry in ChangeTracker.Entries()) {
+                if(entry.State == EntityState.Added) {
+                    entry.State = EntityState.Detached;
+                } else if(entry.State is EntityState.Modified or EntityState.Deleted) {
+                    entry.State = EntityState.Unchanged;
+                }
+            }
+        }
+
 #pragma warning disable CS8618
         public DbSet<Discipline> Disciplines { get; set; }
         public DbSet<DeletedDisciplines> DeletedDisciplines { get; set; }

@@ -35,8 +35,8 @@ namespace Core.Bot.MessagesQueue {
         private static readonly TimeSpan burstInterval = TimeSpan.FromSeconds(1); // Интервал времени для всплеска
 
         #region Messag
-        public static void SendTextMessage(ChatId chatId, string text, IReplyMarkup? replyMarkup = null, ParseMode? parseMode = null, bool? disableWebPagePreview = null, bool? disableNotification = null, bool deletePrevious = false) {
-            var message = new TextMessage(chatId, text, replyMarkup, parseMode, disableWebPagePreview, disableNotification, deletePrevious);
+        public static void SendTextMessage(ChatId chatId, string text, IReplyMarkup? replyMarkup = null, ParseMode? parseMode = null, bool? disableWebPagePreview = null, bool? disableNotification = null, bool deletePrevious = false, bool saveMessageId = false) {
+            var message = new TextMessage(chatId, text, replyMarkup, parseMode, disableWebPagePreview, disableNotification, deletePrevious, saveMessageId);
 
             AddMessageToQueue(chatId, message);
         }
@@ -101,7 +101,7 @@ namespace Core.Bot.MessagesQueue {
                     case TextMessage textMessage:
                         msg = textMessage.Text;
 
-                        if(textMessage.DeletePrevious && previewsMessage.TryGetValue(textMessage.ChatId, out int messageId))
+                        if(textMessage.DeletePrevious && previewsMessage.TryRemove(textMessage.ChatId, out int messageId))
                             await SendMessageAsync(new DeleteMessage(textMessage.ChatId, messageId));
 
                         int newId = (await BotClient.SendTextMessageAsync(
@@ -113,7 +113,8 @@ namespace Core.Bot.MessagesQueue {
                                         replyMarkup: textMessage.ReplyMarkup
                                     )).MessageId;
 
-                        previewsMessage.AddOrUpdate(textMessage.ChatId, newId, (_, _) => newId);
+                        if(textMessage.SaveMessageId)
+                            previewsMessage.AddOrUpdate(textMessage.ChatId, newId, (_, _) => newId);
 
                         break;
 

@@ -132,7 +132,7 @@ namespace Core.Bot {
             bool siteIsNotResponding = false;
 
             if(groupLastUpdate is null || (DateTime.Now - groupLastUpdate)?.TotalMinutes > commands.Config.DisciplineUpdateTime) {
-                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"], saveMessageId: true);
                 siteIsNotResponding = true;
 
                 if(!await parser.UpdatingDisciplines(dbContext, group, commands.Config.UpdateAttemptTime)) {
@@ -153,7 +153,7 @@ namespace Core.Bot {
             bool siteIsNotResponding = false;
 
             if(teacherLastUpdate is null || (DateTime.Now - teacherLastUpdate)?.TotalMinutes > commands.Config.WorkScheduleUpdateTime) {
-                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"], saveMessageId: true);
                 siteIsNotResponding = true;
 
                 if(!await parser.UpdatingTeacherWorkSchedule(dbContext, teacher, commands.Config.UpdateAttemptTime)) {
@@ -174,7 +174,7 @@ namespace Core.Bot {
             bool siteIsNotResponding = false;
 
             if(classroomLastUpdate is null || (DateTime.Now - classroomLastUpdate)?.TotalMinutes > commands.Config.WorkScheduleUpdateTime) {
-                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"], saveMessageId: true);
                 siteIsNotResponding = true;
 
                 if(!await parser.UpdatingClassroomWorkSchedule(dbContext, classroom, commands.Config.UpdateAttemptTime)) {
@@ -195,7 +195,7 @@ namespace Core.Bot {
             bool siteIsNotResponding = false;
 
             if(studentIDlastUpdate is null || (DateTime.Now - studentIDlastUpdate)?.TotalMinutes > commands.Config.StudentIDUpdateTime) {
-                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"]);
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"], saveMessageId: true);
                 siteIsNotResponding = true;
 
                 if(!await parser.UpdatingProgress(dbContext, studentID, commands.Config.UpdateAttemptTime)) {
