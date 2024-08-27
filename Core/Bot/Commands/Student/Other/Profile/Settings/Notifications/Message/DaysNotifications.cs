@@ -30,7 +30,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message
                 await dbContext.SaveChangesAsync();
 
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Количество дней успешно изменено.", replyMarkup: DefaultMessage.GetSettingsKeyboardMarkup(user));
-                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["NotificationSettings"], replyMarkup: DefaultCallback.GetNotificationsInlineKeyboardButton(user));
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["NotificationSettings"], replyMarkup: DefaultCallback.GetNotificationsInlineKeyboardButton(user), saveMessageId: true);
             } catch(Exception) {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Ошибка в формате количества дней!", replyMarkup: Statics.CancelKeyboardMarkup);
             }
