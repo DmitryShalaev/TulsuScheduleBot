@@ -1,10 +1,14 @@
-﻿using Core.DB;
+﻿using System.Text;
+
+using Core.DB;
 using Core.DB.Entity;
 
 using ScheduleBot;
 
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Core.Bot.Commands.AddingDiscipline {
     public static class AddingDisciplineMode {
@@ -74,7 +78,11 @@ namespace Core.Bot.Commands.AddingDiscipline {
             await dbContext.SaveChangesAsync();
 
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: Statics.MainKeyboardMarkup);
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, customDiscipline.Date, user, all: true).Item1, replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, customDiscipline.Date, user.ScheduleProfile), parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
+
+            StringBuilder sb = new(Scheduler.GetScheduleByDate(dbContext, customDiscipline.Date, user, all: true).Item1);
+            sb.AppendLine($"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n<b>{UserCommands.Instance.Message["SelectAnAction"]}</b>");
+
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, customDiscipline.Date, user.ScheduleProfile), parseMode: Telegram.Bot.Types.Enums.ParseMode.Html);
         }
 
         public static void DeleteInitialMessage(ChatId chatId, TelegramUser user) {

@@ -47,6 +47,8 @@
     "ThisWeek": "Эта неделя",
     "NextWeek": "Следующая неделя",
 
+    "SelectAnAction": "Выберите действие из меню ниже, чтобы скрыть пройденные предметы или добавить новые",
+
     "Back": "Hазaд",
     "Cancel": "Отмeнa",
     "Reset": "Восстановить",
@@ -106,7 +108,7 @@
     },
     "CustomEditCancel": {
       "text": "Отмена",
-      "callback": "Cancel"
+      "callback": "CustomEditCancel"
     },
     "Add": {
       "text": "Добавить",

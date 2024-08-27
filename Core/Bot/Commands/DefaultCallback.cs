@@ -59,7 +59,7 @@ namespace Core.Bot.Commands {
             if(user.IsOwner()) {
                 if(all) {
                     editButtons.Add([ InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["All"].text, callbackData: $"{UserCommands.Instance.Callback["All"].callback} {date}"),
-                                            InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["Edit"].text, callbackData: $"{UserCommands.Instance.Callback["Edit"].callback} {date}") ]);
+                                      InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["Edit"].text, callbackData: $"{UserCommands.Instance.Callback["Edit"].callback} {date}") ]);
                 } else {
                     editButtons.Add([InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["Edit"].text, callbackData: $"{UserCommands.Instance.Callback["Edit"].callback} {date}")]);
                 }
