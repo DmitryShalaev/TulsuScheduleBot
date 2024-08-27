@@ -1,4 +1,6 @@
-﻿using Core.Bot.Commands.Interfaces;
+﻿using System.Text;
+
+using Core.Bot.Commands.Interfaces;
 using Core.DB;
 using Core.DB.Entity;
 
@@ -22,8 +24,10 @@ namespace Core.Bot.Commands.Student.Custom.Message {
                 if(user.IsOwner()) {
                     CustomDiscipline discipline = dbContext.CustomDiscipline.Single(i => i.ID == uint.Parse(user.TelegramUserTmp.TmpData));
 
-                    (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, discipline.Date, user, all: true);
-                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: schedule.Item1, replyMarkup: DefaultCallback.GetCustomEditAdminInlineKeyboardButton(discipline), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                    StringBuilder sb = new(Scheduler.GetScheduleByDate(dbContext, discipline.Date, user, all: true).Item1);
+                    sb.AppendLine($"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n<b>{UserCommands.Instance.Message["SelectAnAction"]}</b>");
+
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: DefaultCallback.GetCustomEditAdminInlineKeyboardButton(discipline), parseMode: ParseMode.Html, disableWebPagePreview: true);
                 }
             }
 

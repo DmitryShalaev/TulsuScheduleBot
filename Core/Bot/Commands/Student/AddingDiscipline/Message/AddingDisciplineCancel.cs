@@ -1,4 +1,6 @@
-﻿using Core.Bot.Commands.Interfaces;
+﻿using System.Text;
+
+using Core.Bot.Commands.Interfaces;
 using Core.DB;
 using Core.DB.Entity;
 
@@ -28,8 +30,10 @@ namespace Core.Bot.Commands.AddingDiscipline.Message {
 
             await Statics.ScheduleRelevanceAsync(dbContext, chatId, user.ScheduleProfile.Group!, DefaultMessage.GetMainKeyboardMarkup(user));
 
-            (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, first.Date, user, true);
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: schedule.Item1, replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, first.Date, user.ScheduleProfile), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+            StringBuilder sb = new(Scheduler.GetScheduleByDate(dbContext, first.Date, user, true).Item1);
+            sb.AppendLine($"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n<b>{UserCommands.Instance.Message["SelectAnAction"]}</b>");
+
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, first.Date, user.ScheduleProfile), parseMode: ParseMode.Html, disableWebPagePreview: true);
         }
     }
 }

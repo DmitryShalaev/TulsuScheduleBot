@@ -1,4 +1,6 @@
-﻿using Core.Bot.Commands.Interfaces;
+﻿using System.Text;
+
+using Core.Bot.Commands.Interfaces;
 using Core.DB;
 using Core.DB.Entity;
 
@@ -25,7 +27,10 @@ namespace Core.Bot.Commands.Student.Custom.Callback {
                     dbContext.CustomDiscipline.Remove(customDiscipline);
                     await dbContext.SaveChangesAsync();
 
-                    MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, customDiscipline.Date, user, true).Item1, replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, customDiscipline.Date, user.ScheduleProfile), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                    StringBuilder sb = new(Scheduler.GetScheduleByDate(dbContext, customDiscipline.Date, user, true).Item1);
+                    sb.AppendLine($"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n<b>{UserCommands.Instance.Message["SelectAnAction"]}</b>");
+
+                    MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: sb.ToString(), replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, customDiscipline.Date, user.ScheduleProfile), parseMode: ParseMode.Html, disableWebPagePreview: true);
                     return;
                 }
             }

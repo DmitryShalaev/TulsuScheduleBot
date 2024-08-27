@@ -1,5 +1,8 @@
-﻿using Core.Bot.Commands.AddingDiscipline;
+﻿using System.Text;
+
+using Core.Bot.Commands.AddingDiscipline;
 using Core.Bot.Commands.Interfaces;
+using Core.Bot.Commands.Student.Schedule.Message;
 using Core.DB;
 using Core.DB.Entity;
 
@@ -27,7 +30,12 @@ namespace Core.Bot.Commands.Student.Custom.Message {
                     await dbContext.SaveChangesAsync();
 
                     MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Время конца успешно изменено.", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
-                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: Scheduler.GetScheduleByDate(dbContext, discipline.Date, user, all: true).Item1, replyMarkup: DefaultCallback.GetCustomEditAdminInlineKeyboardButton(discipline), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+
+                    StringBuilder sb = new(Scheduler.GetScheduleByDate(dbContext, discipline.Date, user, all: true).Item1);
+                    sb.AppendLine($"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n<b>{UserCommands.Instance.Message["SelectAnAction"]}</b>");
+
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: DefaultCallback.GetCustomEditAdminInlineKeyboardButton(discipline), parseMode: ParseMode.Html, disableWebPagePreview: true);
+
                 } catch(Exception) {
                     MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Ошибка в формате времени!", replyMarkup: Statics.CancelKeyboardMarkup);
                 }

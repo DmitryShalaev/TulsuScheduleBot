@@ -53,6 +53,10 @@ namespace Core.Bot {
                 if(match.Success)
                     return $"{match.Groups[1]} {user.TelegramUserTmp.Mode}".ToLower();
 
+                match = Statics.MarkedMessageRegex().Match(message);
+                if(match.Success)
+                    return $"{match.Groups[1]} {user.TelegramUserTmp.Mode}".ToLower();
+
                 match = Statics.CommandMessageRegex().Match(message);
                 if(match.Success) {
                     args = match.Groups[2].ToString();
