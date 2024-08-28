@@ -43,7 +43,7 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
 
             sb.AppendLine();
             sb.AppendLine($"--Получено сообщений--");
-            sb.AppendLine($"За сегодня: {dbContext.MessageLog.Where(user => user.Date.Date == today).Count()}");
+            sb.AppendLine($"За сегодня: {dbContext.TelegramUsers.Sum(user => user.TodayRequests)}");
             sb.AppendLine($"За неделю: {dbContext.MessageLog.Where(user => user.Date >= startOfWeek && user.Date <= endOfWeek).Count()}");
             sb.AppendLine($"За месяц: {dbContext.MessageLog.Where(user => user.Date >= startOfMonth && user.Date <= endOfMonth).Count()}");
 
