@@ -11,9 +11,9 @@ namespace Core.Bot.Commands.Admin.Feedbacks.Message {
 
         public List<string> Commands => ["Отзывы"];
 
-        public List<Mode> Modes => Enum.GetValues(typeof(Mode)).Cast<Mode>().ToList();
+        public List<Mode> Modes => [Mode.Admin];
 
-        public Manager.Check Check => Manager.Check.none;
+        public Manager.Check Check => Manager.Check.admin;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             Feedback? feedback = await dbContext.Feedbacks.Include(i => i.TelegramUser).Where(i => !i.IsCompleted).OrderBy(i => i.Date).FirstOrDefaultAsync();
