@@ -31,7 +31,7 @@ namespace Core.Bot.Commands.Teachers.Callback {
 
             MessagesQueue.Message.DeleteMessage(chatId: chatId, messageId: messageId);
 
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentTeacher"]}: [{teacherName}]({teacher.LinkProfile})", replyMarkup: DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(teacherName), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentTeacher"]}: [{teacherName}]({teacher.LinkProfile})", replyMarkup: DefaultMessage.GetTeacherWorkScheduleSelectedKeyboardMarkup(teacherName), parseMode: ParseMode.Markdown);
         }
     }
 }

@@ -23,8 +23,7 @@ namespace Core.Bot.Commands.Admin.Feedbacks.Message {
                     chatId: chatId,
                     text: FeedbackMessage.GetFeedbackMessage(feedback),
                     replyMarkup: FeedbackMessage.GetFeedbackInlineKeyboardButton(dbContext, feedback),
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                    disableWebPagePreview: true);
+                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
 
             } else {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Нет новых отзывов и предложений.", replyMarkup: Statics.AdminPanelKeyboardMarkup);

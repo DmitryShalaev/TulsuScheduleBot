@@ -25,12 +25,12 @@ namespace Core.Bot.Commands.Student.Callback {
                     await dbContext.CustomDiscipline.AddAsync(new(user.ScheduleProfile, date));
                     await dbContext.SaveChangesAsync();
 
-                    MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user).Item1, parseMode: ParseMode.Markdown, disableWebPagePreview: true);
-                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: AddingDisciplineMode.GetStagesAddingDiscipline(dbContext, user), replyMarkup: Statics.CancelKeyboardMarkup, parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                    MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user).Item1, parseMode: ParseMode.Markdown);
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: AddingDisciplineMode.GetStagesAddingDiscipline(dbContext, user), replyMarkup: Statics.CancelKeyboardMarkup, parseMode: ParseMode.Markdown);
 
                 } else {
                     (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user);
-                    MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                    MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown);
                 }
             }
         }

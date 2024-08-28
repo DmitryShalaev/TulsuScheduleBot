@@ -2,6 +2,6 @@
 
 namespace Core.Bot.MessagesQueue.Interfaces {
     public interface IMessageQueue {
-        public ChatId ChatId { get; set; }
+        public ChatId ChatId { get; }
     }
 }

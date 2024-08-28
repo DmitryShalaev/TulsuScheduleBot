@@ -78,9 +78,9 @@ namespace Core.Bot.Commands.AddingDiscipline {
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter), replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
 
             StringBuilder sb = new(Scheduler.GetScheduleByDate(dbContext, customDiscipline.Date, user, all: true).Item1);
-            sb.AppendLine($"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n<b>{UserCommands.Instance.Message["SelectAnAction"]}</b>");
+            sb.AppendLine($"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n**{UserCommands.Instance.Message["SelectAnAction"]}**");
 
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, customDiscipline.Date, user.ScheduleProfile), parseMode: Telegram.Bot.Types.Enums.ParseMode.Html);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, customDiscipline.Date, user.ScheduleProfile), parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
         }
 
         public static void DeleteInitialMessage(ChatId chatId, TelegramUser user) {

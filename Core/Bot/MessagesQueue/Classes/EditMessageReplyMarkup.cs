@@ -5,8 +5,8 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Core.Bot.MessagesQueue.Classes {
     public class EditMessageReplyMarkup(ChatId chatId, int messageId, InlineKeyboardMarkup? replyMarkup) : IMessageQueue {
-        public ChatId ChatId { get; set; } = chatId;
+        public ChatId ChatId { get; } = chatId;
         public int MessageId { get; } = messageId;
-        public InlineKeyboardMarkup? ReplyMarkup { get; set; } = replyMarkup;
+        public InlineKeyboardMarkup? ReplyMarkup { get; } = replyMarkup;
     }
 }

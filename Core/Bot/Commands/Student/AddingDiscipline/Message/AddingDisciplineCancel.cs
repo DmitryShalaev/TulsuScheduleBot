@@ -31,9 +31,9 @@ namespace Core.Bot.Commands.AddingDiscipline.Message {
             await Statics.ScheduleRelevanceAsync(dbContext, chatId, user.ScheduleProfile.Group!, DefaultMessage.GetMainKeyboardMarkup(user));
 
             StringBuilder sb = new(Scheduler.GetScheduleByDate(dbContext, first.Date, user, true).Item1);
-            sb.AppendLine($"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n<b>{UserCommands.Instance.Message["SelectAnAction"]}</b>");
+            sb.AppendLine($"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n***{UserCommands.Instance.Message["SelectAnAction"]}***");
 
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, first.Date, user.ScheduleProfile), parseMode: ParseMode.Html, disableWebPagePreview: true);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: DefaultCallback.GetEditAdminInlineKeyboardButton(dbContext, first.Date, user.ScheduleProfile), parseMode: ParseMode.Markdown);
         }
     }
 }

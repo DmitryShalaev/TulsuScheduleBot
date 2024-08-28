@@ -42,7 +42,7 @@ namespace Core.Bot.Commands.Student.Callback {
 
             if(DateOnly.TryParse(tmp[1], out DateOnly date)) {
                 (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user);
-                MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown);
             }
         }
     }

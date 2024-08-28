@@ -18,7 +18,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Message {
             if(user.IsOwner()) {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Если вы хотите поделиться своим расписанием с кем-то, просто отправьте им следующую команду: " +
                 $"\n`/SetProfile {user.ScheduleProfileGuid}`" +
-                $"\nЕсли другой пользователь введет эту команду, он сможет видеть расписание с вашими изменениями.", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                $"\nЕсли другой пользователь введет эту команду, он сможет видеть расписание с вашими изменениями.", replyMarkup: DefaultMessage.GetProfileKeyboardMarkup(user), parseMode: ParseMode.Markdown);
             } else {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Поделиться профилем может только его владелец!", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
             }

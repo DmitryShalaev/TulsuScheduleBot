@@ -17,7 +17,7 @@ namespace Core.Bot.Commands.Student.Callback {
 
         public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
             if(DateOnly.TryParse(args, out DateOnly date))
-                MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user, true).Item1, replyMarkup: DefaultCallback.GetBackInlineKeyboardButton(date), parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                MessagesQueue.Message.EditMessageText(chatId: chatId, messageId: messageId, text: Scheduler.GetScheduleByDate(dbContext, date, user, true).Item1, replyMarkup: DefaultCallback.GetBackInlineKeyboardButton(date), parseMode: ParseMode.Markdown);
             return Task.CompletedTask;
         }
     }

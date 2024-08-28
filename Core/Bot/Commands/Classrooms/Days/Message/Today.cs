@@ -22,7 +22,7 @@ namespace Core.Bot.Commands.Classrooms.Days.Message {
 
             await Statics.ClassroomWorkScheduleRelevanceAsync(dbContext, chatId, user.TelegramUserTmp.TmpData!, teacherWorkSchedule);
             var date = DateOnly.FromDateTime(DateTime.Now);
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: Scheduler.GetClassroomWorkScheduleByDate(dbContext, date, user.TelegramUserTmp.TmpData!, user), replyMarkup: teacherWorkSchedule, parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: Scheduler.GetClassroomWorkScheduleByDate(dbContext, date, user.TelegramUserTmp.TmpData!, user), replyMarkup: teacherWorkSchedule, parseMode: ParseMode.Markdown);
         }
     }
 }

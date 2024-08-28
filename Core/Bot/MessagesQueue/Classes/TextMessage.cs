@@ -5,17 +5,16 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Core.Bot.MessagesQueue.Classes {
-    public class TextMessage(ChatId chatId, string text, IReplyMarkup? replyMarkup, ParseMode? parseMode, bool? disableWebPagePreview, bool? disableNotification, bool deletePrevious, bool saveMessageId) : IMessageQueue {
-        public ChatId ChatId { get; set; } = chatId;
-        public string Text { get; set; } = text;
+    public class TextMessage(ChatId chatId, string text, IReplyMarkup? replyMarkup, ParseMode? parseMode, bool? disableNotification, bool deletePrevious, bool saveMessageId) : IMessageQueue {
+        public ChatId ChatId { get; } = chatId;
+        public string Text { get; } = text;
 
-        public IReplyMarkup? ReplyMarkup { get; set; } = replyMarkup;
-        public ParseMode? ParseMode { get; set; } = parseMode;
+        public IReplyMarkup? ReplyMarkup { get; } = replyMarkup;
+        public ParseMode? ParseMode { get; } = parseMode;
 
-        public bool? DisableWebPagePreview { get; set; } = disableWebPagePreview;
-        public bool? DisableNotification { get; set; } = disableNotification;
+        public bool? DisableNotification { get; } = disableNotification;
 
-        public bool DeletePrevious { get; set; } = deletePrevious;
-        public bool SaveMessageId { get; set; } = saveMessageId;
+        public bool DeletePrevious { get; } = deletePrevious;
+        public bool SaveMessageId { get; } = saveMessageId;
     }
 }

@@ -33,7 +33,7 @@ namespace Core.Bot.Commands.Classrooms.Message {
 
                     ClassroomLastUpdate classroom = dbContext.ClassroomLastUpdate.First(i => i.Classroom == _classroom);
 
-                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentClassroom"]}: {_classroom}", replyMarkup: DefaultMessage.GetClassroomWorkScheduleSelectedKeyboardMarkup(_classroom), disableWebPagePreview: true);
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"{UserCommands.Instance.Message["CurrentClassroom"]}: {_classroom}", replyMarkup: DefaultMessage.GetClassroomWorkScheduleSelectedKeyboardMarkup(_classroom));
                 }
 
                 await dbContext.SaveChangesAsync();

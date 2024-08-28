@@ -35,8 +35,14 @@ namespace Core.Bot.MessagesQueue {
         private static readonly TimeSpan burstInterval = TimeSpan.FromSeconds(1); // Интервал времени для всплеска
 
         #region Messag
-        public static void SendTextMessage(ChatId chatId, string text, IReplyMarkup? replyMarkup = null, ParseMode? parseMode = null, bool? disableWebPagePreview = null, bool? disableNotification = null, bool deletePrevious = false, bool saveMessageId = false) {
-            var message = new TextMessage(chatId, text, replyMarkup, parseMode, disableWebPagePreview, disableNotification, deletePrevious, saveMessageId);
+        public static void SendTextMessage(ChatId chatId, string text, IReplyMarkup? replyMarkup = null, ParseMode? parseMode = null, bool? disableNotification = null, bool deletePrevious = false, bool saveMessageId = false) {
+            var message = new TextMessage(chatId, text, replyMarkup, parseMode, disableNotification, deletePrevious, saveMessageId);
+
+            AddMessageToQueue(chatId, message);
+        }
+
+        public static void SendVenue(ChatId chatId, double latitude, double longitude, string title, string address, IReplyMarkup? replyMarkup = null) {
+            var message = new Classes.Venue(chatId, latitude, longitude, title, address, replyMarkup);
 
             AddMessageToQueue(chatId, message);
         }
@@ -108,7 +114,7 @@ namespace Core.Bot.MessagesQueue {
                                         chatId: textMessage.ChatId,
                                         text: textMessage.Text,
                                         parseMode: textMessage.ParseMode,
-                                        disableWebPagePreview: textMessage.DisableWebPagePreview,
+                                        disableWebPagePreview: true,
                                         disableNotification: textMessage.DisableNotification,
                                         replyMarkup: textMessage.ReplyMarkup
                                     )).MessageId;
@@ -148,6 +154,19 @@ namespace Core.Bot.MessagesQueue {
                             replyMarkup: editMessageReplyMarkup.ReplyMarkup,
                             messageId: editMessageReplyMarkup.MessageId
                         );
+                        break;
+
+                    case Classes.Venue vanueMessage:
+                        msg = $"VanueMessage {vanueMessage.Title}";
+
+                        await BotClient.SendVenueAsync(chatId: vanueMessage.ChatId,
+                            latitude: vanueMessage.Latitude,
+                            longitude: vanueMessage.Longitude,
+                            title: vanueMessage.Title,
+                            address: vanueMessage.Address,
+                            replyMarkup: vanueMessage.ReplyMarkup
+                        );
+
                         break;
                 }
             } catch(Exception e) {

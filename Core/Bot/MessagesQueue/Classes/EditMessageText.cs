@@ -6,13 +6,13 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Core.Bot.MessagesQueue.Classes {
     public class EditMessageText(ChatId chatId, int messageId, string text, InlineKeyboardMarkup? replyMarkup, ParseMode? parseMode, bool? disableWebPagePreview) : IMessageQueue {
-        public ChatId ChatId { get; set; } = chatId;
+        public ChatId ChatId { get; } = chatId;
         public int MessageId { get; } = messageId;
-        public string Text { get; set; } = text;
+        public string Text { get; } = text;
 
-        public InlineKeyboardMarkup? ReplyMarkup { get; set; } = replyMarkup;
-        public ParseMode? ParseMode { get; set; } = parseMode;
+        public InlineKeyboardMarkup? ReplyMarkup { get; } = replyMarkup;
+        public ParseMode? ParseMode { get; } = parseMode;
 
-        public bool? DisableWebPagePreview { get; set; } = disableWebPagePreview;
+        public bool? DisableWebPagePreview { get; } = disableWebPagePreview;
     }
 }

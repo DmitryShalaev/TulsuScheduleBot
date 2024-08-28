@@ -101,19 +101,23 @@ namespace Core.Bot {
             });
 
             foreach(UserCommands.CorpsStruct item in UserCommands.Instance.Corps) {
-                commandManager.AddMessageCommand(item.text, Mode.Default, async (dbContext, chatId, messageId, user, args) => {
+                commandManager.AddMessageCommand(item.text, Mode.Default, (dbContext, chatId, messageId, user, args) => {
                     if(!string.IsNullOrWhiteSpace(item.map))
-                        MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"[Схема корпуса]({item.map})", parseMode: ParseMode.Markdown, disableWebPagePreview: true);
+                        MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"[Схема корпуса]({item.map})", parseMode: ParseMode.Markdown);
 
-                    await botClient.SendVenueAsync(chatId: chatId, latitude: item.latitude, longitude: item.longitude, title: item.title, address: item.address, replyMarkup: Statics.CorpsKeyboardMarkup);
+                    MessagesQueue.Message.SendVenue(chatId: chatId, latitude: item.latitude, longitude: item.longitude, title: item.title, address: item.address, replyMarkup: Statics.CorpsKeyboardMarkup);
+
+                    return Task.CompletedTask;
                 });
             }
 
-            commandManager.AddMessageCommand(UserCommands.Instance.College.text, Mode.Default, async (dbContext, chatId, messageId, user, args) => {
+            commandManager.AddMessageCommand(UserCommands.Instance.College.text, Mode.Default, (dbContext, chatId, messageId, user, args) => {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.College.title, replyMarkup: Statics.CancelKeyboardMarkup);
 
                 foreach(UserCommands.CorpsStruct item in UserCommands.Instance.College.corps)
-                    await botClient.SendVenueAsync(chatId: chatId, latitude: item.latitude, longitude: item.longitude, title: "", address: item.address, replyMarkup: Statics.CorpsKeyboardMarkup);
+                    MessagesQueue.Message.SendVenue(chatId: chatId, latitude: item.latitude, longitude: item.longitude, title: "", address: item.address, replyMarkup: Statics.CorpsKeyboardMarkup);
+
+                return Task.CompletedTask;
             });
             #endregion
 
