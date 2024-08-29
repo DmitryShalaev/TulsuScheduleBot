@@ -4,6 +4,7 @@ using Core.Bot.MessagesQueue.Classes;
 using Core.Bot.MessagesQueue.Interfaces;
 
 using Telegram.Bot;
+using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -169,6 +170,8 @@ namespace Core.Bot.MessagesQueue {
 
                         break;
                 }
+            } catch(ApiRequestException ex) when(ex.Message.Contains("bot was blocked by the user")) {
+
             } catch(Exception e) {
                 await ErrorReport.Send(msg, e);
             }

@@ -27,17 +27,14 @@ namespace Core.Bot {
                     double days = (DateTime.Parse(Date.ToString()) - DateTime.Now.Date).TotalDays;
 
                     foreach(ExtendedTelegramUser? user in telegramUsers.Where(i => i.ScheduleProfile.Group == Group && days <= i.Settings.NotificationDays)) {
-                        try {
-                            if(!user.Flag) {
-                                Message.SendTextMessage(chatId: user.ChatID, text: Commands.UserCommands.Instance.Message["NotificationMessage"], disableNotification: true);
-                                user.Flag = true;
-                            }
+                        if(!user.Flag) {
+                            Message.SendTextMessage(chatId: user.ChatID, text: Commands.UserCommands.Instance.Message["NotificationMessage"], disableNotification: true);
+                            user.Flag = true;
+                        }
 
-                            Message.SendTextMessage(chatId: user.ChatID, text: str,
-                                    replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: Commands.UserCommands.Instance.Callback["All"].text, callbackData: $"NotificationsAll {Date}")),
-                                    disableNotification: true);
-
-                        } catch(Exception) { }
+                        Message.SendTextMessage(chatId: user.ChatID, text: str,
+                                replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: Commands.UserCommands.Instance.Callback["All"].text, callbackData: $"NotificationsAll {Date}")),
+                                disableNotification: true);
                     }
                 }
             }
