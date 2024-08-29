@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 
 using Core.Bot.Commands;
 using Core.DB;
@@ -208,6 +209,24 @@ namespace Core.Bot {
 
             if(send && studentIDlastUpdate is not null)
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"{commands.Message["AcademicPerformanceIsRelevantOn"]} {studentIDlastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup, deletePrevious: siteIsNotResponding);
+        }
+
+        public static string EscapeSpecialCharacters(string input) {
+            // List of special characters that need to be escaped in Markdown
+            char[] specialChars = { '_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!' };
+
+            var escapedString = new StringBuilder();
+
+            foreach(char c in input) {
+                // If the character is special, add a backslash before it
+                if(Array.Exists(specialChars, element => element == c)) {
+                    escapedString.Append('\\');
+                }
+
+                escapedString.Append(c);
+            }
+
+            return escapedString.ToString();
         }
     }
 }

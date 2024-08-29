@@ -27,32 +27,15 @@ namespace Core.Bot.Commands.Student.Other.GroupList.Message {
             if(users.Count == 0) sb.AppendLine("Здесь никого нет 😢😢😢");
 
             foreach(TelegramUser? u in users) {
-                if(!string.IsNullOrWhiteSpace(u.Username)) sb.AppendLine($"[{EscapeSpecialCharacters($"{u.FirstName} {u.LastName}")}](https://t.me/{u.Username})");
-                else {
-                    sb.AppendLine(EscapeSpecialCharacters($"{u.FirstName} {u.LastName}"));
+                if(!string.IsNullOrWhiteSpace(u.Username)) {
+                    sb.AppendLine($"[{Statics.EscapeSpecialCharacters($"{u.FirstName} {u.LastName}")}](https://t.me/{u.Username})");
+                } else {
+                    sb.AppendLine(Statics.EscapeSpecialCharacters($"{u.FirstName} {u.LastName}"));
                 }
             }
 
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: Statics.OtherKeyboardMarkup, parseMode: ParseMode.Markdown);
             return Task.CompletedTask;
-        }
-
-        public static string EscapeSpecialCharacters(string input) {
-            // Перечень символов, которые нужно экранировать
-            char[] specialChars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
-
-            var escapedString = new StringBuilder();
-
-            foreach(char c in input) {
-                // Если символ является специальным, добавляем перед ним обратный слэш
-                if(Array.Exists(specialChars, element => element == c)) {
-                    escapedString.Append('\\');
-                }
-
-                escapedString.Append(c);
-            }
-
-            return escapedString.ToString();
         }
     }
 }
