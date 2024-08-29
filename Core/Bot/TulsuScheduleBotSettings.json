@@ -1,11 +1,11 @@
 {
   "Config": {
-    "DisciplineUpdateTime": 45, //Minutes
-    "StudentIDUpdateTime": 45, //Minutes
+    "DisciplineUpdateTime": 60, //Minutes
+    "StudentIDUpdateTime": 60, //Minutes
 
     "WorkScheduleUpdateTime": 60, //Minutes
 
-    "DisciplineUpdateDays": 4,
+    "DisciplineUpdateDays": 5,
 
     "UpdateAttemptTime": 5, //Minutes
 

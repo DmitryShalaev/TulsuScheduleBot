@@ -170,7 +170,8 @@ namespace Core.Bot.MessagesQueue {
 
                         break;
                 }
-            } catch(ApiRequestException ex) when(ex.Message.Contains("bot was blocked by the user")) {
+            } catch(ApiRequestException ex) when(ex.Message.Contains("bot was blocked by the user") ||
+                                                 ex.Message.Contains("message is not modified")) {
 
             } catch(Exception e) {
                 await ErrorReport.Send(msg, e);
