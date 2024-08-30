@@ -34,7 +34,7 @@ namespace Core.Bot.Commands.Student.Other.GroupList.Message {
                 }
             }
 
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: Statics.OtherKeyboardMarkup, parseMode: ParseMode.Markdown);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: DefaultMessage.GetOtherKeyboardMarkup(user), parseMode: ParseMode.Markdown);
             return Task.CompletedTask;
         }
     }

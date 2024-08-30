@@ -19,7 +19,7 @@ namespace Core.Bot.Commands.Student.Callback {
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
             if(DateOnly.TryParse(args, out DateOnly date)) {
-                if(user.IsOwner()) {
+                if(user.IsOwner() && !user.IsSupergroup()) {
                     user.TelegramUserTmp.Mode = Mode.AddingDiscipline;
                     user.TelegramUserTmp.TmpData = $"{messageId}";
                     await dbContext.CustomDiscipline.AddAsync(new(user.ScheduleProfile, date));

@@ -21,7 +21,7 @@ namespace Core.Bot.Commands.Student.Custom.Message {
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["MainMenu"], replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
 
             if(!string.IsNullOrWhiteSpace(user.TelegramUserTmp.TmpData)) {
-                if(user.IsOwner()) {
+                if(user.IsOwner() && !user.IsSupergroup()) {
                     CustomDiscipline discipline = dbContext.CustomDiscipline.Single(i => i.ID == uint.Parse(user.TelegramUserTmp.TmpData));
 
                     StringBuilder sb = new(Scheduler.GetScheduleByDate(dbContext, discipline.Date, user, all: true).Item1);

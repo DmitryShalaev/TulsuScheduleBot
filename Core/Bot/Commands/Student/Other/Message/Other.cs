@@ -13,7 +13,7 @@ namespace Core.Bot.Commands.Student.Other.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["Other"], replyMarkup: Statics.OtherKeyboardMarkup);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["Other"], replyMarkup: DefaultMessage.GetOtherKeyboardMarkup(user));
             return Task.CompletedTask;
         }
     }

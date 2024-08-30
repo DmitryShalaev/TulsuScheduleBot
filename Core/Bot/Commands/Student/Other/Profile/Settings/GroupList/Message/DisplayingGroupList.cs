@@ -13,6 +13,8 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.GroupList.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
+            if(user.IsSupergroup()) return;
+
             user.Settings.DisplayingGroupList = !user.Settings.DisplayingGroupList;
 
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["Settings"], replyMarkup: DefaultMessage.GetSettingsKeyboardMarkup(user));

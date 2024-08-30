@@ -143,9 +143,7 @@ namespace Core.Bot {
 
                             user = new() {
                                 ChatID = message.Chat.Id,
-                                Username = message.From.Username,
-                                FirstName = message.From.FirstName,
-                                LastName = message.From.LastName,
+                                FirstName = "",
                                 ScheduleProfile = new() { OwnerID = message.Chat.Id },
                                 Settings = new() { OwnerID = message.Chat.Id },
                                 TelegramUserTmp = new() { OwnerID = message.Chat.Id },
@@ -161,16 +159,21 @@ namespace Core.Bot {
                         user.TodayRequests++;
                         user.TotalRequests++;
 
+                        if(message.Chat.Type == ChatType.Private) {
+                            user.Username = message.From.Username;
+                            user.FirstName = message.From.FirstName;
+                            user.LastName = message.From.LastName;
+                        } else {
+                            user.FirstName = message.Chat.Title ?? "";
+                            user.Username = user.LastName = null;
+                        }
+
                         await dbContext.SaveChangesAsync();
 
                         switch(update.Type) {
                             case UpdateType.Message:
                             case UpdateType.EditedMessage:
                                 if(message.Text is null) return;
-
-                                user.Username = message.From.Username;
-                                user.FirstName = message.From.FirstName;
-                                user.LastName = message.From.LastName;
 
                                 await commandManager.OnMessageAsync(dbContext, message.Chat, message.MessageId, message.Text, user);
                                 dbContext.MessageLog.Add(new() { Message = message.Text, TelegramUser = user });

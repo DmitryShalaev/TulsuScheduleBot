@@ -19,7 +19,7 @@ namespace Core.Bot.Commands.Student.Custom.Callback {
 
         public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string message, string args) {
             if(DateOnly.TryParse(args, out DateOnly date)) {
-                if(user.IsOwner()) {
+                if(user.IsOwner() && !user.IsSupergroup()) {
                     StringBuilder sb = new(Scheduler.GetScheduleByDate(dbContext, date, user, all: true).Item1);
                     sb.AppendLine($"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n***{UserCommands.Instance.Message["SelectAnAction"]}***");
 

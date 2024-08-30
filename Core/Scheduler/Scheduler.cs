@@ -187,7 +187,6 @@ namespace ScheduleBot {
             return sb.ToString();
         }
 
-
         public static string GetTeacherWorkScheduleByDate(ScheduleDbContext dbContext, DateOnly date, string teacher) {
             var schedules = dbContext.TeacherWorkSchedule
                 .Where(i => i.Lecturer == teacher && i.Date == date)

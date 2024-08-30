@@ -23,9 +23,13 @@ namespace Core.Bot.Commands {
             List<KeyboardButton[]> ProfileKeyboardMarkup = [];
 
             if(user.IsOwner()) {
-                ProfileKeyboardMarkup.AddRange([  [$"{commands.Message["GroupNumber"]}:\n{user.ScheduleProfile.Group}", $"{commands.Message["StudentIDNumber"]}:\n{user.ScheduleProfile.StudentID}"],
+                if(!user.IsSupergroup()) {
+                    ProfileKeyboardMarkup.AddRange([[$"{commands.Message["GroupNumber"]}:\n{user.ScheduleProfile.Group}", $"{commands.Message["StudentIDNumber"]}:\n{user.ScheduleProfile.StudentID}"],
                                                         [commands.Message["GetProfileLink"]]
                                                      ]);
+                } else {
+                    ProfileKeyboardMarkup.Add([$"{commands.Message["GroupNumber"]}:\n{user.ScheduleProfile.Group}"]);
+                }
             } else {
                 ProfileKeyboardMarkup.Add([commands.Message["ResetProfileLink"]]);
             }
@@ -40,7 +44,7 @@ namespace Core.Bot.Commands {
 
         public static ReplyKeyboardMarkup GetMainKeyboardMarkup(TelegramUser user) {
             List<KeyboardButton[]> ProfileKeyboardMarkup = new([
-                [commands.Message["Today"], commands.Message["Tomorrow"] ],
+                [commands.Message["Today"], commands.Message["Tomorrow"]],
                 [commands.Message["ByDays"], commands.Message["ForAWeek"]],
                 [commands.Message["Corps"], commands.Message["Schedule"]],
                 [commands.Message["Other"]]
@@ -49,6 +53,22 @@ namespace Core.Bot.Commands {
             if(user.IsAdmin) {
                 ProfileKeyboardMarkup.Add([commands.Message["AdminPanel"]]);
             }
+
+            return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
+        }
+
+        public static ReplyKeyboardMarkup GetOtherKeyboardMarkup(TelegramUser user) {
+            List<KeyboardButton[]> ProfileKeyboardMarkup = new([
+                [commands.Message["Profile"]],
+            ]);
+
+            if(!user.IsSupergroup()) {
+                ProfileKeyboardMarkup.AddRange([[commands.Message["AcademicPerformance"], commands.Message["GroupList"]]]);
+            } else {
+                ProfileKeyboardMarkup.Add([commands.Message["GroupList"]]);
+            }
+
+            ProfileKeyboardMarkup.Add([commands.Message["Back"]]);
 
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }
@@ -64,11 +84,14 @@ namespace Core.Bot.Commands {
 
             List<KeyboardButton[]> ProfileKeyboardMarkup = new([
                 [$"{notificationEnabled} {commands.Message["Notifications"]} {notificationEnabled}"],
-                [$"{teacherLincsEnabled} {commands.Message["TeacherLincsEnabled"]} {teacherLincsEnabled} \n({(_teacherLincsEnabled ? "Выключить" : "Включить")})"],
-                [$"{displayingGroupList} {commands.Message["DisplayingGroupList"]} {displayingGroupList} \n({(_displayingGroupList ? "Выключить" : "Включить")})"],
-                [commands.Message["Back"]]
+                [$"{teacherLincsEnabled} {commands.Message["TeacherLincsEnabled"]} {teacherLincsEnabled} \n({(_teacherLincsEnabled ? "Выключить" : "Включить")})"]
             ]);
 
+            if(!user.IsSupergroup()) {
+                ProfileKeyboardMarkup.Add([$"{displayingGroupList} {commands.Message["DisplayingGroupList"]} {displayingGroupList} \n({(_displayingGroupList ? "Выключить" : "Включить")})"]);
+            }
+
+            ProfileKeyboardMarkup.Add([commands.Message["Back"]]);
             return new(ProfileKeyboardMarkup) { ResizeKeyboard = true };
         }
 

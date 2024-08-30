@@ -53,17 +53,17 @@ namespace Core.Bot.Commands {
             return new InlineKeyboardMarkup(buttons);
         }
 
-        public static InlineKeyboardMarkup GetInlineKeyboardButton(DateOnly date, TelegramUser user, bool all) {
+        public static InlineKeyboardMarkup GetInlineKeyboardButton(DateOnly date, TelegramUser user, bool notAll) {
             var editButtons = new List<InlineKeyboardButton[]>();
 
-            if(user.IsOwner()) {
-                if(all) {
+            if(user.IsOwner() && !user.IsSupergroup()) {
+                if(notAll) {
                     editButtons.Add([ InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["All"].text, callbackData: $"{UserCommands.Instance.Callback["All"].callback} {date}"),
                                       InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["Edit"].text, callbackData: $"{UserCommands.Instance.Callback["Edit"].callback} {date}") ]);
                 } else {
                     editButtons.Add([InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["Edit"].text, callbackData: $"{UserCommands.Instance.Callback["Edit"].callback} {date}")]);
                 }
-            } else if(all) {
+            } else if(notAll) {
                 editButtons.Add([InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["All"].text, callbackData: $"{UserCommands.Instance.Callback["All"].callback} {date}")]);
             }
 

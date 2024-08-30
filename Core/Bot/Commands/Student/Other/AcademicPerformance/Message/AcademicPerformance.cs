@@ -13,6 +13,8 @@ namespace Core.Bot.Commands.Student.Other.AcademicPerformance.Message {
         public Manager.Check Check => Manager.Check.studentId;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
+            if(user.IsSupergroup()) return;
+
             user.TelegramUserTmp.TmpData = UserCommands.Instance.Message["AcademicPerformance"];
 
             string StudentID = user.ScheduleProfile.StudentID!;

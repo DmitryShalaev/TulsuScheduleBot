@@ -48,12 +48,6 @@ namespace Core.Bot {
                              [commands.Message["Back"]]
                         }) { ResizeKeyboard = true };
 
-        public static readonly ReplyKeyboardMarkup OtherKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["Profile"] },
-                            [commands.Message["AcademicPerformance"], commands.Message["GroupList"]],
-                            [commands.Message["Back"]]
-                        }) { ResizeKeyboard = true };
-
         public static readonly ReplyKeyboardMarkup ExamKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { commands.Message["NextExam"], commands.Message["AllExams"] },
                             [commands.Message["Back"]]
@@ -213,7 +207,7 @@ namespace Core.Bot {
 
         public static string EscapeSpecialCharacters(string input) {
             // List of special characters that need to be escaped in Markdown
-            char[] specialChars = { '_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!' };
+            char[] specialChars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
 
             var escapedString = new StringBuilder();
 

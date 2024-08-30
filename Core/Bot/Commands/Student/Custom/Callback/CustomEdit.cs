@@ -21,7 +21,7 @@ namespace Core.Bot.Commands.Student.Custom.Callback {
             string[] tmp = args.Split('|');
             CustomDiscipline? customDiscipline = await dbContext.CustomDiscipline.FirstOrDefaultAsync(i => i.ID == uint.Parse(tmp[0]));
             if(customDiscipline is not null) {
-                if(user.IsOwner()) {
+                if(user.IsOwner() && !user.IsSupergroup()) {
                     MessagesQueue.Message.EditMessageReplyMarkup(chatId: chatId, messageId: messageId, replyMarkup: DefaultCallback.GetCustomEditAdminInlineKeyboardButton(customDiscipline));
                     return;
                 }

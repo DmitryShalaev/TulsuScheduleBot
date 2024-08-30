@@ -13,7 +13,7 @@ namespace Core.Bot.Commands.Student.Custom {
             string[] tmp = args.Split('|');
             CustomDiscipline? discipline = await dbContext.CustomDiscipline.FirstOrDefaultAsync(i => i.ID == uint.Parse(tmp[0]));
             if(discipline is not null) {
-                if(user.IsOwner()) {
+                if(user.IsOwner() && !user.IsSupergroup()) {
                     user.TelegramUserTmp.Mode = mode;
                     user.TelegramUserTmp.TmpData = $"{discipline.ID}";
 

@@ -18,8 +18,8 @@ namespace Core.Bot.Commands.Student.Back_Cancel.Message {
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             var transitions = new Dictionary<string, (string nextState, IReplyMarkup replyMarkup)> {
-                                    { commands["AcademicPerformance"], (commands["Other"], Statics.OtherKeyboardMarkup) },
-                                    { commands["Profile"], (commands["Other"], Statics.OtherKeyboardMarkup) },
+                                    { commands["AcademicPerformance"], (commands["Other"], DefaultMessage.GetOtherKeyboardMarkup(user)) },
+                                    { commands["Profile"], (commands["Other"], DefaultMessage.GetOtherKeyboardMarkup(user)) },
                                     { commands["Settings"], (commands["Profile"], DefaultMessage.GetProfileKeyboardMarkup(user)) },
                                     { commands["Exam"], (commands["Schedule"], Statics.ScheduleKeyboardMarkup) }
                                 };

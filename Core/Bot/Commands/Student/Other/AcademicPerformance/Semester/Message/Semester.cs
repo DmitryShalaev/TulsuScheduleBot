@@ -15,6 +15,8 @@ namespace Core.Bot.Commands.Student.Other.AcademicPerformance.Semester.Message {
         public Manager.Check Check => Manager.Check.studentId;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
+            if(user.IsSupergroup()) return;
+
             string StudentID = user.ScheduleProfile.StudentID!;
 
             await Statics.ProgressRelevanceAsync(dbContext, chatId, StudentID, DefaultMessage.GetTermsKeyboardMarkup(dbContext, StudentID));

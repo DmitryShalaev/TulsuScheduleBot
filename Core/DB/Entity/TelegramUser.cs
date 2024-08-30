@@ -34,6 +34,7 @@ namespace Core.DB.Entity {
         public override int GetHashCode() => ChatID.GetHashCode();
 
         public bool IsOwner() => ChatID == ScheduleProfile.OwnerID;
+        public bool IsSupergroup() => ChatID < 0;
 
         public TelegramUser() { }
 

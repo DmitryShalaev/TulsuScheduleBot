@@ -15,6 +15,8 @@ namespace Core.Bot.Commands.Student.Other.Profile.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
+            if(user.IsSupergroup()) return Task.CompletedTask;
+
             if(user.IsOwner()) {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Если вы хотите поделиться своим расписанием с кем-то, просто отправьте им следующую команду: " +
                 $"\n`/SetProfile {user.ScheduleProfileGuid}`" +

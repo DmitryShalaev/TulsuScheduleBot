@@ -1,5 +1,6 @@
 ﻿using System.Text;
 
+using Core.Bot.Commands.AddingDiscipline;
 using Core.Bot.Commands.Interfaces;
 using Core.DB;
 using Core.DB.Entity;
@@ -8,7 +9,7 @@ using ScheduleBot;
 
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-namespace Core.Bot.Commands.AddingDiscipline.Message {
+namespace Core.Bot.Commands.Student.AddingDiscipline.Message {
     internal class AddingDisciplineCancel : IMessageCommand {
 
         public List<string>? Commands => [UserCommands.Instance.Message["Cancel"]];

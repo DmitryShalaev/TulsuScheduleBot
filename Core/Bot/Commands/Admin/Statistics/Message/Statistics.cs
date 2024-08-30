@@ -37,7 +37,6 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             sb.AppendLine($"За месяц: {dbContext.TelegramUsers.Count(u => u.DateOfRegistration.HasValue && u.DateOfRegistration.Value >= startOfMonth && u.DateOfRegistration.Value <= endOfMonth)}");
             sb.AppendLine();
 
-            
             sb.AppendLine($"--Активных пользователей--");
             sb.AppendLine($"За сегодня: {dbContext.TelegramUsers.Count(u => u.LastAppeal.Date == today)}");
             sb.AppendLine($"За неделю: {dbContext.TelegramUsers.Count(u => u.LastAppeal >= startOfWeek && u.LastAppeal <= endOfWeek)}");
@@ -53,6 +52,7 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
                     sb.AppendLine($"{Statics.EscapeSpecialCharacters($"{topUser.FirstName} {topUser.LastName}")}");
                 }
             }
+
             sb.AppendLine();
 
             sb.AppendLine($"--Получено сообщений--");
@@ -61,7 +61,7 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             sb.AppendLine($"За неделю: {dbContext.MessageLog.Count(ml => ml.Date >= startOfWeek && ml.Date <= endOfWeek)}");
             sb.AppendLine($"За месяц: {dbContext.MessageLog.Count(ml => ml.Date >= startOfMonth && ml.Date <= endOfMonth)}");
             sb.AppendLine();
-           
+
             sb.AppendLine($"Среднее количество запросов на пользователя: {dbContext.TelegramUsers.Average(u => u.TotalRequests):F2}");
             sb.AppendLine();
 

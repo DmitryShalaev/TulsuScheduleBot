@@ -9,7 +9,6 @@ namespace Core.DB.Entity {
         public long From { get; set; }
         public TelegramUser TelegramUser { get; set; }
 
-        
         public long? Previous { get; set; }
         [ForeignKey("Previous")]
         public Messenger PreviousMessenger { get; set; }

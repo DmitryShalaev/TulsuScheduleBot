@@ -13,6 +13,8 @@ namespace Core.Bot.Commands.Student.Other.Profile.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
+            if(user.IsSupergroup()) return;
+
             if(!user.IsOwner()) {
                 user.TelegramUserTmp.Mode = Mode.ResetProfileLink;
                 await dbContext.SaveChangesAsync();

@@ -22,7 +22,7 @@ namespace Core.Bot.Commands.Student.Callback {
             string[] tmp = args.Split('|');
             Discipline? discipline = await dbContext.Disciplines.FirstOrDefaultAsync(i => i.ID == uint.Parse(tmp[0]));
             if(discipline is not null) {
-                if(user.IsOwner()) {
+                if(user.IsOwner() && !user.IsSupergroup()) {
                     var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid).ToList();
 
                     CompletedDiscipline dayTmp = new(discipline, user.ScheduleProfileGuid);

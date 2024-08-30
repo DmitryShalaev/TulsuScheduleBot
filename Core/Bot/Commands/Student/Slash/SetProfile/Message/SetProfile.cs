@@ -13,6 +13,8 @@ namespace Core.Bot.Commands.Student.Slash.SetProfile.Message {
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
+            if(user.IsSupergroup()) return;
+
             try {
                 if(Guid.TryParse(args, out Guid profile)) {
                     if(profile != user.ScheduleProfileGuid && dbContext.ScheduleProfile.Any(i => i.ID == profile)) {
