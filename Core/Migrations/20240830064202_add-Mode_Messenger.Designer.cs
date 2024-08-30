@@ -3,6 +3,7 @@ using System;
 using Core.DB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240830064202_add-Mode_Messenger")]
+    partial class addMode_Messenger
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -352,9 +355,6 @@ namespace ScheduleBot.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("From")
-                        .HasColumnType("bigint");
-
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("boolean");
 
@@ -362,9 +362,12 @@ namespace ScheduleBot.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<long>("TelegramUserChatID")
+                        .HasColumnType("bigint");
+
                     b.HasKey("ID");
 
-                    b.HasIndex("From");
+                    b.HasIndex("TelegramUserChatID");
 
                     b.ToTable("Feedbacks");
                 });
@@ -434,46 +437,6 @@ namespace ScheduleBot.Migrations
                     b.HasIndex("TelegramUserChatID");
 
                     b.ToTable("MessageLog");
-                });
-
-            modelBuilder.Entity("Core.DB.Entity.Messenger", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<long?>("FeedbackID")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("Following")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("From")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<long?>("Previous")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("FeedbackID");
-
-                    b.HasIndex("Following");
-
-                    b.HasIndex("From");
-
-                    b.HasIndex("Previous");
-
-                    b.ToTable("Messenger");
                 });
 
             modelBuilder.Entity("Core.DB.Entity.MissingFields", b =>
@@ -939,7 +902,7 @@ namespace ScheduleBot.Migrations
                 {
                     b.HasOne("Core.DB.Entity.TelegramUser", "TelegramUser")
                         .WithMany()
-                        .HasForeignKey("From")
+                        .HasForeignKey("TelegramUserChatID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -964,35 +927,6 @@ namespace ScheduleBot.Migrations
                         .HasForeignKey("TelegramUserChatID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("TelegramUser");
-                });
-
-            modelBuilder.Entity("Core.DB.Entity.Messenger", b =>
-                {
-                    b.HasOne("Core.DB.Entity.Feedback", "Feedback")
-                        .WithMany()
-                        .HasForeignKey("FeedbackID");
-
-                    b.HasOne("Core.DB.Entity.Messenger", "FollowingMessenger")
-                        .WithMany()
-                        .HasForeignKey("Following");
-
-                    b.HasOne("Core.DB.Entity.TelegramUser", "TelegramUser")
-                        .WithMany()
-                        .HasForeignKey("From")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.DB.Entity.Messenger", "PreviousMessenger")
-                        .WithMany()
-                        .HasForeignKey("Previous");
-
-                    b.Navigation("Feedback");
-
-                    b.Navigation("FollowingMessenger");
-
-                    b.Navigation("PreviousMessenger");
 
                     b.Navigation("TelegramUser");
                 });

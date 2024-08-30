@@ -22,7 +22,7 @@ namespace Core.Bot.Commands.Admin.Feedbacks.Callback {
                     chatId: chatId,
                     messageId: messageId,
                     text: FeedbackMessage.GetFeedbackMessage(feedback),
-                    replyMarkup: DefaultCallback.GetFeedbackInlineKeyboardButton(dbContext, feedback),
+                    replyMarkup: FeedbackMessage.GetFeedbackInlineKeyboardButton(dbContext, feedback),
                     parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                     disableWebPagePreview: true);
         }

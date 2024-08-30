@@ -46,5 +46,6 @@ namespace Core.DB {
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<IntersectionOfSubgroups> IntersectionOfSubgroups { get; set; }
         public DbSet<MissingFields> MissingFields { get; set; }
+        public DbSet<Messenger> Messenger { get; set; }
     }
 }

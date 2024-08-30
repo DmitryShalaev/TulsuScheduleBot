@@ -18,6 +18,7 @@ namespace Core.Bot.Commands.Admin.Feedbacks {
             return new InlineKeyboardMarkup(new List<InlineKeyboardButton[]> {
                             new[] { InlineKeyboardButton.WithCallbackData(text: previous ? "⬅️":"❌", callbackData: $"FeedbackPrevious {feedback.ID}"),
                                     InlineKeyboardButton.WithCallbackData(text: "✅", callbackData: $"FeedbackAccept {feedback.ID}"),
+                                    InlineKeyboardButton.WithCallbackData(text: "✏️", callbackData: $"FeedbackReply {feedback.ID}"),
                                     InlineKeyboardButton.WithCallbackData(text: next ? "➡️":"❌", callbackData: $"FeedbackNext {feedback.ID}") }
                         });
         }

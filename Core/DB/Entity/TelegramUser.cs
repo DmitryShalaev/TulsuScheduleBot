@@ -66,6 +66,8 @@ namespace Core.DB.Entity {
 
         Feedback,
 
+        Messenger,
+
         Admin
     }
 
