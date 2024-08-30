@@ -169,19 +169,19 @@ namespace ScheduleBot {
 
             // Формирование строк для каждого предмета
             foreach(ExtendedDiscipline? item in scheduleList) {
-                sb.Append(item.Deleted ? "<s>" : "")
+                sb.Append(item.Deleted ? "~~" : "")
                   .AppendLine($"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}")
                   .AppendLine($"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}");
 
                 if(!string.IsNullOrWhiteSpace(item.Lecturer)) {
                     if(linkEnabled && !string.IsNullOrWhiteSpace(item.TeacherLastUpdate?.LinkProfile)) {
-                        sb.AppendLine($"✒ <a href=\"{item.TeacherLastUpdate.LinkProfile}\">{item.Lecturer}</a>");
+                        sb.AppendLine($"✒ [{item.Lecturer}]({item.TeacherLastUpdate.LinkProfile})");
                     } else {
                         sb.AppendLine($"✒ {item.Lecturer}");
                     }
                 }
 
-                sb.AppendLine(item.Deleted ? "</s>" : "");
+                sb.AppendLine(item.Deleted ? "~~" : "");
             }
 
             return sb.ToString();
