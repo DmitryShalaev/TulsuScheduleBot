@@ -20,7 +20,7 @@ namespace Core.Bot.Commands.Student.Other.GroupList.Message {
 
             string? group = user.ScheduleProfile.Group;
 
-            var users = dbContext.TelegramUsers.Where(u => u.Settings.DisplayingGroupList && u.ScheduleProfile.Group == group).ToList();
+            var users = dbContext.TelegramUsers.Where(u => u.ChatID > 0 && u.Settings.DisplayingGroupList && u.ScheduleProfile.Group == group).ToList();
 
             sb.AppendLine($"{UserCommands.Instance.Message["GroupList"]}: {group}\n");
 
