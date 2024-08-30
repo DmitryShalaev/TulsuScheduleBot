@@ -169,23 +169,24 @@ namespace ScheduleBot {
 
             // Формирование строк для каждого предмета
             foreach(ExtendedDiscipline? item in scheduleList) {
-                sb.Append(item.Deleted ? "~~" : "")
+                sb.Append(item.Deleted ? "<s>" : "")
                   .AppendLine($"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}")
                   .AppendLine($"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}");
 
                 if(!string.IsNullOrWhiteSpace(item.Lecturer)) {
                     if(linkEnabled && !string.IsNullOrWhiteSpace(item.TeacherLastUpdate?.LinkProfile)) {
-                        sb.AppendLine($"✒ [{item.Lecturer}]({item.TeacherLastUpdate.LinkProfile})");
+                        sb.AppendLine($"✒ <a href=\"{item.TeacherLastUpdate.LinkProfile}\">{item.Lecturer}</a>");
                     } else {
                         sb.AppendLine($"✒ {item.Lecturer}");
                     }
                 }
 
-                sb.AppendLine(item.Deleted ? "~~" : "");
+                sb.AppendLine(item.Deleted ? "</s>" : "");
             }
 
             return sb.ToString();
         }
+
 
         public static string GetTeacherWorkScheduleByDate(ScheduleDbContext dbContext, DateOnly date, string teacher) {
             var schedules = dbContext.TeacherWorkSchedule
