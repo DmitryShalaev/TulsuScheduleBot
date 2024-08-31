@@ -7,6 +7,7 @@ using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Core.Bot.MessagesQueue {
@@ -46,6 +47,12 @@ namespace Core.Bot.MessagesQueue {
             var message = new Classes.Venue(chatId, latitude, longitude, title, address, replyMarkup);
 
             AddMessageToQueue(chatId, message);
+        }
+
+        public static void AnswerInlineQuery(string inlineQueryId, IEnumerable<InlineQueryResult> results, int? cacheTime, bool? isPersonal) {
+            var message = new Classes.InlineQuery(inlineQueryId, results, cacheTime, isPersonal);
+
+            AddMessageToQueue(inlineQueryId, message);
         }
 
         public static void EditMessageText(ChatId chatId, int messageId, string text, InlineKeyboardMarkup? replyMarkup = null, ParseMode? parseMode = null, bool? disableWebPagePreview = null) {
@@ -169,10 +176,14 @@ namespace Core.Bot.MessagesQueue {
                         );
 
                         break;
+                    case Classes.InlineQuery inlineQuery:
+                        msg = $"InlineQuery {inlineQuery.InlineQueryId}";
+
+                        await BotClient.AnswerInlineQueryAsync(inlineQuery.InlineQueryId, inlineQuery.Results, cacheTime: inlineQuery.CacheTime, isPersonal: inlineQuery.IsPersonal);
+                        break;
                 }
             } catch(ApiRequestException ex) when(ex.Message.Contains("bot was blocked by the user") ||
-                                                 ex.Message.Contains("message is not modified")) {
-
+            ex.Message.Contains("message is not modified")) {
             } catch(Exception e) {
                 await ErrorReport.Send(msg, e);
             }

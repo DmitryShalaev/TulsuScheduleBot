@@ -3,6 +3,7 @@ using System;
 using Core.DB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240831053924_add-MessageLog_Request")]
+    partial class addMessageLog_Request
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -422,9 +425,6 @@ namespace ScheduleBot.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("From")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("text");
@@ -432,9 +432,12 @@ namespace ScheduleBot.Migrations
                     b.Property<string>("Request")
                         .HasColumnType("text");
 
+                    b.Property<long>("TelegramUserChatID")
+                        .HasColumnType("bigint");
+
                     b.HasKey("ID");
 
-                    b.HasIndex("From");
+                    b.HasIndex("TelegramUserChatID");
 
                     b.ToTable("MessageLog");
                 });
@@ -964,7 +967,7 @@ namespace ScheduleBot.Migrations
                 {
                     b.HasOne("Core.DB.Entity.TelegramUser", "TelegramUser")
                         .WithMany()
-                        .HasForeignKey("From")
+                        .HasForeignKey("TelegramUserChatID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
