@@ -20,9 +20,10 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
         public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             StringBuilder sb = new();
 
-            DateTime today = DateTime.Now.Date;
+            DateTime today = DateTime.Today;
+            int daysToSubtract = (today.DayOfWeek == DayOfWeek.Sunday) ? 6 : (int)today.DayOfWeek - 1;
 
-            DateTime startOfWeek = today.AddDays(DayOfWeek.Monday - today.DayOfWeek);
+            DateTime startOfWeek = today.AddDays(-daysToSubtract);
             var startOfMonth = new DateTime(today.Year, today.Month, 1);
             DateTime endOfWeek = startOfWeek.AddDays(7).AddTicks(-1);
             DateTime endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
