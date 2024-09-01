@@ -22,12 +22,26 @@ namespace WebHook {
 
             WebApplication app = builder.Build();
 
-            CultureInfo cultureInfo = new("ru-RU") { DateTimeFormat = { FirstDayOfWeek = DayOfWeek.Monday }, NumberFormat = { NumberDecimalSeparator = ".", CurrencyDecimalSeparator = "." } }; 
+            CultureInfo cultureInfo = new("ru-RU") { DateTimeFormat = { FirstDayOfWeek = DayOfWeek.Monday }, NumberFormat = { NumberDecimalSeparator = ".", CurrencyDecimalSeparator = "." } };
 
             app.UseRequestLocalization(new RequestLocalizationOptions {
                 DefaultRequestCulture = new RequestCulture(cultureInfo),
                 SupportedCultures = [cultureInfo],
                 SupportedUICultures = [cultureInfo]
+            });
+
+            var standardTimeZone = TimeZoneInfo.CreateCustomTimeZone(
+                id: "Russian Standard Time (No DST)",
+                baseUtcOffset: new TimeSpan(3, 0, 0),
+                displayName: "Moscow Standard Time (No DST)",
+                standardDisplayName: "Moscow Standard Time"
+            );
+
+            app.Use(async (context, next) => {
+                TimeZoneInfo.ClearCachedData();
+                CultureInfo.CurrentCulture = cultureInfo;
+                CultureInfo.CurrentUICulture = cultureInfo;
+                await next.Invoke();
             });
 
             app.UseAuthorization();
