@@ -20,15 +20,11 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
         public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             StringBuilder sb = new();
 
-            DateTime today = DateTime.Today.Date;
-            DateTime endOfToday = today.AddDays(1).AddTicks(-1);
+            DateTime today = DateTime.Now.Date;
 
-            int daysToSubtract = (today.DayOfWeek == DayOfWeek.Sunday) ? 6 : (int)today.DayOfWeek - 1;
-            DateTime startOfWeek = today.AddDays(-daysToSubtract);
-            DateTime endOfWeek = startOfWeek.AddDays(7).AddTicks(-1);
+            DateTime startOfWeek = today.AddDays(-7);
 
-            DateTime startOfMonth = new(today.Year, today.Month, 1);
-            DateTime endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
+            DateTime startOfMonth = today.AddMonths(-1);
 
             IQueryable<TelegramUser> telegramUsers = dbContext.TelegramUsers.AsQueryable();
             IQueryable<MessageLog> messageLogs = dbContext.MessageLog.AsQueryable();
@@ -37,10 +33,10 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             sb.AppendLine($"Администраторы: {telegramUsers.Count(u => u.IsAdmin)}");
             sb.AppendLine();
 
-            AppendNewUsersStats(sb, telegramUsers, today, endOfToday, startOfWeek, endOfWeek, startOfMonth, endOfMonth);
-            AppendActiveUsersStats(sb, telegramUsers, startOfWeek, endOfWeek, startOfMonth, endOfMonth);
+            AppendNewUsersStats(sb, telegramUsers, today, startOfWeek, startOfMonth);
+            AppendActiveUsersStats(sb, telegramUsers, today, startOfWeek, startOfMonth);
             AppendTopUsers(sb, telegramUsers);
-            AppendMessageStats(sb, telegramUsers, messageLogs, startOfWeek, endOfWeek, startOfMonth, endOfMonth);
+            AppendMessageStats(sb, telegramUsers, messageLogs, today, startOfWeek, startOfMonth);
             AppendMessageDistributionStats(sb, messageLogs);
             AppendScheduleProfileStats(sb, dbContext);
 
@@ -49,19 +45,19 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             return Task.CompletedTask;
         }
 
-        private static void AppendNewUsersStats(StringBuilder sb, IQueryable<TelegramUser> users, DateTime today, DateTime endOfToday, DateTime startOfWeek, DateTime endOfWeek, DateTime startOfMonth, DateTime endOfMonth) {
+        private static void AppendNewUsersStats(StringBuilder sb, IQueryable<TelegramUser> users, DateTime today, DateTime startOfWeek, DateTime startOfMonth) {
             sb.AppendLine($"--Новых пользователей--");
-            sb.AppendLine($"За сегодня: {users.Where(u => u.DateOfRegistration.HasValue && u.DateOfRegistration.Value.ToLocalTime() >= today && u.DateOfRegistration.Value.ToLocalTime() <= endOfToday).Count()}");
-            sb.AppendLine($"За неделю: {users.Count(u => u.DateOfRegistration.HasValue && u.DateOfRegistration.Value.ToLocalTime() >= startOfWeek && u.DateOfRegistration.Value.ToLocalTime() <= endOfWeek)}");
-            sb.AppendLine($"За месяц: {users.Count(u => u.DateOfRegistration.HasValue && u.DateOfRegistration.Value.ToLocalTime() >= startOfMonth && u.DateOfRegistration.Value.ToLocalTime() <= endOfMonth)}");
+            sb.AppendLine($"За сегодня: {users.Count(u => u.DateOfRegistration.HasValue && u.DateOfRegistration.Value.ToLocalTime() >= today)}");
+            sb.AppendLine($"За неделю: {users.Count(u => u.DateOfRegistration.HasValue && u.DateOfRegistration.Value.ToLocalTime() >= startOfWeek)}");
+            sb.AppendLine($"За месяц: {users.Count(u => u.DateOfRegistration.HasValue && u.DateOfRegistration.Value.ToLocalTime() >= startOfMonth)}");
             sb.AppendLine();
         }
 
-        private static void AppendActiveUsersStats(StringBuilder sb, IQueryable<TelegramUser> users, DateTime startOfWeek, DateTime endOfWeek, DateTime startOfMonth, DateTime endOfMonth) {
+        private static void AppendActiveUsersStats(StringBuilder sb, IQueryable<TelegramUser> users, DateTime today, DateTime startOfWeek, DateTime startOfMonth) {
             sb.AppendLine($"--Активных пользователей--");
-            sb.AppendLine($"За сегодня: {users.Where(u => u.TodayRequests != 0).Count()}");
-            sb.AppendLine($"За неделю: {users.Count(u => u.LastAppeal.ToLocalTime() >= startOfWeek && u.LastAppeal.ToLocalTime() <= endOfWeek)}");
-            sb.AppendLine($"За месяц: {users.Count(u => u.LastAppeal.ToLocalTime() >= startOfMonth && u.LastAppeal.ToLocalTime() <= endOfMonth)}");
+            sb.AppendLine($"За сегодня: {users.Count(u => u.LastAppeal.ToLocalTime() >= today)}");
+            sb.AppendLine($"За неделю: {users.Count(u => u.LastAppeal.ToLocalTime() >= startOfWeek)}");
+            sb.AppendLine($"За месяц: {users.Count(u => u.LastAppeal.ToLocalTime() >= startOfMonth)}");
             sb.AppendLine();
         }
 
@@ -79,12 +75,12 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             sb.AppendLine();
         }
 
-        private static void AppendMessageStats(StringBuilder sb, IQueryable<TelegramUser> users, IQueryable<MessageLog> messages, DateTime startOfWeek, DateTime endOfWeek, DateTime startOfMonth, DateTime endOfMonth) {
+        private static void AppendMessageStats(StringBuilder sb, IQueryable<TelegramUser> users, IQueryable<MessageLog> messages, DateTime today, DateTime startOfWeek, DateTime startOfMonth) {
             sb.AppendLine($"--Получено сообщений--");
             sb.AppendLine($"Всего сообщений: {messages.Count()}");
-            sb.AppendLine($"За сегодня: {users.Sum(u => u.TodayRequests)}");
-            sb.AppendLine($"За неделю: {messages.Count(ml => ml.Date.ToLocalTime() >= startOfWeek && ml.Date.ToLocalTime() <= endOfWeek)}");
-            sb.AppendLine($"За месяц: {messages.Count(ml => ml.Date.ToLocalTime() >= startOfMonth && ml.Date.ToLocalTime() <= endOfMonth)}");
+            sb.AppendLine($"За сегодня: {messages.Count(ml => ml.Date.ToLocalTime() >= today)}");
+            sb.AppendLine($"За неделю: {messages.Count(ml => ml.Date.ToLocalTime() >= startOfWeek)}");
+            sb.AppendLine($"За месяц: {messages.Count(ml => ml.Date.ToLocalTime() >= startOfMonth)}");
             sb.AppendLine();
 
             sb.AppendLine($"Среднее количество запросов на пользователя: {users.Average(u => u.TotalRequests):F2}");
