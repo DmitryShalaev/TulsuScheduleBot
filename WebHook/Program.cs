@@ -30,20 +30,6 @@ namespace WebHook {
                 SupportedUICultures = [cultureInfo]
             });
 
-            var standardTimeZone = TimeZoneInfo.CreateCustomTimeZone(
-                id: "Russian Standard Time (No DST)",
-                baseUtcOffset: new TimeSpan(3, 0, 0),
-                displayName: "Moscow Standard Time (No DST)",
-                standardDisplayName: "Moscow Standard Time"
-            );
-
-            app.Use(async (context, next) => {
-                TimeZoneInfo.ClearCachedData();
-                CultureInfo.CurrentCulture = cultureInfo;
-                CultureInfo.CurrentUICulture = cultureInfo;
-                await next.Invoke();
-            });
-
             app.UseAuthorization();
 
             app.MapControllers();
