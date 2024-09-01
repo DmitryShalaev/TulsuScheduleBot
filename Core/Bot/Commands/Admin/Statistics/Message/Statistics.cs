@@ -50,8 +50,8 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
         }
 
         private static void AppendNewUsersStats(StringBuilder sb, IQueryable<TelegramUser> users, DateTime today, DateTime endOfToday, DateTime startOfWeek, DateTime endOfWeek, DateTime startOfMonth, DateTime endOfMonth) {
-            sb.AppendLine($"--Новых пользователей--\n{today} \n{endOfToday}\n{users.Where(u => u.TodayRequests != 0).OrderBy(u => u.LastAppeal).First().LastAppeal.ToLocalTime()}");
-            sb.AppendLine($"За сегодня: {users.Count(u => u.DateOfRegistration.HasValue && u.DateOfRegistration.Value.ToLocalTime() >= today && u.DateOfRegistration.Value.ToLocalTime() <= endOfToday)}");
+            sb.AppendLine($"--Новых пользователей--");
+            sb.AppendLine($"За сегодня: {users.Where(u => u.DateOfRegistration.HasValue && u.DateOfRegistration.Value.ToLocalTime() >= today && u.DateOfRegistration.Value.ToLocalTime() <= endOfToday).Count()}");
             sb.AppendLine($"За неделю: {users.Count(u => u.DateOfRegistration.HasValue && u.DateOfRegistration.Value.ToLocalTime() >= startOfWeek && u.DateOfRegistration.Value.ToLocalTime() <= endOfWeek)}");
             sb.AppendLine($"За месяц: {users.Count(u => u.DateOfRegistration.HasValue && u.DateOfRegistration.Value.ToLocalTime() >= startOfMonth && u.DateOfRegistration.Value.ToLocalTime() <= endOfMonth)}");
             sb.AppendLine();
