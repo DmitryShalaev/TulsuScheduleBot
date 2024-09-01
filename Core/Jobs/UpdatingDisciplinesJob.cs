@@ -72,7 +72,7 @@ namespace Core.Jobs {
         private static int GetUpdateInterval() {
             using(ScheduleDbContext dbContext = new()) {
                 int tmp = dbContext.ScheduleProfile.Where(i => !string.IsNullOrEmpty(i.Group) && (DateTime.Now - i.LastAppeal.ToLocalTime()).TotalDays <= config.DisciplineUpdateDays).Select(i => i.Group!).Distinct().Count();
-                int sec = Math.Max((int)Math.Floor((config.DisciplineUpdateTime - 1.0) * 60.0 / (tmp == 0 ? 1.0 : tmp)), 60);
+                int sec = Math.Max((int)Math.Floor((config.DisciplineUpdateTime - 1.0) * 60.0 / (tmp == 0 ? 1.0 : tmp)), 45);
 
                 return sec;
             }
