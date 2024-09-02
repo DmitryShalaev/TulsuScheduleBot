@@ -1,10 +1,12 @@
-﻿using Core.DB;
+﻿using System.Collections.Concurrent;
+
+using Core.DB;
 
 namespace Core.Parser {
     public class NGramSearch {
         private static NGramSearch? instance;
-        private readonly Dictionary<string, HashSet<string>> TeachersNgramsDict;
-        private readonly Dictionary<string, HashSet<string>> ClassroomNgramsDict;
+        private ConcurrentDictionary<string, HashSet<string>> TeachersNgramsDict;
+        private ConcurrentDictionary<string, HashSet<string>> ClassroomNgramsDict;
 
         private NGramSearch() {
             TeachersNgramsDict = [];
@@ -14,8 +16,10 @@ namespace Core.Parser {
         public static NGramSearch Instance => instance ??= new NGramSearch();
 
         public void Clear() {
-            TeachersNgramsDict.Clear();
-            ClassroomNgramsDict.Clear();
+            TeachersNgramsDict = [];
+            ClassroomNgramsDict = [];
+
+            GC.Collect();
         }
 
         private static IEnumerable<string> GetNGrams(string input, int n) {
@@ -27,7 +31,7 @@ namespace Core.Parser {
             }
         }
 
-        public static void PrecomputeNGrams(List<string> names, Dictionary<string, HashSet<string>> ngramsDict, int n) {
+        public static void PrecomputeNGrams(List<string> names, ConcurrentDictionary<string, HashSet<string>> ngramsDict, int n) {
             foreach(string name in names) {
                 var ngrams = new HashSet<string>(GetNGrams(name.ToLower(), n));
                 ngramsDict[name] = ngrams;
@@ -41,7 +45,7 @@ namespace Core.Parser {
         }
 
         public IEnumerable<string> TeacherFindMatch(string query, int n = 3, int count = 5) {
-            if(TeachersNgramsDict.Count == 0) {
+            if(TeachersNgramsDict.IsEmpty) {
                 using(ScheduleDbContext dbContext = new()) {
                     PrecomputeNGrams([.. dbContext.TeacherLastUpdate.Select(i => i.Teacher)], TeachersNgramsDict, n);
                 }
@@ -83,7 +87,7 @@ namespace Core.Parser {
         }
 
         public IEnumerable<string> ClassroomFindMatch(string query, int n = 2, int count = 5) {
-            if(ClassroomNgramsDict.Count == 0) {
+            if(ClassroomNgramsDict.IsEmpty) {
                 using(ScheduleDbContext dbContext = new()) {
                     PrecomputeNGrams([.. dbContext.ClassroomLastUpdate.Select(i => i.Classroom)], ClassroomNgramsDict, n);
                 }
