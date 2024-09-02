@@ -171,7 +171,7 @@ namespace ScheduleBot {
             foreach(ExtendedDiscipline? item in scheduleList) {
                 sb.Append(item.Deleted ? "<s>" : "")
                   .AppendLine($"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}")
-                  .AppendLine($"📎 {item.Name} ({item.Type}) {(!string.IsNullOrWhiteSpace(item.Subgroup) ? item.Subgroup : "")}");
+                  .AppendLine($"📎 {item.Name} ({item.Type}) {(string.IsNullOrWhiteSpace(item.Subgroup) ? item.IntersectionMark : item.Subgroup)}");
 
                 if(!string.IsNullOrWhiteSpace(item.Lecturer)) {
                     if(linkEnabled && !string.IsNullOrWhiteSpace(item.TeacherLastUpdate?.LinkProfile)) {

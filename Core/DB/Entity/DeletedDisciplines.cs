@@ -17,6 +17,7 @@ namespace Core.DB.Entity {
 
         public string? LectureHall { get; set; }
         public string? Subgroup { get; set; } = null;
+        public string? IntersectionMark { get; set; } = null;
 
         public DateOnly Date { get; set; }
         public DateOnly DeleteDate { get; set; }
@@ -42,6 +43,7 @@ namespace Core.DB.Entity {
             TeacherLastUpdate = discipline.TeacherLastUpdate;
             LectureHall = discipline.LectureHall;
             Subgroup = discipline.Subgroup;
+            IntersectionMark = discipline.IntersectionMark;
             Date = discipline.Date;
             StartTime = discipline.StartTime;
             EndTime = discipline.EndTime;

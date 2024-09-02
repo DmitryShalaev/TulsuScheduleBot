@@ -78,6 +78,7 @@ namespace Core.DB.Entity {
             TeacherLastUpdate = discipline.TeacherLastUpdate;
             LectureHall = discipline.LectureHall;
             Subgroup = discipline.Subgroup;
+            IntersectionMark = discipline.IntersectionMark;
             Date = discipline.Date;
             StartTime = discipline.StartTime;
             EndTime = discipline.EndTime;
@@ -94,6 +95,7 @@ namespace Core.DB.Entity {
             TeacherLastUpdate = discipline.TeacherLastUpdate;
             LectureHall = discipline.LectureHall;
             Subgroup = discipline.Subgroup;
+            IntersectionMark = discipline.IntersectionMark;
             Date = discipline.Date;
             StartTime = discipline.StartTime;
             EndTime = discipline.EndTime;
