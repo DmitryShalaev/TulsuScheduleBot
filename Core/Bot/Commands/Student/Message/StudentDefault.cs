@@ -39,8 +39,8 @@ namespace Core.Bot.Commands.Student.Message {
                 return;
             }
 
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["CommandNotRecognized"], replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
-
+            if(!user.IsSupergroup())
+                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["CommandNotRecognized"], replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
         }
     }
 }
