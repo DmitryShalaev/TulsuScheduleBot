@@ -14,6 +14,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             user.TelegramUserTmp.Mode = Mode.Default;
+            user.TelegramUserTmp.TmpData = UserCommands.Instance.Message["Settings"];
 
             await dbContext.SaveChangesAsync();
 

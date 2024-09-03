@@ -26,6 +26,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Message
 
                 user.Settings.NotificationDays = Math.Abs(int.Parse(args));
                 user.TelegramUserTmp.Mode = Mode.Default;
+                user.TelegramUserTmp.TmpData = UserCommands.Instance.Message["Settings"];
 
                 await dbContext.SaveChangesAsync();
 

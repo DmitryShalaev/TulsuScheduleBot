@@ -8,7 +8,7 @@ using Telegram.Bot.Types;
 namespace Core.Bot.Commands.Student.AddingDiscipline.Callback {
     public class SetEndTime : ICallbackCommand {
 
-        public string Command => UserCommands.Instance.Callback["SetEndTime"].callback;
+        public string Command => "SetEndTime";
 
         public Mode Mode => Mode.AddingDiscipline;
 

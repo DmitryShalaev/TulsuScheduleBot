@@ -56,7 +56,7 @@ namespace Core.Bot.Commands.AddingDiscipline {
                 case 5:
                     TimeOnly? endTime = customDiscipline.StartTime?.AddMinutes(95);
                     MessagesQueue.Message.SendTextMessage(chatId: chatId, text: GetStagesAddingDiscipline(dbContext, user, customDiscipline.Counter),
-                          replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: endTime?.ToString() ?? "endTime Error", callbackData: $"{UserCommands.Instance.Callback["SetEndTime"].callback} {endTime}")));
+                          replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(text: endTime?.ToString() ?? "endTime Error", callbackData: $"SetEndTime {endTime}")));
                     break;
 
                 case 6:

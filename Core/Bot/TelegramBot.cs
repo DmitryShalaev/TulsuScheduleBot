@@ -72,6 +72,7 @@ namespace Core.Bot {
                 Match match = Statics.DisciplineCallbackRegex().Match(message);
                 if(match.Success) {
                     args = match.Groups[2].ToString();
+
                     return $"{match.Groups[1]} {user.TelegramUserTmp.Mode}".ToLower();
                 }
 

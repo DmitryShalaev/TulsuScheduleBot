@@ -9,7 +9,7 @@ using Telegram.Bot.Types;
 namespace Core.Bot.Commands.Classrooms.Callback {
     public class ClassroomSelect : ICallbackCommand {
 
-        public string Command => "Select";
+        public string Command => "ClassroomSelect";
 
         public Mode Mode => Mode.ClassroomSchedule;
 

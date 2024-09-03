@@ -21,7 +21,7 @@ namespace Core.Bot.Commands.Classrooms.Message {
                 if(find.Count() > 1) {
                     var buttons = new List<InlineKeyboardButton[]>();
                     foreach(string item in find) {
-                        string callback = $"Select|{item}";
+                        string callback = $"ClassroomSelect|{item}";
 
                         buttons.Add([InlineKeyboardButton.WithCallbackData(text: item, callbackData: callback[..Math.Min(callback.Length, 35)])]);
                     }

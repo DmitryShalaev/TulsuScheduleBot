@@ -2,7 +2,6 @@
 
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.InlineQueryResults;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Core.Bot.MessagesQueue.Classes {
     public class InlineQuery(string inlineQueryId, IEnumerable<InlineQueryResult> results, int? cacheTime, bool? isPersonal) : IMessageQueue {

@@ -12,7 +12,7 @@ using Telegram.Bot.Types.Enums;
 namespace Core.Bot.Commands.Teachers.Callback {
     public class TeacherSelect : ICallbackCommand {
 
-        public string Command => "Select";
+        public string Command => "TeacherSelect";
 
         public Mode Mode => Mode.TeachersWorkSchedule;
 

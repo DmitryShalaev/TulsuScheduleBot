@@ -17,23 +17,28 @@ namespace Core.Bot.Commands.Student.Custom.Message {
 
         public Manager.Check Check => Manager.Check.none;
 
-        public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
+        public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["MainMenu"], replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
 
             if(!string.IsNullOrWhiteSpace(user.TelegramUserTmp.TmpData)) {
                 if(user.IsOwner() && !user.IsSupergroup()) {
-                    CustomDiscipline discipline = dbContext.CustomDiscipline.Single(i => i.ID == uint.Parse(user.TelegramUserTmp.TmpData));
 
-                    StringBuilder sb = new(Scheduler.GetScheduleByDate(dbContext, discipline.Date, user, all: true).Item1);
-                    sb.AppendLine($"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n***{UserCommands.Instance.Message["SelectAnAction"]}***");
+                    CustomDiscipline? discipline = dbContext.CustomDiscipline.FirstOrDefault(i => i.ID == uint.Parse(user.TelegramUserTmp.TmpData));
+                    if(discipline is not null) {
 
-                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: DefaultCallback.GetCustomEditAdminInlineKeyboardButton(discipline), parseMode: ParseMode.Markdown);
+                        StringBuilder sb = new(Scheduler.GetScheduleByDate(dbContext, discipline.Date, user, all: true).Item1);
+                        sb.AppendLine($"⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯\n***{UserCommands.Instance.Message["SelectAnAction"]}***");
+
+                        MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: DefaultCallback.GetCustomEditAdminInlineKeyboardButton(discipline), parseMode: ParseMode.Markdown);
+
+                    }
                 }
             }
 
             user.TelegramUserTmp.Mode = Mode.Default;
             user.TelegramUserTmp.TmpData = null;
-            return Task.CompletedTask;
+
+            await dbContext.SaveChangesAsync();
         }
     }
 }

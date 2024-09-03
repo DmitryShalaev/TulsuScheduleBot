@@ -22,6 +22,7 @@ namespace Core.Bot.Commands.Student.Other.Profile.Settings.Notifications.Callbac
                     break;
             }
 
+            user.TelegramUserTmp.TmpData = UserCommands.Instance.Message["Settings"];
             await dbContext.SaveChangesAsync();
 
             MessagesQueue.Message.DeleteMessage(chatId: chatId, messageId: messageId);

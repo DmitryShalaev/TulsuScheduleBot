@@ -5,7 +5,6 @@ namespace Core.DB.Entity {
     public class MessageLog {
         public long ID { get; set; }
 
-
         [ForeignKey("TelegramUser")]
         public long From { get; set; }
         public TelegramUser TelegramUser { get; set; }

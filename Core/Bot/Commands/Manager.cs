@@ -65,7 +65,13 @@ namespace Core.Bot.Commands {
 
             foreach(Type? type in types) {
                 if(Activator.CreateInstance(type) is ICallbackCommand callbackCommand) {
-                    CallbackCommands.Add($"{callbackCommand.Command} {callbackCommand.Mode}".ToLower(), (callbackCommand.Check, callbackCommand.Execute));
+                    if(callbackCommand.Mode == Mode.Default) {
+                        foreach(Mode mode in Enum.GetValues(typeof(Mode)).Cast<Mode>().ToList()) {
+                            CallbackCommands.Add($"{callbackCommand.Command} {mode}".ToLower(), (callbackCommand.Check, callbackCommand.Execute));
+                        }
+                    } else {
+                        CallbackCommands.Add($"{callbackCommand.Command} {callbackCommand.Mode}".ToLower(), (callbackCommand.Check, callbackCommand.Execute));
+                    }
                 }
             }
 
