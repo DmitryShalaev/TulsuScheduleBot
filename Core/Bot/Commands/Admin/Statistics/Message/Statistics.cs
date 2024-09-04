@@ -133,6 +133,7 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             sb.AppendLine($"За месяц: {messages.Count(ml => ml.Date.ToLocalTime() >= startOfMonth) / (double)hoursMonth:F2}");
 
             var spikes = messages
+                .Where(ml => ml.Date.ToLocalTime() >= today)
                 .GroupBy(ml => ml.Date.ToLocalTime().Hour)
                 .OrderByDescending(g => g.Count())
                 .Take(5)
