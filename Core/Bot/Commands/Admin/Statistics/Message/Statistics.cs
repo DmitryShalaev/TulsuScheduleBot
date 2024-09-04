@@ -38,6 +38,7 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             AppendTopUsers(sb, telegramUsers);
             AppendMessageStats(sb, telegramUsers, messageLogs, today, startOfWeek, startOfMonth);
             AppendMessageDistributionStats(sb, messageLogs);
+            AppendAverageMessagesPerHourStats(sb, messageLogs, today, startOfWeek, startOfMonth);
             AppendScheduleProfileStats(sb, dbContext);
 
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: Statics.AdminPanelKeyboardMarkup, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
@@ -118,6 +119,32 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             if(groups.Count > 1) {
                 sb.AppendLine($"Время между последними обновлениями: {(groups[0].Update.ToLocalTime() - groups[1].Update.ToLocalTime()).ToString(@"hh\:mm\:ss")}");
             }
+        }
+
+        private static void AppendAverageMessagesPerHourStats(StringBuilder sb, IQueryable<MessageLog> messages, DateTime today, DateTime startOfWeek, DateTime startOfMonth) {
+            sb.AppendLine($"--Среднее число сообщений в час--");
+
+            int hoursToday = (int)(DateTime.Now - today).TotalHours;
+            int hoursWeek = (int)(DateTime.Now - startOfWeek).TotalHours; 
+            int hoursMonth = (int)(DateTime.Now - startOfMonth).TotalHours;
+
+            sb.AppendLine($"За сегодня: {messages.Count(ml => ml.Date.ToLocalTime() >= today) / (double)hoursToday:F2}");
+            sb.AppendLine($"За неделю: {messages.Count(ml => ml.Date.ToLocalTime() >= startOfWeek) / (double)hoursWeek:F2}");
+            sb.AppendLine($"За месяц: {messages.Count(ml => ml.Date.ToLocalTime() >= startOfMonth) / (double)hoursMonth:F2}");
+
+            var spikes = messages
+                .GroupBy(ml => ml.Date.ToLocalTime().Hour)
+                .OrderByDescending(g => g.Count())
+                .Take(5)
+                .Select(g => new { Hour = g.Key, Count = g.Count() })
+                .ToList();
+
+            sb.AppendLine("\nВсплески активности по часам:");
+            foreach(var spike in spikes) {
+                sb.AppendLine($"{spike.Hour}:00 - {spike.Hour + 1}:00 с {spike.Count} сообщениями");
+            }
+
+            sb.AppendLine();
         }
     }
 }
