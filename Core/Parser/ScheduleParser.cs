@@ -91,6 +91,9 @@ namespace ScheduleBot {
         }
 
         public async Task<bool> UpdatingDisciplines(ScheduleDbContext dbContext, string group, int updateAttemptTime, (DateOnly min, DateOnly max, string searchField)? lastDates = null, List<Discipline>? lastDisciplines = null) {
+#if DEBUG
+            updateAttemptTime = 0;
+#endif
             GroupLastUpdate? groupLastUpdate = await dbContext.GroupLastUpdate.FirstOrDefaultAsync(i => i.Group == group);
             if(groupLastUpdate is null) {
                 groupLastUpdate = new() { Group = group, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };

@@ -18,7 +18,7 @@ namespace Core.Bot {
         public static void UpdatedDisciplines(List<(string, DateOnly)> values) {
             using(ScheduleDbContext dbContext = new()) {
 
-                var telegramUsers = dbContext.TelegramUsers.Include(u => u.Settings).Include(u => u.ScheduleProfile).Where(u => u.Settings.NotificationEnabled).Select(u => new ExtendedTelegramUser(u)).ToList();
+                var telegramUsers = dbContext.TelegramUsers.Include(u => u.Settings).Include(u => u.ScheduleProfile).Where(u => !u.IsDeactivated && u.Settings.NotificationEnabled).Select(u => new ExtendedTelegramUser(u)).ToList();
 
                 foreach((string Group, DateOnly Date) in values) {
                     int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Parse(Date.ToString()), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);

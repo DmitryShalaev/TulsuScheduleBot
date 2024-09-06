@@ -18,6 +18,7 @@ namespace Core.DB.Entity {
         public long TodayRequests { get; set; } = 0;
 
         public bool IsAdmin { get; set; } = false;
+        public bool IsDeactivated { get; set; } = false;
 
         [ForeignKey("ScheduleProfile")]
         public Guid ScheduleProfileGuid { get; set; }

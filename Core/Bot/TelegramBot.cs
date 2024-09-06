@@ -160,6 +160,8 @@ namespace Core.Bot {
                         user.TodayRequests++;
                         user.TotalRequests++;
 
+                        user.IsDeactivated = false;
+
                         await dbContext.SaveChangesAsync();
 
                         switch(update.Type) {

@@ -126,7 +126,14 @@ namespace Core.Bot {
 
             bool siteIsNotResponding = false;
 
-            if(groupLastUpdate is null || (DateTime.Now - groupLastUpdate)?.TotalMinutes > commands.Config.DisciplineUpdateTime) {
+            if(
+#if !DEBUG
+                groupLastUpdate is null || (DateTime.Now - groupLastUpdate)?.TotalMinutes > commands.Config.DisciplineUpdateTime
+#else
+                true
+#endif
+                ) {
+
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"], saveMessageId: true);
                 siteIsNotResponding = true;
 

@@ -36,9 +36,8 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             AppendNewUsersStats(sb, telegramUsers, today, startOfWeek, startOfMonth);
             AppendActiveUsersStats(sb, telegramUsers, today, startOfWeek, startOfMonth);
             AppendTopUsers(sb, telegramUsers);
-            AppendMessageStats(sb, telegramUsers, messageLogs, today, startOfWeek, startOfMonth);
-            AppendMessageDistributionStats(sb, messageLogs);
-            AppendAverageMessagesPerHourStats(sb, messageLogs, today, startOfWeek, startOfMonth);
+            AppendMessageStats(sb, messageLogs, today, startOfWeek, startOfMonth);
+            AppendAverageMessagesPerHourStats(sb, telegramUsers, messageLogs, today, startOfWeek, startOfMonth);
             AppendScheduleProfileStats(sb, dbContext);
 
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: Statics.AdminPanelKeyboardMarkup, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
@@ -76,39 +75,12 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             sb.AppendLine();
         }
 
-        private static void AppendMessageStats(StringBuilder sb, IQueryable<TelegramUser> users, IQueryable<MessageLog> messages, DateTime today, DateTime startOfWeek, DateTime startOfMonth) {
+        private static void AppendMessageStats(StringBuilder sb, IQueryable<MessageLog> messages, DateTime today, DateTime startOfWeek, DateTime startOfMonth) {
             sb.AppendLine($"--Получено сообщений--");
-            sb.AppendLine($"Всего сообщений: {messages.Count()}");
+            sb.AppendLine($"Всего: {messages.Count()}");
             sb.AppendLine($"За сегодня: {messages.Count(ml => ml.Date.ToLocalTime() >= today)}");
             sb.AppendLine($"За неделю: {messages.Count(ml => ml.Date.ToLocalTime() >= startOfWeek)}");
             sb.AppendLine($"За месяц: {messages.Count(ml => ml.Date.ToLocalTime() >= startOfMonth)}");
-            sb.AppendLine();
-
-            sb.AppendLine($"Среднее количество запросов на пользователя: {users.Average(u => u.TotalRequests):F2}");
-            sb.AppendLine();
-        }
-
-        private static void AppendMessageDistributionStats(StringBuilder sb, IQueryable<MessageLog> messages) {
-            sb.AppendLine($"--Распределение сообщений по времени--");
-
-            int morningMessages = messages.Count(ml => ml.Date.ToLocalTime().TimeOfDay < TimeSpan.FromHours(12));
-            int afternoonMessages = messages.Count(ml => ml.Date.ToLocalTime().TimeOfDay >= TimeSpan.FromHours(12) && ml.Date.ToLocalTime().TimeOfDay < TimeSpan.FromHours(18));
-            int eveningMessages = messages.Count(ml => ml.Date.ToLocalTime().TimeOfDay >= TimeSpan.FromHours(18));
-
-            sb.AppendLine($"Утро (00:00 - 12:00): {morningMessages}");
-            sb.AppendLine($"День (12:00 - 18:00): {afternoonMessages}");
-            sb.AppendLine($"Вечер (18:00 - 24:00): {eveningMessages}");
-
-            var mostActiveHour = messages
-                .GroupBy(ml => ml.Date.ToLocalTime().Hour)
-                .OrderByDescending(g => g.Count())
-                .Select(g => new { Hour = g.Key, Count = g.Count() })
-                .FirstOrDefault();
-
-            if(mostActiveHour != null) {
-                sb.AppendLine($"Самое активное время: {mostActiveHour.Hour}:00 - {mostActiveHour.Hour + 1}:00 с {mostActiveHour.Count} сообщениями");
-            }
-
             sb.AppendLine();
         }
 
@@ -121,16 +93,20 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             }
         }
 
-        private static void AppendAverageMessagesPerHourStats(StringBuilder sb, IQueryable<MessageLog> messages, DateTime today, DateTime startOfWeek, DateTime startOfMonth) {
+        private static void AppendAverageMessagesPerHourStats(StringBuilder sb, IQueryable<TelegramUser> users, IQueryable<MessageLog> messages, DateTime today, DateTime startOfWeek, DateTime startOfMonth) {
             sb.AppendLine($"--Среднее число сообщений в час--");
 
             int hoursToday = (int)(DateTime.Now - today).TotalHours;
-            int hoursWeek = (int)(DateTime.Now - startOfWeek).TotalHours; 
+            int hoursWeek = (int)(DateTime.Now - startOfWeek).TotalHours;
             int hoursMonth = (int)(DateTime.Now - startOfMonth).TotalHours;
 
             sb.AppendLine($"За сегодня: {messages.Count(ml => ml.Date.ToLocalTime() >= today) / (double)hoursToday:F2}");
             sb.AppendLine($"За неделю: {messages.Count(ml => ml.Date.ToLocalTime() >= startOfWeek) / (double)hoursWeek:F2}");
             sb.AppendLine($"За месяц: {messages.Count(ml => ml.Date.ToLocalTime() >= startOfMonth) / (double)hoursMonth:F2}");
+
+            sb.AppendLine();
+            sb.AppendLine($"Среднее количество запросов на пользователя: {users.Average(u => u.TotalRequests):F2}");
+            sb.AppendLine();
 
             var spikes = messages
                 .Where(ml => ml.Date.ToLocalTime() >= today)
@@ -140,7 +116,7 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
                 .Select(g => new { Hour = g.Key, Count = g.Count() })
                 .ToList();
 
-            sb.AppendLine("\nВсплески активности по часам:");
+            sb.AppendLine("Всплески активности по часам:");
             foreach(var spike in spikes) {
                 sb.AppendLine($"{spike.Hour}:00 - {spike.Hour + 1}:00 с {spike.Count} сообщениями");
             }

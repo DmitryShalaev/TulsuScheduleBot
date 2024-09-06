@@ -2,6 +2,9 @@
 
 using Core.Bot.MessagesQueue.Classes;
 using Core.Bot.MessagesQueue.Interfaces;
+using Core.DB;
+
+using Microsoft.EntityFrameworkCore;
 
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -182,8 +185,20 @@ namespace Core.Bot.MessagesQueue {
                         await BotClient.AnswerInlineQueryAsync(inlineQuery.InlineQueryId, inlineQuery.Results, cacheTime: inlineQuery.CacheTime, isPersonal: inlineQuery.IsPersonal);
                         break;
                 }
-            } catch(ApiRequestException ex) when(ex.Message.Contains("bot was blocked by the user") ||
-            ex.Message.Contains("message is not modified")) {
+            } catch(ApiRequestException ex) when(
+                                        ex.Message.Contains("bot was blocked by the user") ||
+                                        ex.Message.Contains("user is deactivated") ||
+                                        ex.Message.Contains("bot was kicked from the group chat")) {
+
+                using(ScheduleDbContext dbContext = new()) {
+                    DB.Entity.TelegramUser user = await dbContext.TelegramUsers.FirstAsync(u => u.ChatID == message.ChatId.Identifier);
+
+                    user.IsDeactivated = true;
+
+                    dbContext.SaveChanges();
+                }
+            } catch(ApiRequestException ex) when(ex.Message.Contains("message is not modified")) {
+
             } catch(Exception e) {
                 await ErrorReport.Send(msg, e);
             }
