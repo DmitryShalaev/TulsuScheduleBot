@@ -34,6 +34,12 @@ namespace Core.Bot {
         [GeneratedRegex("^([Ss]elect)[|](.+)$")]
         public static partial Regex WorksCallbackRegex();
 
+        [GeneratedRegex("^([Cc]lassroom[Ss]elect)[|](.+)$")]
+        public static partial Regex ClassroomCallbackRegex();
+
+        [GeneratedRegex("^([Tt]eacher[Ss]elect)[|](.+)$")]
+        public static partial Regex TeacherCallbackRegex();
+
         [GeneratedRegex("^(\\d{1,2})([ ,.-](\\d{1,2}|\\w{3,8}))?([ ,.-](\\d{2}|\\d{4}))?$")]
         public static partial Regex DateRegex();
 
