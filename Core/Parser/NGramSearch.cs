@@ -16,8 +16,7 @@ namespace Core.Parser {
         public static NGramSearch Instance => instance ??= new NGramSearch();
 
         public void Clear() {
-            TeachersNgramsDict = [];
-            ClassroomNgramsDict = [];
+            instance = null;
 
             GC.Collect();
         }
