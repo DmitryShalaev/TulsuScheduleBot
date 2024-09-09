@@ -88,6 +88,18 @@ namespace Core.Bot {
                     return $"{match.Groups[1]} {user.TelegramUserTmp.Mode}".ToLower();
                 }
 
+                match = Statics.TeacherCallbackRegex().Match(message);
+                if(match.Success) {
+                    args = match.Groups[2].ToString();
+                    return $"{match.Groups[1]} {user.TelegramUserTmp.Mode}".ToLower();
+                }
+
+                match = Statics.ClassroomCallbackRegex().Match(message);
+                if(match.Success) {
+                    args = match.Groups[2].ToString();
+                    return $"{match.Groups[1]} {user.TelegramUserTmp.Mode}".ToLower();
+                }
+
                 return $"{message} {user.TelegramUserTmp.Mode}".ToLower();
             });
 
