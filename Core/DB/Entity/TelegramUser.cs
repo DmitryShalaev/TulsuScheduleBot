@@ -70,7 +70,8 @@ namespace Core.DB.Entity {
 
         Messenger,
 
-        Admin
+        Admin,
+        Dispatch
     }
 
     public class ModeDTO {

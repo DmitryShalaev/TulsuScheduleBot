@@ -68,6 +68,7 @@ namespace Core.Bot {
 
         public static readonly ReplyKeyboardMarkup AdminPanelKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { "Отзывы", "Статистика"},
+                                                       ["Рассылка"],
 
                             [commands.Message["Back"]]
                         }) { ResizeKeyboard = true };

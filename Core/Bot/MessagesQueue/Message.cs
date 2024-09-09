@@ -188,7 +188,7 @@ namespace Core.Bot.MessagesQueue {
             } catch(ApiRequestException ex) when(
                                         ex.Message.Contains("bot was blocked by the user") ||
                                         ex.Message.Contains("user is deactivated") ||
-ex.Message.Contains("chat not found") ||
+                                        ex.Message.Contains("chat not found") ||
                                         ex.Message.Contains("bot was kicked from the group chat")) {
 
                 using(ScheduleDbContext dbContext = new()) {
