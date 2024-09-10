@@ -29,7 +29,7 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             IQueryable<TelegramUser> telegramUsers = dbContext.TelegramUsers.AsQueryable();
             IQueryable<MessageLog> messageLogs = dbContext.MessageLog.AsQueryable();
 
-            sb.AppendLine($"Всего пользователей: {telegramUsers.Count()}");
+            sb.AppendLine($"Всего пользователей: {telegramUsers.Count()} ({telegramUsers.Where(i => !i.IsDeactivated).Count()})");
             sb.AppendLine($"Администраторы: {telegramUsers.Count(u => u.IsAdmin)}");
             sb.AppendLine();
 
