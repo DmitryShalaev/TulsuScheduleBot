@@ -356,7 +356,7 @@ namespace ScheduleBot {
 
             await UpdatingClassrooms(dbContext, GetClassrooms(dbContext, jObject));
 
-            NGramSearch.Instance.Clear();
+            NGramSearch.Clear();
         }
 
         private static async Task<bool> UpdatingTeachers(ScheduleDbContext dbContext, List<string>? teachers) {
@@ -364,7 +364,6 @@ namespace ScheduleBot {
                 var _list = dbContext.TeacherLastUpdate.Select(i => i.Teacher).ToList();
 
                 IEnumerable<string> except = teachers.Except(_list);
-                var ff = except.ToList();
                 if(except.Any()) {
                     DateTime updDate = new DateTime(2000, 1, 1).ToUniversalTime();
                     await dbContext.TeacherLastUpdate.AddRangeAsync(except.Select(i => new TeacherLastUpdate() { Teacher = i, Update = updDate }));
@@ -375,12 +374,15 @@ namespace ScheduleBot {
 
                 except = _list.Except(teachers);
 
-                if(except.Any()) {
-                    var fd = dbContext.TeacherLastUpdate.Where(i => except.Contains(i.Teacher)).ToList();
-                    dbContext.TeacherLastUpdate.RemoveRange(fd);
+                try {
+                    if(except.Any()) {
+                        dbContext.TeacherLastUpdate.RemoveRange(dbContext.TeacherLastUpdate.Where(i => except.Contains(i.Teacher)));
+                    }
+                } catch(Exception) {
+                } finally {
+                    dbContext.ClearContext();
+                    await dbContext.SaveChangesAsync();
                 }
-
-                await dbContext.SaveChangesAsync();
 
                 return true;
             }
@@ -403,12 +405,15 @@ namespace ScheduleBot {
 
                 except = _list.Except(teachers);
 
-                if(except.Any()) {
-                    var fd = dbContext.ClassroomLastUpdate.Where(i => except.Contains(i.Classroom)).ToList();
-                    dbContext.ClassroomLastUpdate.RemoveRange(fd);
+                try {
+                    if(except.Any()) {
+                        dbContext.ClassroomLastUpdate.RemoveRange(dbContext.ClassroomLastUpdate.Where(i => except.Contains(i.Classroom)));
+                    }
+                } catch(Exception) {
+                } finally {
+                    dbContext.ClearContext();
+                    await dbContext.SaveChangesAsync();
                 }
-
-                await dbContext.SaveChangesAsync();
 
                 return true;
             }

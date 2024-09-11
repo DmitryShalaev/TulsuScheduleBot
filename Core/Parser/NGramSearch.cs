@@ -5,8 +5,8 @@ using Core.DB;
 namespace Core.Parser {
     public class NGramSearch {
         private static NGramSearch? instance;
-        private ConcurrentDictionary<string, HashSet<string>> TeachersNgramsDict;
-        private ConcurrentDictionary<string, HashSet<string>> ClassroomNgramsDict;
+        private readonly ConcurrentDictionary<string, HashSet<string>> TeachersNgramsDict;
+        private readonly ConcurrentDictionary<string, HashSet<string>> ClassroomNgramsDict;
 
         private NGramSearch() {
             TeachersNgramsDict = [];
@@ -15,7 +15,7 @@ namespace Core.Parser {
 
         public static NGramSearch Instance => instance ??= new NGramSearch();
 
-        public void Clear() {
+        public static void Clear() {
             instance = null;
 
             GC.Collect();
