@@ -198,7 +198,9 @@ namespace Core.Bot.MessagesQueue {
 
                     dbContext.SaveChanges();
                 }
-            } catch(ApiRequestException ex) when(ex.Message.Contains("message is not modified")) {
+            } catch(ApiRequestException ex) when(
+ex.Message.Contains("message is not modified") ||
+ex.Message.Contains("message can't be deleted for everyone")) {
 
             } catch(Exception e) {
                 await ErrorReport.Send(msg, e);
