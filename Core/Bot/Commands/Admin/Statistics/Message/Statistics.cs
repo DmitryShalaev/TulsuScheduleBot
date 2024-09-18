@@ -68,8 +68,8 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             foreach(TelegramUser? topUser in topUsers) {
                 string userName = Statics.EscapeSpecialCharacters($"{topUser.FirstName} {topUser.LastName}");
                 sb.AppendLine(!string.IsNullOrWhiteSpace(topUser.Username)
-                    ? $"[{userName}](https://t.me/{topUser.Username})"
-                    : userName);
+                    ? $"[{userName}](https://t.me/{topUser.Username}) ({topUser.TotalRequests})"
+                    : $"{userName} ({topUser.TotalRequests})");
             }
 
             sb.AppendLine();
