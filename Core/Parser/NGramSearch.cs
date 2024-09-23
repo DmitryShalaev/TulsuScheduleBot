@@ -8,12 +8,23 @@ namespace Core.Parser {
         private readonly ConcurrentDictionary<string, HashSet<string>> TeachersNgramsDict;
         private readonly ConcurrentDictionary<string, HashSet<string>> ClassroomNgramsDict;
 
+        private static readonly object _lock = new();
+
         private NGramSearch() {
             TeachersNgramsDict = [];
             ClassroomNgramsDict = [];
         }
 
-        public static NGramSearch Instance => instance ??= new NGramSearch();
+        public static NGramSearch Instance() {
+
+            if(instance is null) {
+                lock(_lock) {
+                    instance ??= new NGramSearch();
+                }
+            }
+
+            return instance;
+        }
 
         public static void Clear() {
             instance = null;
