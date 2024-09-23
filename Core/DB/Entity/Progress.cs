@@ -20,7 +20,10 @@ namespace Core.DB.Entity {
         public Progress() { }
 
         public Progress(JToken json, string studentID) {
-            Discipline = json.Value<string>("DISCIPLINE") ?? throw new NullReferenceException("DISCIPLINE");
+            ArgumentNullException.ThrowIfNull(json);
+            if(string.IsNullOrWhiteSpace(studentID)) throw new ArgumentException("Student ID cannot be null or whitespace", nameof(studentID));
+
+            Discipline = json.Value<string>("DISCIPLINE") ?? throw new NullReferenceException("Field 'DISCIPLINE' is missing in JSON");
             Mark = json.Value<int?>("MARK");
             Term = json.Value<int>("TERM");
             MarkTitle = json.Value<string>("MARK_TITLE");

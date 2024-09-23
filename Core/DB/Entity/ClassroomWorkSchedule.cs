@@ -33,24 +33,37 @@ namespace Core.DB.Entity {
         public ClassroomWorkSchedule() { }
 
         public ClassroomWorkSchedule(JToken json) {
-            LectureHall = json.Value<string>("AUD") ?? throw new NullReferenceException("AUD");
-            Date = DateOnly.Parse(json.Value<string>("DATE_Z") ?? throw new NullReferenceException("DATE_Z"));
-            Name = json.Value<string>("DISCIP") ?? throw new NullReferenceException("DISCIP");
-            Type = json.Value<string>("KOW") ?? throw new NullReferenceException("KOW");
+            ArgumentNullException.ThrowIfNull(json);
 
-            foreach(JToken? item in json.Value<JToken>("GROUPS") ?? "") {
-                string? GROUP_P = item?.Value<string>("GROUP_P");
-                string? PRIM = item?.Value<string>("PRIM");
-                Groups += $"{GROUP_P}{$"{(string.IsNullOrWhiteSpace(PRIM) ? "" : $": {PRIM}")}"}; ";
+            LectureHall = json.Value<string>("AUD") ?? throw new NullReferenceException("Field 'AUD' is missing in JSON");
+            Date = DateOnly.Parse(json.Value<string>("DATE_Z") ?? throw new NullReferenceException("Field 'DATE_Z' is missing in JSON"));
+            Name = json.Value<string>("DISCIP") ?? throw new NullReferenceException("Field 'DISCIP' is missing in JSON");
+            Type = json.Value<string>("KOW") ?? throw new NullReferenceException("Field 'KOW' is missing in JSON");
+
+            JToken? groupItems = json.Value<JToken>("GROUPS");
+            if(groupItems != null && groupItems.HasValues) {
+                var groupList = new List<string>();
+                foreach(JToken? item in groupItems) {
+                    string? groupP = item?.Value<string>("GROUP_P");
+                    string? prim = item?.Value<string>("PRIM");
+
+                    if(!string.IsNullOrWhiteSpace(groupP)) {
+                        groupList.Add(string.IsNullOrWhiteSpace(prim) ? groupP : $"{groupP}: {prim}");
+                    }
+                }
+
+                Groups = string.Join("; ", groupList);
             }
-
-            Groups = Groups?[..^2];
 
             Lecturer = json.Value<string?>("PREP");
 
             Class = (Class)Enum.Parse(typeof(Class), (json.Value<string>("CLASS") ?? "other").Replace("default", "def"));
 
-            string[] times = (json.Value<string>("TIME_Z") ?? throw new NullReferenceException("TIME_Z")).Split('-');
+            string timeRange = json.Value<string>("TIME_Z") ?? throw new NullReferenceException("Field 'TIME_Z' is missing in JSON");
+            string[] times = timeRange.Split('-');
+            if(times.Length != 2)
+                throw new FormatException($"Invalid time range format in 'TIME_Z': {timeRange}");
+
             StartTime = TimeOnly.Parse(times[0]);
             EndTime = TimeOnly.Parse(times[1]);
         }

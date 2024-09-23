@@ -50,6 +50,9 @@ namespace ScheduleBot {
         }
 
         public async Task<bool> UpdatingProgress(ScheduleDbContext dbContext, string studentID, int updateAttemptTime) {
+#if DEBUG
+            updateAttemptTime = 0;
+#endif
             StudentIDLastUpdate? studentIDLastUpdate = await dbContext.StudentIDLastUpdate.FirstOrDefaultAsync(i => i.StudentID == studentID);
             if(studentIDLastUpdate is null) {
                 studentIDLastUpdate = new() { StudentID = studentID, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };

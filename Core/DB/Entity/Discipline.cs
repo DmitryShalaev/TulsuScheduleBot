@@ -46,19 +46,31 @@ namespace Core.DB.Entity {
         public Discipline() { }
 
         public Discipline(JToken json, string group) {
-            LectureHall = json.Value<string>("AUD") ?? throw new NullReferenceException("AUD");
-            Date = DateOnly.Parse(json.Value<string>("DATE_Z") ?? throw new NullReferenceException("DATE_Z"));
-            Name = json.Value<string>("DISCIP") ?? throw new NullReferenceException("DISCIP");
-            Type = json.Value<string>("KOW") ?? throw new NullReferenceException("KOW");
+            ArgumentNullException.ThrowIfNull(json);
+            if(string.IsNullOrWhiteSpace(group)) throw new ArgumentException("Group cannot be null or whitespace", nameof(group));
 
-            string? _subgroup = json.Value<JToken>("GROUPS")?[0]?.Value<string>("PRIM");
-            Subgroup = string.IsNullOrWhiteSpace(_subgroup) ? null : _subgroup;
+            LectureHall = json.Value<string>("AUD") ?? throw new NullReferenceException("Field 'AUD' is missing in JSON");
+            Date = DateOnly.Parse(json.Value<string>("DATE_Z") ?? throw new NullReferenceException("Field 'DATE_Z' is missing in JSON"));
+            Name = json.Value<string>("DISCIP") ?? throw new NullReferenceException("Field 'DISCIP' is missing in JSON");
+            Type = json.Value<string>("KOW") ?? throw new NullReferenceException("Field 'KOW' is missing in JSON");
+
+            JToken? groups = json.Value<JToken>("GROUPS");
+            if(groups != null && groups.HasValues) {
+                string? _subgroup = groups[0]?.Value<string>("PRIM");
+                Subgroup = string.IsNullOrWhiteSpace(_subgroup) ? null : _subgroup;
+            } else {
+                Subgroup = null;
+            }
 
             Lecturer = json.Value<string?>("PREP");
 
             Class = (Class)Enum.Parse(typeof(Class), (json.Value<string>("CLASS") ?? "other").Replace("default", "def"));
 
-            string[] times = (json.Value<string>("TIME_Z") ?? throw new NullReferenceException("TIME_Z")).Split('-');
+            string timeRange = json.Value<string>("TIME_Z") ?? throw new NullReferenceException("Field 'TIME_Z' is missing in JSON");
+            string[] times = timeRange.Split('-');
+            if(times.Length != 2)
+                throw new FormatException($"Invalid time range format in 'TIME_Z': {timeRange}");
+
             StartTime = TimeOnly.Parse(times[0]);
             EndTime = TimeOnly.Parse(times[1]);
 
@@ -66,15 +78,19 @@ namespace Core.DB.Entity {
         }
 
         public Discipline(CustomDiscipline discipline) {
-            Name = Statics.EscapeSpecialCharacters(discipline.Name ?? throw new NullReferenceException("Name"));
+            ArgumentNullException.ThrowIfNull(discipline);
+
+            Name = Escape(discipline.Name, nameof(discipline.Name));
             Class = Class.other;
-            Lecturer = Statics.EscapeSpecialCharacters(discipline.Lecturer?.Trim() ?? "");
-            LectureHall = Statics.EscapeSpecialCharacters(discipline.LectureHall ?? throw new NullReferenceException("LectureHall"));
-            StartTime = discipline.StartTime ?? throw new NullReferenceException("StartTime");
-            EndTime = discipline.EndTime ?? throw new NullReferenceException("EndTime");
+            Lecturer = Escape(discipline.Lecturer?.Trim() ?? string.Empty, nameof(discipline.Lecturer));
+            LectureHall = Escape(discipline.LectureHall, nameof(discipline.LectureHall));
+            StartTime = discipline.StartTime ?? throw new NullReferenceException($"{nameof(discipline.StartTime)} cannot be null");
+            EndTime = discipline.EndTime ?? throw new NullReferenceException($"{nameof(discipline.EndTime)} cannot be null");
             Date = discipline.Date;
-            Type = Statics.EscapeSpecialCharacters(discipline.Type ?? throw new NullReferenceException("Type"));
+            Type = Escape(discipline.Type, nameof(discipline.Type));
         }
+
+        private static string Escape(string? input, string fieldName) => input == null ? throw new NullReferenceException($"{fieldName} cannot be null") : Statics.EscapeSpecialCharacters(input);
 
         public Discipline(Discipline discipline) {
             Name = discipline.Name;

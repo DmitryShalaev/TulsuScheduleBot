@@ -22,7 +22,7 @@ namespace Core.Bot.Commands.Student.Other.AcademicPerformance.Message {
             await Statics.ProgressRelevanceAsync(dbContext, chatId, StudentID, null, false);
             await dbContext.SaveChangesAsync();
 
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["AcademicPerformance"], replyMarkup: DefaultMessage.GetTermsKeyboardMarkup(dbContext, StudentID));
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["AcademicPerformance"], replyMarkup: DefaultMessage.GetTermsKeyboardMarkup(dbContext, StudentID), deletePrevious: true);
         }
     }
 }

@@ -203,7 +203,13 @@ namespace Core.Bot {
 
             bool siteIsNotResponding = false;
 
-            if(studentIDlastUpdate is null || (DateTime.Now - studentIDlastUpdate)?.TotalMinutes > commands.Config.StudentIDUpdateTime) {
+            if(
+#if !DEBUG
+                studentIDlastUpdate is null || (DateTime.Now - studentIDlastUpdate)?.TotalMinutes > commands.Config.StudentIDUpdateTime
+#else
+                true
+#endif
+                ) {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: commands.Message["WeNeedToWait"], saveMessageId: true);
                 siteIsNotResponding = true;
 
@@ -219,13 +225,13 @@ namespace Core.Bot {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"{commands.Message["AcademicPerformanceIsRelevantOn"]} {studentIDlastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup, deletePrevious: siteIsNotResponding);
         }
 
-        public static string EscapeSpecialCharacters(string input) { 
-            char[] specialChars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
+        private static readonly HashSet<char> SpecialChars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
 
-            var escapedString = new StringBuilder();
+        public static string EscapeSpecialCharacters(string input) {
+            var escapedString = new StringBuilder(input.Length);
 
             foreach(char c in input) {
-                if(Array.Exists(specialChars, element => element == c)) 
+                if(SpecialChars.Contains(c))
                     escapedString.Append('\\');
 
                 escapedString.Append(c);
