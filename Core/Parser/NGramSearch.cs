@@ -15,15 +15,18 @@ namespace Core.Parser {
             ClassroomNgramsDict = [];
         }
 
-        public static NGramSearch Instance() {
+        public static NGramSearch Instance {
+            get {
 
-            if(instance is null) {
-                lock(_lock) {
-                    instance ??= new NGramSearch();
+                if(instance is null) {
+                    lock(_lock) {
+                        instance ??= new NGramSearch();
+                    }
                 }
-            }
 
-            return instance;
+                return instance;
+
+            }
         }
 
         public static void Clear() {
