@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
+using Core.Bot;
+
 using Microsoft.EntityFrameworkCore;
 
 using Newtonsoft.Json.Linq;
@@ -64,14 +66,14 @@ namespace Core.DB.Entity {
         }
 
         public Discipline(CustomDiscipline discipline) {
-            Name = discipline.Name ?? throw new NullReferenceException("Name");
+            Name = Statics.EscapeSpecialCharacters(discipline.Name ?? throw new NullReferenceException("Name"));
             Class = Class.other;
-            Lecturer = discipline.Lecturer?.Trim();
-            LectureHall = discipline.LectureHall ?? throw new NullReferenceException("LectureHall");
+            Lecturer = Statics.EscapeSpecialCharacters(discipline.Lecturer?.Trim() ?? "");
+            LectureHall = Statics.EscapeSpecialCharacters(discipline.LectureHall ?? throw new NullReferenceException("LectureHall"));
             StartTime = discipline.StartTime ?? throw new NullReferenceException("StartTime");
             EndTime = discipline.EndTime ?? throw new NullReferenceException("EndTime");
             Date = discipline.Date;
-            Type = discipline.Type ?? throw new NullReferenceException("Type");
+            Type = Statics.EscapeSpecialCharacters(discipline.Type ?? throw new NullReferenceException("Type"));
         }
 
         public Discipline(Discipline discipline) {

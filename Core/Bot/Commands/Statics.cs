@@ -219,17 +219,14 @@ namespace Core.Bot {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"{commands.Message["AcademicPerformanceIsRelevantOn"]} {studentIDlastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup, deletePrevious: siteIsNotResponding);
         }
 
-        public static string EscapeSpecialCharacters(string input) {
-            // List of special characters that need to be escaped in Markdown
+        public static string EscapeSpecialCharacters(string input) { 
             char[] specialChars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
 
             var escapedString = new StringBuilder();
 
             foreach(char c in input) {
-                // If the character is special, add a backslash before it
-                if(Array.Exists(specialChars, element => element == c)) {
+                if(Array.Exists(specialChars, element => element == c)) 
                     escapedString.Append('\\');
-                }
 
                 escapedString.Append(c);
             }

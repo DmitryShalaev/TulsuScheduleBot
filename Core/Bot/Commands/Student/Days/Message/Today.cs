@@ -20,6 +20,7 @@ namespace Core.Bot.Commands.Student.Days.Message {
             var date = DateOnly.FromDateTime(DateTime.Now);
 
             (string, bool) schedule = Scheduler.GetScheduleByDate(dbContext, date, user);
+
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: schedule.Item1, replyMarkup: DefaultCallback.GetInlineKeyboardButton(date, user, schedule.Item2), parseMode: ParseMode.Markdown);
         }
     }
