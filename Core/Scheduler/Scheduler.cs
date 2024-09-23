@@ -167,9 +167,13 @@ namespace ScheduleBot {
 
             bool linkEnabled = user.Settings.TeacherLincsEnabled;
 
+            var today = DateOnly.FromDateTime(DateTime.Now);
+
             // Формирование строк для каждого предмета
             foreach(ExtendedDiscipline? item in scheduleList) {
-                sb.Append(item.Deleted ? "<s>" : "")
+                bool addition = item.DateOfAddition?.AddDays(5) > today;
+
+                sb.Append(item.Deleted ? "<s>" : addition ? "<u>" : "")
                   .AppendLine($"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}")
                   .AppendLine($"📎 {item.Name} ({item.Type}) {(string.IsNullOrWhiteSpace(item.Subgroup) ? item.IntersectionMark : item.Subgroup)}");
 
@@ -181,7 +185,7 @@ namespace ScheduleBot {
                     }
                 }
 
-                sb.AppendLine(item.Deleted ? "</s>" : "");
+                sb.AppendLine(item.Deleted ? "</s>" : addition ? "</u>" : "");
             }
 
             return sb.ToString();

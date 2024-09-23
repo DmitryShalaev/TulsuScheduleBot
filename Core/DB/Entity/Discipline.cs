@@ -26,6 +26,8 @@ namespace Core.DB.Entity {
 
         public DateOnly Date { get; set; }
 
+        public DateOnly? DateOfAddition { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
 

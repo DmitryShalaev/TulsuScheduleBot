@@ -127,7 +127,6 @@ namespace ScheduleBot {
 
                     IEnumerable<Discipline> except = disciplines.Except(_list);
                     if(except.Any()) {
-                        var dd = except.ToList();
                         await dbContext.Disciplines.AddRangeAsync(except);
 
                         if(_list.Count != 0)
