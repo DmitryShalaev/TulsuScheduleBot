@@ -63,7 +63,7 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
 
         private static void AppendTopUsers(StringBuilder sb, IQueryable<TelegramUser> users) {
             sb.AppendLine($"--Топ пользователей по активности--");
-            var topUsers = users.OrderByDescending(u => u.TotalRequests).Take(5).ToList();
+            var topUsers = users.OrderByDescending(u => u.TotalRequests).Take(10).ToList();
 
             foreach(TelegramUser? topUser in topUsers) {
                 string userName = Statics.EscapeSpecialCharacters($"{topUser.FirstName} {topUser.LastName}");
