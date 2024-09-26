@@ -40,6 +40,12 @@ namespace Core.Bot.MessagesQueue {
         private static readonly TimeSpan burstInterval = TimeSpan.FromSeconds(1); // Интервал времени для всплеска
 
         #region Messag
+        public static void SendPhoto(ChatId chatId, string path, IReplyMarkup? replyMarkup = null, bool deleteFile = false) {
+            var message = new PhotoMessage(chatId, path, replyMarkup, deleteFile);
+
+            AddMessageToQueue(chatId, message);
+        }
+
         public static void SendTextMessage(ChatId chatId, string text, IReplyMarkup? replyMarkup = null, ParseMode? parseMode = null, bool? disableNotification = null, bool deletePrevious = false, bool saveMessageId = false) {
             var message = new TextMessage(chatId, text, replyMarkup, parseMode, disableNotification, deletePrevious, saveMessageId);
 
@@ -184,12 +190,23 @@ namespace Core.Bot.MessagesQueue {
 
                         await BotClient.AnswerInlineQueryAsync(inlineQuery.InlineQueryId, inlineQuery.Results, cacheTime: inlineQuery.CacheTime, isPersonal: inlineQuery.IsPersonal);
                         break;
+
+                    case PhotoMessage photoMessage:
+                        msg = $"PhotoMessage {photoMessage.ChatId}";
+
+                        using(Stream stream = System.IO.File.OpenRead(photoMessage.Path))
+                            await BotClient.SendPhotoAsync(chatId: photoMessage.ChatId, photo: InputFile.FromStream(stream), replyMarkup: photoMessage.ReplyMarkup);
+
+                        if(photoMessage.DeleteFile && System.IO.File.Exists(photoMessage.Path)) System.IO.File.Delete(photoMessage.Path);
+
+                        break;
                 }
             } catch(ApiRequestException ex) when(
                                         ex.Message.Contains("bot was blocked by the user") ||
                                         ex.Message.Contains("user is deactivated") ||
                                         ex.Message.Contains("chat not found") ||
-                                        ex.Message.Contains("bot was kicked from the group chat")) {
+                                        ex.Message.Contains("bot was kicked from the group chat")
+                                        ) {
 
                 using(ScheduleDbContext dbContext = new()) {
                     DB.Entity.TelegramUser user = await dbContext.TelegramUsers.FirstAsync(u => u.ChatID == message.ChatId.Identifier);
@@ -199,8 +216,9 @@ namespace Core.Bot.MessagesQueue {
                     dbContext.SaveChanges();
                 }
             } catch(ApiRequestException ex) when(
-ex.Message.Contains("message is not modified") ||
-ex.Message.Contains("message can't be deleted for everyone")) {
+                                        ex.Message.Contains("message is not modified") ||
+                                        ex.Message.Contains("message can't be deleted for everyone")
+                                        ) {
 
             } catch(Exception e) {
                 await ErrorReport.Send(msg, e);

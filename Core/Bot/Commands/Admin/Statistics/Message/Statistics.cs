@@ -6,7 +6,6 @@ using Core.DB.Entity;
 
 using Microsoft.EntityFrameworkCore;
 
-using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace Core.Bot.Commands.Admin.Statistics.Message {
@@ -16,11 +15,11 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
 
         public List<Mode> Modes => [Mode.Admin];
 
-        public Manager.Check Check => Manager.Check.none;
+        public Manager.Check Check => Manager.Check.admin;
 
         private static readonly UserCommands.ConfigStruct config = UserCommands.Instance.Config;
 
-        public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
+        public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             StringBuilder sb = new();
 
             DateTime today = DateTime.Now.Date;
@@ -44,23 +43,7 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             AppendScheduleProfileStats(sb, dbContext);
 
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: Statics.AdminPanelKeyboardMarkup, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
-
-            var activityData = dbContext.MessageLog
-        .GroupBy(m => new {
-            m.Date.Date,
-        })
-        .Select(g => new ActivityData {
-            Date = g.Min(m => m.Date),
-            Count = g.Count()
-        })
-        .ToList();
-
-            var path = HeatmapGenerator.DrawHeatmap(activityData);
-
-            using(Stream stream = System.IO.File.OpenRead(path)) {
-                await TelegramBot.Instance.botClient.SendPhotoAsync(chatId, InputFile.FromStream(stream));
-
-            }
+            return Task.CompletedTask;
         }
 
         private static void AppendNewUsersStats(StringBuilder sb, IQueryable<TelegramUser> users, DateTime today, DateTime startOfWeek, DateTime startOfMonth) {

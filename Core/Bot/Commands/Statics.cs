@@ -68,7 +68,7 @@ namespace Core.Bot {
 
         public static readonly ReplyKeyboardMarkup AdminPanelKeyboardMarkup = new(new[] {
                             new KeyboardButton[] { "Отзывы", "Статистика"},
-                                                       ["Рассылка"],
+                                                  ["Рассылка","Heatmap"],
 
                             [commands.Message["Back"]]
                         }) { ResizeKeyboard = true };
@@ -225,7 +225,7 @@ namespace Core.Bot {
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"{commands.Message["AcademicPerformanceIsRelevantOn"]} {studentIDlastUpdate:dd.MM HH:mm}", replyMarkup: replyMarkup, deletePrevious: siteIsNotResponding);
         }
 
-        private static readonly HashSet<char> SpecialChars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
+        private static readonly HashSet<char> SpecialChars = ['_', '*', '[', '`'];
 
         public static string EscapeSpecialCharacters(string input) {
             var escapedString = new StringBuilder(input.Length);
