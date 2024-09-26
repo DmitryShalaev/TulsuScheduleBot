@@ -16,13 +16,13 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
         public Manager.Check Check => Manager.Check.admin;
 
         public Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
-            DateTime months = DateTime.UtcNow.Date.AddMonths(-1);
+            DateTime months = DateTime.Now.Date.AddMonths(-1);
 
-            var activityData = dbContext.MessageLog.Where(m => m.Date > months)
-                                                   .GroupBy(o => o.Date.Date)
+            var activityData = dbContext.MessageLog.Where(m => m.Date.ToLocalTime() > months)
+                                                   .GroupBy(o => o.Date.ToLocalTime().Date)
                                                    .OrderBy(d => d.Key)
                                                    .Select(g => new ActivityData {
-                                                       Date = g.Key,
+                                                       Date = g.Key.ToLocalTime(),
                                                        Items = g.GroupBy(o => o.Date.ToLocalTime().Hour)
                                                            .Select(c => new HourlyActivity {
                                                                Hour = c.Key,
