@@ -27,8 +27,7 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
                                                            .Select(c => new HourlyActivity {
                                                                Hour = c.Key,
                                                                Count = c.Count()
-                                                           })
-                                                           .OrderByDescending(h => h.Hour).ToList()
+                                                           }).ToList()
                                                    }).ToList();
 
             MessagesQueue.Message.SendPhoto(chatId: chatId, path: DrawHeatmap(activityData), replyMarkup: Statics.AdminPanelKeyboardMarkup, deleteFile: true);
@@ -36,9 +35,14 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             return Task.CompletedTask;
         }
 
+        public static SKPaint textPaint = new() {
+            Color = SKColors.White,
+            TextSize = 12,
+        };
+
         public static string DrawHeatmap(List<ActivityData> activityData) {
             // Размеры для клеток и отступов
-            int cellSize = 50; // Размер одной ячейки
+            int cellSize = 55; // Размер одной ячейки
             int paddingLeft = 25; // Отступ для подписей дней
             int paddingTop = 25;  // Отступ сверху для подписей часов
             int daysCount = activityData.Count; // Количество дней (по горизонтали)
@@ -52,6 +56,8 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
 
                 // Получаем максимальное значение активности для нормализации
                 int maxCount = activityData.SelectMany(a => a.Items).Max(i => i.Count);
+
+                var textBounds = new SKRect();
 
                 // Отрисовываем тепловую карту
                 for(int dayIndex = 0; dayIndex < activityData.Count; dayIndex++) {
@@ -75,36 +81,39 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
 
                         // Рисуем ячейку
                         canvas.DrawRect(x, y, cellSize, cellSize, paint);
+
+                        textPaint.MeasureText($"{count}", ref textBounds);
+
+                        float xText = x + cellSize / 2 - textBounds.Width / 2;
+                        float yText = y + cellSize / 2 - textBounds.Height / 2 - textBounds.Top;
+
+                        canvas.DrawText($"{count}", xText, yText, textPaint);
                     }
                 }
 
                 // Горизонтальная ось
-                using(var dayTextPaint = new SKPaint {
-                    Color = SKColors.White,
-                    TextSize = 12
-                }) {
-                    for(int i = 0; i < daysCount; i++) {
-                        DateTime date = activityData[i].Date;
-                        string dayLabel = date.ToString("dd.MM");
+                for(int i = 0; i < daysCount; i++) {
+                    DateTime date = activityData[i].Date;
+                    string dayLabel = date.ToString("dd.MM");
 
-                        // Позиционируем текст для каждого дня
-                        int dayX = paddingLeft + i * cellSize + 10;
-                        canvas.DrawText(dayLabel, dayX, imageHeight - 10, dayTextPaint);
-                    }
+                    // Измеряем текст
+                    textPaint.MeasureText(dayLabel, ref textBounds);
+
+                    // Позиционируем текст по центру клетки для каждого дня
+                    float dayX = paddingLeft + i * cellSize + cellSize / 2 - textBounds.Width / 2;
+                    canvas.DrawText(dayLabel, dayX, imageHeight - 10, textPaint);
                 }
 
                 // Вертикальная ось
-                using(var hourTextPaint = new SKPaint {
-                    Color = SKColors.White,
-                    TextSize = 12
-                }) {
-                    for(int i = 23; i >= 0; i--) {
-                        string hourLabel = $"{i}";
+                for(int i = 23; i >= 0; i--) {
+                    string hourLabel = $"{i}";
 
-                        // Позиционируем текст для каждого часа
-                        int hourY = paddingTop + i * cellSize + cellSize / 2 + 6;
-                        canvas.DrawText(hourLabel, 5, hourY, hourTextPaint);
-                    }
+                    // Измеряем текст
+                    textPaint.MeasureText(hourLabel, ref textBounds);
+
+                    // Позиционируем текст по центру клетки для каждого часа
+                    float hourY = paddingTop + i * cellSize + cellSize / 2 - textBounds.Height / 2 - textBounds.Top;
+                    canvas.DrawText(hourLabel, 5, hourY, textPaint);
                 }
 
                 // Сохранение изображения во временный файл
