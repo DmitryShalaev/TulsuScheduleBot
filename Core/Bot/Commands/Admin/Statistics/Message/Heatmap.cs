@@ -59,35 +59,40 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
 
                 var textBounds = new SKRect();
 
-                // Отрисовываем тепловую карту
-                for(int dayIndex = 0; dayIndex < activityData.Count; dayIndex++) {
-                    ActivityData dayData = activityData[dayIndex];
+                using(SKPaint textPaint = new() {
+                    Color = SKColors.White,
+                    TextSize = 10,
+                }) {
+                    // Отрисовываем тепловую карту
+                    for(int dayIndex = 0; dayIndex < activityData.Count; dayIndex++) {
+                        ActivityData dayData = activityData[dayIndex];
 
-                    foreach(HourlyActivity hourData in dayData.Items) {
-                        int hour = hourData.Hour;
-                        int count = hourData.Count;
+                        foreach(HourlyActivity hourData in dayData.Items) {
+                            int hour = hourData.Hour;
+                            int count = hourData.Count;
 
-                        // Рассчитываем интенсивность цвета
-                        float intensity = (float)count / maxCount;
-                        byte greenValue = (byte)(255 * intensity); // Чем больше значение, тем ярче зеленый цвет
+                            // Рассчитываем интенсивность цвета
+                            float intensity = (float)count / maxCount;
+                            byte greenValue = (byte)(255 * intensity); // Чем больше значение, тем ярче зеленый цвет
 
-                        var paint = new SKPaint {
-                            Color = new SKColor(0, greenValue, 0), // Оттенок зеленого
-                            Style = SKPaintStyle.Fill
-                        };
+                            var paint = new SKPaint {
+                                Color = new SKColor(0, greenValue, 0), // Оттенок зеленого
+                                Style = SKPaintStyle.Fill
+                            };
 
-                        int x = paddingLeft + dayIndex * cellSize; // X по дням
-                        int y = paddingTop + hour * cellSize;      // Y по часам
+                            int x = paddingLeft + dayIndex * cellSize; // X по дням
+                            int y = paddingTop + hour * cellSize;      // Y по часам
 
-                        // Рисуем ячейку
-                        canvas.DrawRect(x, y, cellSize, cellSize, paint);
+                            // Рисуем ячейку
+                            canvas.DrawRect(x, y, cellSize, cellSize, paint);
 
-                        textPaint.MeasureText($"{count}", ref textBounds);
+                            textPaint.MeasureText($"{count}", ref textBounds);
 
-                        float xText = x + cellSize / 2 - textBounds.Width / 2;
-                        float yText = y + cellSize / 2 - textBounds.Height / 2 - textBounds.Top;
+                            float xText = x + cellSize / 2 - textBounds.Width / 2;
+                            float yText = y + cellSize / 2 - textBounds.Height / 2 - textBounds.Top;
 
-                        canvas.DrawText($"{count}", xText, yText, textPaint);
+                            canvas.DrawText($"{count}", xText, yText, textPaint);
+                        }
                     }
                 }
 
