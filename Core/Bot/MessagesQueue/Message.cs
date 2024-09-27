@@ -26,7 +26,7 @@ namespace Core.Bot.MessagesQueue {
         // Переменные для глобального ограничения количества сообщений
         private static readonly SemaphoreSlim globalLock = new(1, 1);
 
-        private const int globalRateLimit = 30; // Максимальное количество сообщений в секунду
+        private const int globalRateLimit = 20; // Максимальное количество сообщений в секунду
         private static int globalMessageCount = 0;
 
         private static DateTime lastGlobalResetTime = DateTime.UtcNow;
@@ -36,7 +36,7 @@ namespace Core.Bot.MessagesQueue {
         private static readonly ConcurrentDictionary<ChatId, (int burstCount, DateTime lastMessageTime)> userBurstControl = new();
 
         // Настройки всплесков
-        private static readonly int burstLimit = 5; // Максимальное количество сообщений в всплеске
+        private static readonly int burstLimit = 4; // Максимальное количество сообщений в всплеске
         private static readonly TimeSpan burstInterval = TimeSpan.FromSeconds(1); // Интервал времени для всплеска
 
         #region Messag
