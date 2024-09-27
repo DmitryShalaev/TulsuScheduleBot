@@ -30,7 +30,7 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
                                                            }).ToList()
                                                    }).ToList();
 
-            MessagesQueue.Message.SendPhoto(chatId: chatId, path: DrawHeatmap(activityData), replyMarkup: Statics.AdminPanelKeyboardMarkup, deleteFile: true);
+            MessagesQueue.Message.SendDocument(chatId: chatId, path: DrawHeatmap(activityData), name: "Heatmap.png", replyMarkup: Statics.AdminPanelKeyboardMarkup, deleteFile: true); 
 
             return Task.CompletedTask;
         }
@@ -43,7 +43,7 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
         public static string DrawHeatmap(List<ActivityData> activityData) {
             // Размеры для клеток и отступов
             int cellSize = 55; // Размер одной ячейки
-            int paddingLeft = 25; // Отступ для подписей дней
+            int paddingLeft = 50; // Отступ для подписей дней
             int paddingTop = 25;  // Отступ сверху для подписей часов
             int daysCount = activityData.Count; // Количество дней (по горизонтали)
             int imageWidth = daysCount * cellSize + paddingLeft; // Ширина изображения

@@ -30,7 +30,7 @@ namespace Core.Bot.Commands.Admin.Feedbacks.Callback {
                 : Statics.EscapeSpecialCharacters($"{telegramUser.FirstName} {telegramUser.LastName}");
 
             MessagesQueue.Message.DeleteMessage(chatId: chatId, messageId: messageId);
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Ответ пльзователю: {username}", replyMarkup: Statics.CancelKeyboardMarkup, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: $"Ответ пользователю: {username}", replyMarkup: Statics.CancelKeyboardMarkup, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
         }
     }
 }

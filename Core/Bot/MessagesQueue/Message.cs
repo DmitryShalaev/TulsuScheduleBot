@@ -40,8 +40,14 @@ namespace Core.Bot.MessagesQueue {
         private static readonly TimeSpan burstInterval = TimeSpan.FromSeconds(1); // Интервал времени для всплеска
 
         #region Messag
-        public static void SendPhoto(ChatId chatId, string path, IReplyMarkup? replyMarkup = null, bool deleteFile = false) {
-            var message = new PhotoMessage(chatId, path, replyMarkup, deleteFile);
+        public static void SendPhoto(ChatId chatId, string path, string name, IReplyMarkup? replyMarkup = null, bool deleteFile = false) {
+            var message = new PhotoMessage(chatId, path, name, replyMarkup, deleteFile);
+
+            AddMessageToQueue(chatId, message);
+        }
+
+        public static void SendDocument(ChatId chatId, string path, string name, IReplyMarkup? replyMarkup = null, bool deleteFile = false) {
+            var message = new DocumentMessage(chatId, path, name, replyMarkup, deleteFile);
 
             AddMessageToQueue(chatId, message);
         }
@@ -195,9 +201,19 @@ namespace Core.Bot.MessagesQueue {
                         msg = $"PhotoMessage {photoMessage.ChatId}";
 
                         using(Stream stream = System.IO.File.OpenRead(photoMessage.Path))
-                            await BotClient.SendPhotoAsync(chatId: photoMessage.ChatId, photo: InputFile.FromStream(stream), replyMarkup: photoMessage.ReplyMarkup);
+                            await BotClient.SendPhotoAsync(chatId: photoMessage.ChatId, photo: InputFile.FromStream(stream, fileName: photoMessage.Name), replyMarkup: photoMessage.ReplyMarkup);
 
                         if(photoMessage.DeleteFile && System.IO.File.Exists(photoMessage.Path)) System.IO.File.Delete(photoMessage.Path);
+
+                        break;
+
+                    case DocumentMessage documentMessage:
+                        msg = $"DocumentMessage {documentMessage.ChatId}";
+
+                        using(Stream stream = System.IO.File.OpenRead(documentMessage.Path))
+                            await BotClient.SendDocumentAsync(chatId: documentMessage.ChatId, document: InputFile.FromStream(stream, fileName: documentMessage.Name), replyMarkup: documentMessage.ReplyMarkup, disableContentTypeDetection: false);
+
+                        if(documentMessage.DeleteFile && System.IO.File.Exists(documentMessage.Path)) System.IO.File.Delete(documentMessage.Path);
 
                         break;
                 }
