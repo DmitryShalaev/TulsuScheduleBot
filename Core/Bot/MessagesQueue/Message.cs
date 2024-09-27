@@ -26,7 +26,7 @@ namespace Core.Bot.MessagesQueue {
         // Переменные для глобального ограничения количества сообщений
         private static readonly SemaphoreSlim globalLock = new(1, 1);
 
-        private const int globalRateLimit = 20; // Максимальное количество сообщений в секунду
+        private const int globalRateLimit = 10; // Максимальное количество сообщений в секунду
         private static int globalMessageCount = 0;
 
         private static DateTime lastGlobalResetTime = DateTime.UtcNow;
