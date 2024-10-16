@@ -365,3 +365,5 @@ FodyWeavers.xsd
 /Properties/launchSettings.json
 /LongPolling/Properties/launchSettings.json
 /WebHook/Properties/launchSettings.json
+
+/Doxygen/html/

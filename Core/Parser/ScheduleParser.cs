@@ -7,7 +7,6 @@ using Core.Bot;
 using Core.Bot.Commands;
 using Core.DB;
 using Core.DB.Entity;
-using Core.Parser;
 
 using HtmlAgilityPack;
 
@@ -17,14 +16,31 @@ using Newtonsoft.Json.Linq;
 
 using Npgsql;
 
-namespace ScheduleBot {
+namespace Core.Parser {
+
+    /// <summary>
+    /// Класс <c>ScheduleParser</c> отвечает за парсинг и обновление данных о преподавателях, дисциплинах, аудиториях и прогрессе студентов.
+    /// </summary>
     public partial class ScheduleParser {
+
+        /// <summary>
+        /// HTTP-клиент для работы с запросами, поддерживающий автоматическое декомпрессирование.
+        /// </summary>
         private readonly HttpClientHandler clientHandler;
 
+        /// <summary>
+        /// Экземпляр класса (реализован паттерн Singleton).
+        /// </summary>
         private static ScheduleParser? instance;
 
+        /// <summary>
+        /// Свойство для доступа к единственному экземпляру <c>ScheduleParser</c>.
+        /// </summary>
         public static ScheduleParser Instance => instance ??= new ScheduleParser();
 
+        /// <summary>
+        /// Приватный конструктор для инициализации HTTP-клиента.
+        /// </summary>
         private ScheduleParser() {
             clientHandler = new() {
                 AllowAutoRedirect = false,
@@ -33,23 +49,42 @@ namespace ScheduleBot {
                 //Proxy = new WebProxy("127.0.0.1:8888"),
             };
 
+            // Запуск задачи получения данных о преподавателях
             Task.Run(GetTeachersData);
         }
 
+        /// <summary>
+        /// Получение и обновление данных о преподавателях.
+        /// </summary>
+
         public async Task GetTeachersData() {
             using(ScheduleDbContext dbContext = new()) {
-
+                // Обновление данных
                 await UpdatingData(dbContext);
 
-                var teachers = dbContext.Disciplines.Include(i => i.TeacherLastUpdate).Where(i => i.Lecturer != null && string.IsNullOrEmpty(i.TeacherLastUpdate.LinkProfile)).Select(i => i.Lecturer!).Distinct().ToList();
+                // Получение списка уникальных преподавателей
+                var teachers = dbContext.Disciplines
+                    .Include(i => i.TeacherLastUpdate)
+                    .Where(i => i.Lecturer != null && string.IsNullOrEmpty(i.TeacherLastUpdate.LinkProfile))
+                    .Select(i => i.Lecturer!).Distinct().ToList();
+
+                // Обновление информации по каждому преподавателю
                 foreach(string item in teachers) {
                     await UpdatingTeacherInfo(dbContext, item);
-                    await Task.Delay(TimeSpan.FromSeconds(10));
+                    await Task.Delay(TimeSpan.FromSeconds(10)); // Задержка для предотвращения перегрузки сервера
                 }
             }
         }
 
+        /// <summary>
+        /// Обновление прогресса студента.
+        /// </summary>
+        /// <param name="dbContext">Контекст базы данных.</param>
+        /// <param name="studentID">Идентификатор студента.</param>
+        /// <param name="updateAttemptTime">Задержка попытки обновления.</param>
+        /// <returns>Булево значение, указывающее на успешное обновление.</returns>
         public async Task<bool> UpdatingProgress(ScheduleDbContext dbContext, string studentID, int updateAttemptTime) {
+            // Для режима отладки сбрасываем время попытки обновления
 #if DEBUG
             updateAttemptTime = 0;
 #endif
@@ -58,6 +93,7 @@ namespace ScheduleBot {
                 studentIDLastUpdate = new() { StudentID = studentID, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
                 dbContext.StudentIDLastUpdate.Add(studentIDLastUpdate);
             } else {
+                // Проверка необходимости обновления
                 if((DateTime.Now - studentIDLastUpdate.UpdateAttempt.ToLocalTime()).TotalMinutes > updateAttemptTime)
                     studentIDLastUpdate.UpdateAttempt = DateTime.UtcNow;
                 else
@@ -66,21 +102,22 @@ namespace ScheduleBot {
 
             await dbContext.SaveChangesAsync();
 
+            // Получение прогресса
             List<Progress>? progress = await GetProgress(studentID);
             if(progress is not null) {
-
                 studentIDLastUpdate!.Update = DateTime.UtcNow;
 
                 var _list = dbContext.Progresses.Where(i => i.StudentID == studentID).ToList();
 
+                // Добавление новых записей
                 IEnumerable<Progress> except = progress.Except(_list);
                 if(except.Any()) {
                     dbContext.Progresses.AddRange(except);
-
                     await dbContext.SaveChangesAsync();
                     _list = [.. dbContext.Progresses.Where(i => i.StudentID == studentID)];
                 }
 
+                // Удаление устаревших записей
                 except = _list.Except(progress);
                 if(except.Any())
                     dbContext.Progresses.RemoveRange(except);
@@ -93,6 +130,15 @@ namespace ScheduleBot {
             return false;
         }
 
+        /// <summary>
+        /// Обновление дисциплин для группы.
+        /// </summary>
+        /// <param name="dbContext">Контекст базы данных.</param>
+        /// <param name="group">Название группы.</param>
+        /// <param name="updateAttemptTime">Задержка попытки обновления.</param>
+        /// <param name="lastDates">Последние даты обновления.</param>
+        /// <param name="lastDisciplines">Последние дисциплины.</param>
+        /// <returns>Булево значение, указывающее на успешное обновление.</returns>
         public async Task<bool> UpdatingDisciplines(ScheduleDbContext dbContext, string group, int updateAttemptTime, (DateOnly min, DateOnly max, string searchField)? lastDates = null, List<Discipline>? lastDisciplines = null) {
 #if DEBUG
             updateAttemptTime = 0;
@@ -102,6 +148,7 @@ namespace ScheduleBot {
                 groupLastUpdate = new() { Group = group, Update = DateTime.MinValue.ToUniversalTime(), UpdateAttempt = DateTime.UtcNow };
                 dbContext.GroupLastUpdate.Add(groupLastUpdate);
             } else {
+                // Проверка необходимости обновления
                 if((DateTime.Now - groupLastUpdate.UpdateAttempt.ToLocalTime()).TotalMinutes >= updateAttemptTime)
                     groupLastUpdate.UpdateAttempt = DateTime.UtcNow;
                 else
@@ -110,6 +157,7 @@ namespace ScheduleBot {
 
             await dbContext.SaveChangesAsync();
 
+            // Получение последних дат
             (DateOnly min, DateOnly max, string searchField)? dates = lastDates ?? await GetDates(group);
 
             if(dates is not null && dates.Value.searchField == "GROUP_P") {
@@ -121,6 +169,7 @@ namespace ScheduleBot {
 
                     groupLastUpdate.Update = DateTime.UtcNow;
 
+                    // Удаление устаревших дисциплин за пределами текущих дат
                     if(dbContext.Disciplines.Any(i => i.Group == group && (i.Date < dates.Value.min || i.Date > dates.Value.max))) {
                         dbContext.Disciplines.RemoveRange(dbContext.Disciplines.Where(i => i.Group == group && (i.Date < dates.Value.min || i.Date > dates.Value.max)));
                         await dbContext.SaveChangesAsync();
@@ -128,6 +177,7 @@ namespace ScheduleBot {
 
                     var _list = dbContext.Disciplines.Where(i => i.Group == group).ToList();
 
+                    // Добавление новых дисциплин
                     IEnumerable<Discipline> except = disciplines.Except(_list);
                     if(except.Any()) {
                         await dbContext.Disciplines.AddRangeAsync(except);
@@ -147,9 +197,7 @@ namespace ScheduleBot {
                     except = _list.Except(disciplines);
                     if(except.Any()) {
                         dbContext.Disciplines.RemoveRange(except);
-
                         updatedDisciplines.AddRange(except);
-
                         await dbContext.DeletedDisciplines.AddRangeAsync(except.Select(i => new DeletedDisciplines(i)));
                     }
 
@@ -157,9 +205,11 @@ namespace ScheduleBot {
 
                     await IntersectionOfSubgroups(dbContext, group);
 
+                    // Уведомления об обновлениях
                     if(updatedDisciplines.Count != 0) {
                         var date = DateOnly.FromDateTime(DateTime.Now);
-                        var _updatedDisciplines = updatedDisciplines.Where(i => i.Date >= date).Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList();
+                        var _updatedDisciplines = updatedDisciplines.Where(i => i.Date >= date)
+                            .Select(i => (i.Group, i.Date)).Distinct().OrderBy(i => i.Date).ToList();
 
                         if(_updatedDisciplines.Count != 0)
                             _ = Task.Run(() => Notifications.UpdatedDisciplines(_updatedDisciplines));
@@ -172,10 +222,15 @@ namespace ScheduleBot {
             return false;
         }
 
+        /// <summary>
+        /// Обработка исключений Postgres и добавление недостающих полей.
+        /// </summary>
+        /// <param name="dbContext">Контекст базы данных.</param>
+        /// <param name="ex">Исключение <see cref="DbUpdateException"/>.</param>
+        /// <returns>Булево значение, указывающее на успешную обработку.</returns>
         private async Task<bool> PostgresExceptionHandling(ScheduleDbContext dbContext, DbUpdateException ex) {
             dbContext.ClearContext();
 
-            // Получаем исключение, содержащее подробности ошибки
             if(ex.InnerException is PostgresException innerException) {
                 // Проверяем код ошибки (23503 указывает на нарушение внешнего ключа)
                 if(innerException.SqlState == "23503" && innerException.Detail is not null) {
@@ -187,11 +242,8 @@ namespace ScheduleBot {
                     await dbContext.MissingFields.AddAsync(new MissingFields { Field = missingValue });
 
                     if(innerException.MessageText.Contains("ClassroomLastUpdate")) {
-
                         await dbContext.ClassroomLastUpdate.AddAsync(new ClassroomLastUpdate { Classroom = missingValue, Update = updDate });
-
                     } else if(innerException.MessageText.Contains("TeacherLastUpdate")) {
-
                         await dbContext.TeacherLastUpdate.AddAsync(new TeacherLastUpdate { Teacher = missingValue, Update = updDate });
                     }
 
@@ -209,33 +261,56 @@ namespace ScheduleBot {
             return false;
         }
 
+        /// <summary>
+        /// Регулярное выражение для извлечения недостающих значений.
+        /// </summary>
         [GeneratedRegex(@"\(.+?\)=\((.+?)\)")]
         private static partial Regex ExtractMissingValueRegex();
 
+        /// <summary>
+        /// Извлечение недостающего значения из сообщения об ошибке.
+        /// </summary>
+        /// <param name="detail">Подробности об ошибке.</param>
+        /// <returns>Недостающее значение или <c>null</c>.</returns>
         private static string? ExtractMissingValue(string detail) {
             Match match = ExtractMissingValueRegex().Match(detail);
             return match.Success ? match.Groups[1].Value : null;
         }
 
+        /// <summary>
+        /// Вычисление пересечения подгрупп.
+        /// </summary>
+        /// <param name="dbContext">Контекст базы данных.</param>
+        /// <param name="group">Группа.</param>
         public async Task IntersectionOfSubgroups(ScheduleDbContext dbContext, string group) {
             IntersectionOfSubgroups? intersection = dbContext.IntersectionOfSubgroups.SingleOrDefault(i => i.Group == group);
 
             if(intersection is not null) {
                 await UpdatingDisciplines(dbContext, intersection.IntersectionWith, UserCommands.Instance.Config.DisciplineUpdateTime);
 
-                dbContext.Disciplines.Where(d => (d.Group == group || d.Group == intersection.IntersectionWith) && d.Class == intersection.Class)
-                                     .ToList()
-                                     .GroupBy(d => new { d.Name, d.Lecturer, d.LectureHall, d.Date, d.StartTime, d.EndTime })
-                                     .Where(g => g.Count() > 1)
-                                     .SelectMany(g => g)
-                                     .Where(i => i.Group == group)
-                                     .ToList()
-                                     .ForEach(d => d.IntersectionMark = intersection.Mark);
+                dbContext.Disciplines
+                    .Where(d => (d.Group == group || d.Group == intersection.IntersectionWith) && d.Class == intersection.Class)
+                    .ToList()
+                    .GroupBy(d => new { d.Name, d.Lecturer, d.LectureHall, d.Date, d.StartTime, d.EndTime })
+                    .Where(g => g.Count() > 1)
+                    .SelectMany(g => g)
+                    .Where(i => i.Group == group)
+                    .ToList()
+                    .ForEach(d => d.IntersectionMark = intersection.Mark);
 
                 await dbContext.SaveChangesAsync();
             }
         }
 
+        /// <summary>
+        /// Обновление расписания преподавателя.
+        /// </summary>
+        /// <param name="dbContext">Контекст базы данных.</param>
+        /// <param name="teacher">Имя преподавателя.</param>
+        /// <param name="updateAttemptTime">Задержка попытки обновления.</param>
+        /// <param name="lastDates">Последние даты обновления.</param>
+        /// <param name="lastTeacherWorkSchedule">Последнее расписание преподавателя.</param>
+        /// <returns>Булево значение, указывающее на успешное обновление.</returns>
         public async Task<bool> UpdatingTeacherWorkSchedule(ScheduleDbContext dbContext, string teacher, int updateAttemptTime, (DateOnly min, DateOnly max, string searchField)? lastDates = null, List<TeacherWorkSchedule>? lastTeacherWorkSchedule = null) {
             TeacherLastUpdate? teacherLastUpdate = await dbContext.TeacherLastUpdate.FirstOrDefaultAsync(i => i.Teacher == teacher);
             if(teacherLastUpdate is null) {
@@ -294,6 +369,16 @@ namespace ScheduleBot {
             return false;
         }
 
+        /// <summary>
+        /// Обновление расписания для аудитории.
+        /// </summary>
+        /// <param name="dbContext">Контекст базы данных.</param>
+        /// <param name="classroom">Название аудитории.</param>
+        /// <param name="updateAttemptTime">Задержка попытки обновления.</param>
+        /// <param name="lastDates">Последние даты обновления.</param>
+        /// <param name="lastClassroomWorkSchedule">Последнее расписание аудитории.</param>
+        /// <returns>Булево значение, указывающее на успешное обновление.</returns>
+
         public async Task<bool> UpdatingClassroomWorkSchedule(ScheduleDbContext dbContext, string classroom, int updateAttemptTime, (DateOnly min, DateOnly max, string searchField)? lastDates = null, List<ClassroomWorkSchedule>? lastClassroomWorkSchedule = null) {
             ClassroomLastUpdate? classroomLastUpdate = await dbContext.ClassroomLastUpdate.FirstOrDefaultAsync(i => i.Classroom == classroom);
             if(classroomLastUpdate is null) {
@@ -350,6 +435,12 @@ namespace ScheduleBot {
             return false;
         }
 
+        /// <summary>
+        /// Обновление данных преподавателей и аудиторий.
+        /// </summary>
+        /// <param name="dbContext">Контекст базы данных.</param>
+        /// <returns>Задача обновления данных.</returns>
+
         public async Task UpdatingData(ScheduleDbContext dbContext) {
             JArray? jObject = await GetDictionaries();
             if(jObject == null) return;
@@ -360,6 +451,13 @@ namespace ScheduleBot {
 
             NGramSearch.Clear();
         }
+
+        /// <summary>
+        /// Обновление списка преподавателей в базе данных. Добавляет новых преподавателей и удаляет отсутствующих в новом списке.
+        /// </summary>
+        /// <param name="dbContext">Контекст базы данных.</param>
+        /// <param name="teachers">Список преподавателей для обновления.</param>
+        /// <returns>Булево значение, указывающее на успешное обновление.</returns>
 
         private static async Task<bool> UpdatingTeachers(ScheduleDbContext dbContext, List<string>? teachers) {
             if(teachers is not null) {
@@ -392,6 +490,13 @@ namespace ScheduleBot {
             return false;
         }
 
+        /// <summary>
+        /// Обновление списка аудиторий в базе данных. Добавляет новые аудитории и удаляет отсутствующие в новом списке.
+        /// </summary>
+        /// <param name="dbContext">Контекст базы данных.</param>
+        /// <param name="teachers">Список аудиторий для обновления.</param>
+        /// <returns>Булево значение, указывающее на успешное обновление.</returns>
+
         private static async Task<bool> UpdatingClassrooms(ScheduleDbContext dbContext, List<string>? teachers) {
             if(teachers is not null) {
                 var _list = dbContext.ClassroomLastUpdate.Select(i => i.Classroom).ToList();
@@ -423,6 +528,11 @@ namespace ScheduleBot {
             return false;
         }
 
+        /// <summary>
+        /// Получает список дисциплин для указанной группы, отправляя HTTP-запрос к удаленному сервису расписания.
+        /// </summary>
+        /// <param name="group">Группа для которой запрашивается расписание.</param>
+        /// <returns>Список дисциплин для группы или null в случае ошибки.</returns>
         public async Task<List<Discipline>?> GetDisciplines(string group) {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
@@ -461,6 +571,11 @@ namespace ScheduleBot {
             return null;
         }
 
+        /// <summary>
+        /// Получает расписание работы преподавателя, отправляя HTTP-запрос к удаленному сервису расписания.
+        /// </summary>
+        /// <param name="fio">ФИО преподавателя, для которого запрашивается расписание.</param>
+        /// <returns>Список расписаний работы преподавателя или null в случае ошибки.</returns>
         public async Task<List<TeacherWorkSchedule>?> GetTeachersWorkSchedule(string fio) {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
@@ -499,6 +614,11 @@ namespace ScheduleBot {
             return null;
         }
 
+        /// <summary>
+        /// Получает расписание работы аудитории, отправляя HTTP-запрос к удаленному сервису расписания.
+        /// </summary>
+        /// <param name="classroom">Название аудитории, для которой запрашивается расписание.</param>
+        /// <returns>Список расписаний работы аудитории или null в случае ошибки.</returns>
         public async Task<List<ClassroomWorkSchedule>?> GetClassroomWorkSchedule(string classroom) {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
@@ -537,6 +657,10 @@ namespace ScheduleBot {
             return null;
         }
 
+        /// <summary>
+        /// Получает справочные данные (словарь) с удаленного сервиса расписания.
+        /// </summary>
+        /// <returns>JArray с данными или null в случае ошибки.</returns>
         private async Task<JArray?> GetDictionaries() {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
@@ -576,6 +700,13 @@ namespace ScheduleBot {
 
         [GeneratedRegex("^[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?\\s[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?(?:\\s[А-ЯЁа-яё]+(?:\\s[А-ЯЁа-яё]+)*)?$")]
         private static partial Regex TeachersRegex();
+
+        /// <summary>
+        /// Возвращает список преподавателей, проверяя данные по регулярному выражению и отсутствующим полям в базе данных.
+        /// </summary>
+        /// <param name="dbContext">Контекст базы данных.</param>
+        /// <param name="jObject">JArray объект, содержащий данные для обработки.</param>
+        /// <returns>Список преподавателей или null в случае ошибки.</returns>
 
         public static List<string>? GetTeachers(ScheduleDbContext dbContext, JArray jObject) {
             try {
@@ -625,6 +756,12 @@ namespace ScheduleBot {
             ];
         #endregion
 
+        /// <summary>
+        /// Возвращает список аудиторий, проверяя данные по отсутствующим полям в базе данных и регулярным выражениям.
+        /// </summary>
+        /// <param name="dbContext">Контекст базы данных.</param>
+        /// <param name="jObject">JArray объект, содержащий данные для обработки.</param>
+        /// <returns>Список аудиторий или null в случае ошибки.</returns>
         public static List<string>? GetClassrooms(ScheduleDbContext dbContext, JArray jObject) {
             try {
                 return jObject?.Count == 0 ? throw new Exception() : (jObject?.Where(i => {
@@ -639,6 +776,11 @@ namespace ScheduleBot {
             }
         }
 
+        /// <summary>
+        /// Получает диапазон дат для указанного значения поиска (например, аудитории или преподавателя).
+        /// </summary>
+        /// <param name="search_value">Значение для поиска дат (например, ФИО преподавателя или название аудитории).</param>
+        /// <returns>Диапазон дат и поле поиска или null в случае ошибки.</returns>
         public async Task<(DateOnly min, DateOnly max, string searchField)?> GetDates(string search_value) {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
@@ -680,6 +822,11 @@ namespace ScheduleBot {
             return null;
         }
 
+        /// <summary>
+        /// Получает список оценок студента по его идентификатору, отправляя запрос к удаленному сервису.
+        /// </summary>
+        /// <param name="studentID">Идентификатор студента для получения его прогресса.</param>
+        /// <returns>Список оценок или null в случае ошибки.</returns>
         public async Task<List<Progress>?> GetProgress(string studentID) {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
@@ -720,6 +867,11 @@ namespace ScheduleBot {
             return null;
         }
 
+        /// <summary>
+        /// Получает информацию о преподавателе (ссылку на профиль) по его имени, отправляя запрос к удаленному сервису.
+        /// </summary>
+        /// <param name="teacher">Имя преподавателя для поиска информации.</param>
+        /// <returns>Ссылка на профиль преподавателя или null в случае ошибки.</returns>
         public async Task<string?> GetTeacherInfo(string teacher) {
             try {
                 using(var client = new HttpClient(clientHandler, false)) {
@@ -764,6 +916,11 @@ namespace ScheduleBot {
             return null;
         }
 
+        /// <summary>
+        /// Обновляет информацию о преподавателе, включая ссылку на его профиль, в базе данных.
+        /// </summary>
+        /// <param name="dbContext">Контекст базы данных.</param>
+        /// <param name="teacher">Имя преподавателя для обновления информации.</param>
         public async Task UpdatingTeacherInfo(ScheduleDbContext dbContext, string teacher) {
             TeacherLastUpdate? teacherLastUpdate = await dbContext.TeacherLastUpdate.FirstOrDefaultAsync(i => i.Teacher == teacher);
             if(teacherLastUpdate is not null) {

@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Core.Bot.Commands;
 using Core.DB;
 using Core.DB.Entity;
+using Core.Parser;
 
 using Microsoft.EntityFrameworkCore;
 

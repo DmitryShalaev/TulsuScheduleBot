@@ -1,6 +1,7 @@
 ﻿using Core.Bot.Commands.Interfaces;
 using Core.DB;
 using Core.DB.Entity;
+using Core.Parser;
 
 using Microsoft.EntityFrameworkCore;
 
