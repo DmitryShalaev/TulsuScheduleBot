@@ -1,12 +1,10 @@
 ﻿using Core.Bot.Commands.Interfaces;
 using Core.DB;
 using Core.DB.Entity;
-
-using ScheduleBot;
+using Core.Parser;
 
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Core.Parser;
 
 #pragma warning disable CA1862 // Используйте перегрузки метода "StringComparison" для сравнения строк без учета регистра
 

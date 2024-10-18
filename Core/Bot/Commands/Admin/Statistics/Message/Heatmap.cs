@@ -30,7 +30,7 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
                                                            }).ToList()
                                                    }).ToList();
 
-            MessagesQueue.Message.SendDocument(chatId: chatId, path: DrawHeatmap(activityData), name: "Heatmap.png", replyMarkup: Statics.AdminPanelKeyboardMarkup, deleteFile: true); 
+            MessagesQueue.Message.SendDocument(chatId: chatId, path: DrawHeatmap(activityData), name: "Heatmap.png", replyMarkup: Statics.AdminPanelKeyboardMarkup, deleteFile: true);
 
             return Task.CompletedTask;
         }

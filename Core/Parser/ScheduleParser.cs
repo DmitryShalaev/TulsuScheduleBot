@@ -194,6 +194,7 @@ namespace Core.Parser {
                         _list = [.. dbContext.Disciplines.Where(i => i.Group == group)];
                     }
 
+                    // Удаление дисциплин, которые отсутствуют в обновленных данных
                     except = _list.Except(disciplines);
                     if(except.Any()) {
                         dbContext.Disciplines.RemoveRange(except);

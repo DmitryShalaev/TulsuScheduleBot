@@ -27,9 +27,8 @@ namespace Core.Bot.Commands.Student.Other.GroupList.Message {
             if(users.Count == 0) sb.AppendLine("Здесь никого нет 😢😢😢");
 
             foreach(TelegramUser? u in users) {
-                if(!string.IsNullOrWhiteSpace(u.Username)) {
-                    sb.AppendLine($"[{Statics.EscapeSpecialCharacters($"{u.FirstName} {u.LastName}")}](https://t.me/{u.Username})");
-                } else {
+                if(!string.IsNullOrWhiteSpace(u.Username)) sb.AppendLine($"[{Statics.EscapeSpecialCharacters($"{u.FirstName} {u.LastName}")}](https://t.me/{u.Username})");
+                else {
                     sb.AppendLine(Statics.EscapeSpecialCharacters($"{u.FirstName} {u.LastName}"));
                 }
             }

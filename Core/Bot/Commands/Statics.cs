@@ -8,8 +8,6 @@ using Core.Parser;
 
 using Microsoft.EntityFrameworkCore;
 
-using ScheduleBot;
-
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 

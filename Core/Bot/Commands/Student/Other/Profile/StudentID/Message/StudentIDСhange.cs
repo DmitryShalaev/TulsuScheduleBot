@@ -1,13 +1,11 @@
 ﻿using Core.Bot.Commands.Interfaces;
 using Core.DB;
 using Core.DB.Entity;
+using Core.Parser;
 
 using Microsoft.EntityFrameworkCore;
 
-using ScheduleBot;
-
 using Telegram.Bot.Types;
-using Core.Parser;
 
 namespace Core.Bot.Commands.Student.Other.Profile.StudentID.Message {
     internal class StudentIDСhange : IMessageCommand {

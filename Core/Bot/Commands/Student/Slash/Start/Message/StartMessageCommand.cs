@@ -1,10 +1,9 @@
-﻿using Core.Bot.Commands;
-using Core.Bot.Commands.Interfaces;
+﻿using Core.Bot.Commands.Interfaces;
 using Core.DB;
 using Core.DB.Entity;
 
 using Telegram.Bot.Types;
-namespace Core.Bot.New.Commands.Student.Slash.Start.Message {
+namespace Core.Bot.Commands.Student.Slash.Start.Message {
     public class StartMessageCommand : IMessageCommand {
 
         public List<string> Commands => ["/start"];

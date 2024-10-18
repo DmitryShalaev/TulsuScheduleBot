@@ -5,8 +5,6 @@ using Core.Parser;
 
 using Microsoft.EntityFrameworkCore;
 
-using ScheduleBot;
-
 using Telegram.Bot.Types;
 namespace Core.Bot.Commands.Student.Other.Profile.GroupNumber.Message {
     internal class GroupСhange : IMessageCommand {
