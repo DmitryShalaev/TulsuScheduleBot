@@ -18,7 +18,7 @@ jobs:
         cache: true
          
     - name: DotNet Restore
-      run: dotnet restore
+      run: dotnet restore --locked-mode
     
     - name: DotNet Publish
       run: dotnet publish ./WebHook/WebHook.csproj -c Release -r linux-x64 -p:PublishReadyToRun=true --self-contained false
