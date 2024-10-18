@@ -8,7 +8,8 @@ jobs:
   Deploy:
 
     runs-on: ubuntu-latest
-
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET Core
@@ -16,6 +17,9 @@ jobs:
       with:
         dotnet-version: 8.0.x
         cache: true
+        cache-dependency-path: |
+          Core/packages.lock.json
+          WebHook/packages.lock.json
          
     - name: DotNet Restore
       run: dotnet restore --locked-mode
