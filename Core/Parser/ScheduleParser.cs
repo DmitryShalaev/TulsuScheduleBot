@@ -250,9 +250,6 @@ namespace Core.Parser {
 
                     await dbContext.SaveChangesAsync();
 
-                    foreach(TelegramUser? item in dbContext.TelegramUsers.Where(i => i.IsAdmin))
-                        Core.Bot.MessagesQueue.Message.SendTextMessage(chatId: item.ChatID, text: $"Обнаружена ошибка парсера: {missingValue}", disableNotification: true);
-
                     await UpdatingData(dbContext);
 
                     return true;
