@@ -107,6 +107,7 @@ namespace Core.DB.Entity {
             Type = discipline.Type;
             Class = discipline.Class;
             ClassDTO = discipline.ClassDTO;
+            DateOfAddition = discipline.DateOfAddition;
         }
 
         public Discipline(DeletedDisciplines discipline) {

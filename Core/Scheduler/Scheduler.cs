@@ -171,7 +171,7 @@ namespace ScheduleBot {
 
             // Формирование строк для каждого предмета
             foreach(ExtendedDiscipline? item in scheduleList) {
-                bool addition = item.DateOfAddition?.AddDays(5) > today;
+                bool addition = item.DateOfAddition is not null && item.DateOfAddition?.AddDays(5) > today;
 
                 sb.Append(item.Deleted ? "<s>" : addition ? "<u>" : "")
                   .AppendLine($"⏰ {item.StartTime:HH:mm}-{item.EndTime:HH:mm} | {item.LectureHall}")
