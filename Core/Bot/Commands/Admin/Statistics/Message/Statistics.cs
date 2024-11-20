@@ -1,8 +1,6 @@
 ﻿using System.Text;
 
 using Core.Bot.Commands.Interfaces;
-using Core.Bot.Commands.Student.Days.Message;
-using Core.Bot.MessagesQueue;
 using Core.DB;
 using Core.DB.Entity;
 
@@ -40,11 +38,13 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             AppendNewUsersStats(sb, telegramUsers, today, startOfWeek, startOfMonth);
             AppendActiveUsersStats(sb, telegramUsers, today, startOfWeek, startOfMonth);
             AppendMessageStats(sb, messageLogs, today, startOfWeek, startOfMonth);
-            AppendRareMessagesStats(sb, messageLogs, today);
             AppendAverageMessagesPerHourStats(sb, telegramUsers, messageLogs, today, startOfWeek, startOfMonth);
             AppendScheduleProfileStats(sb, dbContext);
 
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: Statics.AdminPanelKeyboardMarkup, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
+
+            SendRareMessagesStats(messageLogs, today, chatId);
+
             return Task.CompletedTask;
         }
 
@@ -113,22 +113,30 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             sb.AppendLine();
         }
 
-        private static void AppendRareMessagesStats(StringBuilder sb, IQueryable<MessageLog> messages, DateTime today) {
+        private static void SendRareMessagesStats(IQueryable<MessageLog> messages, DateTime today, ChatId chatId) {
+            var sb = new StringBuilder();
+
             sb.AppendLine($"--Топ редких сообщений за сегодня--");
             var rareMessages = messages
-                .Where(ml => ml.Date.ToLocalTime() >= today)
+                .Where(ml => ml.Date.ToLocalTime() >= today && !EF.Functions.Like(ml.Message, "/%"))
                 .GroupBy(ml => ml.Message)
                 .OrderBy(g => g.Count())
-                .ThenBy(g => g.Key) 
-                .Take(15)
+                .ThenBy(g => g.Key)
                 .Select(g => new { Message = g.Key, Count = g.Count() })
+                .Where(g => g.Count < 5)
                 .ToList();
 
             foreach(var msg in rareMessages) {
-                sb.AppendLine($"'{msg.Message}': {msg.Count}");
+                string str = $"'{msg.Message}': {msg.Count}";
+                if(sb.Length + str.Length > 4000) {
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: Statics.AdminPanelKeyboardMarkup, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
+                    sb.Clear();
+                }
+
+                sb.AppendLine(str);
             }
 
-            sb.AppendLine();
+            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: Statics.AdminPanelKeyboardMarkup, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
         }
     }
 }
