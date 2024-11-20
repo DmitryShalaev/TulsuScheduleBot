@@ -47,43 +47,44 @@ namespace Core.Bot {
         private static readonly ScheduleParser parser = ScheduleParser.Instance;
 
         #region ReplyKeyboardMarkup
-        public static readonly ReplyKeyboardMarkup ScheduleKeyboardMarkup = new(new[] {
-                             new KeyboardButton[] { commands.Message["Exam"]},
+        public static readonly ReplyKeyboardMarkup ScheduleKeyboardMarkup = new([
+                             [commands.Message["Exam"]],
                              [commands.Message["TeachersWorkSchedule"], commands.Message["ClassroomSchedule"]],
                              [commands.Message["Back"]]
-                        }) { ResizeKeyboard = true };
+                        ]) { ResizeKeyboard = true };
 
-        public static readonly ReplyKeyboardMarkup ExamKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["NextExam"], commands.Message["AllExams"] },
+        public static readonly ReplyKeyboardMarkup ExamKeyboardMarkup = new([
+                            [commands.Message["NextExam"], commands.Message["AllExams"]],
                             [commands.Message["Back"]]
-                        }) { ResizeKeyboard = true };
+                        ]) { ResizeKeyboard = true };
 
-        public static readonly ReplyKeyboardMarkup DaysKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["Monday"], commands.Message["Tuesday"] },
+        public static readonly ReplyKeyboardMarkup DaysKeyboardMarkup = new([
+                            [commands.Message["Monday"], commands.Message["Tuesday"]],
                             [commands.Message["Wednesday"], commands.Message["Thursday"]],
                             [commands.Message["Friday"], commands.Message["Saturday"]],
                             [commands.Message["Back"]]
-                        }) { ResizeKeyboard = true };
+                        ]) { ResizeKeyboard = true };
 
-        public static readonly ReplyKeyboardMarkup AdminPanelKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { "Отзывы", "Статистика"},
-                                                  ["Рассылка","Heatmap"],
+        public static readonly ReplyKeyboardMarkup AdminPanelKeyboardMarkup = new([
+                            ["Статистика", "Сообщения"],
+                            ["Heatmap"],
+                            ["Рассылка", "Отзывы"],
 
                             [commands.Message["Back"]]
-                        }) { ResizeKeyboard = true };
+                        ]) { ResizeKeyboard = true };
 
         public static readonly ReplyKeyboardMarkup CancelKeyboardMarkup = new(commands.Message["Cancel"]) { ResizeKeyboard = true };
 
-        public static readonly ReplyKeyboardMarkup ResetProfileLinkKeyboardMarkup = new(new KeyboardButton[] { commands.Message["Reset"], commands.Message["Cancel"] }) { ResizeKeyboard = true };
+        public static readonly ReplyKeyboardMarkup ResetProfileLinkKeyboardMarkup = new([commands.Message["Reset"], commands.Message["Cancel"]]) { ResizeKeyboard = true };
 
-        public static readonly ReplyKeyboardMarkup WeekKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["ThisWeek"], commands.Message["NextWeek"] },
+        public static readonly ReplyKeyboardMarkup WeekKeyboardMarkup = new([
+                            [commands.Message["ThisWeek"], commands.Message["NextWeek"]],
                             [commands.Message["Back"]]
-                        }) { ResizeKeyboard = true };
+                        ]) { ResizeKeyboard = true };
 
-        public static readonly ReplyKeyboardMarkup WorkScheduleBackKeyboardMarkup = new(new[] {
-                            new KeyboardButton[] { commands.Message["WorkScheduleBack"] }
-                        }) { ResizeKeyboard = true };
+        public static readonly ReplyKeyboardMarkup WorkScheduleBackKeyboardMarkup = new([
+                            [commands.Message["WorkScheduleBack"]]
+                        ]) { ResizeKeyboard = true };
 
         #region Corps
         public static readonly ReplyKeyboardMarkup CorpsKeyboardMarkup = GetCorpsKeyboardMarkup();

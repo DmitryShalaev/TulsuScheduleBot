@@ -43,8 +43,6 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
 
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: Statics.AdminPanelKeyboardMarkup, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
 
-            SendRareMessagesStats(messageLogs, today, chatId);
-
             return Task.CompletedTask;
         }
 
@@ -111,32 +109,6 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             }
 
             sb.AppendLine();
-        }
-
-        private static void SendRareMessagesStats(IQueryable<MessageLog> messages, DateTime today, ChatId chatId) {
-            var sb = new StringBuilder();
-
-            sb.AppendLine($"--Топ редких сообщений за сегодня--");
-            var rareMessages = messages
-                .Where(ml => ml.Date.ToLocalTime() >= today && !EF.Functions.Like(ml.Message, "/%"))
-                .GroupBy(ml => ml.Message)
-                .OrderBy(g => g.Count())
-                .ThenBy(g => g.Key)
-                .Select(g => new { Message = g.Key, Count = g.Count() })
-                .Where(g => g.Count < 5)
-                .ToList();
-
-            foreach(var msg in rareMessages) {
-                string str = $"'{msg.Message}': {msg.Count}";
-                if(sb.Length + str.Length > 4000) {
-                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: Statics.AdminPanelKeyboardMarkup, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
-                    sb.Clear();
-                }
-
-                sb.AppendLine(str);
-            }
-
-            MessagesQueue.Message.SendTextMessage(chatId: chatId, text: sb.ToString(), replyMarkup: Statics.AdminPanelKeyboardMarkup, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
         }
     }
 }
