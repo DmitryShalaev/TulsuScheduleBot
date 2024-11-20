@@ -1,6 +1,8 @@
 ﻿using System.Text;
 
 using Core.Bot.Commands.Interfaces;
+using Core.Bot.Commands.Student.Days.Message;
+using Core.Bot.MessagesQueue;
 using Core.DB;
 using Core.DB.Entity;
 
@@ -37,8 +39,8 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
 
             AppendNewUsersStats(sb, telegramUsers, today, startOfWeek, startOfMonth);
             AppendActiveUsersStats(sb, telegramUsers, today, startOfWeek, startOfMonth);
-            AppendTopUsers(sb, telegramUsers);
             AppendMessageStats(sb, messageLogs, today, startOfWeek, startOfMonth);
+            AppendRareMessagesStats(sb, messageLogs, today);
             AppendAverageMessagesPerHourStats(sb, telegramUsers, messageLogs, today, startOfWeek, startOfMonth);
             AppendScheduleProfileStats(sb, dbContext);
 
@@ -59,20 +61,6 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             sb.AppendLine($"За сегодня: {users.Count(u => u.LastAppeal.ToLocalTime() >= today)}");
             sb.AppendLine($"За неделю: {users.Count(u => u.LastAppeal.ToLocalTime() >= startOfWeek)}");
             sb.AppendLine($"За месяц: {users.Count(u => u.LastAppeal.ToLocalTime() >= startOfMonth)}");
-            sb.AppendLine();
-        }
-
-        private static void AppendTopUsers(StringBuilder sb, IQueryable<TelegramUser> users) {
-            sb.AppendLine($"--Топ пользователей по активности--");
-            var topUsers = users.OrderByDescending(u => u.TotalRequests).Take(10).ToList();
-
-            foreach(TelegramUser? topUser in topUsers) {
-                string userName = Statics.EscapeSpecialCharacters($"{topUser.FirstName} {topUser.LastName}");
-                sb.AppendLine(!string.IsNullOrWhiteSpace(topUser.Username)
-                    ? $"[{userName}](https://t.me/{topUser.Username}) ({topUser.TotalRequests})"
-                    : $"{userName} ({topUser.TotalRequests})");
-            }
-
             sb.AppendLine();
         }
 
@@ -120,6 +108,24 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             sb.AppendLine("Всплески активности по часам:");
             foreach(var spike in spikes) {
                 sb.AppendLine($"{spike.Hour}:00 - {spike.Hour + 1}:00 с {spike.Count} сообщениями");
+            }
+
+            sb.AppendLine();
+        }
+
+        private static void AppendRareMessagesStats(StringBuilder sb, IQueryable<MessageLog> messages, DateTime today) {
+            sb.AppendLine($"--Топ редких сообщений за сегодня--");
+            var rareMessages = messages
+                .Where(ml => ml.Date.ToLocalTime() >= today)
+                .GroupBy(ml => ml.Message)
+                .OrderBy(g => g.Count())
+                .ThenBy(g => g.Key) 
+                .Take(15)
+                .Select(g => new { Message = g.Key, Count = g.Count() })
+                .ToList();
+
+            foreach(var msg in rareMessages) {
+                sb.AppendLine($"'{msg.Message}': {msg.Count}");
             }
 
             sb.AppendLine();
