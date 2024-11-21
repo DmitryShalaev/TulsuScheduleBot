@@ -45,7 +45,7 @@ jobs:
         username: ${{ secrets.REMOTE_USER }}
         key: ${{ secrets.REMOTE_SSH_KEY }}
         passphrase: ${{ secrets.PASSPHRASE }}
-        source: /home/runner/work/TulsuScheduleBot/TulsuScheduleBot/WebHook/bin/Release/net8.0/linux-x64/publish/*
+        source: /home/runner/work/TulsuScheduleBot/TulsuScheduleBot/WebHook/bin/Release/net9.0/linux-x64/publish/*
         target: ${{ secrets.REMOTE_TARGET }}
         rm: true
       
