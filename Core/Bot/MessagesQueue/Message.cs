@@ -221,6 +221,7 @@ namespace Core.Bot.MessagesQueue {
                                         ex.Message.Contains("bot was blocked by the user") ||
                                         ex.Message.Contains("user is deactivated") ||
                                         ex.Message.Contains("chat not found") ||
+ex.Message.Contains("the group chat was deleted") ||
                                         ex.Message.Contains("bot was kicked from the group chat")
                                         ) {
 
