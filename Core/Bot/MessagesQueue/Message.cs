@@ -234,7 +234,7 @@ ex.Message.Contains("the group chat was deleted") ||
                 }
             } catch(ApiRequestException ex) when(
                                         ex.Message.Contains("message is not modified") ||
-                                        ex.Message.Contains("message can't be deleted for everyone")
+ex.Message.Contains("message to delete not found") ||                                        ex.Message.Contains("message can't be deleted for everyone")
                                         ) {
 
             } catch(Exception e) {
