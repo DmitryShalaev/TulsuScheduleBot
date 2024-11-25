@@ -28,7 +28,7 @@ namespace Core.DB.Entity {
 
         public DateOnly Date { get; set; }
 
-        public DateOnly? DateOfAddition { get; set; } = DateOnly.FromDateTime(DateTime.UtcNow);
+        public DateOnly? DateOfAddition { get; set; }
 
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
@@ -64,7 +64,7 @@ namespace Core.DB.Entity {
 
             Lecturer = json.Value<string?>("PREP");
 
-            Class = (Class)Enum.Parse(typeof(Class), (json.Value<string>("CLASS") ?? "other").Replace("default", "def"));
+            Class = Enum.Parse<Class>((json.Value<string>("CLASS") ?? "other").Replace("default", "def"));
 
             string timeRange = json.Value<string>("TIME_Z") ?? throw new NullReferenceException("Field 'TIME_Z' is missing in JSON");
             string[] times = timeRange.Split('-');
@@ -75,6 +75,8 @@ namespace Core.DB.Entity {
             EndTime = TimeOnly.Parse(times[1]);
 
             Group = group;
+
+            DateOfAddition = DateOnly.FromDateTime(DateTime.UtcNow);
         }
 
         public Discipline(CustomDiscipline discipline) {
