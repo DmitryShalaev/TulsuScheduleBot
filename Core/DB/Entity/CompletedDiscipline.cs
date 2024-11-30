@@ -12,6 +12,7 @@ namespace Core.DB.Entity {
         public string? IntersectionMark { get; set; }
 
         public DateOnly? Date { get; set; } = null;
+        public TimeOnly? StartTime { get; set; } = null;
 
         [ForeignKey("ScheduleProfile")]
         public Guid ScheduleProfileGuid { get; set; }
@@ -22,7 +23,7 @@ namespace Core.DB.Entity {
         public ClassDTO ClassDTO { get; set; }
 
         public override bool Equals(object? obj) => Equals(obj as CompletedDiscipline);
-        public bool Equals(CompletedDiscipline? discipline) => discipline is not null && Name == discipline.Name && Class == discipline.Class && Lecturer == discipline.Lecturer && Subgroup == discipline.Subgroup && (Date == null || Date.Equals(discipline.Date)) && IntersectionMark == discipline.IntersectionMark;
+        public bool Equals(CompletedDiscipline? discipline) => discipline is not null && Name == discipline.Name && Class == discipline.Class && Lecturer == discipline.Lecturer && Subgroup == discipline.Subgroup && (Date == null || Date.Equals(discipline.Date)) && (StartTime == null || StartTime.Equals(discipline.StartTime)) && IntersectionMark == discipline.IntersectionMark;
 
         public static bool operator ==(CompletedDiscipline? left, CompletedDiscipline? right) => left?.Equals(right) ?? false;
         public static bool operator !=(CompletedDiscipline? left, CompletedDiscipline? right) => !(left == right);
@@ -36,6 +37,7 @@ namespace Core.DB.Entity {
             hash += Subgroup?.GetHashCode() ?? 0;
             hash += ScheduleProfileGuid.GetHashCode();
             hash += Date.GetHashCode();
+            hash += StartTime.GetHashCode();
 
             return hash.GetHashCode();
         }
@@ -48,6 +50,7 @@ namespace Core.DB.Entity {
             Class = discipline.Class;
             Subgroup = discipline.Subgroup;
             Date = discipline.Date;
+            StartTime = discipline.StartTime;
             ScheduleProfileGuid = scheduleProfileGuid;
             IntersectionMark = discipline.IntersectionMark;
         }

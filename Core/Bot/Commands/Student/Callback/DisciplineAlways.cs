@@ -24,7 +24,7 @@ namespace Core.Bot.Commands.Student.Callback {
                 if(user.IsOwner() && !user.IsSupergroup()) {
                     var completedDisciplines = dbContext.CompletedDisciplines.Where(i => i.ScheduleProfileGuid == user.ScheduleProfileGuid).ToList();
 
-                    CompletedDiscipline alwaysTmp = new(discipline, user.ScheduleProfileGuid) { Date = null };
+                    CompletedDiscipline alwaysTmp = new(discipline, user.ScheduleProfileGuid) { Date = null, StartTime = null };
                     CompletedDiscipline? alwaysCompletedDisciplines = completedDisciplines.FirstOrDefault(i => i.Equals(alwaysTmp));
 
                     if(alwaysCompletedDisciplines is not null) {

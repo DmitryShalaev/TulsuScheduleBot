@@ -151,7 +151,7 @@ namespace Core.DB.Entity {
             return hash.GetHashCode();
         }
 
-        public static explicit operator CompletedDiscipline(Discipline discipline) => new() { Name = discipline.Name, Class = discipline.Class, Lecturer = discipline.Lecturer, Subgroup = discipline.Subgroup, Date = discipline.Date, IntersectionMark = discipline.IntersectionMark };
+        public static explicit operator CompletedDiscipline(Discipline discipline) => new() { Name = discipline.Name, Class = discipline.Class, Lecturer = discipline.Lecturer, Subgroup = discipline.Subgroup, Date = discipline.Date, StartTime = discipline.StartTime, IntersectionMark = discipline.IntersectionMark };
     }
 
     public enum Class : byte {
