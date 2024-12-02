@@ -191,14 +191,14 @@ namespace Core.Bot {
                                 }
 
                                 await commandManager.OnMessageAsync(dbContext, message.Chat, message.MessageId, message.Text, user);
-                                dbContext.MessageLog.Add(new() { Message = message.Text, Request = msg, TelegramUser = user });
+                                dbContext.MessageLog.Add(new() { Message = message.Text, TelegramUser = user });
                                 break;
 
                             case UpdateType.CallbackQuery:
                                 if(update.CallbackQuery?.Data is null || message.Text is null) return;
 
                                 await commandManager.OnCallbackAsync(dbContext, message.Chat, message.MessageId, update.CallbackQuery.Data, message.Text, user);
-                                dbContext.MessageLog.Add(new() { Message = update.CallbackQuery.Data, Request = msg, TelegramUser = user });
+                                dbContext.MessageLog.Add(new() { Message = update.CallbackQuery.Data, TelegramUser = user });
                                 break;
                         }
 
@@ -211,7 +211,7 @@ namespace Core.Bot {
 
                                 await InlineQueryMessage.InlineQuery(dbContext, inlineQuery);
 
-                                dbContext.MessageLog.Add(new() { Message = inlineQuery.Query, Request = msg, From = inlineQuery.From.Id });
+                                dbContext.MessageLog.Add(new() { Message = inlineQuery.Query, From = inlineQuery.From.Id });
 
                                 await dbContext.SaveChangesAsync();
                             }

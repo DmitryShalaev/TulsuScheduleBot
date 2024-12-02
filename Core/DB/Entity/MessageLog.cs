@@ -10,7 +10,6 @@ namespace Core.DB.Entity {
         public TelegramUser TelegramUser { get; set; }
 
         public string Message { get; set; }
-        public string? Request { get; set; }
 
         public DateTime Date { get; set; } = DateTime.UtcNow;
     }
