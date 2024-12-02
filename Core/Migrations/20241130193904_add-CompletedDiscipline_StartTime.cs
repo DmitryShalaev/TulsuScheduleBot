@@ -1,16 +1,12 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ScheduleBot.Migrations
-{
+namespace ScheduleBot.Migrations {
     /// <inheritdoc />
-    public partial class addCompletedDiscipline_StartTime : Migration
-    {
+    public partial class addCompletedDiscipline_StartTime : Migration {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
+        protected override void Up(MigrationBuilder migrationBuilder) {
             migrationBuilder.AddColumn<TimeOnly>(
                 name: "StartTime",
                 table: "CompletedDisciplines",
@@ -19,8 +15,7 @@ namespace ScheduleBot.Migrations
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+        protected override void Down(MigrationBuilder migrationBuilder) {
             migrationBuilder.DropColumn(
                 name: "StartTime",
                 table: "CompletedDisciplines");

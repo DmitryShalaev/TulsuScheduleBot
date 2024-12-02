@@ -60,6 +60,17 @@ namespace Core.Bot.Commands.Admin.Statistics {
             ];
         }
 
+        private static readonly string[] excludedPrefixes =
+        [
+            "Notifications%",
+            "Discipline%",
+            "Custom%",
+            "SetEndTime%",
+            "All%",
+            "Back%",
+            "Edit%"
+        ];
+
         public static async Task<UserStatistics> GetUserStatisticsAsync(ScheduleDbContext dbContext, ChatId chatId) {
             int currentYear = DateTime.UtcNow.Year;
 
@@ -71,7 +82,8 @@ namespace Core.Bot.Commands.Admin.Statistics {
 
             IQueryable<DB.Entity.MessageLog> messagesThisYear = messagesQuery
                 .Where(m => m.From == chatId.Identifier)
-                .Where(m => m.Date >= startOfYear && m.Date < endOfYear);
+                .Where(m => m.Date >= startOfYear && m.Date < endOfYear)
+                .Where(m => !excludedPrefixes.Any(prefix => EF.Functions.ILike(m.Message, prefix)));
 
             // Первое сообщение в году
             DB.Entity.MessageLog? firstMessageInYear = await messagesThisYear
@@ -124,7 +136,7 @@ namespace Core.Bot.Commands.Admin.Statistics {
                 .Select(g => new { Request = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(x => x.Request, x => (long)x.Count);
 
-            // Уникальные функции (уникальные сообщения, предполагая, что разные функции соответствуют разным сообщениям)
+            // Уникальные сообщения
             int uniqueMessages = await messagesThisYear
                 .Select(m => m.Message)
                 .Distinct()

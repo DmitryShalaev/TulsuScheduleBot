@@ -1,7 +1,6 @@
 using System.Text.RegularExpressions;
 
 using Core.Bot.Commands;
-using Core.Bot.Commands.Admin.Statistics;
 using Core.Bot.Commands.Student;
 using Core.DB;
 using Core.DB.Entity;
