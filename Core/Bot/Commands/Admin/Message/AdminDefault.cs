@@ -16,7 +16,9 @@ namespace Core.Bot.Commands.Admin.Message {
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
             if(args == "Statistics") {
-                string message = await StatisticsForTheYear.SendStatisticsMessageAsync(dbContext, chatId);
+                string globalStats = await StatisticsForTheYear.GetGlobalStats(dbContext);
+
+                string message = await StatisticsForTheYear.SendStatisticsMessageAsync(dbContext, chatId, globalStats);
                 MessagesQueue.Message.SendTextMessage(chatId: chatId, text: message, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, replyMarkup: Statics.AdminPanelKeyboardMarkup);
             }
 

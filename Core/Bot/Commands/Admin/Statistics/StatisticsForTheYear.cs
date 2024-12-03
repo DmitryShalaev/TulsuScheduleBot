@@ -30,6 +30,8 @@ namespace Core.Bot.Commands.Admin.Statistics {
             public required string MostPopularRequestType { get; set; }
             public long MostPopularRequestCount { get; set; }
             public required string PreferredInteractionTime { get; set; }
+            public int LongestStreak { get; set; }
+            public DayOfWeek MostActiveDayOfWeek { get; set; }
         }
 
         public static class RequestTypes {
@@ -162,6 +164,31 @@ namespace Core.Bot.Commands.Admin.Statistics {
                 .OrderByDescending(g => g.Count)
                 .FirstOrDefaultAsync();
 
+            // Самый длинный период активности
+            var userActivityDays = messagesThisYear
+                .Select(m => m.Date.Date)
+                .Distinct()
+                .OrderBy(d => d)
+                .ToList();
+
+            int longestStreak = 0, currentStreak = 1;
+            for(int i = 1; i < userActivityDays.Count; i++) {
+                if(userActivityDays[i] == userActivityDays[i - 1].AddDays(1))
+                    currentStreak++;
+                else {
+                    longestStreak = Math.Max(longestStreak, currentStreak);
+                    currentStreak = 1;
+                }
+            }
+
+            longestStreak = Math.Max(longestStreak, currentStreak);
+
+            DayOfWeek mostActiveDayOfWeek = await messagesThisYear
+                .GroupBy(m => m.Date.DayOfWeek)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefaultAsync();
+
             // Формирование DTO
             var statistics = new UserStatistics {
                 FirstMessageInYear = firstMessageInYear?.Date.ToLocalTime() ?? DateTime.MinValue,
@@ -173,6 +200,8 @@ namespace Core.Bot.Commands.Admin.Statistics {
                 ScheduleRequests = scheduleRequests,
                 PerformanceRequests = performanceRequests,
                 UniqueMessages = uniqueMessages,
+                LongestStreak = longestStreak,
+                MostActiveDayOfWeek =  mostActiveDayOfWeek,
                 FirstMessageEver = firstMessageEver?.Message ?? "Нет сообщений",
                 FirstMessageDateEver = firstMessageEver?.Date.ToLocalTime() ?? DateTime.MinValue,
                 MostPopularRequestType = mostPopularRequest != null ? mostPopularRequest.Message : "Нет запросов",
@@ -183,7 +212,7 @@ namespace Core.Bot.Commands.Admin.Statistics {
             return statistics;
         }
 
-        private static async Task<string> GetGlobalStats(ScheduleDbContext dbContext) {
+        public static async Task<string> GetGlobalStats(ScheduleDbContext dbContext) {
             int totalUsers = await dbContext.TelegramUsers.CountAsync();
             int totalMessagesGlobal = await dbContext.MessageLog.CountAsync();
 
@@ -204,6 +233,17 @@ namespace Core.Bot.Commands.Admin.Statistics {
             int performanceRequestsGlobal = await dbContext.MessageLog
                 .Where(m => RequestTypes.PerformanceRequests.Contains(m.Message.ToLower()) || RequestTypes.PerformanceRequests.Contains(m.Message.Substring(2).ToLower()))
                 .CountAsync();
+
+            // День с наибольшей активностью
+            var busiestDay = await dbContext.MessageLog
+                .Where(m => m.Date.Year == 2024)
+                .GroupBy(m => m.Date.Date)
+                .OrderByDescending(g => g.Count())
+                .Select(g => new { Date = g.Key, Count = g.Count() })
+                .FirstOrDefaultAsync();
+
+            string busiestDayText = busiestDay != null ? $"{busiestDay.Date:dd.MM.yyyy} ({busiestDay.Count} " +
+                GetDeclension(busiestDay.Count, "сообщение", "сообщения", "сообщений") + ")" : "Нет данных";
 
             string totalUsersText = $"{totalUsers} " +
                 GetDeclension(totalUsers, "пользователь", "пользователя", "пользователей");
@@ -226,7 +266,8 @@ namespace Core.Bot.Commands.Admin.Statistics {
                               $"📨 Всего сообщений: {totalMessagesGlobalText}.\n" +
                               $"🔥 Самый популярный запрос: {mostPopularRequestGlobalText}.\n" +
                               $"📚 Запросов расписания: {scheduleRequestsGlobalText}.\n" +
-                              $"🎓 Запросов успеваемости: {performanceRequestsGlobalText}.\n\n";
+                              $"🎓 Запросов успеваемости: {performanceRequestsGlobalText}.\n" +
+                              $"📈 День с наибольшей активностью: {busiestDayText}.\n\n";
             return globalStats;
         }
 
@@ -237,7 +278,7 @@ namespace Core.Bot.Commands.Admin.Statistics {
             return number is > 10 and < 20 ? genitivePlural : num is > 1 and < 5 ? genitiveSingular : num == 1 ? nominative : genitivePlural;
         }
 
-        public static async Task<string> SendStatisticsMessageAsync(ScheduleDbContext dbContext, ChatId chatId) {
+        public static async Task<string> SendStatisticsMessageAsync(ScheduleDbContext dbContext, ChatId chatId, string globalStats) {
             UserStatistics stats = await GetUserStatisticsAsync(dbContext, chatId);
 
             string totalMessagesText = $"{stats.TotalMessages} " +
@@ -256,23 +297,24 @@ namespace Core.Bot.Commands.Admin.Statistics {
             string mostPopularRequestCountText = $"{stats.MostPopularRequestCount} " +
                 GetDeclension(stats.MostPopularRequestCount, "раз", "раза", "раз");
 
-            string globalStats = await GetGlobalStats(dbContext);
+            string LongestStreakText = $"{stats.LongestStreak} " +
+                GetDeclension(stats.LongestStreak, "день", "дня", "дней");
 
             // Теперь используйте их в тексте:
             return $"🎉✨ Дорогой друг! ✨🎉\n\n" +
                     $"В этом году мы встретились впервые {stats.FirstMessageInYear:dd.MM.yyyy HH:mm}, и вы написали мне: \"{stats.FirstMessageTextInYear}\". " +
                     $"Это было началом нашей яркой совместной истории в 2024 году! 🌟💫\n\n" +
                     $"***За прошедший год мы с вами сделали так много:***\n\n" +
-                    $"🎈 ***Всего сообщений:*** {totalMessagesText}.\n" +
-                    $"📅 ***Самый активный день:*** {stats.MostActiveDay:dd.MM.yyyy} ({messagesOnMostActiveDayText}) 🎉\n" +
-                    $"🕒 ***Ваше любимое время для общения:*** {stats.PreferredInteractionTime} — отличный выбор для продуктивности!\n\n" +
+                    $"🎈 Всего сообщений: {totalMessagesText}.\n" +
+                    $"📅 Самый активный день: {stats.MostActiveDay:dd.MM.yyyy} ({messagesOnMostActiveDayText}) 🎉\n" +
+                    $"🔥 Самый длинный период активности: {LongestStreakText} подряд.\n" +
+                    $"📊 Ваш самый активный день недели — {stats.MostActiveDayOfWeek}.\n" +
+                    $"🕒 Ваше любимое время для общения: {stats.PreferredInteractionTime} — отличный выбор для продуктивности!\n" +
+                    $"🔁 Самый часто используемый запрос: \"{stats.MostPopularRequestType}\", вы обращались к нему {mostPopularRequestCountText}.\n\n" +
                     $"✨ ***Ваши достижения:***\n" +
                     $"📚 Вы запросили расписание {scheduleRequestsText}, всегда оставались на волне событий!\n" +
                     $"🎓 Проверили успеваемость {stats.PerformanceRequests.Values.Sum()} раз — невероятная целеустремлённость!\n" +
                     $"💡 Отправили {uniqueMessagesText} — вы настоящий исследователь!\n\n" +
-                    $"🎁 ***Немного интересного:***\n" +
-                    $"- Самый часто используемый запрос: \"{stats.MostPopularRequestType}\", вы обращались к нему {mostPopularRequestCountText}.\n\n" +
-                    //$"- Ваше первое сообщение в этом боте: \"{stats.FirstMessageEver}\", отправленное ещё в {stats.FirstMessageDateEver:dd.MM.yyyy}.\n" +
                     $"{globalStats}" +
                     $"Спасибо вам за то, что были со мной этот год! Вы делаете наш диалог тёплым, интересным и таким важным! 💖\n\n" +
                     $"🎄✨ С наступающими праздниками! ✨🎄 Пусть ваш новый год будет наполнен радостью, смехом и счастьем! " +
