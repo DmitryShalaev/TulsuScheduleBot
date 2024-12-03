@@ -201,7 +201,7 @@ namespace Core.Bot.Commands.Admin.Statistics {
                 PerformanceRequests = performanceRequests,
                 UniqueMessages = uniqueMessages,
                 LongestStreak = longestStreak,
-                MostActiveDayOfWeek =  mostActiveDayOfWeek,
+                MostActiveDayOfWeek = mostActiveDayOfWeek,
                 FirstMessageEver = firstMessageEver?.Message ?? "Нет сообщений",
                 FirstMessageDateEver = firstMessageEver?.Date.ToLocalTime() ?? DateTime.MinValue,
                 MostPopularRequestType = mostPopularRequest != null ? mostPopularRequest.Message : "Нет запросов",
@@ -278,6 +278,17 @@ namespace Core.Bot.Commands.Admin.Statistics {
             return number is > 10 and < 20 ? genitivePlural : num is > 1 and < 5 ? genitiveSingular : num == 1 ? nominative : genitivePlural;
         }
 
+        private static readonly Dictionary<DayOfWeek, string> DayOfWeekInRussian = new Dictionary<DayOfWeek, string>
+        {
+            { DayOfWeek.Monday, "Понедельник" },
+            { DayOfWeek.Tuesday, "Вторник" },
+            { DayOfWeek.Wednesday, "Среда" },
+            { DayOfWeek.Thursday, "Четверг" },
+            { DayOfWeek.Friday, "Пятница" },
+            { DayOfWeek.Saturday, "Суббота" },
+            { DayOfWeek.Sunday, "Воскресенье" }
+        };
+
         public static async Task<string> SendStatisticsMessageAsync(ScheduleDbContext dbContext, ChatId chatId, string globalStats) {
             UserStatistics stats = await GetUserStatisticsAsync(dbContext, chatId);
 
@@ -308,7 +319,7 @@ namespace Core.Bot.Commands.Admin.Statistics {
                     $"🎈 Всего сообщений: {totalMessagesText}.\n" +
                     $"📅 Самый активный день: {stats.MostActiveDay:dd.MM.yyyy} ({messagesOnMostActiveDayText}) 🎉\n" +
                     $"🔥 Самый длинный период активности: {LongestStreakText} подряд.\n" +
-                    $"📊 Ваш самый активный день недели — {stats.MostActiveDayOfWeek}.\n" +
+                    $"📊 Ваш самый активный день недели — {DayOfWeekInRussian[stats.MostActiveDayOfWeek]}.\n" +
                     $"🕒 Ваше любимое время для общения: {stats.PreferredInteractionTime} — отличный выбор для продуктивности!\n" +
                     $"🔁 Самый часто используемый запрос: \"{stats.MostPopularRequestType}\", вы обращались к нему {mostPopularRequestCountText}.\n\n" +
                     $"✨ ***Ваши достижения:***\n" +
