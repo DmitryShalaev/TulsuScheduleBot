@@ -183,6 +183,53 @@ namespace Core.Bot.Commands.Admin.Statistics {
             return statistics;
         }
 
+        private static async Task<string> GetGlobalStats(ScheduleDbContext dbContext) {
+            int totalUsers = await dbContext.TelegramUsers.CountAsync();
+            int totalMessagesGlobal = await dbContext.MessageLog.CountAsync();
+
+            var mostPopularRequestGlobal = await dbContext.MessageLog
+                .Where(m => !excludedPrefixes.Any(prefix => EF.Functions.ILike(m.Message, prefix)))
+                .GroupBy(m => m.Message)
+                .Select(g => new { Request = g.Key, Count = g.Count() })
+                .OrderByDescending(g => g.Count)
+                .FirstOrDefaultAsync();
+
+            string mostPopularRequestGlobalType = mostPopularRequestGlobal?.Request ?? "Нет запросов";
+            int mostPopularRequestGlobalCount = mostPopularRequestGlobal?.Count ?? 0;
+
+            int scheduleRequestsGlobal = await dbContext.MessageLog
+                .Where(m => RequestTypes.ScheduleRequests.Contains(m.Message.ToLower()))
+            .CountAsync();
+
+            int performanceRequestsGlobal = await dbContext.MessageLog
+                .Where(m => RequestTypes.PerformanceRequests.Contains(m.Message.ToLower()) || RequestTypes.PerformanceRequests.Contains(m.Message.Substring(2).ToLower()))
+                .CountAsync();
+
+            string totalUsersText = $"{totalUsers} " +
+                GetDeclension(totalUsers, "пользователь", "пользователя", "пользователей");
+
+            string totalMessagesGlobalText = $"{totalMessagesGlobal} " +
+                GetDeclension(totalMessagesGlobal, "сообщение", "сообщения", "сообщений");
+
+            string mostPopularRequestGlobalText = $"\"{mostPopularRequestGlobalType}\", к которому обратились {mostPopularRequestGlobalCount} " +
+                GetDeclension(mostPopularRequestGlobalCount, "раз", "раза", "раз");
+
+            string scheduleRequestsGlobalText = $"{scheduleRequestsGlobal} " +
+                GetDeclension(scheduleRequestsGlobal, "раз", "раза", "раз");
+
+            string performanceRequestsGlobalText = $"{performanceRequestsGlobal} " +
+                GetDeclension(performanceRequestsGlobal, "раз", "раза", "раз");
+
+            // Общая статистика
+            string globalStats = $"🌍 ***Общая статистика за год:***\n" +
+                              $"👥 Новых пользователей: {totalUsersText}.\n" +
+                              $"📨 Всего сообщений: {totalMessagesGlobalText}.\n" +
+                              $"🔥 Самый популярный запрос: {mostPopularRequestGlobalText}.\n" +
+                              $"📚 Запросов расписания: {scheduleRequestsGlobalText}.\n" +
+                              $"🎓 Запросов успеваемости: {performanceRequestsGlobalText}.\n\n";
+            return globalStats;
+        }
+
         public static string GetDeclension(long number, string nominative, string genitiveSingular, string genitivePlural) {
             number = Math.Abs(number) % 100;
             long num = number % 10;
@@ -209,6 +256,8 @@ namespace Core.Bot.Commands.Admin.Statistics {
             string mostPopularRequestCountText = $"{stats.MostPopularRequestCount} " +
                 GetDeclension(stats.MostPopularRequestCount, "раз", "раза", "раз");
 
+            string globalStats = await GetGlobalStats(dbContext);
+
             // Теперь используйте их в тексте:
             return $"🎉✨ Дорогой друг! ✨🎉\n\n" +
                     $"В этом году мы встретились впервые {stats.FirstMessageInYear:dd.MM.yyyy HH:mm}, и вы написали мне: \"{stats.FirstMessageTextInYear}\". " +
@@ -224,6 +273,7 @@ namespace Core.Bot.Commands.Admin.Statistics {
                     $"🎁 ***Немного интересного:***\n" +
                     $"- Самый часто используемый запрос: \"{stats.MostPopularRequestType}\", вы обращались к нему {mostPopularRequestCountText}.\n\n" +
                     //$"- Ваше первое сообщение в этом боте: \"{stats.FirstMessageEver}\", отправленное ещё в {stats.FirstMessageDateEver:dd.MM.yyyy}.\n" +
+                    $"{globalStats}" +
                     $"Спасибо вам за то, что были со мной этот год! Вы делаете наш диалог тёплым, интересным и таким важным! 💖\n\n" +
                     $"🎄✨ С наступающими праздниками! ✨🎄 Пусть ваш новый год будет наполнен радостью, смехом и счастьем! " +
                     $"Желаю вам успехов во всех начинаниях, больших побед и маленьких радостей каждый день! 🌟💫\n\n" +
