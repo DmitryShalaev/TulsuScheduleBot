@@ -134,7 +134,7 @@ namespace Core.Bot {
             });
             #endregion
 
-            Console.WriteLine("Запущен бот " + botClient.GetMeAsync().Result.FirstName + "\n");
+            Console.WriteLine($"Запущен бот {botClient.GetMe().Result.FirstName}\n");
         }
 
         public async Task UpdateAsync(Update update) {

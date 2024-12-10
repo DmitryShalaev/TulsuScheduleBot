@@ -75,7 +75,9 @@ namespace Core.Bot {
 
         public static readonly ReplyKeyboardMarkup CancelKeyboardMarkup = new(commands.Message["Cancel"]) { ResizeKeyboard = true };
 
-        public static readonly ReplyKeyboardMarkup ResetProfileLinkKeyboardMarkup = new([commands.Message["Reset"], commands.Message["Cancel"]]) { ResizeKeyboard = true };
+        public static readonly ReplyKeyboardMarkup ResetProfileLinkKeyboardMarkup = new([
+                            [commands.Message["Reset"], commands.Message["Cancel"]]
+                        ]) { ResizeKeyboard = true };
 
         public static readonly ReplyKeyboardMarkup WeekKeyboardMarkup = new([
                             [commands.Message["ThisWeek"], commands.Message["NextWeek"]],

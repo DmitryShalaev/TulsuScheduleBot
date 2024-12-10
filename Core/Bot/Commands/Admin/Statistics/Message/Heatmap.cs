@@ -35,9 +35,11 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
             return Task.CompletedTask;
         }
 
+        public static SKFont textFont = new() {
+            Size = 12,
+        };
         public static SKPaint textPaint = new() {
             Color = SKColors.White,
-            TextSize = 12,
         };
 
         public static string DrawHeatmap(List<ActivityData> activityData) {
@@ -57,12 +59,7 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
                 // Получаем максимальное значение активности для нормализации
                 int maxCount = activityData.SelectMany(a => a.Items).Max(i => i.Count);
 
-                var textBounds = new SKRect();
-
-                using(SKPaint textPaint = new() {
-                    Color = SKColors.White,
-                    TextSize = 10,
-                }) {
+                using(SKFont textFont = new() { Size = 10 }) {
                     // Отрисовываем тепловую карту
                     for(int dayIndex = 0; dayIndex < activityData.Count; dayIndex++) {
                         ActivityData dayData = activityData[dayIndex];
@@ -86,12 +83,12 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
                             // Рисуем ячейку
                             canvas.DrawRect(x, y, cellSize, cellSize, paint);
 
-                            textPaint.MeasureText($"{count}", ref textBounds);
+                            textFont.MeasureText($"{count}", out SKRect textBounds);
 
-                            float xText = x + cellSize / 2 - textBounds.Width / 2;
+                            float xText = x + cellSize / 2 - textBounds.Width / 2 + textBounds.Right / 2;
                             float yText = y + cellSize / 2 - textBounds.Height / 2 - textBounds.Top;
 
-                            canvas.DrawText($"{count}", xText, yText, textPaint);
+                            canvas.DrawText($"{count}", xText, yText, SKTextAlign.Center, textFont, textPaint);
                         }
                     }
                 }
@@ -102,11 +99,11 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
                     string dayLabel = date.ToString("dd.MM");
 
                     // Измеряем текст
-                    textPaint.MeasureText(dayLabel, ref textBounds);
+                    textFont.MeasureText(dayLabel, out SKRect textBounds);
 
                     // Позиционируем текст по центру клетки для каждого дня
-                    float dayX = paddingLeft + i * cellSize + cellSize / 2 - textBounds.Width / 2;
-                    canvas.DrawText(dayLabel, dayX, imageHeight - 10, textPaint);
+                    float dayX = paddingLeft + i * cellSize + cellSize / 2 - textBounds.Width / 2 + textBounds.Right / 2;
+                    canvas.DrawText(dayLabel, dayX, imageHeight - 10, SKTextAlign.Center, textFont, textPaint);
                 }
 
                 // Вертикальная ось
@@ -114,11 +111,11 @@ namespace Core.Bot.Commands.Admin.Statistics.Message {
                     string hourLabel = $"{i}";
 
                     // Измеряем текст
-                    textPaint.MeasureText(hourLabel, ref textBounds);
+                    textFont.MeasureText(hourLabel, out SKRect textBounds);
 
                     // Позиционируем текст по центру клетки для каждого часа
                     float hourY = paddingTop + i * cellSize + cellSize / 2 - textBounds.Height / 2 - textBounds.Top;
-                    canvas.DrawText(hourLabel, 5, hourY, textPaint);
+                    canvas.DrawText(hourLabel, 5, hourY, SKTextAlign.Center, textFont, textPaint);
                 }
 
                 // Сохранение изображения во временный файл

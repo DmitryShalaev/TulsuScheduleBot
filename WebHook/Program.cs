@@ -17,8 +17,10 @@ namespace WebHook {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
             builder.Logging.SetMinimumLevel(LogLevel.Warning);
 
-            builder.Services.AddControllers().AddNewtonsoftJson();
+            builder.Services.ConfigureTelegramBotMvc();
             builder.Services.AddSingleton<TelegramUpdateBackgroundService>();
+
+            builder.Services.AddControllers();
 
             WebApplication app = builder.Build();
 
@@ -31,7 +33,6 @@ namespace WebHook {
             });
 
             app.UseAuthorization();
-
             app.MapControllers();
 
             app.Run();

@@ -18,9 +18,9 @@ namespace LongPolling {
                 new ReceiverOptions {
                     AllowedUpdates = { },
 #if DEBUG
-                    ThrowPendingUpdates = true
+                    DropPendingUpdates = true
 #else
-                    ThrowPendingUpdates = false
+                    DropPendingUpdates = false
 #endif
                 },
                 new CancellationTokenSource().Token

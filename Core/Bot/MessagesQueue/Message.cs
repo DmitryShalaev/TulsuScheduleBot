@@ -52,7 +52,7 @@ namespace Core.Bot.MessagesQueue {
             AddMessageToQueue(chatId, message);
         }
 
-        public static void SendTextMessage(ChatId chatId, string text, IReplyMarkup? replyMarkup = null, ParseMode? parseMode = null, bool? disableNotification = null, bool deletePrevious = false, bool saveMessageId = false) {
+        public static void SendTextMessage(ChatId chatId, string text, IReplyMarkup? replyMarkup = null, ParseMode parseMode = ParseMode.None, bool disableNotification = false, bool deletePrevious = false, bool saveMessageId = false) {
             var message = new TextMessage(chatId, text, replyMarkup, parseMode, disableNotification, deletePrevious, saveMessageId);
 
             AddMessageToQueue(chatId, message);
@@ -64,13 +64,13 @@ namespace Core.Bot.MessagesQueue {
             AddMessageToQueue(chatId, message);
         }
 
-        public static void AnswerInlineQuery(string inlineQueryId, IEnumerable<InlineQueryResult> results, int? cacheTime, bool? isPersonal) {
+        public static void AnswerInlineQuery(string inlineQueryId, IEnumerable<InlineQueryResult> results, int? cacheTime, bool isPersonal = false) {
             var message = new Classes.InlineQuery(inlineQueryId, results, cacheTime, isPersonal);
 
             AddMessageToQueue(inlineQueryId, message);
         }
 
-        public static void EditMessageText(ChatId chatId, int messageId, string text, InlineKeyboardMarkup? replyMarkup = null, ParseMode? parseMode = null, bool? disableWebPagePreview = null) {
+        public static void EditMessageText(ChatId chatId, int messageId, string text, InlineKeyboardMarkup? replyMarkup = null, ParseMode parseMode = ParseMode.None, bool? disableWebPagePreview = null) {
             var message = new EditMessageText(chatId, messageId, text, replyMarkup, parseMode, disableWebPagePreview);
 
             AddMessageToQueue(chatId, message);
@@ -133,11 +133,11 @@ namespace Core.Bot.MessagesQueue {
                         if(textMessage.DeletePrevious && previewsMessage.TryRemove(textMessage.ChatId, out int messageId))
                             await SendMessageAsync(new DeleteMessage(textMessage.ChatId, messageId));
 
-                        int newId = (await BotClient.SendTextMessageAsync(
+                        int newId = (await BotClient.SendMessage(
                                         chatId: textMessage.ChatId,
                                         text: textMessage.Text,
                                         parseMode: textMessage.ParseMode,
-                                        disableWebPagePreview: true,
+                                        linkPreviewOptions: true,
                                         disableNotification: textMessage.DisableNotification,
                                         replyMarkup: textMessage.ReplyMarkup
                                     )).MessageId;
@@ -150,20 +150,20 @@ namespace Core.Bot.MessagesQueue {
                     case EditMessageText editMessageText:
                         msg = editMessageText.Text;
 
-                        await BotClient.EditMessageTextAsync(
+                        await BotClient.EditMessageText(
                             chatId: editMessageText.ChatId,
                             text: editMessageText.Text,
                             messageId: editMessageText.MessageId,
                             parseMode: editMessageText.ParseMode,
                             replyMarkup: editMessageText.ReplyMarkup,
-                            disableWebPagePreview: editMessageText.DisableWebPagePreview
+                            linkPreviewOptions: editMessageText.DisableWebPagePreview
                         );
                         break;
 
                     case DeleteMessage deleteMessage:
                         msg = $"DeleteMessageAsync {deleteMessage.MessageId}";
 
-                        await BotClient.DeleteMessageAsync(
+                        await BotClient.DeleteMessage(
                             chatId: deleteMessage.ChatId,
                             messageId: deleteMessage.MessageId
                         );
@@ -172,7 +172,7 @@ namespace Core.Bot.MessagesQueue {
                     case EditMessageReplyMarkup editMessageReplyMarkup:
                         msg = $"EditMessageReplyMarkupAsync {editMessageReplyMarkup.MessageId}";
 
-                        await BotClient.EditMessageReplyMarkupAsync(
+                        await BotClient.EditMessageReplyMarkup(
                             chatId: editMessageReplyMarkup.ChatId,
                             replyMarkup: editMessageReplyMarkup.ReplyMarkup,
                             messageId: editMessageReplyMarkup.MessageId
@@ -182,7 +182,7 @@ namespace Core.Bot.MessagesQueue {
                     case Classes.Venue vanueMessage:
                         msg = $"VanueMessage {vanueMessage.Title}";
 
-                        await BotClient.SendVenueAsync(chatId: vanueMessage.ChatId,
+                        await BotClient.SendVenue(chatId: vanueMessage.ChatId,
                             latitude: vanueMessage.Latitude,
                             longitude: vanueMessage.Longitude,
                             title: vanueMessage.Title,
@@ -194,14 +194,14 @@ namespace Core.Bot.MessagesQueue {
                     case Classes.InlineQuery inlineQuery:
                         msg = $"InlineQuery {inlineQuery.InlineQueryId}";
 
-                        await BotClient.AnswerInlineQueryAsync(inlineQuery.InlineQueryId, inlineQuery.Results, cacheTime: inlineQuery.CacheTime, isPersonal: inlineQuery.IsPersonal);
+                        await BotClient.AnswerInlineQuery(inlineQuery.InlineQueryId, inlineQuery.Results, cacheTime: inlineQuery.CacheTime, isPersonal: inlineQuery.IsPersonal);
                         break;
 
                     case PhotoMessage photoMessage:
                         msg = $"PhotoMessage {photoMessage.ChatId}";
 
                         using(Stream stream = System.IO.File.OpenRead(photoMessage.Path))
-                            await BotClient.SendPhotoAsync(chatId: photoMessage.ChatId, photo: InputFile.FromStream(stream, fileName: photoMessage.Name), replyMarkup: photoMessage.ReplyMarkup);
+                            await BotClient.SendPhoto(chatId: photoMessage.ChatId, photo: InputFile.FromStream(stream, fileName: photoMessage.Name), replyMarkup: photoMessage.ReplyMarkup);
 
                         if(photoMessage.DeleteFile && System.IO.File.Exists(photoMessage.Path)) System.IO.File.Delete(photoMessage.Path);
 
@@ -211,7 +211,7 @@ namespace Core.Bot.MessagesQueue {
                         msg = $"DocumentMessage {documentMessage.ChatId}";
 
                         using(Stream stream = System.IO.File.OpenRead(documentMessage.Path))
-                            await BotClient.SendDocumentAsync(chatId: documentMessage.ChatId, document: InputFile.FromStream(stream, fileName: documentMessage.Name), replyMarkup: documentMessage.ReplyMarkup, disableContentTypeDetection: false);
+                            await BotClient.SendDocument(chatId: documentMessage.ChatId, document: InputFile.FromStream(stream, fileName: documentMessage.Name), replyMarkup: documentMessage.ReplyMarkup, disableContentTypeDetection: false);
 
                         if(documentMessage.DeleteFile && System.IO.File.Exists(documentMessage.Path)) System.IO.File.Delete(documentMessage.Path);
 
@@ -221,7 +221,7 @@ namespace Core.Bot.MessagesQueue {
                                         ex.Message.Contains("bot was blocked by the user") ||
                                         ex.Message.Contains("user is deactivated") ||
                                         ex.Message.Contains("chat not found") ||
-ex.Message.Contains("the group chat was deleted") ||
+                                        ex.Message.Contains("the group chat was deleted") ||
                                         ex.Message.Contains("bot was kicked from the group chat")
                                         ) {
 
@@ -234,7 +234,8 @@ ex.Message.Contains("the group chat was deleted") ||
                 }
             } catch(ApiRequestException ex) when(
                                         ex.Message.Contains("message is not modified") ||
-ex.Message.Contains("message to delete not found") || ex.Message.Contains("message can't be deleted for everyone")
+                                        ex.Message.Contains("message to delete not found") || 
+                                        ex.Message.Contains("message can't be deleted for everyone")
                                         ) {
 
             } catch(Exception e) {
