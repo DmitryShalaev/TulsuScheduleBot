@@ -8,7 +8,7 @@ namespace Core.Bot.Commands.Student.Slash.Feedbacks.Message {
 
         public List<string> Commands => ["/feedback"];
 
-        public List<Mode> Modes => Enum.GetValues(typeof(Mode)).Cast<Mode>().ToList();
+        public List<Mode> Modes => Enum.GetValues<Mode>().Cast<Mode>().ToList();
 
         public Manager.Check Check => Manager.Check.none;
 

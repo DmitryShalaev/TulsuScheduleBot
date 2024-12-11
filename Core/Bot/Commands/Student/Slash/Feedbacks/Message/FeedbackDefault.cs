@@ -24,7 +24,7 @@ namespace Core.Bot.Commands.Student.Slash.Feedbacks.Message {
             await dbContext.SaveChangesAsync();
 
             foreach(TelegramUser? item in dbContext.TelegramUsers.Where(i => i.IsAdmin))
-                MessagesQueue.Message.SendTextMessage(chatId: item.ChatID, text: $"Получен новый отзыв или предложение.\nОт {user.FirstName}", disableNotification: true);
+                MessagesQueue.Message.SendTextMessage(chatId: item.ChatID, text: $"Получен новый отзыв или предложение.\nОт {user.FirstName}", replyMarkup: DefaultCallback.GeFeedback(), disableNotification: true);
         }
     }
 }

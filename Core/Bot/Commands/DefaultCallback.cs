@@ -71,8 +71,10 @@ namespace Core.Bot.Commands {
         }
 
         public static InlineKeyboardMarkup GetBackInlineKeyboardButton(DateOnly date) {
-            return new(InlineKeyboardButton.WithCallbackData(UserCommands.Instance.Callback["Back"].text, $"{UserCommands.Instance.Callback["Back"].callback} {date}")); ;
+            return new(InlineKeyboardButton.WithCallbackData(text: UserCommands.Instance.Callback["Back"].text, callbackData: $"{UserCommands.Instance.Callback["Back"].callback} {date}")); ;
         }
+
+        public static InlineKeyboardMarkup GeFeedback() => new(InlineKeyboardButton.WithCallbackData(text: "Прочитать", callbackData: $"GetFeedback"));
 
         public static InlineKeyboardMarkup GetNotificationsInlineKeyboardButton(TelegramUser user) {
             var buttons = new List<InlineKeyboardButton[]>();

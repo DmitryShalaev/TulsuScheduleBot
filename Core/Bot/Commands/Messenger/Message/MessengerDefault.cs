@@ -39,16 +39,30 @@ namespace Core.Bot.Commands.Messenger.Message {
                     dbContext.Messenger.Add(messenger);
                     dbContext.SaveChanges();
 
-                    MessagesQueue.Message.SendTextMessage(feedback.From, $"Новое сообщение от: Администратор\n\n{args}\n\nЧтобы ответить, используйте: /feedback", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user), disableNotification: true);
+                    MessagesQueue.Message.SendTextMessage(feedback.From, $"Новое сообщение от: Администратор", disableNotification: true);
+                    MessagesQueue.Message.SendTextMessage(feedback.From, $"{args}", disableNotification: true);
+                    MessagesQueue.Message.SendTextMessage(feedback.From, $"Чтобы ответить, используйте: /feedback", disableNotification: true);
                 }
 
-                MessagesQueue.Message.SendTextMessage(chatId, "Сообщение отправлено!", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
+                if(!string.IsNullOrEmpty(user.TelegramUserTmp.TmpData) && user.TelegramUserTmp.TmpData.Contains("FeedbackReply")) {
+                    user.TelegramUserTmp.Mode = Mode.Admin;
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "Сообщение отправлено!", replyMarkup: Statics.AdminPanelKeyboardMarkup);
+                } else {
+                    user.TelegramUserTmp.Mode = Mode.Default;
+                    MessagesQueue.Message.SendTextMessage(chatId, "Сообщение отправлено!", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
+                }
             } else {
-                MessagesQueue.Message.SendTextMessage(chatId, UserCommands.Instance.Message["MainMenu"], replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
+
+                if(!string.IsNullOrEmpty(user.TelegramUserTmp.TmpData) && user.TelegramUserTmp.TmpData.Contains("FeedbackReply")) {
+                    user.TelegramUserTmp.Mode = Mode.Admin;
+                    MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["AdminPanel"], replyMarkup: Statics.AdminPanelKeyboardMarkup);
+                } else {
+                    user.TelegramUserTmp.Mode = Mode.Default;
+                    MessagesQueue.Message.SendTextMessage(chatId, UserCommands.Instance.Message["MainMenu"], replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user));
+                }
             }
 
             user.TelegramUserTmp.TmpData = null;
-            user.TelegramUserTmp.Mode = Mode.Default;
 
             await dbContext.SaveChangesAsync();
         }
