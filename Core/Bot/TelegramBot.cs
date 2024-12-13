@@ -150,8 +150,6 @@ namespace Core.Bot {
                     if(message is not null) {
                         if(message.From is null) return;
 
-                        message.From.FirstName = message.From.FirstName.All(c => c == 'ㅤ') ? "🚫⚠️👀" : message.From.FirstName;
-
                         TelegramUser? user = await dbContext.TelegramUsers.Include(u => u.ScheduleProfile).Include(u => u.Settings).Include(u => u.TelegramUserTmp).FirstOrDefaultAsync(u => u.ChatID == message.Chat.Id);
 
                         if(user is null) {
