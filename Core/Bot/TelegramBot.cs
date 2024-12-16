@@ -18,7 +18,7 @@ namespace Core.Bot {
 
         public readonly TelegramBotClient botClient;
 
-        private readonly Manager commandManager;
+        public readonly Manager commandManager;
 
         private TelegramBot() {
             if(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TelegramBotToken")) ||
