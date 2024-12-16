@@ -8,11 +8,17 @@ namespace Core.Bot.Commands.Student.Slash.Start.Message {
 
         public List<string> Commands => ["/start"];
 
-        public List<Mode> Modes => Enum.GetValues(typeof(Mode)).Cast<Mode>().ToList();
+        public List<Mode> Modes => Enum.GetValues<Mode>().Cast<Mode>().ToList();
 
         public Manager.Check Check => Manager.Check.none;
 
         public async Task Execute(ScheduleDbContext dbContext, ChatId chatId, int messageId, TelegramUser user, string args) {
+            if(!string.IsNullOrWhiteSpace(args) && args.StartsWith('-')) {
+                MessagesQueue.Message.DeleteMessage(chatId, messageId);
+                await TelegramBot.Instance.commandManager.OnMessageAsync(dbContext, chatId, messageId, $"/{args[1..]}", user);
+                return;
+            }
+
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: "👋", replyMarkup: DefaultMessage.GetMainKeyboardMarkup(user), deletePrevious: true);
 
             if(user.TelegramUserTmp.Mode == Mode.AddingDiscipline)
