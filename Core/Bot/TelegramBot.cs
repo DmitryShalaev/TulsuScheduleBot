@@ -145,29 +145,15 @@ namespace Core.Bot {
 
             try {
                 using(ScheduleDbContext dbContext = new()) {
-                    Message? message = update.Message ?? update.EditedMessage ?? update.CallbackQuery?.Message;
+                    long messageFrom = update.Message?.Chat.Id ??
+                                        update.EditedMessage?.Chat.Id ??
+                                        update.CallbackQuery?.Message?.Chat.Id ??
+                                        update.InlineQuery?.From.Id ??
+                                        throw new ArgumentException("messageFrom cannot be null", nameof(update));
 
-                    if(message is not null) {
-                        if(message.From is null) return;
+                    TelegramUser? user = await dbContext.TelegramUsers.Include(u => u.ScheduleProfile).Include(u => u.Settings).Include(u => u.TelegramUserTmp).FirstOrDefaultAsync(u => u.ChatID == messageFrom);
 
-                        TelegramUser? user = await dbContext.TelegramUsers.Include(u => u.ScheduleProfile).Include(u => u.Settings).Include(u => u.TelegramUserTmp).FirstOrDefaultAsync(u => u.ChatID == message.Chat.Id);
-
-                        if(user is null) {
-
-                            user = new() {
-                                ChatID = message.Chat.Id,
-                                FirstName = "",
-                                ScheduleProfile = new() { OwnerID = message.Chat.Id },
-                                Settings = new() { OwnerID = message.Chat.Id },
-                                TelegramUserTmp = new() { OwnerID = message.Chat.Id },
-                                DateOfRegistration = DateTime.UtcNow
-                            };
-
-                            dbContext.TelegramUsers.Add(user);
-
-                            await dbContext.SaveChangesAsync();
-                        }
-
+                    if(user is not null) {
                         user.LastAppeal = user.ScheduleProfile.LastAppeal = DateTime.UtcNow;
                         user.TodayRequests++;
                         user.TotalRequests++;
@@ -175,50 +161,71 @@ namespace Core.Bot {
                         user.IsDeactivated = false;
 
                         await dbContext.SaveChangesAsync();
+                    }
 
-                        switch(update.Type) {
-                            case UpdateType.Message:
-                            case UpdateType.EditedMessage:
-                                if(message.Text is null) return;
+                    Message? message;
+                    switch(update.Type) {
+                        case UpdateType.Message:
+                        case UpdateType.EditedMessage:
+                            message = update.Message ?? update.EditedMessage ?? throw new ArgumentException("message cannot be null", nameof(update));
 
-                                if(message.Chat.Type == ChatType.Private) {
-                                    user.Username = message.From.Username;
-                                    user.FirstName = message.From.FirstName;
-                                    user.LastName = message.From.LastName;
-                                } else {
-                                    user.FirstName = message.Chat.Title ?? "";
-                                    user.Username = user.LastName = null;
-                                }
+                            if(user is null) {
 
-                                await commandManager.OnMessageAsync(dbContext, message.Chat, message.MessageId, message.Text, user);
-                                dbContext.MessageLog.Add(new() { Message = message.Text, TelegramUser = user });
-                                break;
+                                user = new() {
+                                    ChatID = messageFrom,
+                                    FirstName = "",
+                                    ScheduleProfile = new() { OwnerID = messageFrom },
+                                    Settings = new() { OwnerID = messageFrom },
+                                    TelegramUserTmp = new() { OwnerID = messageFrom },
+                                    DateOfRegistration = DateTime.UtcNow
+                                };
 
-                            case UpdateType.CallbackQuery:
-                                if(update.CallbackQuery?.Data is null || message.Text is null) return;
-
-                                await commandManager.OnCallbackAsync(dbContext, message.Chat, message.MessageId, update.CallbackQuery.Data, message.Text, user);
-                                dbContext.MessageLog.Add(new() { Message = update.CallbackQuery.Data, TelegramUser = user });
-                                break;
-                        }
-
-                        await dbContext.SaveChangesAsync();
-
-                    } else {
-                        if(update.Type == UpdateType.InlineQuery) {
-                            if(update.InlineQuery is not null) {
-                                InlineQuery inlineQuery = update.InlineQuery;
-
-                                await InlineQueryMessage.InlineQuery(dbContext, inlineQuery);
-
-                                dbContext.MessageLog.Add(new() { Message = inlineQuery.Query, From = inlineQuery.From.Id });
+                                dbContext.TelegramUsers.Add(user);
 
                                 await dbContext.SaveChangesAsync();
                             }
 
-                            return;
-                        }
+                            switch(message.Type) {
+                                case MessageType.Text:
+
+                                    await commandManager.OnMessageAsync(dbContext, message.Chat, message.MessageId, message.Text!, user);
+                                    dbContext.MessageLog.Add(new() { Message = message.Text!, TelegramUser = user, UpdateType = update.Type });
+
+                                    break;
+
+                                    //case MessageType.Dice:
+
+                                    //    Message dice = await botClient.SendDice(chatId: message.Chat, emoji: message.Dice!.Emoji);
+                                    //    dbContext.MessageLog.Add(new() { Message = $"{message.Dice!.Emoji} {message.Dice!.Value}", TelegramUser = user });
+
+                                    //    break;
+                            }
+
+                            break;
+
+                        case UpdateType.CallbackQuery:
+                            message = update.CallbackQuery?.Message ?? throw new ArgumentException("message cannot be null", nameof(update));
+
+                            if(user is null || update.CallbackQuery?.Data is null || message.Text is null) return;
+
+                            await commandManager.OnCallbackAsync(dbContext, message.Chat, message.MessageId, update.CallbackQuery.Data, message.Text, user);
+                            dbContext.MessageLog.Add(new() { Message = update.CallbackQuery.Data, TelegramUser = user, UpdateType = update.Type });
+
+                            break;
+
+                        case UpdateType.InlineQuery:
+                            InlineQuery inlineQuery = update.InlineQuery ?? throw new ArgumentException("inlineQuery cannot be null", nameof(update));
+
+                            if(user is null || string.IsNullOrEmpty(inlineQuery.Query)) return;
+
+                            await InlineQueryMessage.InlineQuery(dbContext, inlineQuery);
+                            dbContext.MessageLog.Add(new() { Message = inlineQuery.Query, TelegramUser = user, UpdateType = update.Type });
+
+                            break;
                     }
+
+                    await dbContext.SaveChangesAsync();
+
                 }
             } catch(Exception e) {
                 await ErrorReport.Send(msg, e);

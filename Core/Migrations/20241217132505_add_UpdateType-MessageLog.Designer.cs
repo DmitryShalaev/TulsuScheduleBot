@@ -3,6 +3,7 @@ using System;
 using Core.DB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ScheduleBot.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241217132505_add_UpdateType-MessageLog")]
+    partial class add_UpdateTypeMessageLog
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -445,8 +448,6 @@ namespace ScheduleBot.Migrations
 
                     b.HasIndex("From");
 
-                    b.HasIndex("UpdateType");
-
                     b.ToTable("MessageLog");
                 });
 
@@ -846,142 +847,6 @@ namespace ScheduleBot.Migrations
                     b.ToTable("TelegramUsersTmp");
                 });
 
-            modelBuilder.Entity("Core.DB.Entity.UpdateTypeDTO", b =>
-                {
-                    b.Property<int>("ID")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("UpdateTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            ID = 0,
-                            Name = "Unknown"
-                        },
-                        new
-                        {
-                            ID = 1,
-                            Name = "Message"
-                        },
-                        new
-                        {
-                            ID = 2,
-                            Name = "InlineQuery"
-                        },
-                        new
-                        {
-                            ID = 3,
-                            Name = "ChosenInlineResult"
-                        },
-                        new
-                        {
-                            ID = 4,
-                            Name = "CallbackQuery"
-                        },
-                        new
-                        {
-                            ID = 5,
-                            Name = "EditedMessage"
-                        },
-                        new
-                        {
-                            ID = 6,
-                            Name = "ChannelPost"
-                        },
-                        new
-                        {
-                            ID = 7,
-                            Name = "EditedChannelPost"
-                        },
-                        new
-                        {
-                            ID = 8,
-                            Name = "ShippingQuery"
-                        },
-                        new
-                        {
-                            ID = 9,
-                            Name = "PreCheckoutQuery"
-                        },
-                        new
-                        {
-                            ID = 10,
-                            Name = "Poll"
-                        },
-                        new
-                        {
-                            ID = 11,
-                            Name = "PollAnswer"
-                        },
-                        new
-                        {
-                            ID = 12,
-                            Name = "MyChatMember"
-                        },
-                        new
-                        {
-                            ID = 13,
-                            Name = "ChatMember"
-                        },
-                        new
-                        {
-                            ID = 14,
-                            Name = "ChatJoinRequest"
-                        },
-                        new
-                        {
-                            ID = 15,
-                            Name = "MessageReaction"
-                        },
-                        new
-                        {
-                            ID = 16,
-                            Name = "MessageReactionCount"
-                        },
-                        new
-                        {
-                            ID = 17,
-                            Name = "ChatBoost"
-                        },
-                        new
-                        {
-                            ID = 18,
-                            Name = "RemovedChatBoost"
-                        },
-                        new
-                        {
-                            ID = 19,
-                            Name = "BusinessConnection"
-                        },
-                        new
-                        {
-                            ID = 20,
-                            Name = "BusinessMessage"
-                        },
-                        new
-                        {
-                            ID = 21,
-                            Name = "EditedBusinessMessage"
-                        },
-                        new
-                        {
-                            ID = 22,
-                            Name = "DeletedBusinessMessages"
-                        },
-                        new
-                        {
-                            ID = 23,
-                            Name = "PurchasedPaidMedia"
-                        });
-                });
-
             modelBuilder.Entity("Core.DB.Entity.ClassroomWorkSchedule", b =>
                 {
                     b.HasOne("Core.DB.Entity.ClassDTO", "ClassDTO")
@@ -1123,13 +988,7 @@ namespace ScheduleBot.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Core.DB.Entity.UpdateTypeDTO", "UpdateTypeDTO")
-                        .WithMany()
-                        .HasForeignKey("UpdateType");
-
                     b.Navigation("TelegramUser");
-
-                    b.Navigation("UpdateTypeDTO");
                 });
 
             modelBuilder.Entity("Core.DB.Entity.Messenger", b =>

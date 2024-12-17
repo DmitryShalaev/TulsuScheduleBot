@@ -2,16 +2,21 @@
 
 using Microsoft.EntityFrameworkCore;
 
+using Telegram.Bot.Types.Enums;
+
 namespace Core.DB {
     public class ScheduleDbContext : DbContext {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("TelegramBotConnectionString"));
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
-            foreach(Class type in Enum.GetValues(typeof(Class)).Cast<Class>())
+            foreach(Class type in Enum.GetValues<Class>().Cast<Class>())
                 modelBuilder.Entity<ClassDTO>().HasData(new ClassDTO() { ID = type, Name = type.ToString() });
 
-            foreach(Mode type in Enum.GetValues(typeof(Mode)).Cast<Mode>())
+            foreach(Mode type in Enum.GetValues<Mode>().Cast<Mode>())
                 modelBuilder.Entity<ModeDTO>().HasData(new ModeDTO() { ID = type, Name = type.ToString() });
+
+            foreach(UpdateType type in Enum.GetValues<UpdateType>().Cast<UpdateType>())
+                modelBuilder.Entity<UpdateTypeDTO>().HasData(new UpdateTypeDTO() { ID = type, Name = type.ToString() });
         }
 
         public void ClearContext() {
@@ -37,6 +42,7 @@ namespace Core.DB {
         public DbSet<GroupLastUpdate> GroupLastUpdate { get; set; }
         public DbSet<StudentIDLastUpdate> StudentIDLastUpdate { get; set; }
         public DbSet<MessageLog> MessageLog { get; set; }
+        public DbSet<UpdateTypeDTO> UpdateTypes { get; set; }
         public DbSet<Settings> Settings { get; set; }
         public DbSet<TelegramUsersTmp> TelegramUsersTmp { get; set; }
         public DbSet<TeacherWorkSchedule> TeacherWorkSchedule { get; set; }
