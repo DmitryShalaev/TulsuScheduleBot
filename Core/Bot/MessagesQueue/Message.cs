@@ -64,6 +64,12 @@ namespace Core.Bot.MessagesQueue {
             AddMessageToQueue(chatId, message);
         }
 
+        public static void SendDice(ChatId chatId, string? emoji, IReplyMarkup? replyMarkup = null) {
+            var message = new Classes.Dice(chatId, emoji, replyMarkup);
+
+            AddMessageToQueue(chatId, message);
+        }
+
         public static void AnswerInlineQuery(string inlineQueryId, IEnumerable<InlineQueryResult> results, int? cacheTime, bool isPersonal = false) {
             var message = new Classes.InlineQuery(inlineQueryId, results, cacheTime, isPersonal);
 
@@ -191,6 +197,17 @@ namespace Core.Bot.MessagesQueue {
                         );
 
                         break;
+
+                    case Classes.Dice diceMessage:
+                        msg = $"DiceMessage {diceMessage.Emoji}";
+
+                        await BotClient.SendDice(chatId: diceMessage.ChatId,
+                            emoji: diceMessage.Emoji,
+                            replyMarkup: diceMessage.ReplyMarkup
+                        );
+
+                        break;
+
                     case Classes.InlineQuery inlineQuery:
                         msg = $"InlineQuery {inlineQuery.InlineQueryId}";
 

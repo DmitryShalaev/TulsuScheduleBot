@@ -190,12 +190,10 @@ namespace Core.Bot {
 
                                     await commandManager.OnMessageAsync(dbContext, message.Chat, message.MessageId, message.Text!, user);
                                     dbContext.MessageLog.Add(new() { Message = message.Text!, TelegramUser = user });
-
                                     break;
 
                                 case MessageType.Dice:
-
-                                    Message dice = await botClient.SendDice(chatId: message.Chat, emoji: message.Dice!.Emoji);
+                                    MessagesQueue.Message.SendDice(chatId: message.Chat, emoji: message.Dice!.Emoji);
                                     dbContext.MessageLog.Add(new() { Message = $"{message.Dice!.Emoji} {message.Dice!.Value}", TelegramUser = user });
 
                                     break;
