@@ -13,16 +13,7 @@ namespace Core.DB.Entity {
 
         public string Message { get; set; }
 
-        [ForeignKey("UpdateTypeDTO")]
-        public UpdateType? UpdateType { get; set; }
-        public UpdateTypeDTO UpdateTypeDTO { get; set; }
-
         public DateTime Date { get; set; } = DateTime.UtcNow;
-    }
-
-    public class UpdateTypeDTO {
-        public UpdateType ID { get; set; }
-        public string Name { get; set; }
     }
 }
 

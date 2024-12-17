@@ -14,9 +14,6 @@ namespace Core.DB {
 
             foreach(Mode type in Enum.GetValues<Mode>().Cast<Mode>())
                 modelBuilder.Entity<ModeDTO>().HasData(new ModeDTO() { ID = type, Name = type.ToString() });
-
-            foreach(UpdateType type in Enum.GetValues<UpdateType>().Cast<UpdateType>())
-                modelBuilder.Entity<UpdateTypeDTO>().HasData(new UpdateTypeDTO() { ID = type, Name = type.ToString() });
         }
 
         public void ClearContext() {
@@ -42,7 +39,6 @@ namespace Core.DB {
         public DbSet<GroupLastUpdate> GroupLastUpdate { get; set; }
         public DbSet<StudentIDLastUpdate> StudentIDLastUpdate { get; set; }
         public DbSet<MessageLog> MessageLog { get; set; }
-        public DbSet<UpdateTypeDTO> UpdateTypes { get; set; }
         public DbSet<Settings> Settings { get; set; }
         public DbSet<TelegramUsersTmp> TelegramUsersTmp { get; set; }
         public DbSet<TeacherWorkSchedule> TeacherWorkSchedule { get; set; }

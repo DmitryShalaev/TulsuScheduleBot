@@ -189,16 +189,16 @@ namespace Core.Bot {
                                 case MessageType.Text:
 
                                     await commandManager.OnMessageAsync(dbContext, message.Chat, message.MessageId, message.Text!, user);
-                                    dbContext.MessageLog.Add(new() { Message = message.Text!, TelegramUser = user, UpdateType = update.Type });
+                                    dbContext.MessageLog.Add(new() { Message = message.Text!, TelegramUser = user });
 
                                     break;
 
-                                    //case MessageType.Dice:
+                                case MessageType.Dice:
 
-                                    //    Message dice = await botClient.SendDice(chatId: message.Chat, emoji: message.Dice!.Emoji);
-                                    //    dbContext.MessageLog.Add(new() { Message = $"{message.Dice!.Emoji} {message.Dice!.Value}", TelegramUser = user });
+                                    Message dice = await botClient.SendDice(chatId: message.Chat, emoji: message.Dice!.Emoji);
+                                    dbContext.MessageLog.Add(new() { Message = $"{message.Dice!.Emoji} {message.Dice!.Value}", TelegramUser = user });
 
-                                    //    break;
+                                    break;
                             }
 
                             break;
@@ -209,7 +209,7 @@ namespace Core.Bot {
                             if(user is null || update.CallbackQuery?.Data is null || message.Text is null) return;
 
                             await commandManager.OnCallbackAsync(dbContext, message.Chat, message.MessageId, update.CallbackQuery.Data, message.Text, user);
-                            dbContext.MessageLog.Add(new() { Message = update.CallbackQuery.Data, TelegramUser = user, UpdateType = update.Type });
+                            dbContext.MessageLog.Add(new() { Message = update.CallbackQuery.Data, TelegramUser = user });
 
                             break;
 
@@ -219,7 +219,7 @@ namespace Core.Bot {
                             if(user is null || string.IsNullOrEmpty(inlineQuery.Query)) return;
 
                             await InlineQueryMessage.InlineQuery(dbContext, inlineQuery);
-                            dbContext.MessageLog.Add(new() { Message = inlineQuery.Query, TelegramUser = user, UpdateType = update.Type });
+                            dbContext.MessageLog.Add(new() { Message = inlineQuery.Query, TelegramUser = user });
 
                             break;
                     }
