@@ -149,6 +149,7 @@ namespace Core.Bot {
                                         update.EditedMessage?.Chat.Id ??
                                         update.CallbackQuery?.Message?.Chat.Id ??
                                         update.InlineQuery?.From.Id ??
+                                        update.MyChatMember?.Chat.Id ??
                                         throw new ArgumentException("messageFrom cannot be null", nameof(update));
 
                     TelegramUser? user = await dbContext.TelegramUsers.Include(u => u.ScheduleProfile).Include(u => u.Settings).Include(u => u.TelegramUserTmp).FirstOrDefaultAsync(u => u.ChatID == messageFrom);
@@ -218,6 +219,12 @@ namespace Core.Bot {
 
                             await InlineQueryMessage.InlineQuery(dbContext, inlineQuery);
                             dbContext.MessageLog.Add(new() { Message = inlineQuery.Query, TelegramUser = user });
+
+                            break;
+
+                        case UpdateType.MyChatMember:
+                            if(update.MyChatMember!.NewChatMember.Status is ChatMemberStatus.Kicked or ChatMemberStatus.Left)
+                                user!.IsDeactivated = true;
 
                             break;
                     }
