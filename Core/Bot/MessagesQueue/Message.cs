@@ -23,6 +23,8 @@ namespace Core.Bot.MessagesQueue {
         // Очереди сообщений для каждого пользователя
         private static readonly ConcurrentDictionary<ChatId, (SemaphoreSlim semaphore, ConcurrentQueue<IMessageQueue> queue)> userQueues = new();
 
+        private static readonly ConcurrentQueue<IMessageQueue> sharedQueue = new();
+
         // Переменные для глобального ограничения количества сообщений
         private static readonly SemaphoreSlim globalLock = new(1, 1);
 
@@ -43,66 +45,100 @@ namespace Core.Bot.MessagesQueue {
         public static void SendPhoto(ChatId chatId, string path, string name, IReplyMarkup? replyMarkup = null, bool deleteFile = false) {
             var message = new PhotoMessage(chatId, path, name, replyMarkup, deleteFile);
 
-            AddMessageToQueue(chatId, message);
+            AddMessageToQueue(message);
         }
 
         public static void SendDocument(ChatId chatId, string path, string name, IReplyMarkup? replyMarkup = null, bool deleteFile = false) {
             var message = new DocumentMessage(chatId, path, name, replyMarkup, deleteFile);
 
-            AddMessageToQueue(chatId, message);
+            AddMessageToQueue(message);
+        }
+
+        public static void SendSharedTextMessage(ChatId chatId, string text, IReplyMarkup? replyMarkup = null, ParseMode parseMode = ParseMode.None, bool disableNotification = false, bool deletePrevious = false, bool saveMessageId = false) {
+            var message = new TextMessage(chatId, text, replyMarkup, parseMode, disableNotification, deletePrevious, saveMessageId);
+
+            AddMessageToSharedQueue(message);
         }
 
         public static void SendTextMessage(ChatId chatId, string text, IReplyMarkup? replyMarkup = null, ParseMode parseMode = ParseMode.None, bool disableNotification = false, bool deletePrevious = false, bool saveMessageId = false) {
             var message = new TextMessage(chatId, text, replyMarkup, parseMode, disableNotification, deletePrevious, saveMessageId);
 
-            AddMessageToQueue(chatId, message);
+            AddMessageToQueue(message);
         }
 
         public static void SendVenue(ChatId chatId, double latitude, double longitude, string title, string address, IReplyMarkup? replyMarkup = null) {
             var message = new Classes.Venue(chatId, latitude, longitude, title, address, replyMarkup);
 
-            AddMessageToQueue(chatId, message);
+            AddMessageToQueue(message);
         }
 
         public static void SendDice(ChatId chatId, string? emoji, IReplyMarkup? replyMarkup = null) {
             var message = new Classes.Dice(chatId, emoji, replyMarkup);
 
-            AddMessageToQueue(chatId, message);
+            AddMessageToQueue(message);
         }
 
         public static void AnswerInlineQuery(string inlineQueryId, IEnumerable<InlineQueryResult> results, int? cacheTime, bool isPersonal = false) {
             var message = new Classes.InlineQuery(inlineQueryId, results, cacheTime, isPersonal);
 
-            AddMessageToQueue(inlineQueryId, message);
+            AddMessageToQueue(message);
         }
 
         public static void EditMessageText(ChatId chatId, int messageId, string text, InlineKeyboardMarkup? replyMarkup = null, ParseMode parseMode = ParseMode.None, bool? disableWebPagePreview = null) {
             var message = new EditMessageText(chatId, messageId, text, replyMarkup, parseMode, disableWebPagePreview);
 
-            AddMessageToQueue(chatId, message);
+            AddMessageToQueue(message);
         }
 
         public static void EditMessageReplyMarkup(ChatId chatId, int messageId, InlineKeyboardMarkup? replyMarkup = null) {
             var message = new EditMessageReplyMarkup(chatId, messageId, replyMarkup);
 
-            AddMessageToQueue(chatId, message);
+            AddMessageToQueue(message);
         }
 
         public static void DeleteMessage(ChatId chatId, int messageId) {
             var message = new DeleteMessage(chatId, messageId);
 
-            AddMessageToQueue(chatId, message);
+            AddMessageToQueue(message);
         }
         #endregion
 
-        private static void AddMessageToQueue(ChatId chatId, IMessageQueue message) {
-            (SemaphoreSlim semaphore, ConcurrentQueue<IMessageQueue> queue) user = userQueues.GetOrAdd(chatId, _ => (new SemaphoreSlim(1, 1), new ConcurrentQueue<IMessageQueue>()));
+        private static void AddMessageToQueue(IMessageQueue message) {
+            (SemaphoreSlim semaphore, ConcurrentQueue<IMessageQueue> queue) user = userQueues.GetOrAdd(message.ChatId, _ => (new SemaphoreSlim(1, 1), new ConcurrentQueue<IMessageQueue>()));
 
             user.queue.Enqueue(message);
 
             // Запускаем обработку очереди 
             if(user.semaphore.CurrentCount > 0) {
                 _ = Task.Run(() => ProcessQueue(user));
+            }
+        }
+
+        private static void AddMessageToSharedQueue(IMessageQueue message) {
+            sharedQueue.Enqueue(message);
+
+            // Запускаем обработку очереди массовой рассылки
+            if(sharedQueue.Count == 1) {
+                _ = Task.Run(ProcessSharedQueue);
+            }
+        }
+
+        private static async Task ProcessSharedQueue() {
+            while(!sharedQueue.IsEmpty) {
+                // Проверяем, есть ли сообщения в пользовательских очередях
+                bool isUserQueueEmpty = userQueues.All(u => u.Value.queue.IsEmpty);
+
+                if(isUserQueueEmpty) {
+                    await Task.Delay(TimeSpan.FromSeconds(5));
+
+                    if(sharedQueue.TryDequeue(out IMessageQueue? message)) {
+                        // Отправляем сообщение
+                        await SendMessageAsync(message);
+                    }
+                } else {
+                    // Если есть сообщения в пользовательских очередях, ждем и проверяем снова
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                }
             }
         }
 
@@ -209,9 +245,9 @@ namespace Core.Bot.MessagesQueue {
                         break;
 
                     case Classes.InlineQuery inlineQuery:
-                        msg = $"InlineQuery {inlineQuery.InlineQueryId}";
+                        msg = $"InlineQuery {inlineQuery.ChatId}";
 
-                        await BotClient.AnswerInlineQuery(inlineQuery.InlineQueryId, inlineQuery.Results, cacheTime: inlineQuery.CacheTime, isPersonal: inlineQuery.IsPersonal);
+                        await BotClient.AnswerInlineQuery(inlineQuery.ChatId.ToString(), inlineQuery.Results, cacheTime: inlineQuery.CacheTime, isPersonal: inlineQuery.IsPersonal);
                         break;
 
                     case PhotoMessage photoMessage:

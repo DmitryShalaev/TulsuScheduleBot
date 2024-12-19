@@ -18,8 +18,13 @@ namespace Core.Bot.Commands.Admin.Message {
             if(args == "Statistics") {
                 string globalStats = await StatisticsForTheYear.GetGlobalStats(dbContext);
 
-                string message = await StatisticsForTheYear.SendStatisticsMessageAsync(dbContext, chatId, globalStats);
-                MessagesQueue.Message.SendTextMessage(chatId: chatId, text: message, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, replyMarkup: Statics.AdminPanelKeyboardMarkup);
+                foreach(TelegramUser? item in dbContext.TelegramUsers.Where(i => !i.IsDeactivated).ToList()) {
+                    string message = await StatisticsForTheYear.SendStatisticsMessageAsync(dbContext, item.ChatID, globalStats);
+
+                    MessagesQueue.Message.SendSharedTextMessage(chatId: item.ChatID, text: message, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, disableNotification: true);
+                }
+
+                MessagesQueue.Message.SendSharedTextMessage(chatId: chatId, text: "Все сообщения доставлены", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
             }
 
             MessagesQueue.Message.SendTextMessage(chatId: chatId, text: UserCommands.Instance.Message["AdminPanel"], replyMarkup: Statics.AdminPanelKeyboardMarkup);
