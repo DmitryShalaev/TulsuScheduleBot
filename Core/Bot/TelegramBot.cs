@@ -223,8 +223,8 @@ namespace Core.Bot {
                             break;
 
                         case UpdateType.MyChatMember:
-                            if(update.MyChatMember!.NewChatMember.Status is ChatMemberStatus.Kicked or ChatMemberStatus.Left)
-                                user!.IsDeactivated = true;
+                            if(user is not null && update.MyChatMember!.NewChatMember.Status is ChatMemberStatus.Kicked or ChatMemberStatus.Left)
+                                user.IsDeactivated = true;
 
                             break;
                     }
